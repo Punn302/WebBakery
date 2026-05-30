@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hebekery | Sản Phẩm</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<!-- ========== HEADER ========== -->
+<div th:replace="~{layout/fragments :: header}"></div>
+
+<main class="pt-24 pb-16">
+    <div class="max-w-7xl mx-auto px-4 md:px-8">
+
+        <!-- Hero Title -->
+        <div class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-medium text-gray-800 mb-3">Sản Phẩm Của Hebekery</h1>
+            <p class="text-gray-500 max-w-2xl mx-auto">
+                Thực phẩm lành mạnh từ nguyên liệu hữu cơ, không chất bảo quản -
+                Đồng hành cùng bạn trên hành trình ăn uống khoa học
+            </p>
+        </div>
+
+        <!-- Category Filter -->
+        <div class="flex flex-wrap justify-center gap-3 mb-12">
+            <button class="category-btn active px-5 py-2 rounded-full text-sm font-semibold transition-all" data-category="all">
+                Tất cả
+            </button>
+            <button class="category-btn px-5 py-2 rounded-full text-sm font-semibold transition-all" data-category="Ngũ cốc & Granola">
+                🥣 Ngũ cốc & Granola
+            </button>
+            <button class="category-btn px-5 py-2 rounded-full text-sm font-semibold transition-all" data-category="Bánh ăn kiêng">
+                🍪 Bánh ăn kiêng
+            </button>
+            <button class="category-btn px-5 py-2 rounded-full text-sm font-semibold transition-all" data-category="Snack healthy">
+                🥨 Snack healthy
+            </button>
+            <button class="category-btn px-5 py-2 rounded-full text-sm font-semibold transition-all" data-category="Thực phẩm bổ sung">
+                💪 Thực phẩm bổ sung
+            </button>
+            <button class="category-btn px-5 py-2 rounded-full text-sm font-semibold transition-all" data-category="Combo quà tặng">
+                🎁 Combo quà tặng
+            </button>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="productsGrid">
+            <a th:each="product : ${products}"
+               th:href="@{/product/{id}(id=${product.id})}"
+               class="product-card group cursor-pointer block"
+               th:attr="data-category=${product.category}">
+                <div class="aspect-square mb-4 overflow-hidden rounded-xl bg-white shadow-md hover-lift">
+                    <img th:src="@{${product.imageUrl}}"
+                         th:alt="${product.name}"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                </div>
+                <div class="text-center">
+                    <div class="flex items-center justify-center gap-2 mb-2">
+                        <span class="text-xs text-[#47654c] uppercase tracking-wider" th:text="${product.badge}"></span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1" th:text="${product.name}"></h3>
+                    <p class="text-sm text-gray-500 mb-2 line-clamp-2" th:text="${product.description}"></p>
+                    <p class="text-lg font-bold text-[#47654c] mb-3" th:text="${product.price} + '₫'"></p>
+                    <button class="quick-add" th:attr="data-product-id=${product.id}">Thêm vào giỏ</button>
+                </div>
+            </a>
+        </div>
+
+        <!-- No Results -->
+        <div id="noResults" class="text-center py-12 hidden">
+            <span class="material-symbols-outlined text-5xl text-gray-300">search_off</span>
+            <p class="text-gray-400 mt-3">Không tìm thấy sản phẩm nào trong danh mục này</p>
+        </div>
+    </div>
+</main>
+
+<!-- ========== FOOTER ========== -->
+<div th:replace="~{layout/fragments :: footer}"></div>
+
+<script th:src="@{/js/products.js(v=2)}"></script>
+</body>
+</html>

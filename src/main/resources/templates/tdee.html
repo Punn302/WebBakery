@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hebekery | Tính TDEE Online</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<!-- ========== HEADER ========== -->
+<div th:replace="~{layout/fragments :: header}"></div>
+
+<main class="pt-24 pb-16">
+    <div class="max-w-7xl mx-auto px-4 md:px-8">
+
+        <!-- Hero Title -->
+        <div class="text-center mb-12">
+            <h1 class="text-3xl md:text-4xl font-medium text-gray-800 mb-3">Công Cụ Tính TDEE Online</h1>
+            <p class="text-gray-500">Tính lượng calo cần thiết cho cơ thể mỗi ngày</p>
+        </div>
+
+        <!-- Layout: Cột trái hẹp hơn, cột phải rộng hơn -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+
+            <!-- ================= CỘT TRÁI: TDEE là gì? (chiếm 2/5) ================= -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl p-8 shadow-md sticky top-24">
+                    <h2 class="text-2xl font-medium text-gray-800 mb-4">TDEE là gì? Tính TDEE giảm cân lành mạnh</h2>
+                    <div class="text-gray-500 leading-relaxed space-y-4 text-sm">
+                        <p>
+                            TDEE (Total Daily Energy Expenditure) là tất cả năng lượng cần thiết cho hoạt động mỗi ngày của bạn.
+                            Tính TDEE giúp bạn đạt được mục tiêu dinh dưỡng (giảm cân, tăng cân) của bạn.
+                        </p>
+                        <p>
+                            Xác định chỉ số TDEE sẽ giúp bạn biết rõ lượng calo nên tăng hoặc giảm để đạt hiệu quả cutting (giảm cân)
+                            hay bulking (tăng cân).
+                        </p>
+                        <p>
+                            Tính TDEE giúp phân biệt năng lượng của thực phẩm và năng lượng cần thiết để duy trì hoạt động,
+                            từ đó xây dựng chế độ ăn phù hợp.
+                        </p>
+
+                        <h3 class="font-semibold text-gray-700 pt-2">Tại sao cần tính calo?</h3>
+                        <p>
+                            Khi giảm cân, bạn nên tính lượng calo cần nạp vào cơ thể mỗi ngày. Việc này giúp kiểm soát lượng ăn
+                            và chia khẩu phần ăn đủ chất.
+                        </p>
+
+                        <div class="rounded-xl overflow-hidden shadow-lg mt-4">
+                            <img th:src="@{/images/tdee-info.jpg}" alt="TDEE là gì?" class="w-full h-auto object-cover">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= CỘT PHẢI: Công cụ tính TDEE (chiếm 3/5) ================= -->
+            <div class="lg:col-span-3">
+                <div class="tdee-calculator">
+                    <h1>Công cụ tính TDEE Online</h1>
+                    <div class="sub-heading">Tính lượng calo cần thiết cho cơ thể mỗi ngày</div>
+                    <div class="text-gray-500 mb-6">Cho chúng mình xin vài thông tin để tính TDEE cho bạn nhé.</div>
+
+                    <!-- Mục tiêu & Giới tính - 2 cột -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <span class="title">Mục tiêu</span>
+                            <div class="mew-select mt-2">
+                                <input type="text" value="Giảm mỡ" data-value="1" class="js-tdee-goal" readonly>
+                                <ul>
+                                    <li data-value="1" data-content="Giảm cân">Giảm mỡ</li>
+                                    <li data-value="2" data-content="Tăng cân">Tăng cân</li>
+                                    <li data-value="3" data-content="Duy trì">Duy trì</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="title">Giới tính</span>
+                            <div class="gender-buttons mt-2">
+                                <button type="button" class="gender-btn active" data-gender="male">Nam</button>
+                                <button type="button" class="gender-btn" data-gender="female">Nữ</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tuổi, Chiều cao, Cân nặng - 3 cột đều nhau -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+                        <div>
+                            <div class="bmi-bg">
+                                <span class="title">Tuổi</span>
+                                <div class="bmi-quantity js-quantity">
+                                    <button class="minus">-</button>
+                                    <input type="number" class="js-bmi-age" placeholder="0" min="15" max="120">
+                                    <button class="plus">+</button>
+                                </div>
+                                <span class="unit">(năm)</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="bmi-bg">
+                                <span class="title">Chiều cao</span>
+                                <div class="bmi-quantity js-quantity">
+                                    <button class="minus">-</button>
+                                    <input type="number" class="js-bmi-height" placeholder="0" min="100" max="250">
+                                    <button class="plus">+</button>
+                                </div>
+                                <span class="unit">(cm)</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="bmi-bg">
+                                <span class="title">Cân nặng</span>
+                                <div class="bmi-quantity js-quantity">
+                                    <button class="minus">-</button>
+                                    <input type="number" class="js-bmi-weight" placeholder="0" min="30" max="300">
+                                    <button class="plus">+</button>
+                                </div>
+                                <span class="unit">(kg)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cường độ tập luyện -->
+                    <div class="bmi-rate mb-6">
+                        <span class="title">Cường độ tập luyện</span>
+                        <div class="rate-buttons">
+                            <button class="rate-btn active" data-rate="1.2" data-key="1">1</button>
+                            <button class="rate-btn" data-rate="1.375" data-key="2">2</button>
+                            <button class="rate-btn" data-rate="1.55" data-key="3">3</button>
+                            <button class="rate-btn" data-rate="1.725" data-key="4">4</button>
+                            <button class="rate-btn" data-rate="1.9" data-key="5">5</button>
+                        </div>
+                        <span class="rate-desc">Ít hoạt động, chỉ ăn đi làm về ngủ</span>
+                    </div>
+
+                    <!-- Cân nặng mục tiêu & Tốc độ - 2 cột -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div>
+                            <span class="title">Cân nặng mục tiêu</span>
+                            <div class="relative mt-2">
+                                <input type="number" class="js-tdee-weight w-full py-3 px-4 bg-[#f7f3ec] border border-[#e6e2db] rounded-xl text-center" placeholder="0">
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-400">(kg)</span>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="title">Tốc độ tăng/giảm cân</span>
+                            <div class="mew-select mt-2">
+                                <input type="text" value="Chậm" data-value="0.1" class="js-tdee-speed" readonly>
+                                <ul>
+                                    <li data-value="0.1">Chậm</li>
+                                    <li data-value="0.2">Bình thường</li>
+                                    <li data-value="0.3">Cấp tốc</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="js-tdee bmi-button w-full py-4 text-base">Tính TDEE ngay</button>
+
+                    <div class="bmi-notice text-center mt-6">
+                        <p>Để đạt được độ chính xác cao nhất hãy đo lại TDEE khi bạn thay đổi sinh hoạt hoặc thay đổi thể trạng nhé!</p>
+                        <p>Bạn hãy lưu trang này, để mỗi khi cần có thể truy cập nhanh chóng nhé ❤</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Result Modal -->
+<div id="tdeeModal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close js-modal-close" aria-label="Close">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="content_pop">
+                    <p class="title">CHỈ SỐ TDEE CỦA BẠN LÀ</p>
+                    <p id="tdee" class="stat"></p>
+                    <p class="subtitle">calo một ngày</p>
+
+                    <p class="title mt-4">CHỈ SỐ BMR CỦA BẠN LÀ</p>
+                    <p id="bmr" class="stat"></p>
+                    <p class="subtitle">calo cần nạp một ngày</p>
+
+                    <p class="title mt-4 js-goal-title">LƯỢNG CALO CẦN THIẾT ĐỂ BẠN GIẢM CÂN LÀ</p>
+                    <p id="calories" class="stat"></p>
+                    <p class="subtitle">calo một ngày</p>
+
+                    <div class="lose-weight">
+                        <p class="title-time">Dự tính thời gian bạn sẽ giảm còn [kg] là vào ngày</p>
+                        <p id="time" class="stat time"></p>
+                        <p id="time2" class="subtime"></p>
+                    </div>
+
+                    <p class="text-gray-500 text-sm my-4">
+                        Để tận dụng những chỉ số này hiệu quả, bạn cần kiến thức dinh dưỡng cơ bản để chọn được những thực phẩm
+                        lành mạnh tốt cho sức khoẻ.
+                    </p>
+
+                    <div class="flex flex-col gap-3 mt-4">
+                        <a href="/knowledge" class="bmi-button inline-block text-center">Giảm Cân Lành Mạnh</a>
+                        <a href="/products" class="text-[#47654c] text-sm font-semibold uppercase text-center hover:underline">Sản phẩm Healthy</a>
+                        <button class="js-reset text-gray-400 text-sm uppercase tracking-wider hover:text-gray-600">Thực hiện lại</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== FOOTER ========== -->
+<div th:replace="~{layout/fragments :: footer}"></div>
+
+<script th:src="@{/js/tdee.js}"></script>
+</body>
+</html>

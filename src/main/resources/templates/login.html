@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hebekery | Đăng Nhập</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <style>
+        .auth-container {
+            min-height: calc(100vh - 200px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .auth-card {
+            max-width: 480px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            padding: 40px;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.1);
+        }
+        .social-btn {
+            border: 1px solid #e6e2db;
+            border-radius: 40px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .social-btn:hover {
+            background: #f7f3ec;
+            border-color: #47654c;
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 14px;
+            margin: 24px 0;
+        }
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e6e2db;
+        }
+        .divider::before {
+            margin-right: 16px;
+        }
+        .divider::after {
+            margin-left: 16px;
+        }
+        .form-group {
+            margin-bottom: 24px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #1c1c18;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: #f7f3ec;
+            border: 1px solid #e6e2db;
+            border-radius: 16px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #47654c;
+            background: white;
+        }
+        .password-wrapper {
+            position: relative;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #9ca3af;
+        }
+        .btn-primary {
+            width: 100%;
+            background: #47654c;
+            color: white;
+            padding: 14px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background: #3a543e;
+            transform: translateY(-2px);
+        }
+        .error-message {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .success-message {
+            background: #ecfdf5;
+            color: #059669;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== HEADER ========== -->
+<div th:replace="~{layout/fragments :: header}"></div>
+
+<!-- Thêm padding-top để tránh bị header che -->
+<main class="pt-32 pb-16">
+    <div class="auth-container">
+        <div class="auth-card">
+            <!-- Logo -->
+            <div class="text-center mb-8">
+                <img th:src="@{/images/logo.webp}" alt="Hebekery" class="h-12 mx-auto mb-4">
+                <h1 class="text-2xl font-bold text-gray-800">Chào mừng trở lại</h1>
+                <p class="text-gray-500 text-sm mt-2">Đăng nhập để tiếp tục mua sắm</p>
+            </div>
+
+            <!-- Error/Success Messages -->
+            <div id="errorMessage" class="error-message">
+                <span class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-base">error</span>
+                    <span id="errorText"></span>
+                </span>
+            </div>
+            <div id="successMessage" class="success-message">
+                <span class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-base">check_circle</span>
+                    <span id="successText"></span>
+                </span>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email <span class="text-red-500">*</span></label>
+                    <input type="email" id="email" placeholder="example@hebekery.vn" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Mật khẩu <span class="text-red-500">*</span></label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" placeholder="Nhập mật khẩu" required>
+                        <span class="toggle-password material-symbols-outlined">visibility_off</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center mb-6">
+                    <label class="flex items-center gap-2 text-sm text-gray-500 cursor-pointer">
+                        <input type="checkbox" id="rememberMe" class="w-4 h-4 rounded border-gray-300">
+                        <span>Ghi nhớ đăng nhập</span>
+                    </label>
+                    <a href="/forgot-password" class="text-sm text-[#47654c] hover:underline">Quên mật khẩu?</a>
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    <span class="flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">login</span>
+                        Đăng nhập
+                    </span>
+                </button>
+            </form>
+
+            <!-- Divider -->
+            <div class="divider">Hoặc đăng nhập với</div>
+
+            <!-- Social Login -->
+            <div class="space-y-3">
+                <div class="social-btn">
+                    <img src="https://www.google.com/favicon.ico" alt="Google" class="w-5 h-5">
+                    <span>Đăng nhập với Google</span>
+                </div>
+                <div class="social-btn">
+                    <span class="text-xl">📘</span>
+                    <span>Đăng nhập với Facebook</span>
+                </div>
+            </div>
+
+            <!-- Register Link -->
+            <p class="text-center text-sm text-gray-500 mt-8">
+                Chưa có tài khoản?
+                <a href="/register" class="text-[#47654c] font-semibold hover:underline">Đăng ký ngay</a>
+            </p>
+        </div>
+    </div>
+</main>
+
+<!-- ========== FOOTER ========== -->
+<div th:replace="~{layout/fragments :: footer}"></div>
+
+<script th:src="@{/js/login.js}"></script>
+</body>
+</html>

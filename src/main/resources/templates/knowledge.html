@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hebekery | Kiến Thức Dinh Dưỡng</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<!-- ========== HEADER ========== -->
+<div th:replace="~{layout/fragments :: header}"></div>
+
+<main class="pt-24 pb-16">
+    <div class="max-w-7xl mx-auto px-4 md:px-8">
+
+        <!-- Hero Title -->
+        <div class="text-center mb-12">
+            <h1 class="text-3xl md:text-4xl font-medium text-gray-800 mb-3">Kiến Thức Dinh Dưỡng</h1>
+            <p class="text-gray-500 max-w-2xl mx-auto">
+                Cẩm nang dinh dưỡng khoa học - Hành trình ăn uống lành mạnh và giảm cân bền vững
+            </p>
+        </div>
+
+        <!-- Featured Article -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+            <div class="rounded-2xl overflow-hidden shadow-lg">
+                <img th:src="@{/images/knowledge-featured.jpg}" alt="Dinh dưỡng lành mạnh" class="w-full h-64 md:h-full object-cover">
+            </div>
+            <div class="flex flex-col justify-center">
+                <span class="text-sm text-[#47654c] font-semibold uppercase tracking-wider mb-2">Nổi bật</span>
+                <h2 class="text-2xl md:text-3xl font-medium text-gray-800 mb-4">Chất lượng hơn số lượng: Chìa khóa vàng của giảm cân bền vững</h2>
+                <p class="text-gray-500 leading-relaxed mb-4">
+                    Nghiên cứu từ Đại học Stanford công bố trên JAMA chỉ ra rằng chính chất lượng thực phẩm -
+                    ưu tiên rau xanh, thực phẩm toàn phần - mới là yếu tố quyết định giảm cân hiệu quả,
+                    thay vì việc cắt giảm calo khắt khe hay kiêng khem quá mức [citation:2].
+                </p>
+                <p class="text-gray-500 leading-relaxed mb-6">
+                    Những người tham gia nghiên cứu cắt giảm đường tinh luyện và tinh bột trắng,
+                    tăng cường rau củ và thực phẩm nguyên bản - mà không cần tính calo hay ép tập luyện -
+                    vẫn giảm trung bình 5-6kg trong vòng một năm.
+                </p>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm text-gray-400">📅 Nguồn: UW Medicine | 2025</span>
+                    <span class="text-sm text-[#47654c]">⏱️ 5 phút đọc</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Tabs -->
+        <div class="flex flex-wrap gap-3 mb-10 border-b border-gray-200 pb-4">
+            <button class="category-tab active px-5 py-2 text-sm font-semibold rounded-full transition-all" data-category="all">Tất cả</button>
+            <button class="category-tab px-5 py-2 text-sm font-semibold rounded-full transition-all" data-category="nutrition">Dinh dưỡng cơ bản</button>
+            <button class="category-tab px-5 py-2 text-sm font-semibold rounded-full transition-all" data-category="weightloss">Giảm cân khoa học</button>
+            <button class="category-tab px-5 py-2 text-sm font-semibold rounded-full transition-all" data-category="lifestyle">Lối sống lành mạnh</button>
+        </div>
+
+        <!-- Articles Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <!-- Article 1: Chất lượng thực phẩm -->
+            <article class="knowledge-card bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="nutrition weightloss">
+                <div class="h-48 overflow-hidden">
+                    <img th:src="@{/images/knowledge-quality.jpg}" alt="Rau củ quả tươi" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-xs bg-[#f1ede6] text-[#47654c] px-2 py-1 rounded-full">Dinh dưỡng</span>
+                        <span class="text-xs bg-[#f1ede6] text-[#47654c] px-2 py-1 rounded-full">Giảm cân</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Ăn gì quan trọng hơn ăn bao nhiêu</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed mb-4">
+                        Nghiên cứu kéo dài 1 năm cho thấy: tập trung vào chất lượng thực phẩm (rau củ, ngũ cốc nguyên cám, chất béo lành mạnh)
+                        giúp giảm cân hiệu quả mà không cần tính calo [citation:2].
+                    </p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-400">📅 Cập nhật: 2025</span>
+                        <button class="read-more text-[#47654c] text-sm font-semibold hover:underline">Đọc tiếp →</button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Article 2: Chế độ ăn Địa Trung Hải -->
+            <article class="knowledge-card bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="nutrition weightloss">
+                <div class="h-48 overflow-hidden">
+                    <img th:src="@{/images/knowledge-mediterranean.jpg}" alt="Chế độ ăn Địa Trung Hải" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-xs bg-[#f1ede6] text-[#47654c] px-2 py-1 rounded-full">Dinh dưỡng</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Chế độ ăn Địa Trung Hải: Lối sống vàng cho sức khỏe</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed mb-4">
+                        Được UNESCO công nhận là Di sản văn hóa phi vật thể, chế độ ăn Địa Trung Hải ưu tiên dầu ô liu,
+                        rau củ, cá, các loại hạt - giúp giảm nguy cơ bệnh tim mạch, tiểu đường và cải thiện vóc dáng [citation:1][citation:5].
+                    </p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-400">📅 Cập nhật: 2025</span>
+                        <button class="read-more text-[#47654c] text-sm font-semibold hover:underline">Đọc tiếp →</button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Article 3: Kiến thức dinh dưỡng và BMI -->
+            <article class="knowledge-card bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="nutrition">
+                <div class="h-48 overflow-hidden">
+                    <img th:src="@{/images/knowledge-education.jpg}" alt="Học dinh dưỡng" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-xs bg-[#f1ede6] text-[#47654c] px-2 py-1 rounded-full">Nghiên cứu</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Kiến thức dinh dưỡng tỷ lệ thuận với sức khỏe</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed mb-4">
+                        Nghiên cứu trên gần 1.800 sinh viên cho thấy: người có kiến thức dinh dưỡng tốt hơn có chỉ số BMI thấp hơn
+                        và sức khỏe tổng thể tốt hơn đáng kể [citation:3][citation:8].
+                    </p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-400">📅 Nguồn: Elsevier | 2024</span>
+                        <button class="read-more text-[#47654c] text-sm font-semibold hover:underline">Đọc tiếp →</button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Article 4: Chiến lược giảm cân kết hợp -->
+            <article class="knowledge-card bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="weightloss lifestyle">
+                <div class="h-48 overflow-hidden">
+                    <img th:src="@{/images/knowledge-strategy.jpg}" alt="Chiến lược giảm cân" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-xs bg-[#f1ede6] text-[#47654c] px-2 py-1 rounded-full">Giảm cân</span>
+                        <span class="text-xs bg-[#f1ede6] text-[#47654c] px-2 py-1 rounded-full">Lối sống</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Kết hợp đa phương pháp: Chìa khóa giảm cân bền vững</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed mb-4">
+                        Giảm cân hiệu quả cần sự kết hợp của nhiều yếu tố: chế độ ăn giàu protein và chất xơ, tập luyện sức bền,
+                        ngủ đủ giấc và kiểm soát căng thẳng [citation:6].
+                    </p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-400">📅 Nguồn: NIH | 2025</span>
+                        <button class="read-more text-[#47654c] text-sm font-semibold hover:underline">Đọc tiếp →</button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Article 5: Chất xơ và giảm cân -->
+            <article class="knowledge-card bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="nutrition weightloss">
+                <div class="h-48 overflow-hidden">
+                    <img th:src="@{/images/knowledge-fiber.jpg}" alt="Thực phẩm giàu chất xơ" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-xs bg-[#f1ede6] text-[#47654c] px-2 py-1 rounded-full">Dinh dưỡng</span>
+                        <span class="text-xs bg-[#f1ede6] text-[#47654c] px-2 py-1 rounded-full">Giảm cân</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Chất xơ: Vũ khí bí mật cho vòng eo thon gọn</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed mb-4">
+                        Chất xơ hòa tan giúp kéo dài cảm giác no, ổn định đường huyết và hỗ trợ giảm cân hiệu quả.
+                        Nghiên cứu cho thấy bổ sung chất xơ giúp giảm đáng kể BMI và vòng eo [citation:6].
+                    </p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-400">📅 Nguồn: Lippincott | 2025</span>
+                        <button class="read-more text-[#47654c] text-sm font-semibold hover:underline">Đọc tiếp →</button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Article 6: Hoạt động thể chất -->
+            <article class="knowledge-card bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="lifestyle">
+                <div class="h-48 overflow-hidden">
+                    <img th:src="@{/images/knowledge-exercise.jpg}" alt="Tập thể dục" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-xs bg-[#f1ede6] text-[#47654c] px-2 py-1 rounded-full">Lối sống</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Vai trò của vận động trong kiểm soát cân nặng</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed mb-4">
+                        Tập luyện sức bền giúp giảm mỡ nội tạng và duy trì khối cơ trong quá trình giảm cân.
+                        Kết hợp với chế độ ăn lành mạnh mang lại hiệu quả tối ưu [citation:1][citation:6].
+                    </p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-400">📅 Nguồn: Frontiers | 2025</span>
+                        <button class="read-more text-[#47654c] text-sm font-semibold hover:underline">Đọc tiếp →</button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Article 7: Bệnh không lây nhiễm -->
+            <article class="knowledge-card bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="nutrition">
+                <div class="h-48 overflow-hidden">
+                    <img th:src="@{/images/knowledge-ncd.jpg}" alt="Phòng bệnh mãn tính" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-xs bg-[#f1ede6] text-[#47654c] px-2 py-1 rounded-full">Sức khỏe</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Dinh dưỡng - Lá chắn phòng ngừa bệnh mãn tính</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed mb-4">
+                        Chế độ ăn giàu flavonoid (trái cây, trà xanh, ca cao) giúp giảm nguy cơ béo phì và các bệnh chuyển hóa.
+                        Dinh dưỡng hợp lý là nền tảng phòng ngừa bệnh tim mạch, tiểu đường và ung thư [citation:1].
+                    </p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-400">📅 Nguồn: NIH | 2025</span>
+                        <button class="read-more text-[#47654c] text-sm font-semibold hover:underline">Đọc tiếp →</button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Article 8: Sleep and weight -->
+            <article class="knowledge-card bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all" data-category="lifestyle">
+                <div class="h-48 overflow-hidden">
+                    <img th:src="@{/images/knowledge-sleep.jpg}" alt="Giấc ngủ và cân nặng" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-xs bg-[#f1ede6] text-[#47654c] px-2 py-1 rounded-full">Lối sống</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Giấc ngủ - Yếu tố không thể bỏ qua trong hành trình giảm cân</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed mb-4">
+                        Ngủ đủ giấc và chất lượng tốt hỗ trợ quá trình giảm cân và duy trì cân nặng.
+                        Thiếu ngủ làm tăng hormone gây đói và giảm hormone no, dẫn đến ăn nhiều hơn [citation:6].
+                    </p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-400">📅 Nguồn: Lippincott | 2025</span>
+                        <button class="read-more text-[#47654c] text-sm font-semibold hover:underline">Đọc tiếp →</button>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        <!-- Newsletter Section -->
+        <div class="mt-16 bg-[#f1ede6] rounded-2xl p-8 md:p-12 text-center">
+            <h2 class="text-2xl font-medium text-gray-800 mb-3">Nhận bản tin kiến thức mỗi tuần</h2>
+            <p class="text-gray-500 mb-6">Đăng ký để nhận các bài viết mới nhất về dinh dưỡng và sức khỏe</p>
+            <form class="flex flex-col md:flex-row gap-4 max-w-lg mx-auto">
+                <input type="email" placeholder="Email của bạn" class="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:border-[#47654c] outline-none">
+                <button type="submit" class="px-6 py-3 bg-[#47654c] text-white rounded-xl font-semibold hover:bg-[#3a543e] transition">Đăng ký ngay</button>
+            </form>
+        </div>
+    </div>
+</main>
+
+<!-- Article Modal -->
+<div id="articleModal" class="modal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close close-modal">✕</button>
+            </div>
+            <div class="modal-body" id="modalContent">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== FOOTER ========== -->
+<div th:replace="~{layout/fragments :: footer}"></div>
+
+<script th:src="@{/js/knowledge.js}"></script>
+</body>
+</html>

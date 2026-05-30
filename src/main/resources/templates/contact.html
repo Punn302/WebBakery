@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hebekery | Liên Hệ</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<!-- ========== HEADER ========== -->
+<div th:replace="~{layout/fragments :: header}"></div>
+
+<main class="pt-24 pb-16">
+    <div class="max-w-7xl mx-auto px-4 md:px-8">
+
+        <!-- Hero Title -->
+        <div class="text-center mb-12">
+            <h1 class="text-3xl md:text-4xl font-medium text-gray-800 mb-3">Liên Hệ Với Hebekery</h1>
+            <p class="text-gray-500 max-w-2xl mx-auto">
+                Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn. Hãy để lại thông tin,
+                đội ngũ Hebekery sẽ phản hồi trong thời gian sớm nhất.
+            </p>
+        </div>
+
+        <!-- Contact Info Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+            <!-- Card 1: Địa chỉ -->
+            <div class="contact-info-card">
+                <div class="contact-icon">
+                    <span class="material-symbols-outlined">location_on</span>
+                </div>
+                <h3>Địa chỉ</h3>
+                <p>123 Đường Phan Thiết,</p>
+                <p>Thành phố Phan Thiết, Bình Thuận</p>
+            </div>
+
+            <!-- Card 2: Điện thoại -->
+            <div class="contact-info-card">
+                <div class="contact-icon">
+                    <span class="material-symbols-outlined">phone</span>
+                </div>
+                <h3>Điện thoại</h3>
+                <p><a href="tel:19006789">1900 6789</a></p>
+                <p><a href="tel:0912345678">0912 345 678</a></p>
+            </div>
+
+            <!-- Card 3: Email -->
+            <div class="contact-info-card">
+                <div class="contact-icon">
+                    <span class="material-symbols-outlined">email</span>
+                </div>
+                <h3>Email</h3>
+                <p><a href="mailto:info@hebekery.vn">info@hebekery.vn</a></p>
+                <p><a href="mailto:support@hebekery.vn">support@hebekery.vn</a></p>
+            </div>
+
+            <!-- Card 4: Giờ làm việc -->
+            <div class="contact-info-card">
+                <div class="contact-icon">
+                    <span class="material-symbols-outlined">schedule</span>
+                </div>
+                <h3>Giờ làm việc</h3>
+                <p>Thứ 2 - Thứ 7: 8:00 - 21:00</p>
+                <p>Chủ Nhật: 9:00 - 18:00</p>
+            </div>
+        </div>
+
+        <!-- Contact Form & Map -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+            <!-- Contact Form -->
+            <div class="contact-form-container">
+                <h2 class="text-2xl font-medium text-gray-800 mb-6">Gửi Tin Nhắn Cho Chúng Tôi</h2>
+
+                <!-- Success/Error Messages -->
+                <div id="successMessage" class="success-message"></div>
+                <div id="errorMessage" class="error-message"></div>
+
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label>Họ và tên <span class="required">*</span></label>
+                        <input type="text" name="name" placeholder="Nhập họ tên của bạn">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="form-group">
+                            <label>Email <span class="required">*</span></label>
+                            <input type="email" name="email" placeholder="email@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Số điện thoại <span class="required">*</span></label>
+                            <input type="tel" name="phone" placeholder="0912 345 678">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Chủ đề <span class="required">*</span></label>
+                        <select name="subject">
+                            <option value="">-- Chọn chủ đề --</option>
+                            <option value="order">Đơn hàng & Giao nhận</option>
+                            <option value="product">Thông tin sản phẩm</option>
+                            <option value="wholesale">Hợp tác & Bán buôn</option>
+                            <option value="feedback">Góp ý & Phản hồi</option>
+                            <option value="other">Vấn đề khác</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nội dung tin nhắn <span class="required">*</span></label>
+                        <textarea name="message" placeholder="Nhập nội dung bạn muốn gửi..."></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Gửi Tin Nhắn</button>
+                </form>
+            </div>
+
+            <!-- Map & Working Hours -->
+            <div>
+                <div class="map-container mb-6">
+                    <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31365.63366348529!2d108.079748!3d10.928136!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3176a7f89f61bacd%3A0x1b7a9bbdb3b1f8f!2zUGhhbiBUaOG6r3QsIELDrG5oIFRodeG6rW4sIFZpZXRuYW0!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+
+                <div class="working-hours">
+                    <h4>
+                        <span class="material-symbols-outlined">schedule</span>
+                        Giờ làm việc chi tiết
+                    </h4>
+                    <div class="hour-row">
+                        <span class="day">Thứ 2 - Thứ 6</span>
+                        <span class="time">8:00 - 21:00</span>
+                    </div>
+                    <div class="hour-row">
+                        <span class="day">Thứ 7</span>
+                        <span class="time">8:00 - 20:00</span>
+                    </div>
+                    <div class="hour-row">
+                        <span class="day">Chủ Nhật</span>
+                        <span class="time">9:00 - 18:00</span>
+                    </div>
+                    <div class="hour-row">
+                        <span class="day">Ngày lễ</span>
+                        <span class="time">10:00 - 16:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="mb-16">
+            <div class="text-center mb-10">
+                <h2 class="text-2xl md:text-3xl font-medium text-gray-800 mb-3">Câu Hỏi Thường Gặp</h2>
+                <p class="text-gray-500">Những thắc mắc phổ biến của khách hàng về Hebekery</p>
+            </div>
+
+            <div class="max-w-3xl mx-auto">
+                <!-- FAQ 1 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Hebekery có giao hàng toàn quốc không?</span>
+                        <span class="material-symbols-outlined">expand_more</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Có, Hebekery giao hàng trên toàn quốc. Thời gian giao hàng dự kiến từ 2-5 ngày tùy khu vực.
+                            Phí ship sẽ được tính dựa trên địa chỉ nhận hàng và khối lượng đơn hàng.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 2 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Sản phẩm của Hebekery có an toàn cho người ăn kiêng không?</span>
+                        <span class="material-symbols-outlined">expand_more</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Tất cả sản phẩm của Hebekery đều được làm từ nguyên liệu hữu cơ, không chất bảo quản,
+                            không đường tinh luyện, rất phù hợp cho người ăn kiêng, keto, paleo và thuần chay.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 3 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Làm thế nào để theo dõi đơn hàng?</span>
+                        <span class="material-symbols-outlined">expand_more</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Bạn có thể theo dõi đơn hàng bằng cách nhấp vào mục "Kiểm tra đơn hàng" trên menu,
+                            sau đó nhập mã đơn hàng và email đã đăng ký. Mã đơn hàng sẽ được gửi qua email sau khi đặt hàng thành công.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 4 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Hebekery có nhận đặt bánh số lượng lớn không?</span>
+                        <span class="material-symbols-outlined">expand_more</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Có, Hebekery nhận đặt hàng số lượng lớn cho các sự kiện, tiệc, hoặc hợp tác bán buôn.
+                            Vui lòng liên hệ qua hotline hoặc email để được tư vấn chi tiết về giá và thời gian sản xuất.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 5 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Sản phẩm có thể bảo quản được bao lâu?</span>
+                        <span class="material-symbols-outlined">expand_more</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Sản phẩm của Hebekery được bảo quản trong túi kín, để nơi khô ráo thoáng mát.
+                            Thời gian bảo quản từ 3-6 tháng tùy từng loại sản phẩm. Sau khi mở túi, nên dùng trong vòng 7-10 ngày.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Social Section -->
+        <div class="text-center">
+            <h2 class="text-2xl font-medium text-gray-800 mb-4">Kết Nối Với Chúng Tôi</h2>
+            <p class="text-gray-500 mb-6">Theo dõi Hebekery trên các nền tảng mạng xã hội</p>
+            <div class="social-links">
+                <a href="#" class="social-link" target="_blank">
+                    <span class="material-symbols-outlined">photo_camera</span>
+                </a>
+                <a href="#" class="social-link" target="_blank">
+                    <span class="material-symbols-outlined">push_pin</span>
+                </a>
+                <a href="#" class="social-link" target="_blank">
+                    <span class="material-symbols-outlined">facebook</span>
+                </a>
+                <a href="#" class="social-link" target="_blank">
+                    <span class="material-symbols-outlined">youtube_activity</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- ========== FOOTER ========== -->
+<div th:replace="~{layout/fragments :: footer}"></div>
+
+<script th:src="@{/js/contact.js}"></script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Tìm kiếm: ' + ${keyword} + ' | Hebekery'">Kết quả tìm kiếm | Hebekery</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<!-- ========== HEADER ========== -->
+<div th:replace="~{layout/fragments :: header}"></div>
+
+<main class="pt-28 pb-16">
+    <div class="max-w-7xl mx-auto px-4 md:px-8">
+
+        <!-- Search Header -->
+        <div class="mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <a href="/" class="text-gray-400 hover:text-[#47654c] transition">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </a>
+                <h1 class="text-2xl md:text-3xl font-medium text-gray-800">Kết quả tìm kiếm</h1>
+            </div>
+
+            <!-- Search Box -->
+            <div class="max-w-2xl">
+                <form action="/search" method="get" class="flex">
+                    <div class="flex-1 relative">
+                        <input type="text" name="keyword" th:value="${keyword}"
+                               placeholder="Bạn muốn tìm sản phẩm gì?"
+                               class="w-full py-3 px-5 pr-12 bg-[#f7f3ec] border border-[#e6e2db] rounded-l-full focus:outline-none focus:border-[#47654c]">
+                        <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                            <span class="material-symbols-outlined">search</span>
+                        </button>
+                    </div>
+                    <button type="submit" class="px-6 bg-[#47654c] text-white rounded-r-full hover:bg-[#3a543e] transition">
+                        Tìm
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Result Info -->
+        <div class="flex justify-between items-center mb-6">
+            <p class="text-gray-500">
+                Tìm thấy <span th:text="${resultCount}">0</span> kết quả cho từ khóa
+                <strong class="text-[#47654c]" th:text="'\'' + ${keyword} + '\''"></strong>
+            </p>
+            <a href="/products" class="text-sm text-[#47654c] hover:underline">Xem tất cả sản phẩm →</a>
+        </div>
+
+        <!-- No Results -->
+        <div th:if="${resultCount == 0}" class="text-center py-16">
+            <span class="material-symbols-outlined text-6xl text-gray-300">search_off</span>
+            <h3 class="text-xl font-medium text-gray-700 mt-4">Không tìm thấy sản phẩm</h3>
+            <p class="text-gray-400 mt-2">Thử tìm kiếm với từ khóa khác hoặc xem tất cả sản phẩm của chúng tôi</p>
+            <a href="/products" class="inline-block mt-6 px-6 py-2 bg-[#47654c] text-white rounded-full hover:bg-[#3a543e] transition">
+                Xem tất cả sản phẩm
+            </a>
+        </div>
+
+        <!-- Results Grid -->
+        <div th:if="${resultCount > 0}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div th:each="product : ${products}" class="product-card group cursor-pointer">
+                <a th:href="@{/product/{id}(id=${product.id})}" class="block">
+                    <div class="aspect-square mb-4 overflow-hidden rounded-xl bg-white shadow-md hover-lift">
+                        <img th:src="@{${product.imageUrl}}" th:alt="${product.name}"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    </div>
+                    <div class="text-center">
+                        <div class="flex items-center justify-center gap-2 mb-2">
+                            <span class="text-xs text-[#47654c] uppercase tracking-wider" th:text="${product.badge}"></span>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-1" th:text="${product.name}"></h3>
+                        <p class="text-sm text-gray-500 mb-2 line-clamp-2" th:text="${product.description}"></p>
+                        <p class="text-lg font-bold text-[#47654c] mb-3" th:text="${product.price} + '₫'"></p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Suggested Keywords -->
+        <div th:if="${resultCount == 0}" class="mt-12 text-center">
+            <p class="text-gray-500 mb-4">Gợi ý tìm kiếm:</p>
+            <div class="flex flex-wrap justify-center gap-3">
+                <a href="/search?keyword=granola" class="px-4 py-2 bg-[#f7f3ec] rounded-full text-sm hover:bg-[#47654c] hover:text-white transition">Granola</a>
+                <a href="/search?keyword=biscotti" class="px-4 py-2 bg-[#f7f3ec] rounded-full text-sm hover:bg-[#47654c] hover:text-white transition">Biscotti</a>
+                <a href="/search?keyword=keto" class="px-4 py-2 bg-[#f7f3ec] rounded-full text-sm hover:bg-[#47654c] hover:text-white transition">Keto Cookies</a>
+                <a href="/search?keyword=yến mạch" class="px-4 py-2 bg-[#f7f3ec] rounded-full text-sm hover:bg-[#47654c] hover:text-white transition">Yến mạch</a>
+                <a href="/search?keyword=combo" class="px-4 py-2 bg-[#f7f3ec] rounded-full text-sm hover:bg-[#47654c] hover:text-white transition">Combo quà tặng</a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- ========== FOOTER ========== -->
+<div th:replace="~{layout/fragments :: footer}"></div>
+
+</body>
+</html>

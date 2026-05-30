@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${product.name} + ' | Hebekery'">Chi Tiết Sản Phẩm | Hebekery</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <style>
+        /* Product Gallery */
+        .main-image {
+            border-radius: 24px;
+            overflow: hidden;
+            cursor: zoom-in;
+        }
+        .thumbnail {
+            cursor: pointer;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            opacity: 0.6;
+        }
+        .thumbnail.active {
+            opacity: 1;
+            ring: 2px solid #47654c;
+        }
+        .thumbnail:hover {
+            opacity: 1;
+        }
+
+        /* Tabs */
+        .tab-btn {
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            border-bottom-color: #47654c;
+            color: #47654c;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        /* Quantity */
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            border: 1px solid #e6e2db;
+            border-radius: 40px;
+            overflow: hidden;
+        }
+        .quantity-btn {
+            width: 44px;
+            height: 44px;
+            background: #f7f3ec;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s ease;
+        }
+        .quantity-btn:hover {
+            background: #47654c;
+            color: white;
+        }
+        .quantity-input {
+            width: 60px;
+            text-align: center;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            outline: none;
+        }
+
+        /* Nutrition Table */
+        .nutrition-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .nutrition-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e6e2db;
+        }
+        .nutrition-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Zoom Modal */
+        .zoom-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            cursor: zoom-out;
+        }
+        .zoom-modal img {
+            max-width: 90%;
+            max-height: 90%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== HEADER ========== -->
+<div th:replace="~{layout/fragments :: header}"></div>
+
+<main class="pt-24 pb-16">
+    <div class="max-w-7xl mx-auto px-4 md:px-8">
+
+        <!-- Breadcrumb -->
+        <div class="flex items-center gap-2 text-sm text-gray-400 mb-6">
+            <a href="/" class="hover:text-[#47654c] transition">Trang chủ</a>
+            <span>/</span>
+            <a href="/products" class="hover:text-[#47654c] transition">Sản phẩm</a>
+            <span>/</span>
+            <span class="text-[#47654c]" th:text="${product.name}">Tên sản phẩm</span>
+        </div>
+
+        <!-- Product Main Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+
+            <!-- Left: Product Gallery -->
+            <div>
+                <!-- Main Image -->
+                <div class="main-image mb-4">
+                    <img id="mainImage" th:src="@{${product.imageUrl}}" th:alt="${product.name}"
+                         class="w-full h-auto object-cover">
+                </div>
+                <!-- Thumbnails -->
+                <div class="flex gap-3">
+                    <div class="thumbnail active w-20 h-20 rounded-lg overflow-hidden">
+                        <img th:src="@{${product.imageUrl}}" th:alt="${product.name}"
+                             class="w-full h-full object-cover">
+                    </div>
+                    <div class="thumbnail w-20 h-20 rounded-lg overflow-hidden">
+                        <img th:src="@{${product.imageUrl}}" th:alt="${product.name} + ' 2'"
+                             class="w-full h-full object-cover">
+                    </div>
+                    <div class="thumbnail w-20 h-20 rounded-lg overflow-hidden">
+                        <img th:src="@{${product.imageUrl}}" th:alt="${product.name} + ' 3'"
+                             class="w-full h-full object-cover">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Product Info -->
+            <div>
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-xs bg-[#47654c] text-white px-3 py-1 rounded-full" th:text="${product.badge}">Nổi bật</span>
+                </div>
+                <h1 class="text-3xl md:text-4xl font-medium text-gray-800 mb-3" th:text="${product.name}">Tên sản phẩm</h1>
+                <p class="text-gray-500 mb-6 leading-relaxed" th:text="${product.description}">Mô tả sản phẩm</p>
+
+                <div class="mb-6">
+                    <span class="text-3xl font-bold text-[#47654c]" th:text="${#numbers.formatDecimal(product.price, 0, 0, 'COMMA') + '₫'}">219.000₫</span>
+                </div>
+
+                <!-- Quantity Selector -->
+                <div class="flex items-center gap-6 mb-8">
+                    <div class="quantity-selector">
+                        <button class="quantity-btn minus">-</button>
+                        <input type="number" id="quantity" class="quantity-input" value="1" min="1" max="99">
+                        <button class="quantity-btn plus">+</button>
+                    </div>
+                    <button id="addToCartBtn" th:attr="data-product-id=${product.id}" class="flex-1 bg-[#47654c] text-white py-3 px-6 rounded-full font-semibold hover:bg-[#3a543e] transition flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">shopping_cart</span>
+                        Thêm vào giỏ hàng
+                    </button>
+                </div>
+
+                <!-- Product Meta -->
+                <div class="border-t border-gray-200 pt-6 space-y-3 text-sm">
+                    <div class="flex">
+                        <span class="w-28 text-gray-500">Danh mục:</span>
+                        <span class="text-gray-700" th:text="${product.category}">Ngũ cốc</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-28 text-gray-500">Xuất xứ:</span>
+                        <span class="text-gray-700">Việt Nam</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-28 text-gray-500">Bảo quản:</span>
+                        <span class="text-gray-700">Nơi khô ráo, thoáng mát</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Tabs -->
+        <div class="mb-16">
+            <div class="flex border-b border-gray-200 mb-6">
+                <button class="tab-btn active px-6 py-3 font-semibold" data-tab="description">Mô tả sản phẩm</button>
+                <button class="tab-btn px-6 py-3 font-semibold" data-tab="ingredients">Thành phần</button>
+                <button class="tab-btn px-6 py-3 font-semibold" data-tab="nutrition">Thông tin dinh dưỡng</button>
+                <button class="tab-btn px-6 py-3 font-semibold" data-tab="guide">Hướng dẫn bảo quản</button>
+            </div>
+
+            <!-- Tab 1: Description -->
+            <div id="tab-description" class="tab-content active">
+                <div class="prose max-w-none text-gray-600 leading-relaxed">
+                    <p th:text="${product.description}">Mô tả chi tiết sản phẩm...</p>
+                    <p class="mt-4">Sản phẩm được làm từ 100% nguyên liệu tự nhiên, không chất bảo quản, không màu nhân tạo. Hebekery cam kết mang đến những sản phẩm tốt nhất cho sức khỏe của bạn và gia đình.</p>
+                </div>
+            </div>
+
+            <!-- Tab 2: Ingredients -->
+            <div id="tab-ingredients" class="tab-content">
+                <div class="text-gray-600 leading-relaxed">
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li>Yến mạch nguyên cám hữu cơ</li>
+                        <li>Hạt điều rang</li>
+                        <li>Hạnh nhân nguyên chất</li>
+                        <li>Mật ong rừng nguyên chất</li>
+                        <li>Dầu dừa ép lạnh</li>
+                        <li>Không đường tinh luyện, không chất bảo quản</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Tab 3: Nutrition -->
+            <div id="tab-nutrition" class="tab-content">
+                <table class="nutrition-table">
+                    <tr>
+                        <td class="font-semibold">Năng lượng</td>
+                        <td>450 kcal / 100g</td>
+                    </tr>
+                    <tr>
+                        <td class="font-semibold">Protein</td>
+                        <td>12g</td>
+                    </tr>
+                    <tr>
+                        <td class="font-semibold">Carbohydrate</td>
+                        <td>45g</td>
+                    </tr>
+                    <tr>
+                        <td class="font-semibold">Chất béo</td>
+                        <td>18g</td>
+                    </tr>
+                    <tr>
+                        <td class="font-semibold">Chất xơ</td>
+                        <td>10g</td>
+                    </tr>
+                    <tr>
+                        <td class="font-semibold">Đường</td>
+                        <td>5g</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Tab 4: Guide -->
+            <div id="tab-guide" class="tab-content">
+                <div class="text-gray-600 leading-relaxed">
+                    <p>Bảo quản sản phẩm nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp. Sau khi mở túi, nên dùng trong vòng 7-10 ngày để đảm bảo độ giòn và hương vị tốt nhất.</p>
+                    <p class="mt-3">Có thể bảo quản trong hộp kín để giữ độ tươi ngon lâu hơn.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Products -->
+        <div>
+            <h2 class="text-2xl font-medium text-gray-800 mb-6">Sản phẩm liên quan</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div th:each="related : ${relatedProducts}" class="product-card group cursor-pointer">
+                    <div class="aspect-square mb-4 overflow-hidden rounded-xl bg-white shadow-md hover-lift">
+                        <img th:src="@{${related.imageUrl}}" th:alt="${related.name}"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-base font-semibold text-gray-800 mb-1" th:text="${related.name}"></h3>
+                        <p class="text-sm font-bold text-[#47654c]" th:text="${#numbers.formatDecimal(related.price, 0, 0, 'COMMA') + '₫'}"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<!-- Zoom Modal -->
+<div id="zoomModal" class="zoom-modal">
+    <img id="zoomImage" th:src="@{${product.imageUrl}}" alt="Zoom">
+</div>
+
+<!-- ========== FOOTER ========== -->
+<div th:replace="~{layout/fragments :: footer}"></div>
+
+<script th:src="@{/js/product-detail.js(v=2)}"></script>
+<script>
+    // Xử lý sự kiện click vào sản phẩm liên quan
+    document.querySelectorAll('.related-product-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            // Không cần làm gì thêm vì đã có href
+            console.log('Chuyển đến trang chi tiết sản phẩm');
+        });
+    });
+</script>
+</body>
+</html>
