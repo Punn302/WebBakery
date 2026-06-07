@@ -222,12 +222,16 @@ const Cart = (function() {
 
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
-            const success = await login(email, password);
+            const result = await login(email, password);
 
-            if (success) {
+            if (result.success) {
                 loginModal.style.display = 'none';
                 loginModal.classList.remove('show');
                 document.body.style.overflow = '';
+                if (result.redirectUrl === '/admin') {
+                    window.location.href = '/admin';
+                    return;
+                }
                 await saveCart();
                 window.location.href = '/checkout';
             } else {
@@ -261,10 +265,10 @@ const Cart = (function() {
                 credentials: 'same-origin'
             });
             const data = await response.json();
-            return data.success;
+            return data;
         } catch (error) {
             console.error('Error logging in:', error);
-            return false;
+            return { success: false };
         }
     }
 

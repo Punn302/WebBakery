@@ -52,12 +52,13 @@
                     <span class="material-symbols-outlined">person</span>
                 </a>
                 <div th:if="${session.user != null}" class="relative group">
-                    <button class="text-gray-600 hover:text-gray-900 transition-colors">
+                    <a href="/profile" class="text-gray-600 hover:text-gray-900 transition-colors inline-flex">
                         <span class="material-symbols-outlined">person</span>
-                    </button>
+                    </a>
                     <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 hidden group-hover:block z-50">
                         <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#f7f3ec]">👤 Tài khoản của tôi</a>
                         <a href="/orders" class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#f7f3ec]">📦 Đơn hàng của tôi</a>
+                        <a th:if="${session.user != null and session.user.role == 'ADMIN'}" href="/admin" class="block px-4 py-2 text-sm text-gray-700 hover:bg-[#f7f3ec]">Admin dashboard</a>
                         <hr class="my-1">
                         <button id="logoutBtn" class="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-[#f7f3ec]">🚪 Đăng xuất</button>
                     </div>
@@ -119,6 +120,7 @@
             </a>
         </div>
     </div>
+    <script th:src="@{/js/common.js(v=1)}"></script>
 </footer>
 
 </body>

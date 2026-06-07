@@ -1,11 +1,28 @@
 package com.example.hebekery.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
+@Entity
+@Table(name = "users")
 public class User {
+    @Id
     private String id;
+    @Column(nullable = false, unique = true)
     private String email;
+    @Column(nullable = false)
     private String password;
+    @Column(nullable = false)
     private String name;
     private String phone;
+    @Column(nullable = false)
+    private String role;
+    @Column(nullable = false)
+    private boolean active;
+    @Transient
     private boolean loggedIn;
 
     public User() {}
@@ -16,6 +33,19 @@ public class User {
         this.password = password;
         this.name = name;
         this.phone = phone;
+        this.role = "USER";
+        this.active = true;
+        this.loggedIn = false;
+    }
+
+    public User(String id, String email, String password, String name, String phone, String role) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.phone = phone;
+        this.role = role;
+        this.active = true;
         this.loggedIn = false;
     }
 
@@ -34,6 +64,12 @@ public class User {
 
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
 
     public boolean isLoggedIn() { return loggedIn; }
     public void setLoggedIn(boolean loggedIn) { this.loggedIn = loggedIn; }

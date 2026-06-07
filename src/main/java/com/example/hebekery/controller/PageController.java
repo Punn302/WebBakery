@@ -2,6 +2,7 @@ package com.example.hebekery.controller;
 
 import com.example.hebekery.model.Product;
 import com.example.hebekery.service.CartService;
+import com.example.hebekery.service.OrderService;
 import com.example.hebekery.service.ProductService;
 import com.example.hebekery.service.UserService;
 import org.springframework.stereotype.Controller;
@@ -16,11 +17,13 @@ public class PageController {
     private final ProductService productService;
     private final CartService cartService;
     private final UserService userService;
+    private final OrderService orderService;
 
-    public PageController(ProductService productService, CartService cartService, UserService userService) {
+    public PageController(ProductService productService, CartService cartService, UserService userService, OrderService orderService) {
         this.productService = productService;
         this.cartService = cartService;
         this.userService = userService;
+        this.orderService = orderService;
     }
 
     @GetMapping("/")
@@ -83,7 +86,7 @@ public class PageController {
 
     @GetMapping("/order-tracking")
     public String orderTracking() {
-        return "redirect:/profile";
+        return "order-tracking";
     }
 
     @GetMapping("/cart")
@@ -111,10 +114,11 @@ public class PageController {
     }
 
     @GetMapping("/profile")
-    public String profile() {
+    public String profile(Model model) {
         if (!userService.isLoggedIn()) {
             return "redirect:/login?redirect=/profile";
         }
+        model.addAttribute("user", userService.getCurrentUser());
         return "profile";
     }
 
@@ -123,11 +127,43 @@ public class PageController {
         return "redirect:/profile";
     }
 
+    @GetMapping("/orders/{id}")
+    public String orderDetail(@PathVariable String id, Model model) {
+        if (!userService.isLoggedIn()) {
+            return "redirect:/login?redirect=/orders/" + id;
+        }
+        var order = orderService.getOrderById(id);
+        if (!order.getUserId().equals(userService.getCurrentUser().getId())) {
+            return "redirect:/profile";
+        }
+        model.addAttribute("order", order);
+        return "order-detail";
+    }
+
     @GetMapping("/checkout")
-    public String checkout() {
+    public String checkout(Model model) {
         if (!userService.isLoggedIn()) {
             return "redirect:/login?redirect=/checkout";
         }
-        return "redirect:/cart";
+        if (cartService.getCartItems().isEmpty()) {
+            return "redirect:/cart";
+        }
+        model.addAttribute("user", userService.getCurrentUser());
+        model.addAttribute("cartItems", cartService.getCartItems());
+        model.addAttribute("subtotal", cartService.getTotalPrice());
+        model.addAttribute("shippingFee", 30000);
+        model.addAttribute("totalPrice", cartService.getTotalPrice() + 30000);
+        return "checkout";
+    }
+
+    @GetMapping("/checkout/success")
+    public String checkoutSuccess() {
+        return "checkout-success";
+    }
+
+    @GetMapping("/checkout/momo-test")
+    public String momoTest(@RequestParam String orderId, Model model) {
+        model.addAttribute("orderId", orderId);
+        return "momo-test";
     }
 }

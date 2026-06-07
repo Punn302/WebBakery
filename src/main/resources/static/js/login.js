@@ -101,9 +101,9 @@ const Login = (function() {
                 if (result.success) {
                     showSuccess('Đăng nhập thành công! Đang chuyển hướng...');
 
-                    // Get redirect URL from query parameter or default to home
                     const urlParams = new URLSearchParams(window.location.search);
-                    const redirectUrl = urlParams.get('redirect') || '/';
+                    const requestedRedirect = urlParams.get('redirect') || '/';
+                    const redirectUrl = result.redirectUrl === '/admin' ? '/admin' : requestedRedirect;
 
                     setTimeout(() => {
                         window.location.href = redirectUrl;

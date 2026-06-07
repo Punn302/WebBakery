@@ -6,6 +6,7 @@ import com.example.hebekery.dto.request.ChangePasswordRequest;
 import com.example.hebekery.dto.request.LoginRequest;
 import com.example.hebekery.dto.request.RegisterRequest;
 import com.example.hebekery.dto.request.UpdateUserRequest;
+import com.example.hebekery.service.OrderService;
 import com.example.hebekery.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,9 +22,11 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final OrderService orderService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, OrderService orderService) {
         this.userService = userService;
+        this.orderService = orderService;
     }
 
     @GetMapping("/api/user/status")
@@ -47,6 +49,7 @@ public class UserController {
             UserResponse user = UserResponse.from(userService.getCurrentUser());
             session.setAttribute("user", user);
             response.put("user", user);
+            response.put("redirectUrl", "ADMIN".equals(user.getRole()) ? "/admin" : "/");
             response.put("message", "Dang nhap thanh cong");
         } else {
             response.put("message", "Email hoac mat khau khong dung");
@@ -103,7 +106,7 @@ public class UserController {
         }
 
         Map<String, Object> response = success(null);
-        response.put("orders", Collections.<OrderResponse>emptyList());
+        response.put("orders", orderService.getOrdersByUser(userService.getCurrentUser().getId()));
         return response;
     }
 

@@ -191,7 +191,7 @@ const Profile = (function() {
                     <div class="order-card">
                         <div class="flex justify-between items-start mb-3">
                             <div>
-                                <p class="font-semibold text-gray-800">#${order.id}</p>
+                                <a href="/orders/${order.id}" class="font-semibold text-gray-800 hover:text-[#47654c]">#${order.id}</a>
                                 <p class="text-sm text-gray-400">${new Date(order.date).toLocaleDateString('vi-VN')}</p>
                             </div>
                             <span class="status-badge ${order.statusClass}">${order.statusText}</span>

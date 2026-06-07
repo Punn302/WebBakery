@@ -1,10 +1,10 @@
 package com.example.hebekery.service;
 
 import com.example.hebekery.model.User;
+import com.example.hebekery.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.SessionScope;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,22 +12,16 @@ import java.util.Optional;
 @SessionScope
 public class UserService {
 
+    private final UserRepository userRepository;
     private User currentUser = null;
-    private List<User> users = new ArrayList<>();
 
-    public UserService() {
-        // Tạo user mẫu
-        users.add(new User("1", "user@hebekery.vn", "123456", "Nguyễn Văn A", "0912345678"));
-        users.add(new User("2", "admin@hebekery.vn", "admin123", "Admin Hebekery", "0987654321"));
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
-    // Đăng nhập
     public boolean login(String email, String password) {
-        Optional<User> user = users.stream()
-                .filter(u -> u.getEmail().equals(email) && u.getPassword().equals(password))
-                .findFirst();
-
-        if (user.isPresent()) {
+        Optional<User> user = userRepository.findByEmailIgnoreCase(email);
+        if (user.isPresent() && user.get().isActive() && user.get().getPassword().equals(password)) {
             currentUser = user.get();
             currentUser.setLoggedIn(true);
             return true;
@@ -35,7 +29,6 @@ public class UserService {
         return false;
     }
 
-    // Đăng xuất
     public void logout() {
         if (currentUser != null) {
             currentUser.setLoggedIn(false);
@@ -43,29 +36,54 @@ public class UserService {
         }
     }
 
-    // Lấy user hiện tại
     public User getCurrentUser() {
         return currentUser;
     }
 
-    // Kiểm tra đã đăng nhập chưa
     public boolean isLoggedIn() {
         return currentUser != null && currentUser.isLoggedIn();
     }
-    // Đăng ký tài khoản mới
+
+    public boolean isAdmin() {
+        return isLoggedIn() && "ADMIN".equalsIgnoreCase(currentUser.getRole());
+    }
+
     public boolean register(String email, String password, String name, String phone) {
-        // Check if email already exists
-        boolean exists = users.stream().anyMatch(u -> u.getEmail().equals(email));
-        if (exists) {
+        if (userRepository.existsByEmailIgnoreCase(email)) {
             return false;
         }
-
-        // Create new user
-        String newId = String.valueOf(users.size() + 1);
-        User newUser = new User(newId, email, password, name, phone);
-        users.add(newUser);
-
+        User user = new User(String.valueOf(System.currentTimeMillis()), email, password, name, phone, "USER");
+        userRepository.save(user);
         return true;
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public Optional<User> findById(String id) {
+        return userRepository.findById(id);
+    }
+
+    public User updateUserRole(String id, String role) {
+        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("Khong tim thay user"));
+        user.setRole(role);
+        return userRepository.save(user);
+    }
+
+    public User setUserActive(String id, boolean active) {
+        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("Khong tim thay user"));
+        user.setActive(active);
+        if (!active) {
+            user.setLoggedIn(false);
+        }
+        return userRepository.save(user);
+    }
+
+    public User resetPassword(String id, String newPassword) {
+        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("Khong tim thay user"));
+        user.setPassword(newPassword);
+        return userRepository.save(user);
     }
 
     public User updateCurrentUser(String name, String phone) {
@@ -75,6 +93,8 @@ public class UserService {
 
         currentUser.setName(name);
         currentUser.setPhone(phone);
+        currentUser = userRepository.save(currentUser);
+        currentUser.setLoggedIn(true);
         return currentUser;
     }
 
@@ -88,6 +108,8 @@ public class UserService {
         }
 
         currentUser.setPassword(newPassword);
+        currentUser = userRepository.save(currentUser);
+        currentUser.setLoggedIn(true);
         return true;
     }
 }

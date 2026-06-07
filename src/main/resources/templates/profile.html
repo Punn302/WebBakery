@@ -3,290 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hebekery | Tài Khoản Của Tôi</title>
-
-    <!-- Tailwind CSS -->
+    <title>Hebekery | Tài khoản của tôi</title>
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-
-    <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
-
-    <!-- Custom CSS -->
     <link rel="stylesheet" th:href="@{/css/style.css}">
-
-    <style>
-        .profile-sidebar {
-            background: white;
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        }
-        .profile-nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .profile-nav-item:hover {
-            background: #f7f3ec;
-        }
-        .profile-nav-item.active {
-            background: #47654c;
-            color: white;
-        }
-        .profile-nav-item.active .material-symbols-outlined {
-            color: white;
-        }
-        .profile-content {
-            background: white;
-            border-radius: 24px;
-            padding: 32px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        }
-        .order-card {
-            border: 1px solid #e6e2db;
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 16px;
-            transition: all 0.3s ease;
-        }
-        .order-card:hover {
-            border-color: #47654c;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .status-pending {
-            background: #fef3c7;
-            color: #d97706;
-        }
-        .status-delivered {
-            background: #d4edda;
-            color: #155724;
-        }
-        .status-shipping {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-        .status-cancelled {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-        .info-row {
-            display: flex;
-            margin-bottom: 20px;
-        }
-        .info-label {
-            width: 140px;
-            font-weight: 600;
-            color: #1c1c18;
-        }
-        .info-value {
-            flex: 1;
-            color: #454742;
-        }
-        .edit-btn {
-            background: none;
-            border: 1px solid #e6e2db;
-            padding: 8px 20px;
-            border-radius: 40px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .edit-btn:hover {
-            background: #47654c;
-            color: white;
-            border-color: #47654c;
-        }
-        .save-btn {
-            background: #47654c;
-            color: white;
-            padding: 10px 24px;
-            border-radius: 40px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .save-btn:hover {
-            background: #3a543e;
-        }
-        .cancel-btn {
-            background: #f7f3ec;
-            color: #1c1c18;
-            padding: 10px 24px;
-            border-radius: 40px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-left: 12px;
-        }
-        .cancel-btn:hover {
-            background: #e6e2db;
-        }
-    </style>
 </head>
 <body>
-
-<!-- ========== HEADER ========== -->
 <div th:replace="~{layout/fragments :: header}"></div>
 
-<main class="pt-28 pb-16">
+<main class="pt-28 pb-16 bg-[#fbfaf7] min-h-screen">
     <div class="max-w-7xl mx-auto px-4 md:px-8">
-
-        <h1 class="text-3xl font-medium text-gray-800 mb-8">Tài Khoản Của Tôi</h1>
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <p class="text-sm uppercase tracking-wider text-[#47654c] font-semibold">Tài khoản</p>
+                    <h1 id="userNameDisplay" class="text-3xl font-semibold text-gray-800 mt-1" th:text="${user.name}">Người dùng</h1>
+                    <p id="userEmailDisplay" class="text-gray-500 mt-1" th:text="${user.email}">email@example.com</p>
+                </div>
+                <button id="logoutNav" class="inline-flex items-center gap-2 px-5 py-3 rounded-full border border-gray-200 text-red-500 font-semibold">
+                    <span class="material-symbols-outlined text-base">logout</span>
+                    Đăng xuất
+                </button>
+            </div>
+        </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <aside class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 h-fit">
+                <button class="profile-nav-item active w-full text-left px-4 py-3 rounded-lg font-semibold text-[#47654c] bg-[#f7f3ec]" data-tab="profile">Thông tin cá nhân</button>
+                <button class="profile-nav-item w-full text-left px-4 py-3 rounded-lg font-semibold text-gray-600 hover:bg-[#f7f3ec]" data-tab="password">Đổi mật khẩu</button>
+                <button class="profile-nav-item w-full text-left px-4 py-3 rounded-lg font-semibold text-gray-600 hover:bg-[#f7f3ec]" data-tab="orders">Đơn hàng</button>
+            </aside>
 
-            <!-- Sidebar Navigation -->
-            <div class="lg:col-span-1">
-                <div class="profile-sidebar">
-                    <div class="text-center mb-6">
-                        <div class="w-20 h-20 bg-[#f1ede6] rounded-full flex items-center justify-center mx-auto mb-3">
-                            <span class="material-symbols-outlined text-3xl text-[#47654c]">person</span>
-                        </div>
-                        <h3 class="font-semibold text-gray-800" id="userNameDisplay">Người dùng</h3>
-                        <p class="text-sm text-gray-400" id="userEmailDisplay">email@example.com</p>
-                    </div>
-
-                    <div class="space-y-2">
-                        <div class="profile-nav-item active" data-tab="profile">
-                            <span class="material-symbols-outlined">account_circle</span>
-                            <span>Thông tin tài khoản</span>
-                        </div>
-                        <div class="profile-nav-item" data-tab="orders">
-                            <span class="material-symbols-outlined">receipt_long</span>
-                            <span>Đơn hàng của tôi</span>
-                        </div>
-                        <div class="profile-nav-item" data-tab="address">
-                            <span class="material-symbols-outlined">location_on</span>
-                            <span>Sổ địa chỉ</span>
-                        </div>
-                        <div class="profile-nav-item" data-tab="password">
-                            <span class="material-symbols-outlined">lock</span>
-                            <span>Đổi mật khẩu</span>
-                        </div>
-                        <div class="profile-nav-item" id="logoutNav">
-                            <span class="material-symbols-outlined">logout</span>
-                            <span>Đăng xuất</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Content Area -->
-            <div class="lg:col-span-3">
-                <!-- Tab 1: Profile Info -->
-                <div id="tab-profile" class="profile-content tab-content active">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-semibold text-gray-800">Thông tin cá nhân</h2>
-                        <button id="editProfileBtn" class="edit-btn">
-                            <span class="material-symbols-outlined text-sm align-middle">edit</span> Chỉnh sửa
-                        </button>
-                    </div>
-
+            <section class="lg:col-span-3">
+                <div id="tab-profile" class="tab-content bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                     <div id="profileView">
-                        <div class="info-row">
-                            <div class="info-label">Họ và tên:</div>
-                            <div class="info-value" id="profileName">Nguyễn Văn A</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="border border-gray-100 rounded-lg p-4">
+                                <p class="text-sm text-gray-400">Họ tên</p>
+                                <p id="profileName" class="font-semibold text-gray-800 mt-1" th:text="${user.name}"></p>
+                            </div>
+                            <div class="border border-gray-100 rounded-lg p-4">
+                                <p class="text-sm text-gray-400">Email</p>
+                                <p id="profileEmail" class="font-semibold text-gray-800 mt-1" th:text="${user.email}"></p>
+                            </div>
+                            <div class="border border-gray-100 rounded-lg p-4">
+                                <p class="text-sm text-gray-400">Số điện thoại</p>
+                                <p id="profilePhone" class="font-semibold text-gray-800 mt-1" th:text="${user.phone}"></p>
+                            </div>
+                            <div class="border border-gray-100 rounded-lg p-4">
+                                <p class="text-sm text-gray-400">Ngày tham gia</p>
+                                <p id="profileJoinDate" class="font-semibold text-gray-800 mt-1">Hôm nay</p>
+                            </div>
                         </div>
-                        <div class="info-row">
-                            <div class="info-label">Email:</div>
-                            <div class="info-value" id="profileEmail">user@example.com</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Số điện thoại:</div>
-                            <div class="info-value" id="profilePhone">0912 345 678</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Ngày tham gia:</div>
-                            <div class="info-value" id="profileJoinDate">01/01/2024</div>
-                        </div>
+                        <button id="editProfileBtn" class="mt-6 bg-[#47654c] text-white px-6 py-3 rounded-full font-semibold">Cập nhật thông tin</button>
                     </div>
 
                     <div id="profileEdit" class="hidden">
-                        <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Họ và tên</label>
-                                <input type="text" id="editName" class="w-full p-3 bg-[#f7f3ec] border border-[#e6e2db] rounded-xl">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Họ tên</label>
+                                <input id="editName" class="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]">
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Số điện thoại</label>
-                                <input type="tel" id="editPhone" class="w-full p-3 bg-[#f7f3ec] border border-[#e6e2db] rounded-xl">
-                            </div>
-                            <div class="flex gap-3 pt-4">
-                                <button id="saveProfileBtn" class="save-btn">Lưu thay đổi</button>
-                                <button id="cancelEditBtn" class="cancel-btn">Hủy</button>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Số điện thoại</label>
+                                <input id="editPhone" class="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]">
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Tab 2: Orders -->
-                <div id="tab-orders" class="profile-content tab-content hidden">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Đơn hàng của tôi</h2>
-                    <div id="ordersList">
-                        <div class="text-center py-8 text-gray-400">
-                            <span class="material-symbols-outlined text-4xl">receipt_long</span>
-                            <p class="mt-2">Bạn chưa có đơn hàng nào</p>
-                            <a href="/products" class="inline-block mt-4 text-[#47654c] hover:underline">Mua sắm ngay →</a>
+                        <div class="mt-6 flex gap-3">
+                            <button id="saveProfileBtn" class="bg-[#47654c] text-white px-6 py-3 rounded-full font-semibold">Lưu</button>
+                            <button id="cancelEditBtn" class="border border-gray-200 px-6 py-3 rounded-full font-semibold text-gray-600">Hủy</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Tab 3: Address -->
-                <div id="tab-address" class="profile-content tab-content hidden">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-semibold text-gray-800">Sổ địa chỉ</h2>
-                        <button id="addAddressBtn" class="edit-btn">
-                            <span class="material-symbols-outlined text-sm align-middle">add</span> Thêm địa chỉ
-                        </button>
-                    </div>
-                    <div id="addressList">
-                        <div class="text-center py-8 text-gray-400">
-                            <span class="material-symbols-outlined text-4xl">location_off</span>
-                            <p class="mt-2">Bạn chưa có địa chỉ nào</p>
-                            <button id="addFirstAddressBtn" class="inline-block mt-4 text-[#47654c] hover:underline">Thêm địa chỉ mới</button>
-                        </div>
+                <div id="tab-password" class="tab-content hidden bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-5">Đổi mật khẩu</h2>
+                    <div class="space-y-4 max-w-xl">
+                        <input id="currentPassword" type="password" class="w-full border border-gray-200 rounded-lg px-4 py-3" placeholder="Mật khẩu hiện tại">
+                        <input id="newPassword" type="password" class="w-full border border-gray-200 rounded-lg px-4 py-3" placeholder="Mật khẩu mới">
+                        <input id="confirmNewPassword" type="password" class="w-full border border-gray-200 rounded-lg px-4 py-3" placeholder="Nhập lại mật khẩu mới">
+                        <button id="changePasswordBtn" class="bg-[#47654c] text-white px-6 py-3 rounded-full font-semibold">Đổi mật khẩu</button>
                     </div>
                 </div>
 
-                <!-- Tab 4: Change Password -->
-                <div id="tab-password" class="profile-content tab-content hidden">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Đổi mật khẩu</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Mật khẩu hiện tại</label>
-                            <input type="password" id="currentPassword" class="w-full p-3 bg-[#f7f3ec] border border-[#e6e2db] rounded-xl">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Mật khẩu mới</label>
-                            <input type="password" id="newPassword" class="w-full p-3 bg-[#f7f3ec] border border-[#e6e2db] rounded-xl">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Xác nhận mật khẩu mới</label>
-                            <input type="password" id="confirmNewPassword" class="w-full p-3 bg-[#f7f3ec] border border-[#e6e2db] rounded-xl">
-                        </div>
-                        <button id="changePasswordBtn" class="save-btn mt-4">Đổi mật khẩu</button>
-                    </div>
+                <div id="tab-orders" class="tab-content hidden bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-5">Đơn hàng của tôi</h2>
+                    <div id="ordersList" class="space-y-4"></div>
                 </div>
-            </div>
+            </section>
         </div>
     </div>
 </main>
 
-<!-- ========== FOOTER ========== -->
 <div th:replace="~{layout/fragments :: footer}"></div>
-
-<script th:src="@{/js/profile.js}"></script>
+<script th:src="@{/js/profile.js(v=2)}"></script>
 </body>
 </html>
