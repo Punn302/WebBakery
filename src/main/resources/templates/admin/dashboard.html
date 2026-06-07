@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Admin Dashboard')}"></head>
+<body class="bg-[#fbfaf7] text-gray-800">
+<div class="min-h-screen lg:flex">
+    <aside th:replace="~{admin/fragments :: sidebar('dashboard')}"></aside>
+    <main class="flex-1 px-4 md:px-8 py-8">
+        <div class="mb-8">
+            <p class="text-sm uppercase tracking-wider text-[#47654c] font-semibold">Admin</p>
+            <h1 class="text-3xl md:text-4xl font-semibold">Dashboard quan tri</h1>
+            <p class="text-gray-500 mt-2">Tổng quan các module quản lý của Hebekery.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+            <a href="/admin/users" class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:border-[#47654c]"><p class="text-sm text-gray-500">Users</p><p class="text-3xl font-bold text-[#47654c] mt-2" th:text="${userCount}">0</p></a>
+            <a href="/admin/orders" class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:border-[#47654c]"><p class="text-sm text-gray-500">Orders</p><p class="text-3xl font-bold text-[#47654c] mt-2" th:text="${orderCount}">0</p></a>
+            <a href="/admin/products" class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:border-[#47654c]"><p class="text-sm text-gray-500">Products</p><p class="text-3xl font-bold text-[#47654c] mt-2" th:text="${productCount}">0</p></a>
+            <a href="/admin/contacts" class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:border-[#47654c]"><p class="text-sm text-gray-500">Contacts</p><p class="text-3xl font-bold text-[#47654c] mt-2" th:text="${contactCount}">0</p></a>
+        </div>
+    </main>
+</div>
+<script th:replace="~{admin/fragments :: logoutScript}"></script>
+</body>
+</html>

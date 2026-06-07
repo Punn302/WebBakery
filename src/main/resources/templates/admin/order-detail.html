@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Chi tiết đơn hàng')}"></head>
+<body class="bg-[#fbfaf7] text-gray-800">
+<div class="min-h-screen lg:flex">
+    <aside th:replace="~{admin/fragments :: sidebar('orders')}"></aside>
+    <main class="flex-1 px-4 md:px-8 py-8">
+        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+            <div>
+                <p class="text-sm uppercase tracking-wider text-[#47654c] font-semibold">Đơn hàng</p>
+                <h1 class="text-3xl font-semibold" th:text="${order.id}">HBK</h1>
+                <p class="text-gray-500 mt-2" th:text="${@orderService.statusText(order)}"></p>
+            </div>
+            <a href="/admin/orders" class="border border-gray-200 rounded-lg px-5 py-3 font-semibold bg-white">Quay lại</a>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <section class="xl:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100"><h2 class="text-xl font-semibold">Sản phẩm</h2></div>
+                <table class="w-full text-sm">
+                    <thead class="bg-[#f7f3ec] text-gray-600"><tr><th class="text-left px-6 py-4">Sản phẩm</th><th class="text-left px-6 py-4">Giá</th><th class="text-left px-6 py-4">SL</th><th class="text-left px-6 py-4">Thành tiền</th></tr></thead>
+                    <tbody>
+                    <tr th:each="item : ${order.items}" class="border-t border-gray-100">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-4">
+                                <img th:src="${item.imageUrl}" th:alt="${item.productName}" class="w-16 h-16 rounded-lg object-cover border border-gray-100">
+                                <div><p class="font-semibold" th:text="${item.productName}"></p><p class="text-xs text-gray-400" th:text="${item.productId}"></p></div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4" th:text="${#numbers.formatDecimal(item.price, 0, 0, 'COMMA') + 'đ'}"></td>
+                        <td class="px-6 py-4" th:text="${item.quantity}"></td>
+                        <td class="px-6 py-4 text-[#47654c] font-semibold" th:text="${#numbers.formatDecimal(item.total, 0, 0, 'COMMA') + 'đ'}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="px-6 py-4 border-t border-gray-100 text-right text-xl font-bold text-[#47654c]" th:text="${#numbers.formatDecimal(order.total, 0, 0, 'COMMA') + 'đ'}"></div>
+            </section>
+
+            <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-5">
+                <div>
+                    <h2 class="text-xl font-semibold mb-3">Thông tin giao hàng</h2>
+                    <p><strong>Người nhận:</strong> <span th:text="${order.customerName}"></span></p>
+                    <p><strong>SĐT:</strong> <span th:text="${order.phone}"></span></p>
+                    <p><strong>Địa chỉ:</strong> <span th:text="${order.address}"></span></p>
+                    <p><strong>Ghi chú user:</strong> <span th:text="${order.note}"></span></p>
+                </div>
+                <form th:action="@{/admin/orders/{id}/note(id=${order.id})}" method="post" class="space-y-3">
+                    <label class="block text-sm font-semibold">Ghi chú admin</label>
+                    <textarea name="adminNote" rows="4" class="w-full border border-gray-200 rounded-lg px-4 py-3" th:text="${order.adminNote}"></textarea>
+                    <button class="bg-[#47654c] text-white rounded-lg px-4 py-3 font-semibold">Lưu ghi chú</button>
+                </form>
+            </section>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
+            <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                <h2 class="text-xl font-semibold mb-4">Đổi trả</h2>
+                <p><strong>Trạng thái:</strong> <span th:text="${@orderService.returnStatusText(order)}"></span></p>
+                <p class="mt-2"><strong>Lý do:</strong> <span th:text="${order.returnReason != null and !#strings.isEmpty(order.returnReason) ? order.returnReason : 'Chưa có'}"></span></p>
+                <form th:if="${order.orderStatus == 'RETURN_REQUESTED'}" th:action="@{/admin/orders/{id}/return(id=${order.id})}" method="post" class="mt-5 space-y-3">
+                    <textarea name="adminNote" rows="3" class="w-full border border-gray-200 rounded-lg px-4 py-3" placeholder="Ghi chú duyệt/từ chối"></textarea>
+                    <div class="flex gap-3">
+                        <button name="decision" value="APPROVED" class="bg-[#47654c] text-white rounded-lg px-4 py-3 font-semibold">Duyệt đổi trả</button>
+                        <button name="decision" value="REJECTED" class="border border-red-200 text-red-500 rounded-lg px-4 py-3 font-semibold">Từ chối</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                <h2 class="text-xl font-semibold mb-4">Lịch sử trạng thái</h2>
+                <div class="space-y-4">
+                    <div th:each="item : ${history}" class="border-l-2 border-[#47654c] pl-4">
+                        <p class="font-semibold" th:text="${item.orderStatus + ' / ' + item.paymentStatus}"></p>
+                        <p class="text-sm text-gray-500" th:text="${item.note}"></p>
+                        <p class="text-xs text-gray-400" th:text="${item.createdAt + ' - ' + item.changedBy}"></p>
+                    </div>
+                    <p th:if="${#lists.isEmpty(history)}" class="text-gray-400">Chưa có lịch sử.</p>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+<script th:replace="~{admin/fragments :: logoutScript}"></script>
+</body>
+</html>

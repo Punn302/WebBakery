@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hebekery | Chi tiết đơn hàng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{layout/fragments :: header}"></div>
+<main class="pt-28 pb-16 bg-[#fbfaf7] min-h-screen">
+    <div class="max-w-5xl mx-auto px-4">
+        <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-6">
+            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-semibold text-gray-800">Đơn hàng <span th:text="${order.id}"></span></h1>
+                    <p class="text-gray-500 mt-2" th:text="${order.createdAt}"></p>
+                    <p class="text-gray-500 mt-2">Trạng thái: <span class="font-semibold text-[#47654c]" th:text="${@orderService.statusText(order)}"></span></p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <button th:if="${order.orderStatus == 'PENDING' or order.orderStatus == 'PROCESSING'}" id="cancelOrderBtn" th:attr="data-order-id=${order.id}" class="px-5 py-3 rounded-full border border-red-200 text-red-500 font-semibold">Hủy đơn</button>
+                    <button th:if="${order.orderStatus == 'SHIPPING' or order.orderStatus == 'DELIVERED'}" id="receivedOrderBtn" th:attr="data-order-id=${order.id}" class="px-5 py-3 rounded-full bg-[#47654c] text-white font-semibold">Đã nhận hàng</button>
+                    <button th:if="${order.orderStatus == 'DELIVERED' or order.orderStatus == 'RECEIVED'}" id="returnOrderBtn" th:attr="data-order-id=${order.id}" class="px-5 py-3 rounded-full border border-amber-200 text-amber-600 font-semibold">Yêu cầu đổi trả</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Thông tin giao hàng</h2>
+            <p><strong>Người nhận:</strong> <span th:text="${order.customerName}"></span></p>
+            <p><strong>SĐT:</strong> <span th:text="${order.phone}"></span></p>
+            <p><strong>Địa chỉ:</strong> <span th:text="${order.address}"></span></p>
+            <p><strong>Ghi chú:</strong> <span th:text="${order.note}"></span></p>
+            <p th:if="${order.returnReason != null and !#strings.isEmpty(order.returnReason)}" class="mt-3"><strong>Lý do đổi trả:</strong> <span th:text="${order.returnReason}"></span></p>
+        </section>
+
+        <section class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100"><h2 class="text-xl font-semibold text-gray-800">Sản phẩm</h2></div>
+            <table class="w-full text-sm">
+                <thead class="bg-[#f7f3ec]"><tr><th class="text-left px-6 py-4">Sản phẩm</th><th class="text-left px-6 py-4">Giá</th><th class="text-left px-6 py-4">SL</th><th class="text-left px-6 py-4">Thành tiền</th></tr></thead>
+                <tbody>
+                <tr th:each="item : ${order.items}" class="border-t border-gray-100">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-4">
+                            <img th:src="${item.imageUrl}" th:alt="${item.productName}" class="w-16 h-16 rounded-lg object-cover border border-gray-100">
+                            <div>
+                                <p class="font-semibold text-gray-800" th:text="${item.productName}"></p>
+                                <p class="text-xs text-gray-400" th:text="${item.productId}"></p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4" th:text="${#numbers.formatDecimal(item.price, 0, 0, 'COMMA') + 'đ'}"></td>
+                    <td class="px-6 py-4" th:text="${item.quantity}"></td>
+                    <td class="px-6 py-4 text-[#47654c] font-semibold" th:text="${#numbers.formatDecimal(item.total, 0, 0, 'COMMA') + 'đ'}"></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="px-6 py-4 border-t border-gray-100 text-right text-xl font-bold text-[#47654c]" th:text="${#numbers.formatDecimal(order.total, 0, 0, 'COMMA') + 'đ'}"></div>
+        </section>
+    </div>
+</main>
+<div th:replace="~{layout/fragments :: footer}"></div>
+<script>
+document.getElementById('cancelOrderBtn')?.addEventListener('click', async function() {
+    if (!confirm('Bạn chắc chắn muốn hủy đơn hàng này?')) return;
+    const id = this.getAttribute('data-order-id');
+    const res = await fetch('/api/user/orders/' + id + '/cancel', { method: 'POST', credentials: 'same-origin' });
+    const data = await res.json();
+    alert(data.message || (data.success ? 'Đã hủy đơn hàng' : 'Không thể hủy đơn'));
+    if (data.success) window.location.reload();
+});
+document.getElementById('receivedOrderBtn')?.addEventListener('click', async function() {
+    if (!confirm('Xác nhận bạn đã nhận được hàng?')) return;
+    const id = this.getAttribute('data-order-id');
+    const res = await fetch('/api/user/orders/' + id + '/received', { method: 'POST', credentials: 'same-origin' });
+    const data = await res.json();
+    alert(data.message || (data.success ? 'Đã xác nhận nhận hàng' : 'Không thể cập nhật'));
+    if (data.success) window.location.reload();
+});
+document.getElementById('returnOrderBtn')?.addEventListener('click', async function() {
+    const reason = prompt('Nhập lý do đổi trả đơn hàng:');
+    if (!reason || !reason.trim()) return;
+    const id = this.getAttribute('data-order-id');
+    const res = await fetch('/api/user/orders/' + id + '/return', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason })
+    });
+    const data = await res.json();
+    alert(data.message || (data.success ? 'Đã gửi yêu cầu đổi trả' : 'Không thể cập nhật'));
+    if (data.success) window.location.reload();
+});
+</script>
+</body>
+</html>

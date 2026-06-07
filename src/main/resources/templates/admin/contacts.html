@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Admin Contacts')}"></head>
+<body class="bg-[#fbfaf7] text-gray-800">
+<div class="min-h-screen lg:flex">
+    <aside th:replace="~{admin/fragments :: sidebar('contacts')}"></aside>
+    <main class="flex-1 px-4 md:px-8 py-8">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
+            <div><p class="text-sm uppercase tracking-wider text-[#47654c] font-semibold">Admin</p><h1 class="text-3xl font-semibold">Quản lý liên hệ</h1></div>
+            <form method="get" class="flex gap-2"><input name="keyword" th:value="${keyword}" class="border border-gray-200 rounded-lg px-4 py-3" placeholder="Tìm liên hệ"><button class="bg-[#47654c] text-white px-5 py-3 rounded-lg font-semibold">Tìm</button></form>
+        </div>
+        <section class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <table class="w-full text-sm">
+                <thead class="bg-[#f7f3ec] text-gray-600"><tr><th class="text-left px-6 py-4">Người gửi</th><th class="text-left px-6 py-4">Chủ đề</th><th class="text-left px-6 py-4">Trạng thái</th><th class="text-left px-6 py-4">Cập nhật</th></tr></thead>
+                <tbody>
+                <tr th:each="contact : ${page.content}" class="border-t border-gray-100">
+                    <td class="px-6 py-4"><p class="font-semibold" th:text="${contact.name}"></p><p class="text-xs text-gray-400" th:text="${contact.email}"></p></td>
+                    <td class="px-6 py-4"><p th:text="${contact.subject}"></p><p class="text-xs text-gray-400" th:text="${contact.message}"></p></td>
+                    <td class="px-6 py-4" th:text="${contact.status}"></td>
+                    <td class="px-6 py-4">
+                        <form th:action="@{/admin/contacts/{id}/status(id=${contact.id})}" method="post" class="flex gap-2">
+                            <select name="status" class="border border-gray-200 rounded-lg px-3 py-2"><option value="NEW">Mới</option><option value="PROCESSING">Đang xử lý</option><option value="DONE">Đã xử lý</option></select>
+                            <button class="bg-[#47654c] text-white rounded-lg px-3 py-2 font-semibold">Lưu</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+        <div th:replace="~{admin/pagination :: pager('/admin/contacts', ${page}, ${keyword})}"></div>
+    </main>
+</div>
+<script th:replace="~{admin/fragments :: logoutScript}"></script>
+</body>
+</html>

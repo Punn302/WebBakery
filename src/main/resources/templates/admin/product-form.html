@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Edit Product')}"></head>
+<body class="bg-[#fbfaf7] text-gray-800">
+<div class="min-h-screen lg:flex">
+    <aside th:replace="~{admin/fragments :: sidebar('products')}"></aside>
+    <main class="flex-1 px-4 md:px-8 py-8">
+        <h1 class="text-3xl font-semibold mb-6">Sửa sản phẩm</h1>
+        <form method="post" action="/admin/products" enctype="multipart/form-data" class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input name="id" th:value="${product.id}" readonly class="border border-gray-200 rounded-lg px-4 py-3 bg-gray-50">
+            <input name="name" th:value="${product.name}" class="border border-gray-200 rounded-lg px-4 py-3" required>
+            <select name="category" class="border border-gray-200 rounded-lg px-4 py-3" required><option th:each="cat : ${categories}" th:value="${cat}" th:selected="${cat == product.category}" th:text="${cat}"></option></select>
+            <input name="price" type="number" th:value="${product.price}" class="border border-gray-200 rounded-lg px-4 py-3" required>
+            <div class="md:col-span-2 space-y-3">
+                <img th:src="${product.imageUrl}" class="w-28 h-28 rounded-lg object-cover border border-gray-100">
+                <input type="hidden" name="imageUrl" th:value="${product.imageUrl}">
+                <input name="imageFile" type="file" accept="image/*" class="w-full border border-gray-200 rounded-lg px-4 py-3">
+            </div>
+            <input name="badge" th:value="${product.badge}" class="border border-gray-200 rounded-lg px-4 py-3">
+            <input name="tag" th:value="${product.tag}" class="border border-gray-200 rounded-lg px-4 py-3">
+            <textarea name="description" class="border border-gray-200 rounded-lg px-4 py-3 md:col-span-2" th:text="${product.description}"></textarea>
+            <div class="flex gap-3 md:col-span-2">
+                <button class="bg-[#47654c] text-white rounded-lg font-semibold px-5 py-3">Lưu thay đổi</button>
+                <a href="/admin/products" class="border border-gray-200 rounded-lg font-semibold px-5 py-3">Quay lại</a>
+            </div>
+        </form>
+    </main>
+</div>
+<script th:replace="~{admin/fragments :: logoutScript}"></script>
+</body>
+</html>

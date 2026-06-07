@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<aside th:fragment="sidebar(active)" class="lg:w-72 bg-[#263d2b] text-white lg:min-h-screen">
+    <div class="px-6 py-6 border-b border-white/10">
+        <p class="text-xs uppercase tracking-widest text-[#d9c8a8] font-semibold">Hebekery</p>
+        <h1 class="text-2xl font-semibold mt-1">Admin</h1>
+        <p class="text-sm text-white/60 mt-2">Khu vực quản lý riêng.</p>
+    </div>
+    <nav class="px-4 py-5 space-y-2">
+        <a href="/admin" th:classappend="${active == 'dashboard'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">dashboard</span>Dashboard</a>
+        <a href="/admin/users" th:classappend="${active == 'users'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">group</span>Người dùng</a>
+        <a href="/admin/products" th:classappend="${active == 'products'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">bakery_dining</span>Sản phẩm</a>
+        <a href="/admin/orders" th:classappend="${active == 'orders'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">receipt_long</span>Đơn hàng</a>
+        <a href="/admin/contacts" th:classappend="${active == 'contacts'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">contact_support</span>Liên hệ</a>
+    </nav>
+    <div class="px-4 pb-6">
+        <button id="adminLogoutBtn" type="button" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-white text-[#263d2b] font-semibold"><span class="material-symbols-outlined text-lg">logout</span>Đăng xuất</button>
+    </div>
+</aside>
+<script th:fragment="logoutScript">
+    document.getElementById('adminLogoutBtn')?.addEventListener('click', async () => {
+        await fetch('/api/user/logout', { method: 'POST' });
+        window.location.href = '/login';
+    });
+</script>
+</body>
+</html>
