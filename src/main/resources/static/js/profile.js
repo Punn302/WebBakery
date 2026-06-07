@@ -1,66 +1,59 @@
-/**
- * Profile Page Module
- */
-
 const Profile = (function() {
-
     let currentUser = null;
 
-    // Load user data from server
     async function loadUserData() {
         try {
-            const response = await fetch('/api/user/status');
+            const response = await fetch('/api/user/status', { credentials: 'same-origin' });
             const data = await response.json();
-
-            if (data.loggedIn) {
-                currentUser = data.user;
-                displayUserInfo();
-            } else {
+            if (!data.loggedIn) {
                 window.location.href = '/login?redirect=/profile';
+                return;
             }
+            currentUser = data.user;
+            displayUserInfo();
         } catch (error) {
             console.error('Error loading user data:', error);
             window.location.href = '/login';
         }
     }
 
-    // Display user info
     function displayUserInfo() {
-        if (currentUser) {
-            document.getElementById('userNameDisplay').textContent = currentUser.name || 'Người dùng';
-            document.getElementById('userEmailDisplay').textContent = currentUser.email;
-            document.getElementById('profileName').textContent = currentUser.name || 'Chưa cập nhật';
-            document.getElementById('profileEmail').textContent = currentUser.email;
-            document.getElementById('profilePhone').textContent = currentUser.phone || 'Chưa cập nhật';
-            document.getElementById('profileJoinDate').textContent = new Date().toLocaleDateString('vi-VN');
-
-            document.getElementById('editName').value = currentUser.name || '';
-            document.getElementById('editPhone').value = currentUser.phone || '';
-        }
+        if (!currentUser) return;
+        setText('userNameDisplay', currentUser.name || 'Người dùng');
+        setText('userEmailDisplay', currentUser.email || '');
+        setText('profileName', currentUser.name || 'Chưa cập nhật');
+        setText('profileEmail', currentUser.email || '');
+        setText('profilePhone', currentUser.phone || 'Chưa cập nhật');
+        setText('profileJoinDate', new Date().toLocaleDateString('vi-VN'));
+        setValue('editName', currentUser.name || '');
+        setValue('editPhone', currentUser.phone || '');
     }
 
-    // Tab navigation
+    function setText(id, value) {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value;
+    }
+
+    function setValue(id, value) {
+        const element = document.getElementById(id);
+        if (element) element.value = value;
+    }
+
     function initTabs() {
         const navItems = document.querySelectorAll('.profile-nav-item');
         const tabs = document.querySelectorAll('.tab-content');
-
         navItems.forEach(item => {
             item.addEventListener('click', () => {
                 const tabId = item.getAttribute('data-tab');
                 if (!tabId) return;
-
-                // Update active nav
                 navItems.forEach(nav => nav.classList.remove('active'));
                 item.classList.add('active');
-
-                // Show active tab
                 tabs.forEach(tab => tab.classList.add('hidden'));
-                document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+                document.getElementById(`tab-${tabId}`)?.classList.remove('hidden');
             });
         });
     }
 
-    // Edit profile
     function initEditProfile() {
         const editBtn = document.getElementById('editProfileBtn');
         const saveBtn = document.getElementById('saveProfileBtn');
@@ -68,137 +61,116 @@ const Profile = (function() {
         const viewDiv = document.getElementById('profileView');
         const editDiv = document.getElementById('profileEdit');
 
-        if (editBtn) {
-            editBtn.addEventListener('click', () => {
-                viewDiv.classList.add('hidden');
-                editDiv.classList.remove('hidden');
-            });
-        }
+        editBtn?.addEventListener('click', () => {
+            viewDiv?.classList.add('hidden');
+            editDiv?.classList.remove('hidden');
+        });
 
-        if (cancelBtn) {
-            cancelBtn.addEventListener('click', () => {
-                viewDiv.classList.remove('hidden');
-                editDiv.classList.add('hidden');
-                displayUserInfo(); // Reset values
-            });
-        }
+        cancelBtn?.addEventListener('click', () => {
+            viewDiv?.classList.remove('hidden');
+            editDiv?.classList.add('hidden');
+            displayUserInfo();
+        });
 
-        if (saveBtn) {
-            saveBtn.addEventListener('click', async () => {
-                const name = document.getElementById('editName').value;
-                const phone = document.getElementById('editPhone').value;
-
-                try {
-                    const response = await fetch('/api/user/update', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, phone })
-                    });
-                    const data = await response.json();
-
-                    if (data.success) {
-                        currentUser = data.user;
-                        displayUserInfo();
-                        viewDiv.classList.remove('hidden');
-                        editDiv.classList.add('hidden');
-                        alert('Cập nhật thông tin thành công!');
-                    } else {
-                        alert(data.message || 'Cập nhật thất bại');
-                    }
-                } catch (error) {
-                    console.error('Error updating profile:', error);
-                    alert('Có lỗi xảy ra');
+        saveBtn?.addEventListener('click', async () => {
+            const name = document.getElementById('editName')?.value || '';
+            const phone = document.getElementById('editPhone')?.value || '';
+            try {
+                const response = await fetch('/api/user/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ name, phone })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    currentUser = data.user;
+                    displayUserInfo();
+                    viewDiv?.classList.remove('hidden');
+                    editDiv?.classList.add('hidden');
+                    alert('Cap nhat thong tin thanh cong');
+                } else {
+                    alert(data.message || 'Cap nhat that bai');
                 }
-            });
-        }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                alert('Co loi xay ra');
+            }
+        });
     }
 
-    // Change password
     function initChangePassword() {
         const changeBtn = document.getElementById('changePasswordBtn');
-
-        if (changeBtn) {
-            changeBtn.addEventListener('click', async () => {
-                const currentPassword = document.getElementById('currentPassword').value;
-                const newPassword = document.getElementById('newPassword').value;
-                const confirmPassword = document.getElementById('confirmNewPassword').value;
-
-                if (!currentPassword || !newPassword) {
-                    alert('Vui lòng nhập đầy đủ thông tin');
-                    return;
+        changeBtn?.addEventListener('click', async () => {
+            const currentPassword = document.getElementById('currentPassword')?.value || '';
+            const newPassword = document.getElementById('newPassword')?.value || '';
+            const confirmPassword = document.getElementById('confirmNewPassword')?.value || '';
+            if (!currentPassword || !newPassword) {
+                alert('Vui lòng nhập đầy đủ thông tin');
+                return;
+            }
+            if (newPassword !== confirmPassword) {
+                alert('Mật khẩu mới không khớp');
+                return;
+            }
+            if (newPassword.length < 6) {
+                alert('Mật khẩu mới phải có ít nhất 6 ký tự');
+                return;
+            }
+            try {
+                const response = await fetch('/api/user/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert('Doi mat khau thanh cong');
+                    setValue('currentPassword', '');
+                    setValue('newPassword', '');
+                    setValue('confirmNewPassword', '');
+                } else {
+                    alert(data.message || 'Doi mat khau that bai');
                 }
-
-                if (newPassword !== confirmPassword) {
-                    alert('Mật khẩu mới không khớp');
-                    return;
-                }
-
-                if (newPassword.length < 6) {
-                    alert('Mật khẩu mới phải có ít nhất 6 ký tự');
-                    return;
-                }
-
-                try {
-                    const response = await fetch('/api/user/change-password', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ currentPassword, newPassword })
-                    });
-                    const data = await response.json();
-
-                    if (data.success) {
-                        alert('Đổi mật khẩu thành công!');
-                        document.getElementById('currentPassword').value = '';
-                        document.getElementById('newPassword').value = '';
-                        document.getElementById('confirmNewPassword').value = '';
-                    } else {
-                        alert(data.message || 'Đổi mật khẩu thất bại');
-                    }
-                } catch (error) {
-                    console.error('Error changing password:', error);
-                    alert('Có lỗi xảy ra');
-                }
-            });
-        }
+            } catch (error) {
+                console.error('Error changing password:', error);
+                alert('Co loi xay ra');
+            }
+        });
     }
 
-    // Logout
     function initLogout() {
-        const logoutBtn = document.getElementById('logoutNav');
-
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', async () => {
-                try {
-                    await fetch('/api/user/logout', { method: 'POST' });
-                    window.location.href = '/';
-                } catch (error) {
-                    console.error('Logout error:', error);
-                    window.location.href = '/';
-                }
-            });
-        }
+        document.getElementById('logoutNav')?.addEventListener('click', async () => {
+            await fetch('/api/user/logout', { method: 'POST', credentials: 'same-origin' });
+            window.location.href = '/';
+        });
     }
 
-    // Load orders
     async function loadOrders() {
         try {
-            const response = await fetch('/api/user/orders');
+            const response = await fetch('/api/user/orders', { credentials: 'same-origin' });
             const data = await response.json();
-
             const ordersContainer = document.getElementById('ordersList');
+            if (!ordersContainer) return;
+
             if (data.orders && data.orders.length > 0) {
                 ordersContainer.innerHTML = data.orders.map(order => `
-                    <div class="order-card">
-                        <div class="flex justify-between items-start mb-3">
-                            <div>
-                                <a href="/orders/${order.id}" class="font-semibold text-gray-800 hover:text-[#47654c]">#${order.id}</a>
-                                <p class="text-sm text-gray-400">${new Date(order.date).toLocaleDateString('vi-VN')}</p>
+                    <div class="order-card border border-gray-100 rounded-xl p-4">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div class="flex items-center gap-4">
+                                <img src="${order.imageUrl || '/images/logo.webp'}" alt="${order.productName || 'Hebekery'}" class="w-16 h-16 rounded-lg object-cover border border-gray-100">
+                                <div>
+                                    <a href="/orders/${order.id}" class="font-semibold text-gray-800 hover:text-[#47654c]">#${order.id}</a>
+                                    <p class="text-sm text-gray-500">${order.productName || ''}</p>
+                                    <p class="text-xs text-gray-400">${new Date(order.date).toLocaleDateString('vi-VN')} - ${order.itemCount} sản phẩm</p>
+                                </div>
                             </div>
-                            <span class="status-badge ${order.statusClass}">${order.statusText}</span>
-                        </div>
-                        <div class="flex justify-between items-center pt-3 border-t border-gray-100">
-                            <span class="text-gray-600">${order.itemCount} sản phẩm</span>
-                            <span class="font-bold text-[#47654c]">${order.total.toLocaleString('vi-VN')}₫</span>
+                            <div class="md:text-right">
+                                <span class="status-badge ${order.statusClass}">${order.statusText}</span>
+                                <p class="font-bold text-[#47654c] mt-2">${Number(order.total || 0).toLocaleString('vi-VN')}d</p>
+                                <a href="/orders/${order.id}" class="inline-block mt-2 text-sm font-semibold text-[#47654c] hover:underline">Xem chi tiet</a>
+                            </div>
                         </div>
                     </div>
                 `).join('');
@@ -207,7 +179,7 @@ const Profile = (function() {
                     <div class="text-center py-8 text-gray-400">
                         <span class="material-symbols-outlined text-4xl">receipt_long</span>
                         <p class="mt-2">Bạn chưa có đơn hàng nào</p>
-                        <a href="/products" class="inline-block mt-4 text-[#47654c] hover:underline">Mua sắm ngay →</a>
+                        <a href="/products" class="inline-block mt-4 text-[#47654c] hover:underline">Mua sắm ngay</a>
                     </div>
                 `;
             }
@@ -216,7 +188,6 @@ const Profile = (function() {
         }
     }
 
-    // Initialize
     async function init() {
         await loadUserData();
         initTabs();
@@ -226,9 +197,7 @@ const Profile = (function() {
         loadOrders();
     }
 
-    return { init: init };
+    return { init };
 })();
 
-document.addEventListener('DOMContentLoaded', () => {
-    Profile.init();
-});
+document.addEventListener('DOMContentLoaded', () => Profile.init());

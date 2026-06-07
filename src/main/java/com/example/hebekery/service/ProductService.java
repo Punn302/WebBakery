@@ -2,6 +2,8 @@ package com.example.hebekery.service;
 
 import com.example.hebekery.model.Product;
 import com.example.hebekery.repository.ProductRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -61,7 +63,29 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    public Page<Product> searchProducts(String keyword, Pageable pageable) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return productRepository.findAll(pageable);
+        }
+        String term = keyword.trim();
+        return productRepository.findByNameContainingIgnoreCaseOrCategoryContainingIgnoreCaseOrBadgeContainingIgnoreCase(
+                term,
+                term,
+                term,
+                pageable
+        );
+    }
+
     public Product saveProduct(Product product) {
+        if (product.getId() == null || product.getId().isBlank()) {
+            product.setId("P" + System.currentTimeMillis());
+        }
+        if (product.getBadge() == null) {
+            product.setBadge("");
+        }
+        if (product.getTag() == null) {
+            product.setTag("");
+        }
         return productRepository.save(product);
     }
 

@@ -5,6 +5,10 @@ public class OrderResponse {
     private String date;
     private String statusClass;
     private String statusText;
+    private String orderStatus;
+    private String paymentStatus;
+    private String imageUrl;
+    private String productName;
     private int itemCount;
     private double total;
 
@@ -16,6 +20,20 @@ public class OrderResponse {
         this.date = date;
         this.statusClass = statusClass;
         this.statusText = statusText;
+        this.itemCount = itemCount;
+        this.total = total;
+    }
+
+    public OrderResponse(String id, String date, String statusClass, String statusText, String orderStatus,
+                         String paymentStatus, String imageUrl, String productName, int itemCount, double total) {
+        this.id = id;
+        this.date = date;
+        this.statusClass = statusClass;
+        this.statusText = statusText;
+        this.orderStatus = orderStatus;
+        this.paymentStatus = paymentStatus;
+        this.imageUrl = imageUrl;
+        this.productName = productName;
         this.itemCount = itemCount;
         this.total = total;
     }
@@ -50,6 +68,38 @@ public class OrderResponse {
 
     public void setStatusText(String statusText) {
         this.statusText = statusText;
+    }
+
+    public String getOrderStatus() {
+        return orderStatus;
+    }
+
+    public void setOrderStatus(String orderStatus) {
+        this.orderStatus = orderStatus;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
 
     public int getItemCount() {
