@@ -18,15 +18,18 @@
                     <td class="px-6 py-4" th:text="${order.itemCount}"></td>
                     <td class="px-6 py-4 text-[#47654c] font-semibold" th:text="${#numbers.formatDecimal(order.total, 0, 0, 'COMMA') + 'd'}"></td>
                     <td class="px-6 py-4">
-                        <form th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="flex flex-wrap gap-2">
+                        <form th:if="${order.orderStatus != 'CANCELLED' and order.orderStatus != 'RECEIVED' and order.orderStatus != 'RETURN_REQUESTED' and order.orderStatus != 'RETURNED'}" th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="flex flex-wrap gap-2">
                             <select name="orderStatus" class="border border-gray-200 rounded-lg px-3 py-2">
-                                <option value="PENDING" th:selected="${order.orderStatus == 'PENDING'}">Chờ xử lý</option><option value="PROCESSING" th:selected="${order.orderStatus == 'PROCESSING'}">Đang xử lý</option><option value="SHIPPING" th:selected="${order.orderStatus == 'SHIPPING'}">Đang giao</option><option value="DELIVERED" th:selected="${order.orderStatus == 'DELIVERED'}">Đã giao</option><option value="RECEIVED" th:selected="${order.orderStatus == 'RECEIVED'}">Đã nhận</option><option value="CANCELLED" th:selected="${order.orderStatus == 'CANCELLED'}">Đã hủy</option><option value="RETURN_REQUESTED" th:selected="${order.orderStatus == 'RETURN_REQUESTED'}">Yêu cầu đổi trả</option><option value="RETURNED" th:selected="${order.orderStatus == 'RETURNED'}">Đã đổi trả</option>
+                                <option value="SHIPPING" th:selected="${order.orderStatus == 'SHIPPING'}">Đang giao</option>
+                                <option value="DELIVERED" th:selected="${order.orderStatus == 'DELIVERED'}">Đã giao</option>
                             </select>
                             <select name="paymentStatus" class="border border-gray-200 rounded-lg px-3 py-2">
-                                <option value="UNPAID" th:selected="${order.paymentStatus == 'UNPAID'}">Chưa thanh toán</option><option value="PENDING" th:selected="${order.paymentStatus == 'PENDING'}">Chờ thanh toán</option><option value="PAID" th:selected="${order.paymentStatus == 'PAID'}">Đã thanh toán</option>
+                                <option value="PENDING" th:selected="${order.paymentStatus == 'PENDING'}">Chờ thanh toán</option>
+                                <option value="PAID" th:selected="${order.paymentStatus == 'PAID'}">Đã thanh toán</option>
                             </select>
                             <button class="bg-[#47654c] text-white rounded-lg px-3 py-2 font-semibold">Lưu</button>
                         </form>
+                        <p th:if="${order.orderStatus == 'CANCELLED' or order.orderStatus == 'RECEIVED' or order.orderStatus == 'RETURN_REQUESTED' or order.orderStatus == 'RETURNED'}" class="text-sm text-gray-400">Đơn đang ở trạng thái cuối hoặc đang xử lý đổi trả.</p>
                     </td>
                 </tr>
                 </tbody>

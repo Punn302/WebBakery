@@ -3,11 +3,12 @@ package com.example.hebekery.controller;
 import com.example.hebekery.model.Product;
 import com.example.hebekery.service.ProductService;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.web.util.UriUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,12 +23,9 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    public String searchProducts(@RequestParam(required = false) String keyword, Model model) {
-        List<Product> results = productService.searchProducts(keyword);
-        model.addAttribute("products", results);
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("resultCount", results.size());
-        return "search-results";
+    public String searchProducts(@RequestParam(required = false) String keyword) {
+        String encodedKeyword = UriUtils.encodeQueryParam(keyword == null ? "" : keyword, StandardCharsets.UTF_8);
+        return "redirect:/products?keyword=" + encodedKeyword;
     }
 
     @GetMapping("/api/search")

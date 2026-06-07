@@ -5,16 +5,93 @@
 <div class="min-h-screen lg:flex">
     <aside th:replace="~{admin/fragments :: sidebar('dashboard')}"></aside>
     <main class="flex-1 px-4 md:px-8 py-8">
-        <div class="mb-8">
-            <p class="text-sm uppercase tracking-wider text-[#47654c] font-semibold">Admin</p>
-            <h1 class="text-3xl md:text-4xl font-semibold">Dashboard quan tri</h1>
-            <p class="text-gray-500 mt-2">Tổng quan các module quản lý của Hebekery.</p>
+        <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5 mb-8">
+                <h1 class="text-3xl md:text-4xl font-semibold text-[#263d2b]">T&#7893;ng quan v&#7853;n h&#224;nh</h1>
+            <div class="flex flex-wrap gap-3">
+                <a href="/admin/products" class="inline-flex items-center gap-2 bg-[#47654c] text-white px-5 py-3 rounded-lg font-semibold shadow-sm hover:bg-[#3a543e]">
+                    <span class="material-symbols-outlined text-lg">add_circle</span>
+                    S&#7843;n ph&#7849;m
+                </a>
+                <a href="/admin/orders" class="inline-flex items-center gap-2 bg-white text-[#263d2b] px-5 py-3 rounded-lg font-semibold border border-gray-200 shadow-sm hover:border-[#47654c]">
+                    <span class="material-symbols-outlined text-lg">receipt_long</span>
+                    &#272;&#417;n h&#224;ng
+                </a>
+            </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-            <a href="/admin/users" class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:border-[#47654c]"><p class="text-sm text-gray-500">Users</p><p class="text-3xl font-bold text-[#47654c] mt-2" th:text="${userCount}">0</p></a>
-            <a href="/admin/orders" class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:border-[#47654c]"><p class="text-sm text-gray-500">Orders</p><p class="text-3xl font-bold text-[#47654c] mt-2" th:text="${orderCount}">0</p></a>
-            <a href="/admin/products" class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:border-[#47654c]"><p class="text-sm text-gray-500">Products</p><p class="text-3xl font-bold text-[#47654c] mt-2" th:text="${productCount}">0</p></a>
-            <a href="/admin/contacts" class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:border-[#47654c]"><p class="text-sm text-gray-500">Contacts</p><p class="text-3xl font-bold text-[#47654c] mt-2" th:text="${contactCount}">0</p></a>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
+            <a href="/admin/users" class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:border-[#47654c] transition">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-semibold text-gray-500">Ng&#432;&#7901;i d&#249;ng</p>
+                    <span class="material-symbols-outlined text-[#47654c] bg-[#edf4ee] rounded-lg p-2">group</span>
+                </div>
+                <p class="text-4xl font-bold text-[#263d2b] mt-5" th:text="${userCount}">0</p>
+            </a>
+            <a href="/admin/orders" class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:border-[#47654c] transition">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-semibold text-gray-500">&#272;&#417;n h&#224;ng</p>
+                    <span class="material-symbols-outlined text-[#47654c] bg-[#edf4ee] rounded-lg p-2">receipt_long</span>
+                </div>
+                <p class="text-4xl font-bold text-[#263d2b] mt-5" th:text="${orderCount}">0</p>
+            </a>
+            <a href="/admin/products" class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:border-[#47654c] transition">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-semibold text-gray-500">S&#7843;n ph&#7849;m</p>
+                    <span class="material-symbols-outlined text-[#47654c] bg-[#edf4ee] rounded-lg p-2">bakery_dining</span>
+                </div>
+                <p class="text-4xl font-bold text-[#263d2b] mt-5" th:text="${productCount}">0</p>
+            </a>
+            <a href="/admin/contacts" class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:border-[#47654c] transition">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-semibold text-gray-500">Li&#234;n h&#7879;</p>
+                    <span class="material-symbols-outlined text-[#47654c] bg-[#edf4ee] rounded-lg p-2">contact_support</span>
+                </div>
+                <p class="text-4xl font-bold text-[#263d2b] mt-5" th:text="${contactCount}">0</p>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <section class="xl:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-[#263d2b]">Lu&#7891;ng &#273;&#417;n h&#224;ng</h2>
+                    <a href="/admin/orders" class="text-sm font-semibold text-[#47654c]">Xem &#273;&#417;n</a>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+                    <div class="p-6">
+                        <span class="material-symbols-outlined text-[#47654c] bg-[#edf4ee] rounded-lg p-2 mb-4">inventory_2</span>
+                        <h3 class="font-semibold text-gray-800">Ch&#7901; x&#7917; l&#253;</h3>
+                        <p class="text-sm text-gray-500 mt-2">X&#225;c nh&#7853;n th&#244;ng tin v&#224; chu&#7849;n b&#7883; &#273;&#417;n.</p>
+                    </div>
+                    <div class="p-6">
+                        <span class="material-symbols-outlined text-[#47654c] bg-[#edf4ee] rounded-lg p-2 mb-4">local_shipping</span>
+                        <h3 class="font-semibold text-gray-800">&#272;ang giao</h3>
+                        <p class="text-sm text-gray-500 mt-2">Theo d&#245;i giao h&#224;ng, c&#7853;p nh&#7853;t khi ho&#224;n t&#7845;t.</p>
+                    </div>
+                    <div class="p-6">
+                        <span class="material-symbols-outlined text-[#47654c] bg-[#edf4ee] rounded-lg p-2 mb-4">task_alt</span>
+                        <h3 class="font-semibold text-gray-800">&#272;&#227; giao</h3>
+                        <p class="text-sm text-gray-500 mt-2">COD t&#7921; chuy&#7875;n sang &#273;&#227; thanh to&#225;n.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-[#263d2b] text-white rounded-xl shadow-sm p-6">
+                <h2 class="text-lg font-semibold mb-5">T&#225;c v&#7909; qu&#7843;n l&#253;</h2>
+                <div class="space-y-3">
+                    <a href="/admin/products" class="flex items-center justify-between rounded-lg bg-white/10 px-4 py-3 hover:bg-white/15">
+                        <span>S&#7843;n ph&#7849;m</span>
+                        <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                    </a>
+                    <a href="/admin/users" class="flex items-center justify-between rounded-lg bg-white/10 px-4 py-3 hover:bg-white/15">
+                        <span>Ng&#432;&#7901;i d&#249;ng</span>
+                        <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                    </a>
+                    <a href="/admin/contacts" class="flex items-center justify-between rounded-lg bg-white/10 px-4 py-3 hover:bg-white/15">
+                        <span>Li&#234;n h&#7879;</span>
+                        <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                    </a>
+                </div>
+            </section>
         </div>
     </main>
 </div>

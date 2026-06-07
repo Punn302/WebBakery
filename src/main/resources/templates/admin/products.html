@@ -28,13 +28,18 @@
                 <thead class="bg-[#f7f3ec] text-gray-600"><tr><th class="text-left px-6 py-4">Ảnh</th><th class="text-left px-6 py-4">Sản phẩm</th><th class="text-left px-6 py-4">Danh mục</th><th class="text-left px-6 py-4">Giá</th><th class="text-left px-6 py-4">Thao tác</th></tr></thead>
                 <tbody>
                 <tr th:each="product : ${page.content}" class="border-t border-gray-100">
-                    <td class="px-6 py-4"><img th:src="${product.imageUrl}" class="w-16 h-16 rounded-lg object-cover border border-gray-100"></td>
+                    <td class="px-6 py-4">
+                        <a th:href="@{/admin/products/{id}/preview(id=${product.id})}">
+                            <img th:src="${product.imageUrl}" class="w-16 h-16 rounded-lg object-cover border border-gray-100">
+                        </a>
+                    </td>
                     <td class="px-6 py-4"><p class="font-semibold" th:text="${product.name}"></p><p class="text-xs text-gray-400" th:text="${product.id}"></p></td>
                     <td class="px-6 py-4" th:text="${product.category}"></td>
                     <td class="px-6 py-4 text-[#47654c] font-semibold" th:text="${#numbers.formatDecimal(product.price, 0, 0, 'COMMA') + 'd'}"></td>
                     <td class="px-6 py-4">
                         <div class="flex gap-2">
                             <a th:href="@{/admin/products/{id}/edit(id=${product.id})}" class="px-3 py-2 rounded-lg border border-gray-200 font-semibold">Sửa</a>
+                            <a th:href="@{/admin/products/{id}/preview(id=${product.id})}" class="px-3 py-2 rounded-lg border border-gray-200 font-semibold">Xem ảnh</a>
                             <form th:action="@{/admin/products/{id}/delete(id=${product.id})}" method="post" onsubmit="return confirm('Xóa sản phẩm này?')"><button class="px-3 py-2 rounded-lg border border-red-200 text-red-500 font-semibold">Xóa</button></form>
                         </div>
                     </td>

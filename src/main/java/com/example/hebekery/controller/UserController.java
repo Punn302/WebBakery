@@ -1,6 +1,5 @@
 package com.example.hebekery.controller;
 
-import com.example.hebekery.dto.OrderResponse;
 import com.example.hebekery.dto.UserResponse;
 import com.example.hebekery.dto.request.ChangePasswordRequest;
 import com.example.hebekery.dto.request.LoginRequest;
@@ -50,9 +49,9 @@ public class UserController {
             session.setAttribute("user", user);
             response.put("user", user);
             response.put("redirectUrl", "ADMIN".equals(user.getRole()) ? "/admin" : "/");
-            response.put("message", "Dang nhap thanh cong");
+            response.put("message", "Đăng nhập thành công");
         } else {
-            response.put("message", "Email hoac mat khau khong dung");
+            response.put("message", "Email hoặc mật khẩu không đúng");
         }
         return response;
     }
@@ -68,7 +67,7 @@ public class UserController {
 
         Map<String, Object> response = new HashMap<>();
         response.put("success", registerSuccess);
-        response.put("message", registerSuccess ? "Dang ky thanh cong" : "Email da duoc dang ky");
+        response.put("message", registerSuccess ? "Đăng ký thành công" : "Email đã được đăng ký");
         return response;
     }
 
@@ -76,7 +75,7 @@ public class UserController {
     public Map<String, Object> logout(HttpSession session) {
         userService.logout();
         session.removeAttribute("user");
-        return success("Dang xuat thanh cong");
+        return success("Đăng xuất thành công");
     }
 
     @PostMapping("/api/user/update")
@@ -84,7 +83,7 @@ public class UserController {
         UserResponse user = UserResponse.from(userService.updateCurrentUser(request.getName(), request.getPhone()));
         session.setAttribute("user", user);
 
-        Map<String, Object> response = success("Cap nhat thong tin thanh cong");
+        Map<String, Object> response = success("Cập nhật thông tin thành công");
         response.put("user", user);
         return response;
     }
@@ -95,14 +94,14 @@ public class UserController {
 
         Map<String, Object> response = new HashMap<>();
         response.put("success", changeSuccess);
-        response.put("message", changeSuccess ? "Doi mat khau thanh cong" : "Mat khau hien tai khong dung");
+        response.put("message", changeSuccess ? "Đổi mật khẩu thành công" : "Mật khẩu hiện tại không đúng");
         return response;
     }
 
     @GetMapping("/api/user/orders")
     public Map<String, Object> getUserOrders() {
         if (!userService.isLoggedIn()) {
-            throw new IllegalStateException("Vui long dang nhap");
+            throw new IllegalStateException("Vui lòng đăng nhập");
         }
 
         Map<String, Object> response = success(null);

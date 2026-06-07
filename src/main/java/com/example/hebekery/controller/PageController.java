@@ -5,11 +5,16 @@ import com.example.hebekery.service.CartService;
 import com.example.hebekery.service.OrderService;
 import com.example.hebekery.service.ProductService;
 import com.example.hebekery.service.UserService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.UriUtils;
+
+import java.nio.charset.StandardCharsets;
 
 @Controller
 public class PageController {
@@ -38,18 +43,25 @@ public class PageController {
     }
 
     @GetMapping("/products")
-    public String products(Model model) {
-        model.addAttribute("products", productService.getAllProducts());
+    public String products(@RequestParam(defaultValue = "all") String category,
+                           @RequestParam(defaultValue = "") String keyword,
+                           @RequestParam(defaultValue = "0") int page,
+                           Model model) {
+        var pageable = PageRequest.of(Math.max(page, 0), 8, Sort.by("id").ascending());
+        var productsPage = keyword == null || keyword.isBlank()
+                ? productService.getProductsPage(category, pageable)
+                : productService.searchProducts(keyword, pageable);
+        model.addAttribute("page", productsPage);
+        model.addAttribute("products", productsPage.getContent());
         model.addAttribute("categories", productService.getAllCategories());
+        model.addAttribute("currentCategory", category);
+        model.addAttribute("keyword", keyword);
         return "products";
     }
 
     @GetMapping("/category/{category}")
-    public String category(@PathVariable String category, Model model) {
-        model.addAttribute("products", productService.getProductsByCategory(category));
-        model.addAttribute("currentCategory", category);
-        model.addAttribute("categories", productService.getAllCategories());
-        return "products";
+    public String category(@PathVariable String category) {
+        return "redirect:/products?category=" + UriUtils.encodeQueryParam(category, StandardCharsets.UTF_8);
     }
 
     @GetMapping("/product/{id}")
@@ -98,6 +110,9 @@ public class PageController {
 
     @GetMapping("/login")
     public String loginPage(@RequestParam(required = false) String redirect, Model model) {
+        if (userService.isAdmin()) {
+            return "redirect:/admin";
+        }
         if (userService.isLoggedIn()) {
             return "redirect:/";
         }
@@ -107,6 +122,9 @@ public class PageController {
 
     @GetMapping("/register")
     public String registerPage() {
+        if (userService.isAdmin()) {
+            return "redirect:/admin";
+        }
         if (userService.isLoggedIn()) {
             return "redirect:/";
         }

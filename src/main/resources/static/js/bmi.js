@@ -11,7 +11,6 @@ function initBMISlider() {
     const dotsContainer = document.querySelector('.bmi-slider-dots');
 
     if (!wrapper || !container) {
-        console.log('Slider elements not found');
         return;
     }
 

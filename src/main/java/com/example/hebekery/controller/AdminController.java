@@ -104,24 +104,43 @@ public class AdminController {
     @PostMapping("/admin/products")
     public String saveProductForm(@ModelAttribute Product product, @RequestParam(required = false) MultipartFile imageFile) {
         requireAdminPage();
+        Product existing = product.getId() == null || product.getId().isBlank() ? null : productService.getProductById(product.getId());
+        String oldImageUrl = existing == null ? null : existing.getImageUrl();
         String uploadedImage = fileStorageService.saveProductImage(imageFile);
         if (uploadedImage != null) {
             product.setImageUrl(uploadedImage);
         } else if (product.getId() != null && !product.getId().isBlank()) {
-            Product existing = productService.getProductById(product.getId());
             if (existing != null && (product.getImageUrl() == null || product.getImageUrl().isBlank())) {
                 product.setImageUrl(existing.getImageUrl());
             }
         }
         productService.saveProduct(product);
+        if (uploadedImage != null && oldImageUrl != null && !oldImageUrl.equals(uploadedImage)) {
+            fileStorageService.deleteProductImage(oldImageUrl);
+        }
         return "redirect:/admin/products";
     }
 
     @PostMapping("/admin/products/{id}/delete")
     public String deleteProductForm(@PathVariable String id) {
         requireAdminPage();
+        Product product = productService.getProductById(id);
         productService.deleteProduct(id);
+        if (product != null) {
+            fileStorageService.deleteProductImage(product.getImageUrl());
+        }
         return "redirect:/admin/products";
+    }
+
+    @GetMapping("/admin/products/{id}/preview")
+    public String productPreviewPage(@PathVariable String id, Model model) {
+        requireAdminPage();
+        Product product = productService.getProductById(id);
+        if (product == null) {
+            return "redirect:/admin/products";
+        }
+        model.addAttribute("product", product);
+        return "admin/product-preview";
     }
 
     @GetMapping("/admin/orders")
@@ -231,8 +250,13 @@ public class AdminController {
     @ResponseBody
     public Map<String, Object> deleteProduct(@PathVariable String id) {
         requireAdmin();
+        Product product = productService.getProductById(id);
+        boolean deleted = productService.deleteProduct(id);
+        if (deleted && product != null) {
+            fileStorageService.deleteProductImage(product.getImageUrl());
+        }
         Map<String, Object> response = new HashMap<>();
-        response.put("success", productService.deleteProduct(id));
+        response.put("success", deleted);
         return response;
     }
 

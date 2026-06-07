@@ -14,17 +14,16 @@
     <div class="px-6 py-6 border-b border-white/10">
         <p class="text-xs uppercase tracking-widest text-[#d9c8a8] font-semibold">Hebekery</p>
         <h1 class="text-2xl font-semibold mt-1">Admin</h1>
-        <p class="text-sm text-white/60 mt-2">Khu vực quản lý riêng.</p>
     </div>
     <nav class="px-4 py-5 space-y-2">
         <a href="/admin" th:classappend="${active == 'dashboard'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">dashboard</span>Dashboard</a>
-        <a href="/admin/users" th:classappend="${active == 'users'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">group</span>Người dùng</a>
-        <a href="/admin/products" th:classappend="${active == 'products'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">bakery_dining</span>Sản phẩm</a>
-        <a href="/admin/orders" th:classappend="${active == 'orders'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">receipt_long</span>Đơn hàng</a>
-        <a href="/admin/contacts" th:classappend="${active == 'contacts'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">contact_support</span>Liên hệ</a>
+        <a href="/admin/users" th:classappend="${active == 'users'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">group</span>Ng&#432;&#7901;i d&#249;ng</a>
+        <a href="/admin/products" th:classappend="${active == 'products'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">bakery_dining</span>S&#7843;n ph&#7849;m</a>
+        <a href="/admin/orders" th:classappend="${active == 'orders'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">receipt_long</span>&#272;&#417;n h&#224;ng</a>
+        <a href="/admin/contacts" th:classappend="${active == 'contacts'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">contact_support</span>Li&#234;n h&#7879;</a>
     </nav>
     <div class="px-4 pb-6">
-        <button id="adminLogoutBtn" type="button" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-white text-[#263d2b] font-semibold"><span class="material-symbols-outlined text-lg">logout</span>Đăng xuất</button>
+        <button id="adminLogoutBtn" type="button" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-white text-[#263d2b] font-semibold"><span class="material-symbols-outlined text-lg">logout</span>&#272;&#259;ng xu&#7845;t</button>
     </div>
 </aside>
 <script th:fragment="logoutScript">

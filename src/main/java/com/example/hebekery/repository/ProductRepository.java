@@ -5,10 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
 public interface ProductRepository extends JpaRepository<Product, String> {
-    List<Product> findByCategory(String category);
+    Page<Product> findByCategory(String category, Pageable pageable);
     Page<Product> findByNameContainingIgnoreCaseOrCategoryContainingIgnoreCaseOrBadgeContainingIgnoreCase(
             String name,
             String category,

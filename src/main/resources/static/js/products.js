@@ -1,64 +1,24 @@
-/**
- * Products Page Module
- */
-
 const Products = (function() {
-
-    function initCategoryFilter() {
-        const categoryBtns = document.querySelectorAll('.category-btn');
-        const products = document.querySelectorAll('.product-card');
-        const noResults = document.getElementById('noResults');
-
-        function filterProducts(category) {
-            let visibleCount = 0;
-
-            products.forEach(product => {
-                const productCategory = product.getAttribute('data-category');
-                if (category === 'all' || productCategory === category) {
-                    product.style.display = 'block';
-                    visibleCount++;
-                } else {
-                    product.style.display = 'none';
-                }
-            });
-
-            if (noResults) {
-                noResults.classList.toggle('hidden', visibleCount > 0);
-            }
-        }
-
-        categoryBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                categoryBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                filterProducts(btn.getAttribute('data-category'));
-            });
-        });
-    }
-
     function initAddToCart() {
-        const addBtns = document.querySelectorAll('.quick-add');
+        const addButtons = document.querySelectorAll('.quick-add');
         const cartBadge = document.querySelector('.cart-badge');
 
         function updateCartBadge(count) {
-            if (cartBadge) {
-                cartBadge.textContent = count;
-                cartBadge.classList.toggle('hidden', count === 0);
-            }
+            if (!cartBadge) return;
+            cartBadge.textContent = count;
+            cartBadge.classList.toggle('hidden', count === 0);
         }
 
-        addBtns.forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
+        addButtons.forEach(button => {
+            button.addEventListener('click', async (event) => {
+                event.preventDefault();
+                event.stopPropagation();
 
-                const productId = btn.getAttribute('data-product-id');
-                if (!productId) {
-                    return;
-                }
+                const productId = button.getAttribute('data-product-id');
+                if (!productId) return;
 
-                const originalText = btn.innerHTML;
-                btn.disabled = true;
+                const originalText = button.innerHTML;
+                button.disabled = true;
 
                 try {
                     const response = await fetch('/api/cart/add', {
@@ -71,17 +31,17 @@ const Products = (function() {
 
                     if (data.success) {
                         updateCartBadge(data.cartCount || 0);
-                        btn.innerHTML = 'Da them';
+                        button.innerHTML = 'Đã thêm';
                     } else {
-                        btn.innerHTML = data.message || 'That bai';
+                        button.innerHTML = data.message || 'Thất bại';
                     }
                 } catch (error) {
                     console.error('Error adding to cart:', error);
-                    btn.innerHTML = 'That bai';
+                    button.innerHTML = 'Thất bại';
                 } finally {
                     setTimeout(() => {
-                        btn.innerHTML = originalText;
-                        btn.disabled = false;
+                        button.innerHTML = originalText;
+                        button.disabled = false;
                     }, 1500);
                 }
             });
@@ -89,15 +49,10 @@ const Products = (function() {
     }
 
     function init() {
-        initCategoryFilter();
         initAddToCart();
     }
 
     return { init };
 })();
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => Products.init());
-} else {
-    Products.init();
-}
+document.addEventListener('DOMContentLoaded', () => Products.init());

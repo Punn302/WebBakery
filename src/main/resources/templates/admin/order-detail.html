@@ -52,6 +52,22 @@
             </section>
         </div>
 
+        <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mt-6">
+            <h2 class="text-xl font-semibold mb-4">Cập nhật giao hàng</h2>
+            <form th:if="${order.orderStatus != 'CANCELLED' and order.orderStatus != 'RECEIVED' and order.orderStatus != 'RETURN_REQUESTED' and order.orderStatus != 'RETURNED'}" th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="flex flex-wrap gap-3">
+                <select name="orderStatus" class="border border-gray-200 rounded-lg px-4 py-3">
+                    <option value="SHIPPING" th:selected="${order.orderStatus == 'SHIPPING'}">Đang giao</option>
+                    <option value="DELIVERED" th:selected="${order.orderStatus == 'DELIVERED'}">Đã giao</option>
+                </select>
+                <select name="paymentStatus" class="border border-gray-200 rounded-lg px-4 py-3">
+                    <option value="PENDING" th:selected="${order.paymentStatus == 'PENDING'}">Chờ thanh toán</option>
+                    <option value="PAID" th:selected="${order.paymentStatus == 'PAID'}">Đã thanh toán</option>
+                </select>
+                <button class="bg-[#47654c] text-white rounded-lg px-5 py-3 font-semibold">Lưu trạng thái</button>
+            </form>
+            <p th:if="${order.orderStatus == 'CANCELLED' or order.orderStatus == 'RECEIVED' or order.orderStatus == 'RETURN_REQUESTED' or order.orderStatus == 'RETURNED'}" class="text-gray-400">Đơn đang ở trạng thái cuối hoặc đang xử lý đổi trả.</p>
+        </section>
+
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
             <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                 <h2 class="text-xl font-semibold mb-4">Đổi trả</h2>

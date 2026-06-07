@@ -23,7 +23,7 @@
                 <div class="flex flex-wrap gap-3">
                     <button th:if="${order.orderStatus == 'PENDING' or order.orderStatus == 'PROCESSING'}" id="cancelOrderBtn" th:attr="data-order-id=${order.id}" class="px-5 py-3 rounded-full border border-red-200 text-red-500 font-semibold">Hủy đơn</button>
                     <button th:if="${order.orderStatus == 'SHIPPING' or order.orderStatus == 'DELIVERED'}" id="receivedOrderBtn" th:attr="data-order-id=${order.id}" class="px-5 py-3 rounded-full bg-[#47654c] text-white font-semibold">Đã nhận hàng</button>
-                    <button th:if="${order.orderStatus == 'DELIVERED' or order.orderStatus == 'RECEIVED'}" id="returnOrderBtn" th:attr="data-order-id=${order.id}" class="px-5 py-3 rounded-full border border-amber-200 text-amber-600 font-semibold">Yêu cầu đổi trả</button>
+                    <button th:if="${order.orderStatus == 'RECEIVED'}" id="returnOrderBtn" th:attr="data-order-id=${order.id}" class="px-5 py-3 rounded-full border border-amber-200 text-amber-600 font-semibold">Yêu cầu đổi trả</button>
                 </div>
             </div>
         </section>

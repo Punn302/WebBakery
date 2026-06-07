@@ -189,7 +189,6 @@ const TDEE = (function() {
     // ========== INIT GENDER BUTTONS ==========
     function initGenderButtons() {
         const genderBtns = document.querySelectorAll('.gender-btn');
-        console.log('Gender buttons found:', genderBtns.length);
 
         genderBtns.forEach(btn => {
             // Remove old listeners
@@ -206,7 +205,6 @@ const TDEE = (function() {
                 // Update state
                 const genderValue = this.getAttribute('data-gender');
                 currentState.gender = genderValue;
-                console.log('Gender changed to:', currentState.gender);
             });
         });
     }
@@ -438,8 +436,6 @@ const TDEE = (function() {
 
     // Initialize all
     function init() {
-        console.log('TDEE Calculator initializing...');
-
         // Cache DOM elements
         elements = {
             modal: document.getElementById('tdeeModal'),
@@ -460,8 +456,6 @@ const TDEE = (function() {
         initCalculateButton();
         initModalClose();
         initReset();
-
-        console.log('TDEE Calculator initialized');
     }
 
     // Public API

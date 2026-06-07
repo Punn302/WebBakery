@@ -13,12 +13,16 @@ import java.util.UUID;
 
 @Service
 public class FileStorageService {
+    private static final long MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("jpg", "jpeg", "png", "webp", "gif");
     private final Path productUploadDir = Path.of("uploads", "products").toAbsolutePath().normalize();
 
     public String saveProductImage(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             return null;
+        }
+        if (file.getSize() > MAX_IMAGE_SIZE_BYTES) {
+            throw new IllegalArgumentException("Ảnh sản phẩm không được vượt quá 2MB");
         }
         String originalName = file.getOriginalFilename() == null ? "" : file.getOriginalFilename();
         String extension = extensionOf(originalName);
@@ -36,6 +40,22 @@ public class FileStorageService {
             return "/uploads/products/" + filename;
         } catch (IOException ex) {
             throw new IllegalStateException("Không thể lưu ảnh sản phẩm");
+        }
+    }
+
+    public void deleteProductImage(String imageUrl) {
+        if (imageUrl == null || !imageUrl.startsWith("/uploads/products/")) {
+            return;
+        }
+        String filename = imageUrl.substring("/uploads/products/".length());
+        Path target = productUploadDir.resolve(filename).normalize();
+        if (!target.startsWith(productUploadDir)) {
+            return;
+        }
+        try {
+            Files.deleteIfExists(target);
+        } catch (IOException ignored) {
+            // Không chặn nghiệp vụ sản phẩm nếu file đã bị xóa thủ công hoặc đang bị khóa.
         }
     }
 

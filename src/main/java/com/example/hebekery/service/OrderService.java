@@ -61,7 +61,7 @@ public class OrderService {
         order.setAddress(request.getAddress());
         order.setNote(request.getNote());
         order.setPaymentMethod(request.getPaymentMethod());
-        order.setPaymentStatus("COD".equals(request.getPaymentMethod()) ? "UNPAID" : "PENDING");
+        order.setPaymentStatus("PENDING");
         order.setOrderStatus("PENDING");
         order.setTotal(subtotal + 30000);
         order.setCreatedAt(LocalDateTime.now());
@@ -82,7 +82,7 @@ public class OrderService {
         return new CheckoutResponse(
                 order.getId(),
                 "COD",
-                "UNPAID",
+                "PENDING",
                 null,
                 "Đặt hàng COD thành công. Bạn sẽ thanh toán khi nhận hàng."
         );
@@ -126,10 +126,24 @@ public class OrderService {
 
     public Order updateStatus(String orderId, String orderStatus, String paymentStatus) {
         Order order = getOrderById(orderId);
+        if ("CANCELLED".equals(order.getOrderStatus())
+                || "RECEIVED".equals(order.getOrderStatus())
+                || "RETURN_REQUESTED".equals(order.getOrderStatus())
+                || "RETURNED".equals(order.getOrderStatus())) {
+            throw new IllegalArgumentException("Đơn hàng hiện không thể cập nhật giao hàng");
+        }
+        if (!"SHIPPING".equals(orderStatus) && !"DELIVERED".equals(orderStatus)) {
+            throw new IllegalArgumentException("Admin chỉ được chuyển đơn sang Đang giao hoặc Đã giao");
+        }
         if (orderStatus != null && !orderStatus.isBlank()) {
             order.setOrderStatus(orderStatus);
         }
-        if (paymentStatus != null && !paymentStatus.isBlank()) {
+        if ("DELIVERED".equals(orderStatus) && "COD".equals(order.getPaymentMethod())) {
+            order.setPaymentStatus("PAID");
+        } else if (paymentStatus != null && !paymentStatus.isBlank()) {
+            if (!"PENDING".equals(paymentStatus) && !"PAID".equals(paymentStatus)) {
+                throw new IllegalArgumentException("Trạng thái thanh toán không hợp lệ");
+            }
             order.setPaymentStatus(paymentStatus);
         }
         Order saved = orderRepository.save(order);
@@ -175,8 +189,8 @@ public class OrderService {
 
     public Order requestReturn(String orderId, String userId, String reason) {
         Order order = getOwnedOrder(orderId, userId);
-        if (!"DELIVERED".equals(order.getOrderStatus()) && !"RECEIVED".equals(order.getOrderStatus())) {
-            throw new IllegalArgumentException("Chỉ có thể yêu cầu đổi trả sau khi đơn đã giao");
+        if (!"RECEIVED".equals(order.getOrderStatus())) {
+            throw new IllegalArgumentException("Chỉ có thể yêu cầu đổi trả sau khi đã nhận hàng");
         }
         if (reason == null || reason.isBlank()) {
             throw new IllegalArgumentException("Vui lòng nhập lý do đổi trả");
@@ -281,7 +295,6 @@ public class OrderService {
         String paymentText = switch (order.getPaymentStatus()) {
             case "PAID" -> "Đã thanh toán";
             case "PENDING" -> "Chờ thanh toán";
-            case "UNPAID" -> "Chưa thanh toán";
             default -> order.getPaymentStatus();
         };
         return orderText + " / " + paymentText;

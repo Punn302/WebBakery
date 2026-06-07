@@ -3,6 +3,10 @@ let lastScroll = 0;
 const header = document.querySelector('header');
 
 window.addEventListener('scroll', () => {
+    if (!header) {
+        return;
+    }
+
     const currentScroll = window.pageYOffset;
 
     if (currentScroll <= 0) {
@@ -158,14 +162,12 @@ function initSearchExpand() {
     const header = document.querySelector('header');
 
     if (!searchToggleBtn || !searchExpand) {
-        console.log('Search elements not found');
         return;
     }
 
     // Mở ô tìm kiếm khi click vào icon
     searchToggleBtn.addEventListener('click', function(e) {
         e.stopPropagation();
-        console.log('Search button clicked');
         header.classList.add('search-expanded');
         setTimeout(function() {
             if (searchInput) {

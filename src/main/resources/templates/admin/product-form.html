@@ -12,7 +12,9 @@
             <select name="category" class="border border-gray-200 rounded-lg px-4 py-3" required><option th:each="cat : ${categories}" th:value="${cat}" th:selected="${cat == product.category}" th:text="${cat}"></option></select>
             <input name="price" type="number" th:value="${product.price}" class="border border-gray-200 rounded-lg px-4 py-3" required>
             <div class="md:col-span-2 space-y-3">
-                <img th:src="${product.imageUrl}" class="w-28 h-28 rounded-lg object-cover border border-gray-100">
+                <a th:href="@{/admin/products/{id}/preview(id=${product.id})}" class="inline-block">
+                    <img th:src="${product.imageUrl}" class="w-28 h-28 rounded-lg object-cover border border-gray-100">
+                </a>
                 <input type="hidden" name="imageUrl" th:value="${product.imageUrl}">
                 <input name="imageFile" type="file" accept="image/*" class="w-full border border-gray-200 rounded-lg px-4 py-3">
             </div>

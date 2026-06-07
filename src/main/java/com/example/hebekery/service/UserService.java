@@ -4,6 +4,7 @@ import com.example.hebekery.model.User;
 import com.example.hebekery.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.SessionScope;
 
@@ -15,16 +16,18 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
     private User currentUser = null;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public boolean login(String email, String password) {
         Optional<User> user = userRepository.findByEmailIgnoreCase(email);
-        if (user.isPresent() && user.get().isActive() && user.get().getPassword().equals(password)) {
-            currentUser = user.get();
+        if (user.isPresent() && user.get().isActive() && passwordMatches(password, user.get().getPassword())) {
+            currentUser = upgradePasswordIfNeeded(user.get(), password);
             currentUser.setLoggedIn(true);
             return true;
         }
@@ -54,7 +57,7 @@ public class UserService {
         if (userRepository.existsByEmailIgnoreCase(email)) {
             return false;
         }
-        User user = new User(String.valueOf(System.currentTimeMillis()), email, password, name, phone, "USER");
+        User user = new User(String.valueOf(System.currentTimeMillis()), email, passwordEncoder.encode(password), name, phone, "USER");
         userRepository.save(user);
         return true;
     }
@@ -76,13 +79,13 @@ public class UserService {
     }
 
     public User updateUserRole(String id, String role) {
-        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("Khong tim thay user"));
+        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy user"));
         user.setRole(role);
         return userRepository.save(user);
     }
 
     public User setUserActive(String id, boolean active) {
-        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("Khong tim thay user"));
+        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy user"));
         user.setActive(active);
         if (!active) {
             user.setLoggedIn(false);
@@ -91,14 +94,14 @@ public class UserService {
     }
 
     public User resetPassword(String id, String newPassword) {
-        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("Khong tim thay user"));
-        user.setPassword(newPassword);
+        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy user"));
+        user.setPassword(passwordEncoder.encode(newPassword));
         return userRepository.save(user);
     }
 
     public User updateCurrentUser(String name, String phone) {
         if (!isLoggedIn()) {
-            throw new IllegalStateException("Vui long dang nhap");
+            throw new IllegalStateException("Vui lòng đăng nhập");
         }
 
         currentUser.setName(name);
@@ -110,16 +113,35 @@ public class UserService {
 
     public boolean changePassword(String currentPassword, String newPassword) {
         if (!isLoggedIn()) {
-            throw new IllegalStateException("Vui long dang nhap");
+            throw new IllegalStateException("Vui lòng đăng nhập");
         }
 
-        if (!currentUser.getPassword().equals(currentPassword)) {
+        if (!passwordMatches(currentPassword, currentUser.getPassword())) {
             return false;
         }
 
-        currentUser.setPassword(newPassword);
+        currentUser.setPassword(passwordEncoder.encode(newPassword));
         currentUser = userRepository.save(currentUser);
         currentUser.setLoggedIn(true);
         return true;
+    }
+
+    private boolean passwordMatches(String rawPassword, String storedPassword) {
+        if (storedPassword == null) {
+            return false;
+        }
+        if (storedPassword.startsWith("$2a$") || storedPassword.startsWith("$2b$") || storedPassword.startsWith("$2y$")) {
+            return passwordEncoder.matches(rawPassword, storedPassword);
+        }
+        return storedPassword.equals(rawPassword);
+    }
+
+    private User upgradePasswordIfNeeded(User user, String rawPassword) {
+        String storedPassword = user.getPassword();
+        if (storedPassword != null && !storedPassword.startsWith("$2a$") && !storedPassword.startsWith("$2b$") && !storedPassword.startsWith("$2y$")) {
+            user.setPassword(passwordEncoder.encode(rawPassword));
+            return userRepository.save(user);
+        }
+        return user;
     }
 }

@@ -28,8 +28,11 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    public List<Product> getProductsByCategory(String category) {
-        return productRepository.findByCategory(category);
+    public Page<Product> getProductsPage(String category, Pageable pageable) {
+        if (category == null || category.isBlank() || "all".equalsIgnoreCase(category)) {
+            return productRepository.findAll(pageable);
+        }
+        return productRepository.findByCategory(category, pageable);
     }
 
     public Product getProductById(String id) {
