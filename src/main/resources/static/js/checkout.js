@@ -105,17 +105,83 @@ const Checkout = (function() {
         select.disabled = false;
     }
 
+    function normalizeText(value) {
+        return String(value || '').trim().toLowerCase();
+    }
+
+    function selectByText(select, text) {
+        const expectedText = normalizeText(text);
+        if (!select || !expectedText) return false;
+        const option = Array.from(select.options).find(item => normalizeText(item.textContent) === expectedText);
+        if (!option) return false;
+        select.value = option.value;
+        return true;
+    }
+
+    function applySavedAddressFallback(option) {
+        if (!option || !option.value) return;
+        document.getElementById('customerName').value = option.dataset.name || document.getElementById('customerName').value;
+        document.getElementById('phone').value = option.dataset.phone || document.getElementById('phone').value;
+        document.getElementById('address').value = [
+            option.dataset.line,
+            option.dataset.ward,
+            option.dataset.district,
+            option.dataset.province
+        ].filter(Boolean).join(', ');
+    }
+
+    async function applySavedAddress(option) {
+        if (!option || !option.value) return;
+        const customerNameInput = document.getElementById('customerName');
+        const phoneInput = document.getElementById('phone');
+        const addressInput = document.getElementById('address');
+        const provinceSelect = document.getElementById('provinceSelect');
+        const districtSelect = document.getElementById('districtSelect');
+        const wardSelect = document.getElementById('wardSelect');
+
+        if (customerNameInput) customerNameInput.value = option.dataset.name || customerNameInput.value;
+        if (phoneInput) phoneInput.value = option.dataset.phone || phoneInput.value;
+        if (addressInput) addressInput.value = option.dataset.line || '';
+
+        if (!provinceSelect || !districtSelect || !wardSelect) return;
+        if (!selectByText(provinceSelect, option.dataset.province)) return;
+
+        districtSelect.innerHTML = '<option value="">Quận/huyện</option>';
+        wardSelect.innerHTML = '<option value="">Phường/xã</option>';
+        districtSelect.disabled = true;
+        wardSelect.disabled = true;
+
+        const province = await fetchProvinceApi('p/' + provinceSelect.value + '?depth=2');
+        fillSelect(districtSelect, province.districts || [], 'Quận/huyện');
+        if (!selectByText(districtSelect, option.dataset.district)) return;
+
+        const district = await fetchProvinceApi('d/' + districtSelect.value + '?depth=2');
+        fillSelect(wardSelect, district.wards || [], 'Phường/xã');
+        selectByText(wardSelect, option.dataset.ward);
+    }
+
     function initProvinceDropdowns() {
         const provinceSelect = document.getElementById('provinceSelect');
         const districtSelect = document.getElementById('districtSelect');
         const wardSelect = document.getElementById('wardSelect');
+        const savedAddressSelect = document.getElementById('savedAddressSelect');
         if (!provinceSelect || !districtSelect || !wardSelect) return;
 
         fetchProvinceApi('?depth=1')
-            .then((provinces) => fillSelect(provinceSelect, provinces, 'Tỉnh/thành phố'))
+            .then(async (provinces) => {
+                fillSelect(provinceSelect, provinces, 'Tỉnh/thành phố');
+                if (savedAddressSelect?.value) {
+                    await applySavedAddress(savedAddressSelect.selectedOptions[0]);
+                }
+            })
             .catch(() => {
                 provinceSelect.innerHTML = '<option value="">Không tải được tỉnh/thành</option>';
+                if (savedAddressSelect?.value) {
+                    applySavedAddressFallback(savedAddressSelect.selectedOptions[0]);
+                }
             });
+
+        savedAddressSelect?.addEventListener('change', () => applySavedAddress(savedAddressSelect.selectedOptions[0]));
 
         provinceSelect.addEventListener('change', async () => {
             districtSelect.innerHTML = '<option value="">Quận/huyện</option>';

@@ -3,6 +3,8 @@ package com.example.hebekery.service;
 import com.example.hebekery.model.CartItem;
 import com.example.hebekery.model.Product;
 import com.example.hebekery.model.User;
+import com.example.hebekery.repository.CartItemRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.SessionScope;
 
@@ -14,75 +16,145 @@ import java.util.Optional;
 @SessionScope
 public class CartService {
 
-    private List<CartItem> cartItems = new ArrayList<>();
+    private final CartItemRepository cartItemRepository;
+    private final UserService userService;
+    private final List<CartItem> sessionCartItems = new ArrayList<>();
+
+    public CartService(CartItemRepository cartItemRepository, UserService userService) {
+        this.cartItemRepository = cartItemRepository;
+        this.userService = userService;
+    }
 
     public int getQuantity(String productId) {
-        return cartItems.stream()
+        return getCartItems().stream()
                 .filter(item -> item.getProductId().equals(productId))
                 .mapToInt(CartItem::getQuantity)
                 .findFirst()
                 .orElse(0);
     }
 
-    // Thêm sản phẩm vào giỏ
+    @Transactional
     public void addToCart(Product product, int quantity) {
-        Optional<CartItem> existingItem = cartItems.stream()
+        List<CartItem> items = getMutableCartItems();
+        Optional<CartItem> existingItem = items.stream()
                 .filter(item -> item.getProductId().equals(product.getId()))
                 .findFirst();
 
+        CartItem item;
         if (existingItem.isPresent()) {
-            CartItem item = existingItem.get();
+            item = existingItem.get();
             item.setQuantity(item.getQuantity() + quantity);
         } else {
-            cartItems.add(new CartItem(
+            item = new CartItem(
                     product.getId(),
                     product.getName(),
                     product.getImageUrl(),
                     product.getPrice(),
                     quantity
-            ));
+            );
+            items.add(item);
         }
+        saveIfLoggedIn(item);
     }
 
-    // Cập nhật số lượng
+    @Transactional
     public void updateQuantity(String productId, int quantity) {
-        cartItems.stream()
+        getMutableCartItems().stream()
                 .filter(item -> item.getProductId().equals(productId))
                 .findFirst()
-                .ifPresent(item -> item.setQuantity(quantity));
+                .ifPresent(item -> {
+                    item.setQuantity(quantity);
+                    saveIfLoggedIn(item);
+                });
     }
 
-    // Xóa sản phẩm khỏi giỏ
+    @Transactional
     public void removeFromCart(String productId) {
-        cartItems.removeIf(item -> item.getProductId().equals(productId));
+        if (isLoggedIn()) {
+            cartItemRepository.deleteByUserIdAndProductId(userService.getCurrentUser().getId(), productId);
+            return;
+        }
+        sessionCartItems.removeIf(item -> item.getProductId().equals(productId));
     }
 
-    // Lấy tất cả sản phẩm trong giỏ
     public List<CartItem> getCartItems() {
-        return cartItems;
+        if (isLoggedIn()) {
+            return cartItemRepository.findByUserId(userService.getCurrentUser().getId());
+        }
+        return sessionCartItems;
     }
 
-    // Tính tổng tiền
     public double getTotalPrice() {
-        return cartItems.stream()
+        return getCartItems().stream()
                 .mapToDouble(CartItem::getTotal)
                 .sum();
     }
 
-    // Đếm số lượng sản phẩm trong giỏ
     public int getCartCount() {
-        return cartItems.stream()
+        return getCartItems().stream()
                 .mapToInt(CartItem::getQuantity)
                 .sum();
     }
 
-    // Xóa toàn bộ giỏ hàng
+    @Transactional
     public void clearCart() {
-        cartItems.clear();
+        if (isLoggedIn()) {
+            cartItemRepository.deleteByUserId(userService.getCurrentUser().getId());
+            return;
+        }
+        sessionCartItems.clear();
     }
 
-    // Lưu giỏ hàng (khi đã đăng nhập)
+    @Transactional
     public void saveCartForUser(User user) {
-        // Cart persistence can be moved to database when multi-device cart sync is needed.
+        mergeSessionCartForUser(user);
+    }
+
+    @Transactional
+    public void mergeSessionCartForUser(User user) {
+        if (user == null || sessionCartItems.isEmpty()) {
+            return;
+        }
+        List<CartItem> savedItems = cartItemRepository.findByUserId(user.getId());
+        for (CartItem sessionItem : sessionCartItems) {
+            Optional<CartItem> existingItem = savedItems.stream()
+                    .filter(item -> item.getProductId().equals(sessionItem.getProductId()))
+                    .findFirst();
+            if (existingItem.isPresent()) {
+                CartItem item = existingItem.get();
+                item.setQuantity(item.getQuantity() + sessionItem.getQuantity());
+                cartItemRepository.save(item);
+            } else {
+                CartItem item = new CartItem(
+                        sessionItem.getProductId(),
+                        sessionItem.getProductName(),
+                        sessionItem.getImageUrl(),
+                        sessionItem.getPrice(),
+                        sessionItem.getQuantity()
+                );
+                item.setUserId(user.getId());
+                cartItemRepository.save(item);
+            }
+        }
+        sessionCartItems.clear();
+    }
+
+    private List<CartItem> getMutableCartItems() {
+        if (isLoggedIn()) {
+            return cartItemRepository.findByUserId(userService.getCurrentUser().getId());
+        }
+        return sessionCartItems;
+    }
+
+    private void saveIfLoggedIn(CartItem item) {
+        if (!isLoggedIn()) {
+            return;
+        }
+        item.setUserId(userService.getCurrentUser().getId());
+        cartItemRepository.save(item);
+    }
+
+    private boolean isLoggedIn() {
+        return userService.isLoggedIn() && userService.getCurrentUser() != null;
     }
 }

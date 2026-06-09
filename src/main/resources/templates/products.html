@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hebekery | San pham</title>
+    <title>Hebekery | Sản phẩm</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
@@ -15,15 +15,15 @@
 <main class="pt-24 pb-16 bg-[#fbfaf7] min-h-screen">
     <div class="max-w-7xl mx-auto px-4 md:px-8">
         <div class="text-center mb-10">
-            <h1 class="text-3xl md:text-4xl font-semibold text-gray-800 mb-3">S&#7843;n ph&#7849;m Hebekery</h1>
-            <p th:if="${keyword == null or keyword.isBlank()}" class="text-gray-500 max-w-2xl mx-auto">Danh m&#7909;c healthy bakery, snack v&#224; combo qu&#224; t&#7863;ng.</p>
-            <p th:if="${keyword != null and !keyword.isBlank()}" class="text-gray-500 max-w-2xl mx-auto">K&#7871;t qu&#7843; t&#236;m ki&#7871;m cho <span class="font-semibold text-[#47654c]" th:text="${keyword}"></span></p>
+            <h1 class="text-3xl md:text-4xl font-semibold text-gray-800 mb-3">Sản phẩm Hebekery</h1>
+            <p th:if="${keyword == null or keyword.isBlank()}" class="text-gray-500 max-w-2xl mx-auto">Danh mục healthy bakery, snack và combo quà tặng.</p>
+            <p th:if="${keyword != null and !keyword.isBlank()}" class="text-gray-500 max-w-2xl mx-auto">Kết quả tìm kiếm cho <span class="font-semibold text-[#47654c]" th:text="${keyword}"></span></p>
         </div>
 
         <div class="flex flex-wrap justify-center gap-3 mb-10">
             <a th:href="@{/products(category='all')}"
                th:classappend="${(currentCategory == null or currentCategory == 'all') and (keyword == null or keyword.isBlank())} ? ' bg-[#47654c] text-white' : ' bg-white text-gray-600 border border-gray-200'"
-               class="px-5 py-2 rounded-full text-sm font-semibold transition-all">T&#7845;t c&#7843;</a>
+               class="px-5 py-2 rounded-full text-sm font-semibold transition-all">Tất cả</a>
             <a th:each="category : ${categories}"
                th:href="@{/products(category=${category})}"
                th:classappend="${currentCategory == category and (keyword == null or keyword.isBlank())} ? ' bg-[#47654c] text-white' : ' bg-white text-gray-600 border border-gray-200'"
@@ -41,10 +41,10 @@
                 </div>
                 <div class="text-center">
                     <span class="text-xs text-[#47654c] uppercase tracking-wider" th:text="${product.badge}"></span>
-                    <h3 class="text-lg font-semibold text-gray-800 mt-2 mb-1" th:text="${product.name}">San pham</h3>
-                    <p class="text-sm text-gray-500 mb-2 line-clamp-2" th:text="${product.description}">Mo ta</p>
-                    <p class="text-xs mb-2" th:classappend="${product.outOfStock} ? ' text-red-500' : ' text-gray-400'" th:text="${product.outOfStock ? 'Hết hàng' : 'Còn ' + product.stockQuantity + ' sản phẩm'}">Con hang</p>
-                    <p class="text-lg font-bold text-[#47654c] mb-3" th:text="${#strings.replace(#numbers.formatDecimal(product.price, 0, 0, 'COMMA'), ',', '.') + ' đ'}">0 đ</p>
+                    <h3 class="text-lg font-semibold text-gray-800 mt-2 mb-1" th:text="${product.name}">Sản phẩm</h3>
+                    <p class="text-sm text-gray-500 mb-2 line-clamp-2" th:text="${product.description}">Mô tả</p>
+                    <p class="text-xs mb-2" th:classappend="${product.outOfStock} ? ' text-red-500' : ' text-gray-400'" th:text="${product.outOfStock ? 'Hết hàng' : 'Còn ' + product.stockQuantity + ' sản phẩm'}">Còn hàng</p>
+                    <p class="text-lg font-bold text-[#47654c] mb-3" th:text="${#strings.replace(#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT'), ',', '.') + ' đ'}">0 đ</p>
                     <button type="button" class="quick-add" th:disabled="${product.outOfStock}" th:attr="data-product-id=${product.id}" th:text="${product.outOfStock ? 'Hết hàng' : 'Thêm vào giỏ'}">Thêm vào giỏ</button>
                 </div>
             </a>
@@ -52,7 +52,7 @@
 
         <div th:if="${#lists.isEmpty(products)}" class="text-center py-12">
             <span class="material-symbols-outlined text-5xl text-gray-300">search_off</span>
-            <p class="text-gray-400 mt-3">Kh&#244;ng c&#243; s&#7843;n ph&#7849;m ph&#249; h&#7907;p.</p>
+            <p class="text-gray-400 mt-3">Không có sản phẩm phù hợp.</p>
         </div>
 
         <div th:if="${page.totalPages > 1}" class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-10 text-sm">
@@ -60,7 +60,7 @@
             <div class="flex flex-wrap gap-2">
                 <a th:if="${page.hasPrevious()}"
                    th:href="@{/products(page=${page.number - 1},category=${currentCategory},keyword=${keyword})}"
-                   class="px-4 py-2 rounded-lg border border-gray-200 bg-white">Tr&#432;&#7899;c</a>
+                   class="px-4 py-2 rounded-lg border border-gray-200 bg-white">Trước</a>
                 <a th:each="pageIndex : ${#numbers.sequence(0, page.totalPages - 1)}"
                    th:href="@{/products(page=${pageIndex},category=${currentCategory},keyword=${keyword})}"
                    th:classappend="${pageIndex == page.number} ? ' bg-[#47654c] text-white border-[#47654c]' : ' bg-white text-gray-600 border-gray-200'"

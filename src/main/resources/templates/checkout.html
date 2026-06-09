@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -35,6 +35,17 @@
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Địa chỉ nhận hàng</label>
+                        <div th:if="${!#lists.isEmpty(addresses)}" class="mb-3">
+                            <select id="savedAddressSelect" class="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]">
+                                <option value="">Chọn địa chỉ đã lưu</option>
+                                <option th:each="address : ${addresses}"
+                                        th:value="${address.id}"
+                                        th:selected="${defaultAddress != null and address.id == defaultAddress.id}"
+                                        th:attr="data-name=${address.receiverName},data-phone=${address.phone},data-line=${address.addressLine},data-province=${address.province},data-district=${address.district},data-ward=${address.ward}"
+                                        th:text="${address.receiverName + ' - ' + address.phone + ' - ' + address.addressLine + ', ' + address.ward + ', ' + address.district + ', ' + address.province}">
+                                </option>
+                            </select>
+                        </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                             <select id="provinceSelect" class="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]">
                                 <option value="">Tỉnh/thành phố</option>
@@ -64,8 +75,7 @@
                             </label>
                             <label class="payment-card border border-gray-200 rounded-xl p-4 cursor-pointer">
                                 <input type="radio" name="paymentMethod" value="MOMO" class="mr-2">
-                                <span class="font-semibold text-gray-800">MoMo test mode</span>
-                                <p class="text-sm text-gray-500 mt-2">Tạo URL thanh toán test với chữ ký HMAC SHA256.</p>
+                                <span class="font-semibold text-gray-800">MoMo</span>
                             </label>
                         </div>
                     </div>
@@ -87,13 +97,13 @@
                             <p class="text-sm font-semibold text-gray-800" th:text="${item.productName}"></p>
                             <p class="text-xs text-gray-400">SL: <span th:text="${item.quantity}"></span></p>
                         </div>
-                        <span class="text-sm font-semibold text-[#47654c]" th:text="${#strings.replace(#numbers.formatDecimal(item.total, 0, 0, 'COMMA'), ',', '.') + 'đ'}"></span>
+                        <span class="text-sm font-semibold text-[#47654c]" th:text="${#strings.replace(#numbers.formatDecimal(item.total, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></span>
                     </div>
                 </div>
                 <div class="border-t border-gray-100 pt-4 space-y-3 text-sm">
-                    <div class="flex justify-between"><span class="text-gray-500">Tạm tính</span><span th:text="${#strings.replace(#numbers.formatDecimal(subtotal, 0, 0, 'COMMA'), ',', '.') + 'đ'}"></span></div>
-                    <div class="flex justify-between"><span class="text-gray-500">Vận chuyển</span><span th:text="${#strings.replace(#numbers.formatDecimal(shippingFee, 0, 0, 'COMMA'), ',', '.') + 'đ'}"></span></div>
-                    <div class="flex justify-between text-lg font-bold text-gray-800 pt-3 border-t border-gray-100"><span>Tổng</span><span class="text-[#47654c]" th:text="${#strings.replace(#numbers.formatDecimal(totalPrice, 0, 0, 'COMMA'), ',', '.') + 'đ'}"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Tạm tính</span><span th:text="${#strings.replace(#numbers.formatDecimal(subtotal, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Vận chuyển</span><span th:text="${#strings.replace(#numbers.formatDecimal(shippingFee, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></span></div>
+                    <div class="flex justify-between text-lg font-bold text-gray-800 pt-3 border-t border-gray-100"><span>Tổng</span><span class="text-[#47654c]" th:text="${#strings.replace(#numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></span></div>
                 </div>
             </aside>
         </div>
@@ -102,6 +112,6 @@
 
 <div th:replace="~{layout/fragments :: footer}"></div>
 <script th:src="@{/js/common.js}"></script>
-<script th:src="@{/js/checkout.js(v=2)}"></script>
+<script th:src="@{/js/checkout.js(v=3)}"></script>
 </body>
 </html>

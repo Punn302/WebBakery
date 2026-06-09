@@ -10,7 +10,10 @@
             <input name="id" th:value="${product.id}" readonly class="border border-gray-200 rounded-lg px-4 py-3 bg-gray-50">
             <input name="name" th:value="${product.name}" class="border border-gray-200 rounded-lg px-4 py-3" required>
             <select name="category" class="border border-gray-200 rounded-lg px-4 py-3" required><option th:each="cat : ${categories}" th:value="${cat}" th:selected="${cat == product.category}" th:text="${cat}"></option></select>
-            <input name="price" type="number" th:value="${product.price}" class="border border-gray-200 rounded-lg px-4 py-3" required>
+            <div>
+                <input type="text" inputmode="numeric" data-money-target="price" th:attr="data-initial=${product.price}" class="border border-gray-200 rounded-lg px-4 py-3 w-full" required>
+                <input name="price" type="hidden" th:value="${product.price}">
+            </div>
             <div class="md:col-span-2 space-y-3">
                 <a th:href="@{/admin/products/{id}/preview(id=${product.id})}" class="inline-block">
                     <img th:src="${product.imageUrl}" class="w-28 h-28 rounded-lg object-cover border border-gray-100">
@@ -29,5 +32,6 @@
     </main>
 </div>
 <script th:replace="~{admin/fragments :: logoutScript}"></script>
+<script th:src="@{/js/admin-money-input.js}"></script>
 </body>
 </html>

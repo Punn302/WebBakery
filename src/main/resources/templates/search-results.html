@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -85,7 +85,7 @@
                         </div>
                         <h3 class="text-lg font-semibold text-gray-800 mb-1" th:text="${product.name}"></h3>
                         <p class="text-sm text-gray-500 mb-2 line-clamp-2" th:text="${product.description}"></p>
-                        <p class="text-lg font-bold text-[#47654c] mb-3" th:text="${#strings.replace(#numbers.formatDecimal(product.price, 0, 0, 'COMMA'), ',', '.') + 'đ'}"></p>
+                        <p class="text-lg font-bold text-[#47654c] mb-3" th:text="${#strings.replace(#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></p>
                     </div>
                 </a>
             </div>

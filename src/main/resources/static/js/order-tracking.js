@@ -5,6 +5,24 @@ function formatCurrency(value) {
     return Number(value || 0).toLocaleString('vi-VN') + 'đ';
 }
 
+function formatOrderStatus(orderStatus, paymentStatus) {
+    const orderLabels = {
+        PENDING: 'Chờ xử lý',
+        PROCESSING: 'Đang xử lý',
+        SHIPPING: 'Đang giao',
+        DELIVERED: 'Đã giao',
+        RECEIVED: 'Đã nhận',
+        CANCELLED: 'Đã hủy',
+        RETURN_REQUESTED: 'Yêu cầu đổi trả',
+        RETURNED: 'Đã đổi trả'
+    };
+    const paymentLabels = {
+        PENDING: 'Chờ thanh toán',
+        PAID: 'Đã thanh toán'
+    };
+    return `${orderLabels[orderStatus] || orderStatus || ''} / ${paymentLabels[paymentStatus] || paymentStatus || ''}`;
+}
+
 if (form) {
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -28,7 +46,7 @@ if (form) {
                     <div>
                         <p class="font-semibold text-gray-800">${order.id}</p>
                         <p class="text-sm text-gray-500">${order.customerName || ''} - ${order.phone || ''}</p>
-                        <p class="text-sm text-gray-500">${order.orderStatus} / ${order.paymentStatus}</p>
+                        <p class="text-sm text-gray-500">${formatOrderStatus(order.orderStatus, order.paymentStatus)}</p>
                     </div>
                     <p class="font-bold text-[#47654c]">${formatCurrency(order.total)}</p>
                 </div>

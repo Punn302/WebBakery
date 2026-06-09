@@ -1,17 +1,21 @@
 package com.example.hebekery.controller;
 
+import com.example.hebekery.dto.request.CheckoutRequest;
 import com.example.hebekery.model.Product;
+import com.example.hebekery.service.AddressService;
 import com.example.hebekery.service.CartService;
 import com.example.hebekery.service.OrderService;
 import com.example.hebekery.service.ProductService;
 import com.example.hebekery.service.ProductReviewService;
 import com.example.hebekery.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriUtils;
 
@@ -25,13 +29,15 @@ public class PageController {
     private final UserService userService;
     private final OrderService orderService;
     private final ProductReviewService productReviewService;
+    private final AddressService addressService;
 
-    public PageController(ProductService productService, CartService cartService, UserService userService, OrderService orderService, ProductReviewService productReviewService) {
+    public PageController(ProductService productService, CartService cartService, UserService userService, OrderService orderService, ProductReviewService productReviewService, AddressService addressService) {
         this.productService = productService;
         this.cartService = cartService;
         this.userService = userService;
         this.orderService = orderService;
         this.productReviewService = productReviewService;
+        this.addressService = addressService;
     }
 
     @GetMapping("/")
@@ -176,6 +182,12 @@ public class PageController {
             return "redirect:/cart";
         }
         model.addAttribute("user", userService.getCurrentUser());
+        var addresses = addressService.getByUser(userService.getCurrentUser().getId());
+        model.addAttribute("addresses", addresses);
+        model.addAttribute("defaultAddress", addresses.stream()
+                .filter(address -> address.isDefaultAddress())
+                .findFirst()
+                .orElse(addresses.isEmpty() ? null : addresses.get(0)));
         model.addAttribute("cartItems", cartService.getCartItems());
         model.addAttribute("subtotal", cartService.getTotalPrice());
         model.addAttribute("shippingFee", 30000);
@@ -189,8 +201,36 @@ public class PageController {
     }
 
     @GetMapping("/checkout/momo-test")
-    public String momoTest(@RequestParam String orderId, Model model) {
-        model.addAttribute("orderId", orderId);
+    public String momoTest(HttpSession session) {
+        if (session.getAttribute("pendingMomoCheckout") == null) {
+            return "redirect:/checkout";
+        }
         return "momo-test";
+    }
+
+    @PostMapping("/checkout/momo-test/pay")
+    public String payMomoTest(HttpSession session) {
+        if (!userService.isLoggedIn()) {
+            return "redirect:/login?redirect=/checkout";
+        }
+        Object pendingCheckout = session.getAttribute("pendingMomoCheckout");
+        if (!(pendingCheckout instanceof CheckoutRequest request)) {
+            return "redirect:/checkout";
+        }
+        orderService.createPaidMomoOrder(
+                userService.getCurrentUser(),
+                cartService.getCartItems(),
+                cartService.getTotalPrice(),
+                request
+        );
+        cartService.clearCart();
+        session.removeAttribute("pendingMomoCheckout");
+        return "redirect:/checkout/success";
+    }
+
+    @PostMapping("/checkout/momo-test/cancel")
+    public String cancelMomoTest(HttpSession session) {
+        session.removeAttribute("pendingMomoCheckout");
+        return "redirect:/checkout";
     }
 }

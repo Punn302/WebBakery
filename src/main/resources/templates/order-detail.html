@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -63,7 +63,9 @@
         <section class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden mb-6">
             <div class="px-6 py-4 border-b border-gray-100"><h2 class="text-xl font-semibold text-gray-800">Sản phẩm</h2></div>
             <table class="w-full text-sm">
-                <thead class="bg-[#f7f3ec]"><tr><th class="text-left px-6 py-4">Sản phẩm</th><th class="text-left px-6 py-4">Giá</th><th class="text-left px-6 py-4">SL</th><th class="text-left px-6 py-4">Thành tiền</th></tr></thead>
+                <thead class="bg-[#f7f3ec]">
+                <tr><th class="text-left px-6 py-4">Sản phẩm</th><th class="text-left px-6 py-4">Giá</th><th class="text-left px-6 py-4">SL</th><th class="text-left px-6 py-4">Thành tiền</th></tr>
+                </thead>
                 <tbody>
                 <tr th:each="item : ${order.items}" class="border-t border-gray-100">
                     <td class="px-6 py-4">
@@ -76,14 +78,14 @@
                             </div>
                         </div>
                     </td>
-                    <td class="px-6 py-4" th:text="${#strings.replace(#numbers.formatDecimal(item.price, 0, 0, 'COMMA'), ',', '.') + 'đ'}"></td>
+                    <td class="px-6 py-4" th:text="${#strings.replace(#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></td>
                     <td class="px-6 py-4" th:text="${item.quantity}"></td>
-                    <td class="px-6 py-4 text-[#47654c] font-semibold" th:text="${#strings.replace(#numbers.formatDecimal(item.total, 0, 0, 'COMMA'), ',', '.') + 'đ'}"></td>
+                    <td class="px-6 py-4 text-[#47654c] font-semibold" th:text="${#strings.replace(#numbers.formatDecimal(item.total, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></td>
                 </tr>
                 </tbody>
             </table>
             <div class="px-6 py-4 border-t border-gray-100 text-right text-xl font-bold text-[#47654c]">
-                Tổng tiền: <span th:text="${#strings.replace(#numbers.formatDecimal(order.total, 0, 0, 'COMMA'), ',', '.') + 'đ'}"></span>
+                Tổng tiền: <span th:text="${#strings.replace(#numbers.formatDecimal(order.total, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></span>
             </div>
         </section>
 
@@ -153,103 +155,103 @@
 <div th:replace="~{layout/fragments :: footer}"></div>
 <script th:src="@{/js/common.js}"></script>
 <script>
-function notify(message, type = 'success') {
-    if (window.showToast) window.showToast(message, type);
-    else alert(message);
-}
+    function notify(message, type = 'success') {
+        if (window.showToast) window.showToast(message, type);
+        else alert(message);
+    }
 
-function setReturnMessage(type, message) {
-    const box = document.getElementById('returnFormMessage');
-    if (!box) return;
-    box.className = 'rounded-lg px-4 py-3 text-sm ' + (type === 'error' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-700');
-    box.textContent = message;
-    box.classList.remove('hidden');
-}
+    function setReturnMessage(type, message) {
+        const box = document.getElementById('returnFormMessage');
+        if (!box) return;
+        box.className = 'rounded-lg px-4 py-3 text-sm ' + (type === 'error' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-700');
+        box.textContent = message;
+        box.classList.remove('hidden');
+    }
 
-function openReturnModal() {
-    document.getElementById('returnModal')?.classList.remove('hidden');
-}
+    function openReturnModal() {
+        document.getElementById('returnModal')?.classList.remove('hidden');
+    }
 
-function closeReturnModal() {
-    document.getElementById('returnModal')?.classList.add('hidden');
-}
+    function closeReturnModal() {
+        document.getElementById('returnModal')?.classList.add('hidden');
+    }
 
-document.getElementById('openReturnModalBtn')?.addEventListener('click', openReturnModal);
-document.getElementById('openReturnModalInlineBtn')?.addEventListener('click', openReturnModal);
-document.getElementById('closeReturnModalBtn')?.addEventListener('click', closeReturnModal);
-document.getElementById('cancelReturnModalBtn')?.addEventListener('click', closeReturnModal);
-document.getElementById('returnModal')?.addEventListener('click', (event) => {
-    if (event.target.id === 'returnModal') closeReturnModal();
-});
-
-document.querySelectorAll('input[name="returnReasonPreset"]').forEach((radio) => {
-    radio.addEventListener('change', () => {
-        const textarea = document.getElementById('returnReasonText');
-        if (radio.value !== 'Lý do khác' && textarea && !textarea.value.trim()) {
-            textarea.value = radio.value + '. ';
-            textarea.focus();
-        }
+    document.getElementById('openReturnModalBtn')?.addEventListener('click', openReturnModal);
+    document.getElementById('openReturnModalInlineBtn')?.addEventListener('click', openReturnModal);
+    document.getElementById('closeReturnModalBtn')?.addEventListener('click', closeReturnModal);
+    document.getElementById('cancelReturnModalBtn')?.addEventListener('click', closeReturnModal);
+    document.getElementById('returnModal')?.addEventListener('click', (event) => {
+        if (event.target.id === 'returnModal') closeReturnModal();
     });
-});
 
-document.getElementById('cancelOrderBtn')?.addEventListener('click', async function() {
-    if (!confirm('Bạn chắc chắn muốn hủy đơn hàng này?')) return;
-    const id = this.getAttribute('data-order-id');
-    const res = await fetch('/api/user/orders/' + id + '/cancel', { method: 'POST', credentials: 'same-origin' });
-    const data = await res.json();
-    notify(data.message || (data.success ? 'Đã hủy đơn hàng' : 'Không thể hủy đơn'), data.success ? 'success' : 'error');
-    if (data.success) window.location.reload();
-});
-
-document.getElementById('receivedOrderBtn')?.addEventListener('click', async function() {
-    if (!confirm('Xác nhận bạn đã nhận được hàng?')) return;
-    const id = this.getAttribute('data-order-id');
-    const res = await fetch('/api/user/orders/' + id + '/received', { method: 'POST', credentials: 'same-origin' });
-    const data = await res.json();
-    notify(data.message || (data.success ? 'Đã xác nhận nhận hàng' : 'Không thể cập nhật'), data.success ? 'success' : 'error');
-    if (data.success) window.location.reload();
-});
-
-document.getElementById('returnRequestForm')?.addEventListener('submit', async function(event) {
-    event.preventDefault();
-    const reason = document.getElementById('returnReasonText')?.value.trim();
-    const confirmed = document.getElementById('returnConfirm')?.checked;
-    if (!reason || reason.length < 10) {
-        setReturnMessage('error', 'Vui lòng nhập lý do trả hàng rõ ràng, tối thiểu 10 ký tự.');
-        return;
-    }
-    if (!confirmed) {
-        setReturnMessage('error', 'Vui lòng xác nhận thông tin trước khi gửi yêu cầu.');
-        return;
-    }
-    const button = document.getElementById('submitReturnRequestBtn');
-    const originalText = button.textContent;
-    button.disabled = true;
-    button.textContent = 'Đang gửi...';
-    const id = this.getAttribute('data-order-id');
-    try {
-        const res = await fetch('/api/user/orders/' + id + '/return', {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reason })
+    document.querySelectorAll('input[name="returnReasonPreset"]').forEach((radio) => {
+        radio.addEventListener('change', () => {
+            const textarea = document.getElementById('returnReasonText');
+            if (radio.value !== 'Lý do khác' && textarea && !textarea.value.trim()) {
+                textarea.value = radio.value + '. ';
+                textarea.focus();
+            }
         });
+    });
+
+    document.getElementById('cancelOrderBtn')?.addEventListener('click', async function() {
+        if (!confirm('Bạn chắc chắn muốn hủy đơn hàng này?')) return;
+        const id = this.getAttribute('data-order-id');
+        const res = await fetch('/api/user/orders/' + id + '/cancel', { method: 'POST', credentials: 'same-origin' });
         const data = await res.json();
-        if (!data.success) {
-            setReturnMessage('error', data.message || 'Không thể gửi yêu cầu trả hàng');
+        notify(data.message || (data.success ? 'Đã hủy đơn hàng' : 'Không thể hủy đơn'), data.success ? 'success' : 'error');
+        if (data.success) window.location.reload();
+    });
+
+    document.getElementById('receivedOrderBtn')?.addEventListener('click', async function() {
+        if (!confirm('Xác nhận bạn đã nhận được hàng?')) return;
+        const id = this.getAttribute('data-order-id');
+        const res = await fetch('/api/user/orders/' + id + '/received', { method: 'POST', credentials: 'same-origin' });
+        const data = await res.json();
+        notify(data.message || (data.success ? 'Đã xác nhận nhận hàng' : 'Không thể cập nhật'), data.success ? 'success' : 'error');
+        if (data.success) window.location.reload();
+    });
+
+    document.getElementById('returnRequestForm')?.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const reason = document.getElementById('returnReasonText')?.value.trim();
+        const confirmed = document.getElementById('returnConfirm')?.checked;
+        if (!reason || reason.length < 10) {
+            setReturnMessage('error', 'Vui lòng nhập lý do trả hàng rõ ràng, tối thiểu 10 ký tự.');
             return;
         }
-        setReturnMessage('success', data.message || 'Đã gửi yêu cầu trả hàng');
-        notify(data.message || 'Đã gửi yêu cầu trả hàng');
-        setTimeout(() => window.location.reload(), 800);
-    } catch (error) {
-        console.error('Return request error:', error);
-        setReturnMessage('error', 'Có lỗi xảy ra khi gửi yêu cầu.');
-    } finally {
-        button.disabled = false;
-        button.textContent = originalText;
-    }
-});
+        if (!confirmed) {
+            setReturnMessage('error', 'Vui lòng xác nhận thông tin trước khi gửi yêu cầu.');
+            return;
+        }
+        const button = document.getElementById('submitReturnRequestBtn');
+        const originalText = button.textContent;
+        button.disabled = true;
+        button.textContent = 'Đang gửi...';
+        const id = this.getAttribute('data-order-id');
+        try {
+            const res = await fetch('/api/user/orders/' + id + '/return', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason })
+            });
+            const data = await res.json();
+            if (!data.success) {
+                setReturnMessage('error', data.message || 'Không thể gửi yêu cầu trả hàng');
+                return;
+            }
+            setReturnMessage('success', data.message || 'Đã gửi yêu cầu trả hàng');
+            notify(data.message || 'Đã gửi yêu cầu trả hàng');
+            setTimeout(() => window.location.reload(), 800);
+        } catch (error) {
+            console.error('Return request error:', error);
+            setReturnMessage('error', 'Có lỗi xảy ra khi gửi yêu cầu.');
+        } finally {
+            button.disabled = false;
+            button.textContent = originalText;
+        }
+    });
 </script>
 </body>
 </html>

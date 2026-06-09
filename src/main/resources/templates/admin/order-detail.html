@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments :: head('Chi tiết đơn hàng')}"></head>
 <body class="bg-[#fbfaf7] text-gray-800">
@@ -50,14 +50,14 @@
                                 <div><p class="font-semibold" th:text="${item.productName}"></p><p class="text-xs text-gray-400" th:text="${item.productId}"></p></div>
                             </div>
                         </td>
-                        <td class="px-6 py-4" th:text="${#strings.replace(#numbers.formatDecimal(item.price, 0, 0, 'COMMA'), ',', '.') + 'đ'}"></td>
+                        <td class="px-6 py-4" th:text="${#strings.replace(#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></td>
                         <td class="px-6 py-4" th:text="${item.quantity}"></td>
-                        <td class="px-6 py-4 text-[#47654c] font-semibold" th:text="${#strings.replace(#numbers.formatDecimal(item.total, 0, 0, 'COMMA'), ',', '.') + 'đ'}"></td>
+                        <td class="px-6 py-4 text-[#47654c] font-semibold" th:text="${#strings.replace(#numbers.formatDecimal(item.total, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></td>
                     </tr>
                     </tbody>
                 </table>
                 <div class="px-6 py-4 border-t border-gray-100 text-right text-xl font-bold text-[#47654c]">
-                    Tổng tiền: <span th:text="${#strings.replace(#numbers.formatDecimal(order.total, 0, 0, 'COMMA'), ',', '.') + 'đ'}"></span>
+                    Tổng tiền: <span th:text="${#strings.replace(#numbers.formatDecimal(order.total, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></span>
                 </div>
             </section>
 

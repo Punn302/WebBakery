@@ -5,6 +5,7 @@ import com.example.hebekery.dto.request.ChangePasswordRequest;
 import com.example.hebekery.dto.request.LoginRequest;
 import com.example.hebekery.dto.request.RegisterRequest;
 import com.example.hebekery.dto.request.UpdateUserRequest;
+import com.example.hebekery.service.CartService;
 import com.example.hebekery.service.OrderService;
 import com.example.hebekery.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,10 +25,12 @@ public class UserController {
 
     private final UserService userService;
     private final OrderService orderService;
+    private final CartService cartService;
 
-    public UserController(UserService userService, OrderService orderService) {
+    public UserController(UserService userService, OrderService orderService, CartService cartService) {
         this.userService = userService;
         this.orderService = orderService;
+        this.cartService = cartService;
     }
 
     @GetMapping("/api/user/status")
@@ -49,6 +52,7 @@ public class UserController {
         response.put("success", loginSuccess);
         if (loginSuccess) {
             UserResponse user = UserResponse.from(userService.getCurrentUser());
+            cartService.mergeSessionCartForUser(userService.getCurrentUser());
             String role = user.getRole() == null ? "USER" : user.getRole().trim().toUpperCase();
             session.setAttribute("user", user);
 

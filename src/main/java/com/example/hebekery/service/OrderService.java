@@ -56,13 +56,7 @@ public class OrderService {
 
     @Transactional
     public CheckoutResponse createOrder(User user, List<CartItem> cartItems, double subtotal, CheckoutRequest request) {
-        if (user == null) {
-            throw new IllegalStateException("Vui lòng đăng nhập");
-        }
-        if (cartItems == null || cartItems.isEmpty()) {
-            throw new IllegalArgumentException("Giỏ hàng đang trống");
-        }
-        cartItems.forEach(item -> productService.ensureAvailable(item.getProductId(), item.getQuantity()));
+        validateCheckout(user, cartItems);
 
         Order order = new Order();
         order.setId("HBK-" + System.currentTimeMillis());
@@ -96,6 +90,45 @@ public class OrderService {
                 "PENDING",
                 null,
                 "Đặt hàng COD thành công. Bạn sẽ thanh toán khi nhận hàng."
+        );
+    }
+
+    public void validateCheckout(User user, List<CartItem> cartItems) {
+        if (user == null) {
+            throw new IllegalStateException("Vui lòng đăng nhập");
+        }
+        if (cartItems == null || cartItems.isEmpty()) {
+            throw new IllegalArgumentException("Giỏ hàng đang trống");
+        }
+        cartItems.forEach(item -> productService.ensureAvailable(item.getProductId(), item.getQuantity()));
+    }
+
+    @Transactional
+    public CheckoutResponse createPaidMomoOrder(User user, List<CartItem> cartItems, double subtotal, CheckoutRequest request) {
+        validateCheckout(user, cartItems);
+
+        Order order = new Order();
+        order.setId("HBK-" + System.currentTimeMillis());
+        order.setUserId(user.getId());
+        order.setCustomerName(request.getCustomerName());
+        order.setPhone(request.getPhone());
+        order.setAddress(request.getAddress());
+        order.setNote(request.getNote());
+        order.setPaymentMethod("MOMO");
+        order.setPaymentStatus("PAID");
+        order.setOrderStatus("PENDING");
+        order.setTotal(subtotal + 30000);
+        order.setCreatedAt(LocalDateTime.now());
+        order.setItems(copyItems(order, cartItems));
+        orderRepository.save(order);
+        addHistory(order, "User thanh toán MoMo test thành công", "USER");
+
+        return new CheckoutResponse(
+                order.getId(),
+                "MOMO",
+                "PAID",
+                null,
+                "Thanh toán MoMo thành công. Đơn hàng đã được ghi nhận."
         );
     }
 
@@ -385,7 +418,7 @@ public class OrderService {
             return;
         }
         for (OrderItem item : order.getItems()) {
-            productService.decreaseStock(item.getProductId(), item.getQuantity(), "ORDER", order.getId(), "Xuat kho theo don " + order.getId());
+            productService.decreaseStock(item.getProductId(), item.getQuantity(), "ORDER", order.getId(), "Xuất kho theo đơn " + order.getId());
         }
         order.setInventoryDeducted(true);
     }
@@ -395,7 +428,7 @@ public class OrderService {
             return;
         }
         for (OrderItem item : order.getItems()) {
-            productService.increaseStock(item.getProductId(), item.getQuantity(), "RETURN", order.getId(), "Hoan kho doi tra " + order.getId());
+            productService.increaseStock(item.getProductId(), item.getQuantity(), "RETURN", order.getId(), "Hoàn kho đổi trả " + order.getId());
         }
         order.setInventoryDeducted(false);
     }

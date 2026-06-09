@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments :: head('Admin Dashboard')}"></head>
 <body class="bg-[#fbfaf7] text-gray-800">
@@ -23,7 +23,7 @@
                     <p class="text-sm font-semibold text-gray-500">Doanh thu</p>
                     <span class="material-symbols-outlined text-[#47654c] bg-[#edf4ee] rounded-lg p-2">payments</span>
                 </div>
-                <p class="text-3xl font-bold text-[#263d2b] mt-5" th:text="${#strings.replace(#numbers.formatDecimal(revenueTotal, 0, 0, 'COMMA'), ',', '.') + 'đ'}">0đ</p>
+                <p class="text-3xl font-bold text-[#263d2b] mt-5" th:text="${#strings.replace(#numbers.formatDecimal(revenueTotal, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}">0đ</p>
             </section>
             <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
                 <div class="flex items-center justify-between">
@@ -55,7 +55,7 @@
             </div>
             <div class="grid gap-3 h-72 items-end" th:style="'grid-template-columns: repeat(' + ${#lists.size(weeklyRevenue)} + ', minmax(0, 1fr));'">
                 <div th:each="point : ${weeklyRevenue}" class="h-full flex flex-col justify-end gap-2">
-                    <p class="text-xs text-center text-gray-500" th:text="${#strings.replace(#numbers.formatDecimal(point.revenue, 0, 0, 'COMMA'), ',', '.')}">0</p>
+                    <p class="text-xs text-center text-gray-500" th:text="${#strings.replace(#numbers.formatDecimal(point.revenue, 0, 'COMMA', 0, 'POINT'), ',', '.')}">0</p>
                     <div class="rounded-t-lg bg-[#47654c]" th:style="'height:' + ${point.percent} + '%'"></div>
                     <p class="text-xs text-center text-gray-400" th:text="${point.label}">01/01</p>
                 </div>

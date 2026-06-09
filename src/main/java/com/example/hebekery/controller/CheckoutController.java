@@ -5,6 +5,7 @@ import com.example.hebekery.dto.request.CheckoutRequest;
 import com.example.hebekery.service.CartService;
 import com.example.hebekery.service.OrderService;
 import com.example.hebekery.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,7 +28,25 @@ public class CheckoutController {
     }
 
     @PostMapping("/api/checkout")
-    public Map<String, Object> checkout(@Valid @RequestBody CheckoutRequest request) {
+    public Map<String, Object> checkout(@Valid @RequestBody CheckoutRequest request, HttpSession session) {
+        if ("MOMO".equals(request.getPaymentMethod())) {
+            orderService.validateCheckout(userService.getCurrentUser(), cartService.getCartItems());
+            session.setAttribute("pendingMomoCheckout", request);
+
+            CheckoutResponse checkout = new CheckoutResponse(
+                    null,
+                    "MOMO",
+                    "PENDING",
+                    "/checkout/momo-test",
+                    "Chuyển đến MoMo test để xác nhận thanh toán."
+            );
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("checkout", checkout);
+            response.put("message", checkout.getMessage());
+            return response;
+        }
+
         CheckoutResponse checkout = orderService.createOrder(
                 userService.getCurrentUser(),
                 cartService.getCartItems(),

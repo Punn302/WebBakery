@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments :: head('Quản lý đơn hàng')}"></head>
 <body class="bg-[#fbfaf7] text-gray-800">
@@ -49,7 +49,7 @@
                         <p class="font-semibold" th:text="${order.productName}">Sản phẩm</p>
                         <p class="text-xs text-gray-400" th:text="${order.itemCount + ' sản phẩm'}">0 sản phẩm</p>
                     </td>
-                    <td class="px-6 py-4 text-[#47654c] font-semibold" th:text="${#strings.replace(#numbers.formatDecimal(order.total, 0, 0, 'COMMA'), ',', '.') + 'đ'}">0đ</td>
+                    <td class="px-6 py-4 text-[#47654c] font-semibold" th:text="${#strings.replace(#numbers.formatDecimal(order.total, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}">0đ</td>
                     <td class="px-6 py-4">
                         <a th:if="${order.orderStatus == 'PENDING'}" th:href="@{/admin/orders/{id}(id=${order.id})}" class="inline-block bg-[#47654c] text-white rounded-lg px-4 py-2 font-semibold">Tạo vận đơn</a>
                         <form th:if="${order.orderStatus == 'SHIPPING'}" th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="flex flex-wrap gap-2">

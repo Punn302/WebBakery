@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${product.name} + ' | Hebekery'">Chi tiet san pham | Hebekery</title>
+    <title th:text="${product.name} + ' | Hebekery'">Chi tiết sản phẩm | Hebekery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
@@ -103,11 +103,11 @@
 <main class="pt-24 pb-16">
     <div class="max-w-7xl mx-auto px-4 md:px-8">
         <div class="flex items-center gap-2 text-sm text-gray-400 mb-6">
-            <a href="/" class="hover:text-[#47654c] transition">Trang ch&#7911;</a>
+            <a href="/" class="hover:text-[#47654c] transition">Trang chủ</a>
             <span>/</span>
-            <a href="/products" class="hover:text-[#47654c] transition">S&#7843;n ph&#7849;m</a>
+            <a href="/products" class="hover:text-[#47654c] transition">Sản phẩm</a>
             <span>/</span>
-            <span class="text-[#47654c]" th:text="${product.name}">San pham</span>
+            <span class="text-[#47654c]" th:text="${product.name}">Sản phẩm</span>
         </div>
 
         <section class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
@@ -129,11 +129,11 @@
             </div>
 
             <div>
-                <span class="inline-flex text-xs bg-[#47654c] text-white px-3 py-1 rounded-full mb-3" th:text="${product.badge}">Noi bat</span>
-                <h1 class="text-3xl md:text-4xl font-medium text-gray-800 mb-3" th:text="${product.name}">Ten san pham</h1>
-                <p class="text-gray-500 mb-6 leading-relaxed" th:text="${product.description}">Mo ta san pham</p>
-                <p class="text-3xl font-bold text-[#47654c] mb-6" th:text="${#strings.replace(#numbers.formatDecimal(product.price, 0, 0, 'COMMA'), ',', '.') + ' đ'}">0 đ</p>
-                <p class="mb-6 font-semibold" th:classappend="${product.outOfStock} ? ' text-red-500' : ' text-[#47654c]'" th:text="${product.outOfStock ? 'Hết hàng' : 'Còn ' + product.stockQuantity + ' sản phẩm'}">Con hang</p>
+                <span class="inline-flex text-xs bg-[#47654c] text-white px-3 py-1 rounded-full mb-3" th:text="${product.badge}">Nổi bật</span>
+                <h1 class="text-3xl md:text-4xl font-medium text-gray-800 mb-3" th:text="${product.name}">Tên sản phẩm</h1>
+                <p class="text-gray-500 mb-6 leading-relaxed" th:text="${product.description}">Mô tả sản phẩm</p>
+                <p class="text-3xl font-bold text-[#47654c] mb-6" th:text="${#strings.replace(#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT'), ',', '.') + ' đ'}">0 đ</p>
+                <p class="mb-6 font-semibold" th:classappend="${product.outOfStock} ? ' text-red-500' : ' text-[#47654c]'" th:text="${product.outOfStock ? 'Hết hàng' : 'Còn ' + product.stockQuantity + ' sản phẩm'}">Còn hàng</p>
 
                 <div class="flex items-center gap-6 mb-8">
                     <div class="quantity-selector">
@@ -149,16 +149,16 @@
 
                 <div class="border-t border-gray-200 pt-6 space-y-3 text-sm">
                     <div class="flex">
-                        <span class="w-28 text-gray-500">Danh m&#7909;c:</span>
-                        <a th:href="@{/products(category=${product.category})}" class="text-[#47654c] font-semibold" th:text="${product.category}">Danh muc</a>
+                        <span class="w-28 text-gray-500">Danh mục:</span>
+                        <a th:href="@{/products(category=${product.category})}" class="text-[#47654c] font-semibold" th:text="${product.category}">Danh mục</a>
                     </div>
                     <div class="flex">
-                        <span class="w-28 text-gray-500">Xu&#7845;t x&#7913;:</span>
-                        <span class="text-gray-700">Vi&#7879;t Nam</span>
+                        <span class="w-28 text-gray-500">Xuất xứ:</span>
+                        <span class="text-gray-700">Việt Nam</span>
                     </div>
                     <div class="flex">
-                        <span class="w-28 text-gray-500">B&#7843;o qu&#7843;n:</span>
-                        <span class="text-gray-700">N&#417;i kh&#244; r&#225;o, tho&#225;ng m&#225;t</span>
+                        <span class="w-28 text-gray-500">Bảo quản:</span>
+                        <span class="text-gray-700">Nơi khô ráo, thoáng mát</span>
                     </div>
                 </div>
             </div>
@@ -166,23 +166,23 @@
 
         <section class="mb-16">
             <div class="flex flex-wrap border-b border-gray-200 mb-6">
-                <button type="button" class="tab-btn active px-6 py-3 font-semibold" data-tab="description">M&#244; t&#7843;</button>
-                <button type="button" class="tab-btn px-6 py-3 font-semibold" data-tab="ingredients">Th&#224;nh ph&#7847;n</button>
-                <button type="button" class="tab-btn px-6 py-3 font-semibold" data-tab="nutrition">Dinh d&#432;&#7905;ng</button>
-                <button type="button" class="tab-btn px-6 py-3 font-semibold" data-tab="guide">B&#7843;o qu&#7843;n</button>
+                <button type="button" class="tab-btn active px-6 py-3 font-semibold" data-tab="description">Mô tả</button>
+                <button type="button" class="tab-btn px-6 py-3 font-semibold" data-tab="ingredients">Thành phần</button>
+                <button type="button" class="tab-btn px-6 py-3 font-semibold" data-tab="nutrition">Dinh dưỡng</button>
+                <button type="button" class="tab-btn px-6 py-3 font-semibold" data-tab="guide">Bảo quản</button>
             </div>
 
             <div id="tab-description" class="tab-content active text-gray-600 leading-relaxed">
-                <p th:text="${product.description}">Mo ta chi tiet san pham.</p>
+                <p th:text="${product.description}">Mô tả chi tiết sản phẩm.</p>
             </div>
             <div id="tab-ingredients" class="tab-content text-gray-600 leading-relaxed">
-                <p>Nguy&#234;n li&#7879;u t&#7921; nhi&#234;n, h&#7841;n ch&#7871; ph&#7909; gia, ph&#249; h&#7907;p d&#249;ng h&#7857;ng ng&#224;y.</p>
+                <p>Nguyên liệu tự nhiên, hạn chế phụ gia, phù hợp dùng hằng ngày.</p>
             </div>
             <div id="tab-nutrition" class="tab-content text-gray-600 leading-relaxed">
-                <p>Th&#244;ng tin dinh d&#432;&#7905;ng c&#243; th&#7875; thay &#273;&#7893;i theo t&#7915;ng d&#242;ng s&#7843;n ph&#7849;m.</p>
+                <p>Thông tin dinh dưỡng có thể thay đổi theo từng dòng sản phẩm.</p>
             </div>
             <div id="tab-guide" class="tab-content text-gray-600 leading-relaxed">
-                <p>B&#7843;o qu&#7843;n n&#417;i kh&#244; r&#225;o, tho&#225;ng m&#225;t, tr&#225;nh &#225;nh n&#7855;ng tr&#7921;c ti&#7871;p.</p>
+                <p>Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp.</p>
             </div>
         </section>
 
@@ -223,15 +223,15 @@
         </section>
 
         <section>
-            <h2 class="text-2xl font-medium text-gray-800 mb-6">S&#7843;n ph&#7849;m li&#234;n quan</h2>
+            <h2 class="text-2xl font-medium text-gray-800 mb-6">Sản phẩm liên quan</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <a th:each="related : ${relatedProducts}" th:href="@{/product/{id}(id=${related.id})}" class="product-card group block">
                     <div class="aspect-square mb-4 overflow-hidden rounded-xl bg-white shadow-md hover-lift">
                         <img th:src="@{${related.imageUrl}}" th:alt="${related.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                     </div>
                     <div class="text-center">
-                        <h3 class="text-base font-semibold text-gray-800 mb-1" th:text="${related.name}">San pham</h3>
-                        <p class="text-sm font-bold text-[#47654c]" th:text="${#strings.replace(#numbers.formatDecimal(related.price, 0, 0, 'COMMA'), ',', '.') + ' đ'}">0 đ</p>
+                        <h3 class="text-base font-semibold text-gray-800 mb-1" th:text="${related.name}">Sản phẩm</h3>
+                        <p class="text-sm font-bold text-[#47654c]" th:text="${#strings.replace(#numbers.formatDecimal(related.price, 0, 'COMMA', 0, 'POINT'), ',', '.') + ' đ'}">0 đ</p>
                     </div>
                 </a>
             </div>
