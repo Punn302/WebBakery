@@ -16,6 +16,14 @@ public class CartService {
 
     private List<CartItem> cartItems = new ArrayList<>();
 
+    public int getQuantity(String productId) {
+        return cartItems.stream()
+                .filter(item -> item.getProductId().equals(productId))
+                .mapToInt(CartItem::getQuantity)
+                .findFirst()
+                .orElse(0);
+    }
+
     // Thêm sản phẩm vào giỏ
     public void addToCart(Product product, int quantity) {
         Optional<CartItem> existingItem = cartItems.stream()
@@ -75,8 +83,6 @@ public class CartService {
 
     // Lưu giỏ hàng (khi đã đăng nhập)
     public void saveCartForUser(User user) {
-        // Trong thực tế, lưu vào database
-        System.out.println("Lưu giỏ hàng cho user: " + user.getEmail());
-        System.out.println("Giỏ hàng có " + cartItems.size() + " sản phẩm");
+        // Cart persistence can be moved to database when multi-device cart sync is needed.
     }
 }

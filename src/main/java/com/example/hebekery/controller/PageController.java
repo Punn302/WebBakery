@@ -4,6 +4,7 @@ import com.example.hebekery.model.Product;
 import com.example.hebekery.service.CartService;
 import com.example.hebekery.service.OrderService;
 import com.example.hebekery.service.ProductService;
+import com.example.hebekery.service.ProductReviewService;
 import com.example.hebekery.service.UserService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -23,12 +24,14 @@ public class PageController {
     private final CartService cartService;
     private final UserService userService;
     private final OrderService orderService;
+    private final ProductReviewService productReviewService;
 
-    public PageController(ProductService productService, CartService cartService, UserService userService, OrderService orderService) {
+    public PageController(ProductService productService, CartService cartService, UserService userService, OrderService orderService, ProductReviewService productReviewService) {
         this.productService = productService;
         this.cartService = cartService;
         this.userService = userService;
         this.orderService = orderService;
+        this.productReviewService = productReviewService;
     }
 
     @GetMapping("/")
@@ -73,6 +76,11 @@ public class PageController {
 
         model.addAttribute("product", product);
         model.addAttribute("relatedProducts", productService.getRelatedProducts(id, product.getCategory()));
+        model.addAttribute("reviews", productReviewService.getReviews(id));
+        model.addAttribute("canReview", productReviewService.canReview(id, userService.getCurrentUser()));
+        model.addAttribute("myReview", userService.isLoggedIn()
+                ? productReviewService.getUserReview(id, userService.getCurrentUser().getId()).orElse(null)
+                : null);
         return "product-detail";
     }
 
@@ -155,6 +163,7 @@ public class PageController {
             return "redirect:/profile";
         }
         model.addAttribute("order", order);
+        model.addAttribute("returnHistory", orderService.getReturnHistory(id));
         return "order-detail";
     }
 

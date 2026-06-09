@@ -1,3 +1,63 @@
+function getCookieValue(name) {
+    return document.cookie
+        .split('; ')
+        .find(row => row.startsWith(name + '='))
+        ?.split('=')[1];
+}
+
+function initCsrfProtection() {
+    if (window.__csrfBound) return;
+    window.__csrfBound = true;
+
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = (input, options = {}) => {
+        const method = (options.method || 'GET').toUpperCase();
+        if (!['GET', 'HEAD', 'OPTIONS', 'TRACE'].includes(method)) {
+            const token = getCookieValue('XSRF-TOKEN');
+            if (token) {
+                options.headers = { ...(options.headers || {}), 'X-XSRF-TOKEN': decodeURIComponent(token) };
+            }
+        }
+        return originalFetch(input, options);
+    };
+
+    document.addEventListener('submit', (event) => {
+        const form = event.target;
+        if (!(form instanceof HTMLFormElement) || (form.method || 'GET').toUpperCase() !== 'POST') return;
+        if (form.querySelector('input[name="_csrf"]')) return;
+        const token = getCookieValue('XSRF-TOKEN');
+        if (!token) return;
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = '_csrf';
+        input.value = decodeURIComponent(token);
+        form.appendChild(input);
+    }, true);
+}
+
+function initToastHost() {
+    if (document.getElementById('toastHost')) return;
+    const host = document.createElement('div');
+    host.id = 'toastHost';
+    host.className = 'fixed top-5 right-5 z-[9999] space-y-3';
+    document.body.appendChild(host);
+}
+
+function showToast(message, type = 'success') {
+    initToastHost();
+    const toast = document.createElement('div');
+    const color = type === 'error' ? 'bg-red-500' : 'bg-[#47654c]';
+    toast.className = `${color} text-white rounded-lg shadow-lg px-5 py-3 text-sm font-semibold transition-opacity`;
+    toast.textContent = message;
+    document.getElementById('toastHost').appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 250);
+    }, 2400);
+}
+
+window.showToast = showToast;
+
 function initCommonSearch() {
     const searchToggleBtn = document.getElementById('searchToggleBtn');
     const searchExpand = document.getElementById('searchExpand');
@@ -66,6 +126,8 @@ function initCommonLogout() {
 }
 
 function initCommon() {
+    initCsrfProtection();
+    initToastHost();
     initCommonSearch();
     initCommonLogout();
 }

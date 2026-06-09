@@ -19,7 +19,9 @@
         <a href="/admin" th:classappend="${active == 'dashboard'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">dashboard</span>Dashboard</a>
         <a href="/admin/users" th:classappend="${active == 'users'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">group</span>Ng&#432;&#7901;i d&#249;ng</a>
         <a href="/admin/products" th:classappend="${active == 'products'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">bakery_dining</span>S&#7843;n ph&#7849;m</a>
+        <a href="/admin/inventory" th:classappend="${active == 'inventory'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">inventory_2</span>T&#7891;n kho</a>
         <a href="/admin/orders" th:classappend="${active == 'orders'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">receipt_long</span>&#272;&#417;n h&#224;ng</a>
+        <a href="/admin/reports" th:classappend="${active == 'reports'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">monitoring</span>B&#225;o c&#225;o</a>
         <a href="/admin/contacts" th:classappend="${active == 'contacts'} ? ' bg-white/10 text-white font-semibold' : ' text-white/75'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10"><span class="material-symbols-outlined text-lg">contact_support</span>Li&#234;n h&#7879;</a>
     </nav>
     <div class="px-4 pb-6">
@@ -27,6 +29,38 @@
     </div>
 </aside>
 <script th:fragment="logoutScript">
+    function getAdminCookieValue(name) {
+        return document.cookie.split('; ').find(row => row.startsWith(name + '='))?.split('=')[1];
+    }
+
+    if (!window.__csrfBound) {
+        window.__csrfBound = true;
+        const originalFetch = window.fetch.bind(window);
+        window.fetch = (input, options = {}) => {
+            const method = (options.method || 'GET').toUpperCase();
+            if (!['GET', 'HEAD', 'OPTIONS', 'TRACE'].includes(method)) {
+                const token = getAdminCookieValue('XSRF-TOKEN');
+                if (token) {
+                    options.headers = { ...(options.headers || {}), 'X-XSRF-TOKEN': decodeURIComponent(token) };
+                }
+            }
+            return originalFetch(input, options);
+        };
+
+        document.addEventListener('submit', (event) => {
+            const form = event.target;
+            if (!(form instanceof HTMLFormElement) || (form.method || 'GET').toUpperCase() !== 'POST') return;
+            if (form.querySelector('input[name="_csrf"]')) return;
+            const token = getAdminCookieValue('XSRF-TOKEN');
+            if (!token) return;
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = '_csrf';
+            input.value = decodeURIComponent(token);
+            form.appendChild(input);
+        }, true);
+    }
+
     document.getElementById('adminLogoutBtn')?.addEventListener('click', async () => {
         await fetch('/api/user/logout', { method: 'POST' });
         window.location.href = '/login';

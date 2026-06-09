@@ -25,6 +25,7 @@ public class OrderItem {
     private String productName;
     private String imageUrl;
     private double price;
+    private double costAtSale;
     private int quantity;
     private double total;
 
@@ -52,6 +53,8 @@ public class OrderItem {
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     public double getPrice() { return price; }
     public void setPrice(double price) { this.price = price; }
+    public double getCostAtSale() { return costAtSale; }
+    public void setCostAtSale(double costAtSale) { this.costAtSale = costAtSale; }
     public int getQuantity() { return quantity; }
     public void setQuantity(int quantity) {
         this.quantity = quantity;

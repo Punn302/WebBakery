@@ -6,17 +6,29 @@
     <aside th:replace="~{admin/fragments :: sidebar('users')}"></aside>
     <main class="flex-1 px-4 md:px-8 py-8">
         <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
-            <div><p class="text-sm uppercase tracking-wider text-[#47654c] font-semibold">Admin</p><h1 class="text-3xl font-semibold">Quản lý người dùng</h1></div>
-            <form method="get" class="flex gap-2"><input name="keyword" th:value="${keyword}" class="border border-gray-200 rounded-lg px-4 py-3" placeholder="Tìm tên, email, SĐT"><button class="bg-[#47654c] text-white px-5 py-3 rounded-lg font-semibold">Tìm</button></form>
+            <h1 class="text-3xl font-semibold text-[#263d2b]">Qu&#7843;n l&#253; ng&#432;&#7901;i d&#249;ng</h1>
+            <form method="get" class="flex gap-2">
+                <input name="keyword" th:value="${keyword}" class="border border-gray-200 rounded-lg px-4 py-3" placeholder="T&#236;m t&#234;n, email, S&#272;T">
+                <button class="bg-[#47654c] text-white px-5 py-3 rounded-lg font-semibold">T&#236;m</button>
+            </form>
         </div>
         <section class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
             <table class="w-full text-sm">
-                <thead class="bg-[#f7f3ec] text-gray-600"><tr><th class="text-left px-6 py-4">Tên</th><th class="text-left px-6 py-4">Email</th><th class="text-left px-6 py-4">SĐT</th><th class="text-left px-6 py-4">Quản lý</th></tr></thead>
+                <thead class="bg-[#f7f3ec] text-gray-600">
+                <tr>
+                    <th class="text-left px-6 py-4">T&#234;n</th>
+                    <th class="text-left px-6 py-4">Email</th>
+                    <th class="text-left px-6 py-4">S&#272;T</th>
+                    <th class="text-left px-6 py-4">Vai tr&#242;</th>
+                    <th class="text-left px-6 py-4">Qu&#7843;n l&#253;</th>
+                </tr>
+                </thead>
                 <tbody>
                 <tr th:each="user : ${page.content}" class="border-t border-gray-100">
                     <td class="px-6 py-4 font-semibold" th:text="${user.name}"></td>
                     <td class="px-6 py-4" th:text="${user.email}"></td>
                     <td class="px-6 py-4" th:text="${user.phone}"></td>
+                    <td class="px-6 py-4" th:text="${user.role}"></td>
                     <td class="px-6 py-4">
                         <form th:action="@{/admin/users/{id}/update(id=${user.id})}" method="post" class="flex flex-wrap gap-2">
                             <select name="role" class="border border-gray-200 rounded-lg px-3 py-2">
@@ -27,8 +39,11 @@
                                 <input type="checkbox" name="active" value="true" th:checked="${user.active}">
                                 Active
                             </label>
-                            <input name="newPassword" class="border border-gray-200 rounded-lg px-3 py-2" placeholder="Mật khẩu mới">
-                            <button class="bg-[#47654c] text-white rounded-lg px-3 py-2 font-semibold">Lưu</button>
+                            <label th:if="${user.role == 'USER'}" class="inline-flex items-center gap-2 border border-amber-200 text-amber-700 rounded-lg px-3 py-2">
+                                <input type="checkbox" name="resetDefaultPassword" value="true">
+                                Reset v&#7873; 123456
+                            </label>
+                            <button class="bg-[#47654c] text-white rounded-lg px-3 py-2 font-semibold">L&#432;u</button>
                         </form>
                     </td>
                 </tr>

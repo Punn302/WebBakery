@@ -35,7 +35,18 @@
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Địa chỉ nhận hàng</label>
-                        <textarea id="address" rows="3" class="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố" required></textarea>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                            <select id="provinceSelect" class="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]">
+                                <option value="">Tỉnh/thành phố</option>
+                            </select>
+                            <select id="districtSelect" class="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]" disabled>
+                                <option value="">Quận/huyện</option>
+                            </select>
+                            <select id="wardSelect" class="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]" disabled>
+                                <option value="">Phường/xã</option>
+                            </select>
+                        </div>
+                        <textarea id="address" rows="3" class="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]" placeholder="Số nhà, tên đường" required></textarea>
                     </div>
 
                     <div>
@@ -76,13 +87,13 @@
                             <p class="text-sm font-semibold text-gray-800" th:text="${item.productName}"></p>
                             <p class="text-xs text-gray-400">SL: <span th:text="${item.quantity}"></span></p>
                         </div>
-                        <span class="text-sm font-semibold text-[#47654c]" th:text="${#numbers.formatDecimal(item.total, 0, 0, 'COMMA') + 'đ'}"></span>
+                        <span class="text-sm font-semibold text-[#47654c]" th:text="${#strings.replace(#numbers.formatDecimal(item.total, 0, 0, 'COMMA'), ',', '.') + 'đ'}"></span>
                     </div>
                 </div>
                 <div class="border-t border-gray-100 pt-4 space-y-3 text-sm">
-                    <div class="flex justify-between"><span class="text-gray-500">Tạm tính</span><span th:text="${#numbers.formatDecimal(subtotal, 0, 0, 'COMMA') + 'đ'}"></span></div>
-                    <div class="flex justify-between"><span class="text-gray-500">Vận chuyển</span><span th:text="${#numbers.formatDecimal(shippingFee, 0, 0, 'COMMA') + 'đ'}"></span></div>
-                    <div class="flex justify-between text-lg font-bold text-gray-800 pt-3 border-t border-gray-100"><span>Tổng</span><span class="text-[#47654c]" th:text="${#numbers.formatDecimal(totalPrice, 0, 0, 'COMMA') + 'đ'}"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Tạm tính</span><span th:text="${#strings.replace(#numbers.formatDecimal(subtotal, 0, 0, 'COMMA'), ',', '.') + 'đ'}"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Vận chuyển</span><span th:text="${#strings.replace(#numbers.formatDecimal(shippingFee, 0, 0, 'COMMA'), ',', '.') + 'đ'}"></span></div>
+                    <div class="flex justify-between text-lg font-bold text-gray-800 pt-3 border-t border-gray-100"><span>Tổng</span><span class="text-[#47654c]" th:text="${#strings.replace(#numbers.formatDecimal(totalPrice, 0, 0, 'COMMA'), ',', '.') + 'đ'}"></span></div>
                 </div>
             </aside>
         </div>
@@ -90,6 +101,7 @@
 </main>
 
 <div th:replace="~{layout/fragments :: footer}"></div>
-<script th:src="@{/js/checkout.js(v=1)}"></script>
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/checkout.js(v=2)}"></script>
 </body>
 </html>

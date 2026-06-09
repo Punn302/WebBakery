@@ -36,6 +36,13 @@ public class CartController {
         if (product == null) {
             return failure("San pham khong ton tai");
         }
+        int requestedQuantity = cartService.getQuantity(product.getId()) + request.getQuantity();
+        if (product.getStockQuantity() <= 0) {
+            return failure("San pham da het hang");
+        }
+        if (requestedQuantity > product.getStockQuantity()) {
+            return failure("Chi con " + product.getStockQuantity() + " san pham trong kho");
+        }
 
         cartService.addToCart(product, request.getQuantity());
 
@@ -53,6 +60,16 @@ public class CartController {
 
     @PostMapping("/api/cart/update")
     public Map<String, Object> updateCart(@Valid @RequestBody UpdateCartRequest request) {
+        Product product = productService.getProductById(request.getProductId());
+        if (product == null) {
+            return failure("San pham khong ton tai");
+        }
+        if (product.getStockQuantity() <= 0) {
+            return failure("San pham da het hang");
+        }
+        if (request.getQuantity() > product.getStockQuantity()) {
+            return failure("Chi con " + product.getStockQuantity() + " san pham trong kho");
+        }
         cartService.updateQuantity(request.getProductId(), request.getQuantity());
 
         Map<String, Object> response = success("Da cap nhat gio hang");

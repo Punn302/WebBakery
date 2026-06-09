@@ -20,6 +20,11 @@ public class Product {
     private String imageUrl;
     private String badge;
     private String tag;
+    private int stockQuantity;
+    private int lowStockThreshold = 5;
+    private double averageCost;
+    @Column(nullable = false)
+    private boolean active = true;
 
     public Product() {
     }
@@ -57,4 +62,14 @@ public class Product {
     public void setBadge(String badge) { this.badge = badge; }
     public String getTag() { return tag; }
     public void setTag(String tag) { this.tag = tag; }
+    public int getStockQuantity() { return stockQuantity; }
+    public void setStockQuantity(int stockQuantity) { this.stockQuantity = stockQuantity; }
+    public int getLowStockThreshold() { return lowStockThreshold; }
+    public void setLowStockThreshold(int lowStockThreshold) { this.lowStockThreshold = lowStockThreshold; }
+    public double getAverageCost() { return averageCost; }
+    public void setAverageCost(double averageCost) { this.averageCost = averageCost; }
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
+    public boolean isOutOfStock() { return stockQuantity <= 0; }
+    public boolean isLowStock() { return stockQuantity > 0 && stockQuantity <= lowStockThreshold; }
 }

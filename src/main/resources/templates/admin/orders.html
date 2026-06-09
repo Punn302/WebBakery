@@ -1,41 +1,80 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments :: head('Admin Orders')}"></head>
+<head th:replace="~{admin/fragments :: head('Quản lý đơn hàng')}"></head>
 <body class="bg-[#fbfaf7] text-gray-800">
 <div class="min-h-screen lg:flex">
     <aside th:replace="~{admin/fragments :: sidebar('orders')}"></aside>
     <main class="flex-1 px-4 md:px-8 py-8">
-        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
-            <div><p class="text-sm uppercase tracking-wider text-[#47654c] font-semibold">Admin</p><h1 class="text-3xl font-semibold">Quản lý đơn hàng</h1></div>
-            <form method="get" class="flex gap-2"><input name="keyword" th:value="${keyword}" class="border border-gray-200 rounded-lg px-4 py-3" placeholder="Tìm mã, tên, SĐT, trạng thái"><button class="bg-[#47654c] text-white px-5 py-3 rounded-lg font-semibold">Tìm</button></form>
+        <div class="flex flex-col gap-4 mb-6">
+            <div>
+                <p class="text-sm uppercase tracking-wider text-[#47654c] font-semibold">Admin</p>
+                <h1 class="text-3xl font-semibold">Quản lý đơn hàng</h1>
+            </div>
+            <form method="get" class="grid grid-cols-1 md:grid-cols-6 gap-3 bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
+                <input name="keyword" th:value="${keyword}" class="border border-gray-200 rounded-lg px-4 py-3 md:col-span-2" placeholder="Mã đơn, tên, SĐT">
+                <select name="orderStatus" class="border border-gray-200 rounded-lg px-4 py-3">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="PENDING" th:selected="${orderStatus == 'PENDING'}">Chờ xử lý</option>
+                    <option value="SHIPPING" th:selected="${orderStatus == 'SHIPPING'}">Đang giao</option>
+                    <option value="DELIVERED" th:selected="${orderStatus == 'DELIVERED'}">Đã giao</option>
+                    <option value="RECEIVED" th:selected="${orderStatus == 'RECEIVED'}">Đã nhận</option>
+                    <option value="CANCELLED" th:selected="${orderStatus == 'CANCELLED'}">Đã hủy</option>
+                    <option value="RETURN_REQUESTED" th:selected="${orderStatus == 'RETURN_REQUESTED'}">Yêu cầu đổi trả</option>
+                    <option value="RETURNED" th:selected="${orderStatus == 'RETURNED'}">Đã đổi trả</option>
+                </select>
+                <select name="paymentMethod" class="border border-gray-200 rounded-lg px-4 py-3">
+                    <option value="">Tất cả thanh toán</option>
+                    <option value="COD" th:selected="${paymentMethod == 'COD'}">COD</option>
+                    <option value="MOMO" th:selected="${paymentMethod == 'MOMO'}">MoMo</option>
+                </select>
+                <input type="date" name="from" th:value="${from}" class="border border-gray-200 rounded-lg px-4 py-3">
+                <input type="date" name="to" th:value="${to}" class="border border-gray-200 rounded-lg px-4 py-3">
+                <button class="bg-[#47654c] text-white px-5 py-3 rounded-lg font-semibold md:col-span-6">Lọc đơn hàng</button>
+            </form>
         </div>
+
         <section class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
             <table class="w-full text-sm">
-                <thead class="bg-[#f7f3ec] text-gray-600"><tr><th class="text-left px-6 py-4">Đơn</th><th class="text-left px-6 py-4">Sản phẩm</th><th class="text-left px-6 py-4">Tổng</th><th class="text-left px-6 py-4">Cập nhật</th></tr></thead>
+                <thead class="bg-[#f7f3ec] text-gray-600">
+                <tr><th class="text-left px-6 py-4">Đơn</th><th class="text-left px-6 py-4">Sản phẩm</th><th class="text-left px-6 py-4">Tổng tiền</th><th class="text-left px-6 py-4">Thao tác</th></tr>
+                </thead>
                 <tbody>
-                <tr th:each="order : ${page.content}" class="border-t border-gray-100">
-                    <td class="px-6 py-4"><a th:href="@{/admin/orders/{id}(id=${order.id})}" class="font-semibold hover:text-[#47654c]" th:text="${order.id}"></a><p class="text-xs text-gray-400" th:text="${order.statusText}"></p></td>
-                    <td class="px-6 py-4" th:text="${order.itemCount}"></td>
-                    <td class="px-6 py-4 text-[#47654c] font-semibold" th:text="${#numbers.formatDecimal(order.total, 0, 0, 'COMMA') + 'd'}"></td>
+                <tr th:each="order : ${page.content}" class="border-t border-gray-100 align-top">
                     <td class="px-6 py-4">
-                        <form th:if="${order.orderStatus != 'CANCELLED' and order.orderStatus != 'RECEIVED' and order.orderStatus != 'RETURN_REQUESTED' and order.orderStatus != 'RETURNED'}" th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="flex flex-wrap gap-2">
-                            <select name="orderStatus" class="border border-gray-200 rounded-lg px-3 py-2">
-                                <option value="SHIPPING" th:selected="${order.orderStatus == 'SHIPPING'}">Đang giao</option>
-                                <option value="DELIVERED" th:selected="${order.orderStatus == 'DELIVERED'}">Đã giao</option>
-                            </select>
-                            <select name="paymentStatus" class="border border-gray-200 rounded-lg px-3 py-2">
-                                <option value="PENDING" th:selected="${order.paymentStatus == 'PENDING'}">Chờ thanh toán</option>
-                                <option value="PAID" th:selected="${order.paymentStatus == 'PAID'}">Đã thanh toán</option>
-                            </select>
-                            <button class="bg-[#47654c] text-white rounded-lg px-3 py-2 font-semibold">Lưu</button>
-                        </form>
-                        <p th:if="${order.orderStatus == 'CANCELLED' or order.orderStatus == 'RECEIVED' or order.orderStatus == 'RETURN_REQUESTED' or order.orderStatus == 'RETURNED'}" class="text-sm text-gray-400">Đơn đang ở trạng thái cuối hoặc đang xử lý đổi trả.</p>
+                        <a th:href="@{/admin/orders/{id}(id=${order.id})}" class="font-semibold hover:text-[#47654c]" th:text="${order.id}">HBK</a>
+                        <p class="text-xs text-gray-400 mt-1" th:text="${order.date}"></p>
+                        <p class="text-xs text-[#47654c] mt-1" th:text="${order.statusText}"></p>
                     </td>
+                    <td class="px-6 py-4">
+                        <p class="font-semibold" th:text="${order.productName}">Sản phẩm</p>
+                        <p class="text-xs text-gray-400" th:text="${order.itemCount + ' sản phẩm'}">0 sản phẩm</p>
+                    </td>
+                    <td class="px-6 py-4 text-[#47654c] font-semibold" th:text="${#strings.replace(#numbers.formatDecimal(order.total, 0, 0, 'COMMA'), ',', '.') + 'đ'}">0đ</td>
+                    <td class="px-6 py-4">
+                        <a th:if="${order.orderStatus == 'PENDING'}" th:href="@{/admin/orders/{id}(id=${order.id})}" class="inline-block bg-[#47654c] text-white rounded-lg px-4 py-2 font-semibold">Tạo vận đơn</a>
+                        <form th:if="${order.orderStatus == 'SHIPPING'}" th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="flex flex-wrap gap-2">
+                            <input type="hidden" name="orderStatus" value="DELIVERED">
+                            <input type="hidden" name="paymentStatus" th:value="${order.paymentStatus}">
+                            <button class="bg-[#47654c] text-white rounded-lg px-4 py-2 font-semibold">Xác nhận đã giao</button>
+                        </form>
+                        <a th:if="${order.orderStatus == 'RETURN_REQUESTED'}" th:href="@{/admin/orders/{id}(id=${order.id})}" class="inline-block border border-amber-200 bg-amber-50 text-amber-700 rounded-lg px-4 py-2 font-semibold">Xử lý trả hàng</a>
+                        <p th:if="${order.orderStatus != 'PENDING' and order.orderStatus != 'SHIPPING' and order.orderStatus != 'RETURN_REQUESTED'}" class="text-sm text-gray-400">Không có thao tác.</p>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(page.content)}">
+                    <td colspan="4" class="px-6 py-8 text-center text-gray-400">Không có đơn hàng phù hợp.</td>
                 </tr>
                 </tbody>
             </table>
         </section>
-        <div th:replace="~{admin/pagination :: pager('/admin/orders', ${page}, ${keyword})}"></div>
+
+        <div class="flex items-center justify-between mt-6 text-sm">
+            <p class="text-gray-500">Trang <span th:text="${page.number + 1}">1</span>/<span th:text="${page.totalPages == 0 ? 1 : page.totalPages}">1</span></p>
+            <div class="flex gap-2">
+                <a th:if="${page.hasPrevious()}" th:href="@{/admin/orders(page=${page.number - 1},keyword=${keyword},orderStatus=${orderStatus},paymentMethod=${paymentMethod},from=${from},to=${to})}" class="px-4 py-2 rounded-lg border border-gray-200 bg-white">Trước</a>
+                <a th:if="${page.hasNext()}" th:href="@{/admin/orders(page=${page.number + 1},keyword=${keyword},orderStatus=${orderStatus},paymentMethod=${paymentMethod},from=${from},to=${to})}" class="px-4 py-2 rounded-lg border border-gray-200 bg-white">Sau</a>
+            </div>
+        </div>
     </main>
 </div>
 <script th:replace="~{admin/fragments :: logoutScript}"></script>

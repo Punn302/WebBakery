@@ -20,17 +20,32 @@ public class AddressService {
     }
 
     public Address save(String userId, AddressRequest request) {
+        return save(userId, null, request);
+    }
+
+    public Address save(String userId, String addressId, AddressRequest request) {
         if (request.isDefaultAddress()) {
             List<Address> userAddresses = getByUser(userId);
-            userAddresses.forEach(address -> address.setDefaultAddress(false));
+            userAddresses.stream()
+                    .filter(address -> addressId == null || !address.getId().equals(addressId))
+                    .forEach(address -> address.setDefaultAddress(false));
             addressRepository.saveAll(userAddresses);
         }
-        Address address = new Address();
-        address.setId("ADDR-" + System.currentTimeMillis());
+        Address address = addressId == null
+                ? new Address()
+                : addressRepository.findById(addressId)
+                    .filter(existing -> existing.getUserId().equals(userId))
+                    .orElseThrow(() -> new IllegalArgumentException("Khong tim thay dia chi"));
+        if (address.getId() == null) {
+            address.setId("ADDR-" + System.currentTimeMillis());
+        }
         address.setUserId(userId);
         address.setReceiverName(request.getReceiverName());
         address.setPhone(request.getPhone());
         address.setAddressLine(request.getAddressLine());
+        address.setProvince(clean(request.getProvince()));
+        address.setDistrict(clean(request.getDistrict()));
+        address.setWard(clean(request.getWard()));
         address.setDefaultAddress(request.isDefaultAddress());
         return addressRepository.save(address);
     }
@@ -43,5 +58,9 @@ public class AddressService {
                     return true;
                 })
                 .orElse(false);
+    }
+
+    private String clean(String value) {
+        return value == null ? "" : value.trim();
     }
 }

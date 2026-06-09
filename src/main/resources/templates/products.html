@@ -43,8 +43,9 @@
                     <span class="text-xs text-[#47654c] uppercase tracking-wider" th:text="${product.badge}"></span>
                     <h3 class="text-lg font-semibold text-gray-800 mt-2 mb-1" th:text="${product.name}">San pham</h3>
                     <p class="text-sm text-gray-500 mb-2 line-clamp-2" th:text="${product.description}">Mo ta</p>
-                    <p class="text-lg font-bold text-[#47654c] mb-3" th:text="${#numbers.formatDecimal(product.price, 0, 0, 'COMMA') + ' d'}">0 d</p>
-                    <button type="button" class="quick-add" th:attr="data-product-id=${product.id}">Th&#234;m v&#224;o gi&#7887;</button>
+                    <p class="text-xs mb-2" th:classappend="${product.outOfStock} ? ' text-red-500' : ' text-gray-400'" th:text="${product.outOfStock ? 'Hết hàng' : 'Còn ' + product.stockQuantity + ' sản phẩm'}">Con hang</p>
+                    <p class="text-lg font-bold text-[#47654c] mb-3" th:text="${#strings.replace(#numbers.formatDecimal(product.price, 0, 0, 'COMMA'), ',', '.') + ' đ'}">0 đ</p>
+                    <button type="button" class="quick-add" th:disabled="${product.outOfStock}" th:attr="data-product-id=${product.id}" th:text="${product.outOfStock ? 'Hết hàng' : 'Thêm vào giỏ'}">Thêm vào giỏ</button>
                 </div>
             </a>
         </div>

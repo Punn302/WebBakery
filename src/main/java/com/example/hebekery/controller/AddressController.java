@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,6 +40,15 @@ public class AddressController {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("address", addressService.save(userService.getCurrentUser().getId(), request));
+        return response;
+    }
+
+    @PutMapping("/api/user/addresses/{id}")
+    public Map<String, Object> update(@PathVariable String id, @Valid @RequestBody AddressRequest request) {
+        requireLogin();
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("address", addressService.save(userService.getCurrentUser().getId(), id, request));
         return response;
     }
 

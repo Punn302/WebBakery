@@ -60,7 +60,7 @@
                                     </div>
                                 </td>
                                 <td class="py-4 px-4 text-center">
-                                    <span class="font-medium text-gray-700" th:text="${#numbers.formatDecimal(item.price, 0, 0, 'COMMA') + '₫'}"></span>
+                                    <span class="font-medium text-gray-700" th:text="${#strings.replace(#numbers.formatDecimal(item.price, 0, 0, 'COMMA'), ',', '.') + 'đ'}"></span>
                                 </td>
                                 <td class="py-4 px-4">
                                     <div class="flex justify-center">
@@ -72,7 +72,7 @@
                                     </div>
                                 </td>
                                 <td class="py-4 px-4 text-center">
-                                    <span class="font-bold text-[#47654c] item-total" th:text="${#numbers.formatDecimal(item.total, 0, 0, 'COMMA') + '₫'}"></span>
+                                    <span class="font-bold text-[#47654c] item-total" th:text="${#strings.replace(#numbers.formatDecimal(item.total, 0, 0, 'COMMA'), ',', '.') + 'đ'}"></span>
                                 </td>
                                 <td class="py-4 px-4 text-center">
                                     <button class="remove-item text-gray-400 hover:text-red-500 transition">

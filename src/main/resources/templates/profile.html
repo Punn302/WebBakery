@@ -32,6 +32,7 @@
             <aside class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 h-fit">
                 <button class="profile-nav-item active w-full text-left px-4 py-3 rounded-lg font-semibold text-[#47654c] bg-[#f7f3ec]" data-tab="profile">Thông tin cá nhân</button>
                 <button class="profile-nav-item w-full text-left px-4 py-3 rounded-lg font-semibold text-gray-600 hover:bg-[#f7f3ec]" data-tab="password">Đổi mật khẩu</button>
+                <button class="profile-nav-item w-full text-left px-4 py-3 rounded-lg font-semibold text-gray-600 hover:bg-[#f7f3ec]" data-tab="addresses">Sổ địa chỉ</button>
                 <button class="profile-nav-item w-full text-left px-4 py-3 rounded-lg font-semibold text-gray-600 hover:bg-[#f7f3ec]" data-tab="orders">Đơn hàng</button>
             </aside>
 
@@ -39,36 +40,17 @@
                 <div id="tab-profile" class="tab-content bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                     <div id="profileView">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div class="border border-gray-100 rounded-lg p-4">
-                                <p class="text-sm text-gray-400">Họ tên</p>
-                                <p id="profileName" class="font-semibold text-gray-800 mt-1" th:text="${user.name}"></p>
-                            </div>
-                            <div class="border border-gray-100 rounded-lg p-4">
-                                <p class="text-sm text-gray-400">Email</p>
-                                <p id="profileEmail" class="font-semibold text-gray-800 mt-1" th:text="${user.email}"></p>
-                            </div>
-                            <div class="border border-gray-100 rounded-lg p-4">
-                                <p class="text-sm text-gray-400">Số điện thoại</p>
-                                <p id="profilePhone" class="font-semibold text-gray-800 mt-1" th:text="${user.phone}"></p>
-                            </div>
-                            <div class="border border-gray-100 rounded-lg p-4">
-                                <p class="text-sm text-gray-400">Ngày tham gia</p>
-                                <p id="profileJoinDate" class="font-semibold text-gray-800 mt-1">Hôm nay</p>
-                            </div>
+                            <div class="border border-gray-100 rounded-lg p-4"><p class="text-sm text-gray-400">Họ tên</p><p id="profileName" class="font-semibold text-gray-800 mt-1" th:text="${user.name}"></p></div>
+                            <div class="border border-gray-100 rounded-lg p-4"><p class="text-sm text-gray-400">Email</p><p id="profileEmail" class="font-semibold text-gray-800 mt-1" th:text="${user.email}"></p></div>
+                            <div class="border border-gray-100 rounded-lg p-4"><p class="text-sm text-gray-400">Số điện thoại</p><p id="profilePhone" class="font-semibold text-gray-800 mt-1" th:text="${user.phone}"></p></div>
+                            <div class="border border-gray-100 rounded-lg p-4"><p class="text-sm text-gray-400">Ngày tham gia</p><p id="profileJoinDate" class="font-semibold text-gray-800 mt-1">Hôm nay</p></div>
                         </div>
                         <button id="editProfileBtn" class="mt-6 bg-[#47654c] text-white px-6 py-3 rounded-full font-semibold">Cập nhật thông tin</button>
                     </div>
-
                     <div id="profileEdit" class="hidden">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Họ tên</label>
-                                <input id="editName" class="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Số điện thoại</label>
-                                <input id="editPhone" class="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]">
-                            </div>
+                            <div><label class="block text-sm font-semibold text-gray-700 mb-2">Họ tên</label><input id="editName" class="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]"></div>
+                            <div><label class="block text-sm font-semibold text-gray-700 mb-2">Số điện thoại</label><input id="editPhone" class="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]"></div>
                         </div>
                         <div class="mt-6 flex gap-3">
                             <button id="saveProfileBtn" class="bg-[#47654c] text-white px-6 py-3 rounded-full font-semibold">Lưu</button>
@@ -87,6 +69,31 @@
                     </div>
                 </div>
 
+                <div id="tab-addresses" class="tab-content hidden bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                    <div class="flex items-center justify-between gap-4 mb-5">
+                        <h2 class="text-xl font-semibold text-gray-800">Sổ địa chỉ</h2>
+                        <button id="newAddressBtn" class="bg-[#47654c] text-white px-5 py-3 rounded-full font-semibold">Thêm địa chỉ</button>
+                    </div>
+                    <form id="addressForm" class="hidden border border-gray-100 rounded-xl p-4 mb-5 space-y-3" data-address-id="">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <input id="addressReceiverName" class="border border-gray-200 rounded-lg px-4 py-3" placeholder="Người nhận">
+                            <input id="addressPhone" class="border border-gray-200 rounded-lg px-4 py-3" placeholder="Số điện thoại">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <select id="profileProvinceSelect" class="border border-gray-200 rounded-lg px-4 py-3"><option value="">Tỉnh/thành phố</option></select>
+                            <select id="profileDistrictSelect" class="border border-gray-200 rounded-lg px-4 py-3" disabled><option value="">Quận/huyện</option></select>
+                            <select id="profileWardSelect" class="border border-gray-200 rounded-lg px-4 py-3" disabled><option value="">Phường/xã</option></select>
+                        </div>
+                        <textarea id="addressLine" rows="2" class="w-full border border-gray-200 rounded-lg px-4 py-3" placeholder="Số nhà, tên đường"></textarea>
+                        <label class="flex items-center gap-2 text-sm text-gray-600"><input id="addressDefault" type="checkbox"> Đặt làm địa chỉ mặc định</label>
+                        <div class="flex gap-2">
+                            <button class="bg-[#47654c] text-white rounded-full px-5 py-3 font-semibold">Lưu địa chỉ</button>
+                            <button id="cancelAddressBtn" type="button" class="border border-gray-200 rounded-full px-5 py-3 font-semibold">Hủy</button>
+                        </div>
+                    </form>
+                    <div id="addressesList" class="space-y-4"></div>
+                </div>
+
                 <div id="tab-orders" class="tab-content hidden bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                     <h2 class="text-xl font-semibold text-gray-800 mb-5">Đơn hàng của tôi</h2>
                     <div id="ordersList" class="space-y-4"></div>
@@ -97,6 +104,7 @@
 </main>
 
 <div th:replace="~{layout/fragments :: footer}"></div>
-<script th:src="@{/js/profile.js(v=2)}"></script>
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/profile.js(v=3)}"></script>
 </body>
 </html>

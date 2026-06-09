@@ -132,17 +132,18 @@
                 <span class="inline-flex text-xs bg-[#47654c] text-white px-3 py-1 rounded-full mb-3" th:text="${product.badge}">Noi bat</span>
                 <h1 class="text-3xl md:text-4xl font-medium text-gray-800 mb-3" th:text="${product.name}">Ten san pham</h1>
                 <p class="text-gray-500 mb-6 leading-relaxed" th:text="${product.description}">Mo ta san pham</p>
-                <p class="text-3xl font-bold text-[#47654c] mb-6" th:text="${#numbers.formatDecimal(product.price, 0, 0, 'COMMA') + ' d'}">0 d</p>
+                <p class="text-3xl font-bold text-[#47654c] mb-6" th:text="${#strings.replace(#numbers.formatDecimal(product.price, 0, 0, 'COMMA'), ',', '.') + ' đ'}">0 đ</p>
+                <p class="mb-6 font-semibold" th:classappend="${product.outOfStock} ? ' text-red-500' : ' text-[#47654c]'" th:text="${product.outOfStock ? 'Hết hàng' : 'Còn ' + product.stockQuantity + ' sản phẩm'}">Con hang</p>
 
                 <div class="flex items-center gap-6 mb-8">
                     <div class="quantity-selector">
                         <button type="button" class="quantity-btn minus">-</button>
-                        <input type="number" id="quantity" class="quantity-input" value="1" min="1" max="99">
+                        <input type="number" id="quantity" class="quantity-input" value="1" min="1" th:max="${product.stockQuantity}">
                         <button type="button" class="quantity-btn plus">+</button>
                     </div>
-                    <button id="addToCartBtn" th:attr="data-product-id=${product.id}" class="flex-1 bg-[#47654c] text-white py-3 px-6 rounded-full font-semibold hover:bg-[#3a543e] transition flex items-center justify-center gap-2">
+                    <button id="addToCartBtn" th:disabled="${product.outOfStock}" th:attr="data-product-id=${product.id},data-stock=${product.stockQuantity}" class="flex-1 bg-[#47654c] text-white py-3 px-6 rounded-full font-semibold hover:bg-[#3a543e] transition flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed">
                         <span class="material-symbols-outlined">shopping_cart</span>
-                        Th&#234;m v&#224;o gi&#7887; h&#224;ng
+                        <span th:text="${product.outOfStock ? 'Hết hàng' : 'Thêm vào giỏ hàng'}">Thêm vào giỏ hàng</span>
                     </button>
                 </div>
 
@@ -185,6 +186,42 @@
             </div>
         </section>
 
+        <section class="mb-16 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="text-2xl font-medium text-gray-800">Đánh giá sản phẩm</h2>
+                    <p class="text-sm text-gray-500 mt-1">Chỉ khách đã nhận hàng mới có thể đánh giá.</p>
+                </div>
+                <div th:if="${canReview}" class="w-full md:w-96">
+                    <form id="reviewForm" th:attr="data-product-id=${product.id},data-review-id=${myReview != null ? myReview.id : ''}" class="space-y-3">
+                        <select id="reviewRating" class="w-full border border-gray-200 rounded-lg px-4 py-3">
+                            <option value="5" th:selected="${myReview == null or myReview.rating == 5}">5 sao</option>
+                            <option value="4" th:selected="${myReview != null and myReview.rating == 4}">4 sao</option>
+                            <option value="3" th:selected="${myReview != null and myReview.rating == 3}">3 sao</option>
+                            <option value="2" th:selected="${myReview != null and myReview.rating == 2}">2 sao</option>
+                            <option value="1" th:selected="${myReview != null and myReview.rating == 1}">1 sao</option>
+                        </select>
+                        <textarea id="reviewComment" rows="3" class="w-full border border-gray-200 rounded-lg px-4 py-3" placeholder="Chia sẻ cảm nhận của bạn" th:text="${myReview != null ? myReview.comment : ''}"></textarea>
+                        <div class="flex gap-2">
+                            <button class="bg-[#47654c] text-white rounded-lg px-5 py-3 font-semibold" th:text="${myReview != null ? 'Cập nhật đánh giá' : 'Gửi đánh giá'}">Gửi đánh giá</button>
+                            <button th:if="${myReview != null}" id="deleteReviewBtn" type="button" class="border border-red-200 text-red-500 rounded-lg px-5 py-3 font-semibold">Xóa</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div id="reviewsList" class="space-y-4">
+                <div th:each="review : ${reviews}" class="border-t border-gray-100 pt-4">
+                    <div class="flex items-center justify-between gap-4">
+                        <p class="font-semibold text-gray-800" th:text="${review.userName}">Người dùng</p>
+                        <p class="text-amber-500 font-semibold" th:text="${review.rating + ' sao'}">5 sao</p>
+                    </div>
+                    <p class="text-gray-600 mt-2" th:text="${review.comment}">Nội dung đánh giá</p>
+                    <p class="text-xs text-gray-400 mt-2" th:text="${#temporals.format(review.updatedAt ?: review.createdAt, 'dd/MM/yyyy HH:mm')}">Ngày</p>
+                </div>
+                <p th:if="${#lists.isEmpty(reviews)}" class="text-gray-400">Chưa có đánh giá nào.</p>
+            </div>
+        </section>
+
         <section>
             <h2 class="text-2xl font-medium text-gray-800 mb-6">S&#7843;n ph&#7849;m li&#234;n quan</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -194,7 +231,7 @@
                     </div>
                     <div class="text-center">
                         <h3 class="text-base font-semibold text-gray-800 mb-1" th:text="${related.name}">San pham</h3>
-                        <p class="text-sm font-bold text-[#47654c]" th:text="${#numbers.formatDecimal(related.price, 0, 0, 'COMMA') + ' d'}">0 d</p>
+                        <p class="text-sm font-bold text-[#47654c]" th:text="${#strings.replace(#numbers.formatDecimal(related.price, 0, 0, 'COMMA'), ',', '.') + ' đ'}">0 đ</p>
                     </div>
                 </a>
             </div>
@@ -207,6 +244,7 @@
 </div>
 
 <div th:replace="~{layout/fragments :: footer}"></div>
+<script th:src="@{/js/common.js}"></script>
 <script th:src="@{/js/product-detail.js(v=2)}"></script>
 </body>
 </html>

@@ -31,12 +31,12 @@ const Checkout = (function() {
             const submitBtn = form.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = 'Dang xu ly...';
+            submitBtn.innerHTML = 'Đang xử lý...';
 
             const payload = {
                 customerName: document.getElementById('customerName').value.trim(),
                 phone: document.getElementById('phone').value.trim(),
-                address: document.getElementById('address').value.trim(),
+                address: buildAddress(),
                 note: document.getElementById('note').value.trim(),
                 paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value
             };
@@ -51,12 +51,12 @@ const Checkout = (function() {
                 const data = await response.json();
 
                 if (!data.success) {
-                    showMessage('error', data.message || 'Thanh toan that bai');
+                    showMessage('error', data.message || 'Thanh toán thất bại');
                     return;
                 }
 
                 const checkout = data.checkout;
-                showMessage('success', data.message || 'Dat hang thanh cong');
+                showMessage('success', data.message || 'Đặt hàng thành công');
 
                 if (checkout.paymentMethod === 'MOMO' && checkout.payUrl) {
                     window.location.href = checkout.payUrl;
@@ -65,7 +65,7 @@ const Checkout = (function() {
                 }
             } catch (error) {
                 console.error('Checkout error:', error);
-                showMessage('error', 'Co loi xay ra khi thanh toan');
+                showMessage('error', 'Có lỗi xảy ra khi thanh toán');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
@@ -73,8 +73,72 @@ const Checkout = (function() {
         });
     }
 
+    function selectedText(id) {
+        const select = document.getElementById(id);
+        return select && select.selectedIndex > 0 ? select.options[select.selectedIndex].text : '';
+    }
+
+    function buildAddress() {
+        return [
+            document.getElementById('address').value.trim(),
+            selectedText('wardSelect'),
+            selectedText('districtSelect'),
+            selectedText('provinceSelect')
+        ].filter(Boolean).join(', ');
+    }
+
+    async function fetchProvinceApi(path) {
+        const response = await fetch('https://provinces.open-api.vn/api/' + path);
+        if (!response.ok) throw new Error('Province API unavailable');
+        return response.json();
+    }
+
+    function fillSelect(select, items, placeholder) {
+        if (!select) return;
+        select.innerHTML = `<option value="">${placeholder}</option>`;
+        items.forEach((item) => {
+            const option = document.createElement('option');
+            option.value = item.code;
+            option.textContent = item.name;
+            select.appendChild(option);
+        });
+        select.disabled = false;
+    }
+
+    function initProvinceDropdowns() {
+        const provinceSelect = document.getElementById('provinceSelect');
+        const districtSelect = document.getElementById('districtSelect');
+        const wardSelect = document.getElementById('wardSelect');
+        if (!provinceSelect || !districtSelect || !wardSelect) return;
+
+        fetchProvinceApi('?depth=1')
+            .then((provinces) => fillSelect(provinceSelect, provinces, 'Tỉnh/thành phố'))
+            .catch(() => {
+                provinceSelect.innerHTML = '<option value="">Không tải được tỉnh/thành</option>';
+            });
+
+        provinceSelect.addEventListener('change', async () => {
+            districtSelect.innerHTML = '<option value="">Quận/huyện</option>';
+            wardSelect.innerHTML = '<option value="">Phường/xã</option>';
+            districtSelect.disabled = true;
+            wardSelect.disabled = true;
+            if (!provinceSelect.value) return;
+            const province = await fetchProvinceApi('p/' + provinceSelect.value + '?depth=2');
+            fillSelect(districtSelect, province.districts || [], 'Quận/huyện');
+        });
+
+        districtSelect.addEventListener('change', async () => {
+            wardSelect.innerHTML = '<option value="">Phường/xã</option>';
+            wardSelect.disabled = true;
+            if (!districtSelect.value) return;
+            const district = await fetchProvinceApi('d/' + districtSelect.value + '?depth=2');
+            fillSelect(wardSelect, district.wards || [], 'Phường/xã');
+        });
+    }
+
     function init() {
         initPaymentCards();
+        initProvinceDropdowns();
         initForm();
     }
 

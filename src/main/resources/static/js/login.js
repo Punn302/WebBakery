@@ -56,6 +56,7 @@ const Login = (function() {
             const response = await fetch('/api/user/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
                 body: JSON.stringify({ email, password, rememberMe })
             });
             const data = await response.json();

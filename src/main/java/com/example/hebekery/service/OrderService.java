@@ -7,12 +7,16 @@ import com.example.hebekery.model.CartItem;
 import com.example.hebekery.model.Order;
 import com.example.hebekery.model.OrderItem;
 import com.example.hebekery.model.OrderStatusHistory;
+import com.example.hebekery.model.ReturnHistory;
 import com.example.hebekery.model.User;
+import com.example.hebekery.model.Product;
 import com.example.hebekery.repository.OrderRepository;
 import com.example.hebekery.repository.OrderStatusHistoryRepository;
+import com.example.hebekery.repository.ReturnHistoryRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -22,6 +26,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -39,12 +44,17 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderStatusHistoryRepository orderStatusHistoryRepository;
+    private final ReturnHistoryRepository returnHistoryRepository;
+    private final ProductService productService;
 
-    public OrderService(OrderRepository orderRepository, OrderStatusHistoryRepository orderStatusHistoryRepository) {
+    public OrderService(OrderRepository orderRepository, OrderStatusHistoryRepository orderStatusHistoryRepository, ReturnHistoryRepository returnHistoryRepository, ProductService productService) {
         this.orderRepository = orderRepository;
         this.orderStatusHistoryRepository = orderStatusHistoryRepository;
+        this.returnHistoryRepository = returnHistoryRepository;
+        this.productService = productService;
     }
 
+    @Transactional
     public CheckoutResponse createOrder(User user, List<CartItem> cartItems, double subtotal, CheckoutRequest request) {
         if (user == null) {
             throw new IllegalStateException("Vui lòng đăng nhập");
@@ -52,6 +62,7 @@ public class OrderService {
         if (cartItems == null || cartItems.isEmpty()) {
             throw new IllegalArgumentException("Giỏ hàng đang trống");
         }
+        cartItems.forEach(item -> productService.ensureAvailable(item.getProductId(), item.getQuantity()));
 
         Order order = new Order();
         order.setId("HBK-" + System.currentTimeMillis());
@@ -97,20 +108,20 @@ public class OrderService {
     }
 
     public Page<OrderResponse> searchOrders(String keyword, Pageable pageable) {
-        Page<Order> orders;
-        if (keyword == null || keyword.trim().isEmpty()) {
-            orders = orderRepository.findAll(pageable);
-        } else {
-            String term = keyword.trim();
-            orders = orderRepository.findByIdContainingIgnoreCaseOrCustomerNameContainingIgnoreCaseOrPhoneContainingIgnoreCaseOrOrderStatusContainingIgnoreCase(
-                    term,
-                    term,
-                    term,
-                    term,
-                    pageable
-            );
-        }
-        return orders.map(this::toResponse);
+        return searchOrders(keyword, "", "", null, null, pageable);
+    }
+
+    public Page<OrderResponse> searchOrders(String keyword, String orderStatus, String paymentMethod, LocalDate dateFrom, LocalDate dateTo, Pageable pageable) {
+        LocalDateTime from = dateFrom == null ? null : dateFrom.atStartOfDay();
+        LocalDateTime to = dateTo == null ? null : dateTo.plusDays(1).atStartOfDay();
+        return orderRepository.search(
+                clean(keyword),
+                clean(orderStatus),
+                clean(paymentMethod),
+                from,
+                to,
+                pageable
+        ).map(this::toResponse);
     }
 
     public Order getOrderById(String orderId) {
@@ -124,6 +135,7 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public Order updateStatus(String orderId, String orderStatus, String paymentStatus) {
         Order order = getOrderById(orderId);
         if ("CANCELLED".equals(order.getOrderStatus())
@@ -131,6 +143,12 @@ public class OrderService {
                 || "RETURN_REQUESTED".equals(order.getOrderStatus())
                 || "RETURNED".equals(order.getOrderStatus())) {
             throw new IllegalArgumentException("Đơn hàng hiện không thể cập nhật giao hàng");
+        }
+        if ("SHIPPING".equals(orderStatus)) {
+            throw new IllegalArgumentException("Đơn chờ xử lý chỉ được chuyển sang đang giao bằng thao tác tạo vận đơn");
+        }
+        if ("DELIVERED".equals(orderStatus) && !"SHIPPING".equals(order.getOrderStatus())) {
+            throw new IllegalArgumentException("Chỉ đơn đang giao mới được chuyển sang đã giao");
         }
         if (!"SHIPPING".equals(orderStatus) && !"DELIVERED".equals(orderStatus)) {
             throw new IllegalArgumentException("Admin chỉ được chuyển đơn sang Đang giao hoặc Đã giao");
@@ -146,6 +164,7 @@ public class OrderService {
             }
             order.setPaymentStatus(paymentStatus);
         }
+        deductInventoryIfNeeded(order);
         Order saved = orderRepository.save(order);
         addHistory(saved, "Admin cập nhật trạng thái", "ADMIN");
         return saved;
@@ -156,6 +175,25 @@ public class OrderService {
         order.setAdminNote(adminNote);
         Order saved = orderRepository.save(order);
         addHistory(saved, "Admin ghi chú đơn hàng", "ADMIN");
+        return saved;
+    }
+
+    public Order updateShippingInfo(String orderId, String shippingCarrier, String trackingCode) {
+        Order order = getOrderById(orderId);
+        if (!"PENDING".equals(order.getOrderStatus())) {
+            throw new IllegalArgumentException("Chỉ đơn chờ xử lý mới được tạo mã vận đơn");
+        }
+        if (shippingCarrier == null || shippingCarrier.isBlank()) {
+            throw new IllegalArgumentException("Vui lòng chọn đơn vị giao hàng");
+        }
+        if ("CANCELLED".equals(order.getOrderStatus()) || "RETURNED".equals(order.getOrderStatus())) {
+            throw new IllegalArgumentException("Đơn đã hủy hoặc đã đổi trả không thể cập nhật vận chuyển");
+        }
+        order.setShippingCarrier(clean(shippingCarrier));
+        order.setTrackingCode(generateTrackingCode(order));
+        order.setOrderStatus("SHIPPING");
+        Order saved = orderRepository.save(order);
+        addHistory(saved, "Admin cập nhật thông tin vận chuyển", "ADMIN");
         return saved;
     }
 
@@ -173,6 +211,7 @@ public class OrderService {
         return saved;
     }
 
+    @Transactional
     public Order markReceived(String orderId, String userId) {
         Order order = getOwnedOrder(orderId, userId);
         if (!"SHIPPING".equals(order.getOrderStatus()) && !"DELIVERED".equals(order.getOrderStatus())) {
@@ -182,11 +221,13 @@ public class OrderService {
         if ("COD".equals(order.getPaymentMethod())) {
             order.setPaymentStatus("PAID");
         }
+        deductInventoryIfNeeded(order);
         Order saved = orderRepository.save(order);
         addHistory(saved, "User xác nhận đã nhận hàng", "USER");
         return saved;
     }
 
+    @Transactional
     public Order requestReturn(String orderId, String userId, String reason) {
         Order order = getOwnedOrder(orderId, userId);
         if (!"RECEIVED".equals(order.getOrderStatus())) {
@@ -200,9 +241,11 @@ public class OrderService {
         order.setReturnReason(reason.trim());
         Order saved = orderRepository.save(order);
         addHistory(saved, "User yêu cầu đổi trả: " + reason.trim(), "USER");
+        addReturnHistory(saved, "PENDING", reason.trim(), null, "USER");
         return saved;
     }
 
+    @Transactional
     public Order reviewReturn(String orderId, String decision, String adminNote) {
         Order order = getOrderById(orderId);
         if (!"RETURN_REQUESTED".equals(order.getOrderStatus())) {
@@ -211,6 +254,7 @@ public class OrderService {
         if ("APPROVED".equals(decision)) {
             order.setReturnStatus("APPROVED");
             order.setOrderStatus("RETURNED");
+            restoreInventoryIfNeeded(order);
         } else if ("REJECTED".equals(decision)) {
             order.setReturnStatus("REJECTED");
             order.setOrderStatus("RECEIVED");
@@ -220,11 +264,16 @@ public class OrderService {
         order.setAdminNote(adminNote);
         Order saved = orderRepository.save(order);
         addHistory(saved, "Admin " + ("APPROVED".equals(decision) ? "duyệt" : "từ chối") + " đổi trả: " + safe(adminNote), "ADMIN");
+        addReturnHistory(saved, order.getReturnStatus(), order.getReturnReason(), adminNote, "ADMIN");
         return saved;
     }
 
     public List<OrderStatusHistory> getHistory(String orderId) {
         return orderStatusHistoryRepository.findByOrderIdOrderByCreatedAtAsc(orderId);
+    }
+
+    public List<ReturnHistory> getReturnHistory(String orderId) {
+        return returnHistoryRepository.findByOrderIdOrderByCreatedAtAsc(orderId);
     }
 
     private Order getOwnedOrder(String orderId, String userId) {
@@ -238,6 +287,7 @@ public class OrderService {
     private List<OrderItem> copyItems(Order order, List<CartItem> cartItems) {
         return cartItems.stream()
                 .map(item -> {
+                    Product product = productService.getProductById(item.getProductId());
                     OrderItem orderItem = new OrderItem(
                             item.getProductId(),
                             item.getProductName(),
@@ -245,6 +295,7 @@ public class OrderService {
                             item.getPrice(),
                             item.getQuantity()
                     );
+                    orderItem.setCostAtSale(product == null ? 0 : product.getAverageCost());
                     orderItem.setOrder(order);
                     return orderItem;
                 })
@@ -322,8 +373,45 @@ public class OrderService {
         ));
     }
 
+    private void addReturnHistory(Order order, String returnStatus, String reason, String adminNote, String changedBy) {
+        returnHistoryRepository.save(new ReturnHistory(order.getId(), returnStatus, reason, adminNote, changedBy));
+    }
+
+    private void deductInventoryIfNeeded(Order order) {
+        if (order.isInventoryDeducted()) {
+            return;
+        }
+        if (!"DELIVERED".equals(order.getOrderStatus()) && !"RECEIVED".equals(order.getOrderStatus())) {
+            return;
+        }
+        for (OrderItem item : order.getItems()) {
+            productService.decreaseStock(item.getProductId(), item.getQuantity(), "ORDER", order.getId(), "Xuat kho theo don " + order.getId());
+        }
+        order.setInventoryDeducted(true);
+    }
+
+    private void restoreInventoryIfNeeded(Order order) {
+        if (!order.isInventoryDeducted()) {
+            return;
+        }
+        for (OrderItem item : order.getItems()) {
+            productService.increaseStock(item.getProductId(), item.getQuantity(), "RETURN", order.getId(), "Hoan kho doi tra " + order.getId());
+        }
+        order.setInventoryDeducted(false);
+    }
+
     private String safe(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private String clean(String value) {
+        return value == null ? "" : value.trim();
+    }
+
+    private String generateTrackingCode(Order order) {
+        String source = order.getId() == null ? String.valueOf(System.currentTimeMillis()) : order.getId().replaceAll("[^0-9A-Za-z]", "");
+        String suffix = source.length() > 10 ? source.substring(source.length() - 10) : source;
+        return "VD-" + suffix + "-" + (System.currentTimeMillis() % 10000);
     }
 
     private String createMomoPaymentUrl(Order order) {

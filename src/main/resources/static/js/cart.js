@@ -5,7 +5,7 @@
 const Cart = (function() {
 
     function formatCurrency(value) {
-        return Number(value || 0).toLocaleString('vi-VN') + 'd';
+        return Number(value || 0).toLocaleString('vi-VN') + 'đ';
     }
 
     async function loadCart() {
@@ -113,7 +113,12 @@ const Cart = (function() {
                 let val = parseInt(input.value) || 1;
                 if (val > 1) {
                     input.value = val - 1;
-                    await updateQuantity(productId, val - 1);
+                    const result = await updateQuantity(productId, val - 1);
+                    if (!result?.success) {
+                        alert(result?.message || 'Không thể cập nhật giỏ hàng');
+                        await loadCart();
+                        return;
+                    }
                     updateCartDisplay();
                 }
             });
@@ -121,7 +126,12 @@ const Cart = (function() {
             plusBtn.addEventListener('click', async () => {
                 let val = parseInt(input.value) || 1;
                 input.value = Math.min(val + 1, 99);
-                await updateQuantity(productId, parseInt(input.value));
+                const result = await updateQuantity(productId, parseInt(input.value));
+                if (!result?.success) {
+                    alert(result?.message || 'Không thể cập nhật giỏ hàng');
+                    await loadCart();
+                    return;
+                }
                 updateCartDisplay();
             });
 
@@ -129,7 +139,12 @@ const Cart = (function() {
                 let val = parseInt(input.value);
                 if (isNaN(val) || val < 1) input.value = 1;
                 if (val > 99) input.value = 99;
-                await updateQuantity(productId, parseInt(input.value));
+                const result = await updateQuantity(productId, parseInt(input.value));
+                if (!result?.success) {
+                    alert(result?.message || 'Không thể cập nhật giỏ hàng');
+                    await loadCart();
+                    return;
+                }
                 updateCartDisplay();
             });
         });

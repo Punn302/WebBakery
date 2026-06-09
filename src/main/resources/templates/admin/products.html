@@ -6,26 +6,42 @@
     <aside th:replace="~{admin/fragments :: sidebar('products')}"></aside>
     <main class="flex-1 px-4 md:px-8 py-8">
         <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
-            <div><p class="text-sm uppercase tracking-wider text-[#47654c] font-semibold">Admin</p><h1 class="text-3xl font-semibold">Quản lý sản phẩm</h1></div>
-            <form method="get" class="flex gap-2"><input name="keyword" th:value="${keyword}" class="border border-gray-200 rounded-lg px-4 py-3" placeholder="Tìm sản phẩm"><button class="bg-[#47654c] text-white px-5 py-3 rounded-lg font-semibold">Tìm</button></form>
+            <h1 class="text-3xl font-semibold text-[#263d2b]">Qu&#7843;n l&#253; s&#7843;n ph&#7849;m</h1>
+            <form method="get" class="flex gap-2">
+                <input name="keyword" th:value="${keyword}" class="border border-gray-200 rounded-lg px-4 py-3" placeholder="T&#236;m s&#7843;n ph&#7849;m">
+                <button class="bg-[#47654c] text-white px-5 py-3 rounded-lg font-semibold">T&#236;m</button>
+            </form>
         </div>
+
         <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 mb-6">
-            <h2 class="text-lg font-semibold mb-4">Thêm sản phẩm</h2>
+            <h2 class="text-lg font-semibold mb-4">Th&#234;m s&#7843;n ph&#7849;m</h2>
             <form method="post" action="/admin/products" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <input name="id" class="border border-gray-200 rounded-lg px-3 py-2" placeholder="ID tự động nếu bỏ trống">
-                <input name="name" class="border border-gray-200 rounded-lg px-3 py-2" placeholder="Tên sản phẩm" required>
-                <select name="category" class="border border-gray-200 rounded-lg px-3 py-2" required><option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"></option></select>
-                <input name="price" type="number" class="border border-gray-200 rounded-lg px-3 py-2" placeholder="Giá" required>
+                <input name="id" class="border border-gray-200 rounded-lg px-3 py-2" placeholder="ID t&#7921; &#273;&#7897;ng n&#7871;u b&#7887; tr&#7889;ng">
+                <input name="name" class="border border-gray-200 rounded-lg px-3 py-2" placeholder="T&#234;n s&#7843;n ph&#7849;m" required>
+                <select name="category" class="border border-gray-200 rounded-lg px-3 py-2" required>
+                    <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"></option>
+                </select>
+                <input name="price" type="number" class="border border-gray-200 rounded-lg px-3 py-2" placeholder="Gi&#225;" required>
                 <input name="imageFile" type="file" accept="image/*" class="border border-gray-200 rounded-lg px-3 py-2 md:col-span-2">
                 <input name="badge" class="border border-gray-200 rounded-lg px-3 py-2" placeholder="Badge">
                 <input name="tag" class="border border-gray-200 rounded-lg px-3 py-2" placeholder="Tag">
-                <textarea name="description" class="border border-gray-200 rounded-lg px-3 py-2 md:col-span-3" placeholder="Mô tả"></textarea>
-                <button class="bg-[#47654c] text-white rounded-lg font-semibold px-4 py-2">Lưu</button>
+                <textarea name="description" class="border border-gray-200 rounded-lg px-3 py-2 md:col-span-3" placeholder="M&#244; t&#7843;"></textarea>
+                <button class="bg-[#47654c] text-white rounded-lg font-semibold px-4 py-2">L&#432;u</button>
             </form>
         </section>
+
         <section class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
             <table class="w-full text-sm">
-                <thead class="bg-[#f7f3ec] text-gray-600"><tr><th class="text-left px-6 py-4">Ảnh</th><th class="text-left px-6 py-4">Sản phẩm</th><th class="text-left px-6 py-4">Danh mục</th><th class="text-left px-6 py-4">Giá</th><th class="text-left px-6 py-4">Thao tác</th></tr></thead>
+                <thead class="bg-[#f7f3ec] text-gray-600">
+                <tr>
+                    <th class="text-left px-6 py-4">&#7842;nh</th>
+                    <th class="text-left px-6 py-4">S&#7843;n ph&#7849;m</th>
+                    <th class="text-left px-6 py-4">Danh m&#7909;c</th>
+                    <th class="text-left px-6 py-4">T&#7891;n</th>
+                    <th class="text-left px-6 py-4">Gi&#225;</th>
+                    <th class="text-left px-6 py-4">Thao t&#225;c</th>
+                </tr>
+                </thead>
                 <tbody>
                 <tr th:each="product : ${page.content}" class="border-t border-gray-100">
                     <td class="px-6 py-4">
@@ -35,12 +51,19 @@
                     </td>
                     <td class="px-6 py-4"><p class="font-semibold" th:text="${product.name}"></p><p class="text-xs text-gray-400" th:text="${product.id}"></p></td>
                     <td class="px-6 py-4" th:text="${product.category}"></td>
-                    <td class="px-6 py-4 text-[#47654c] font-semibold" th:text="${#numbers.formatDecimal(product.price, 0, 0, 'COMMA') + 'd'}"></td>
+                    <td class="px-6 py-4">
+                        <span class="font-semibold" th:text="${product.stockQuantity}">0</span>
+                        <span th:if="${product.outOfStock}" class="ml-2 text-xs text-red-500">H&#7871;t</span>
+                        <span th:if="${!product.outOfStock and product.lowStock}" class="ml-2 text-xs text-amber-600">Th&#7845;p</span>
+                    </td>
+                    <td class="px-6 py-4 text-[#47654c] font-semibold" th:text="${#strings.replace(#numbers.formatDecimal(product.price, 0, 0, 'COMMA'), ',', '.') + 'đ'}"></td>
                     <td class="px-6 py-4">
                         <div class="flex gap-2">
-                            <a th:href="@{/admin/products/{id}/edit(id=${product.id})}" class="px-3 py-2 rounded-lg border border-gray-200 font-semibold">Sửa</a>
-                            <a th:href="@{/admin/products/{id}/preview(id=${product.id})}" class="px-3 py-2 rounded-lg border border-gray-200 font-semibold">Xem ảnh</a>
-                            <form th:action="@{/admin/products/{id}/delete(id=${product.id})}" method="post" onsubmit="return confirm('Xóa sản phẩm này?')"><button class="px-3 py-2 rounded-lg border border-red-200 text-red-500 font-semibold">Xóa</button></form>
+                            <a th:href="@{/admin/products/{id}/edit(id=${product.id})}" class="px-3 py-2 rounded-lg border border-gray-200 font-semibold">S&#7917;a</a>
+                            <a th:href="@{/admin/products/{id}/preview(id=${product.id})}" class="px-3 py-2 rounded-lg border border-gray-200 font-semibold">Xem &#7843;nh</a>
+                            <form th:action="@{/admin/products/{id}/delete(id=${product.id})}" method="post" onsubmit="return confirm('Xoa san pham nay?')">
+                                <button class="px-3 py-2 rounded-lg border border-red-200 text-red-500 font-semibold">X&#243;a</button>
+                            </form>
                         </div>
                     </td>
                 </tr>

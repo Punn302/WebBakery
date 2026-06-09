@@ -1,6 +1,10 @@
 const form = document.getElementById('trackingForm');
 const results = document.getElementById('trackingResults');
 
+function formatCurrency(value) {
+    return Number(value || 0).toLocaleString('vi-VN') + 'đ';
+}
+
 if (form) {
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -26,7 +30,7 @@ if (form) {
                         <p class="text-sm text-gray-500">${order.customerName || ''} - ${order.phone || ''}</p>
                         <p class="text-sm text-gray-500">${order.orderStatus} / ${order.paymentStatus}</p>
                     </div>
-                    <p class="font-bold text-[#47654c]">${Number(order.total || 0).toLocaleString('vi-VN')}đ</p>
+                    <p class="font-bold text-[#47654c]">${formatCurrency(order.total)}</p>
                 </div>
             </div>
         `).join('');

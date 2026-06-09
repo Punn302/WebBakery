@@ -10,6 +10,7 @@ const ProductDetail = (function() {
         const quantityInput = document.querySelector('#quantity');
 
         if (minusBtn && plusBtn && quantityInput) {
+            const maxQuantity = parseInt(quantityInput.getAttribute('max')) || 99;
             minusBtn.addEventListener('click', () => {
                 let val = parseInt(quantityInput.value) || 1;
                 if (val > 1) {
@@ -19,7 +20,7 @@ const ProductDetail = (function() {
 
             plusBtn.addEventListener('click', () => {
                 let val = parseInt(quantityInput.value) || 1;
-                if (val < 99) {
+                if (val < maxQuantity) {
                     quantityInput.value = val + 1;
                 }
             });
@@ -27,7 +28,7 @@ const ProductDetail = (function() {
             quantityInput.addEventListener('change', () => {
                 let val = parseInt(quantityInput.value);
                 if (isNaN(val) || val < 1) quantityInput.value = 1;
-                if (val > 99) quantityInput.value = 99;
+                if (val > maxQuantity) quantityInput.value = maxQuantity;
             });
         }
     }
@@ -97,7 +98,12 @@ const ProductDetail = (function() {
             addBtn.addEventListener('click', async () => {
                 const quantity = parseInt(document.querySelector('#quantity')?.value || 1);
                 const productId = addBtn.getAttribute('data-product-id');
+                const stock = parseInt(addBtn.getAttribute('data-stock')) || 0;
                 if (!productId) {
+                    return;
+                }
+                if (stock <= 0) {
+                    addBtn.innerHTML = 'Hết hàng';
                     return;
                 }
 
@@ -132,12 +138,53 @@ const ProductDetail = (function() {
         }
     }
 
+    function initReviews() {
+        const form = document.getElementById('reviewForm');
+        const deleteBtn = document.getElementById('deleteReviewBtn');
+        if (!form) return;
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const productId = form.getAttribute('data-product-id');
+            const payload = {
+                rating: Number(document.getElementById('reviewRating')?.value || 5),
+                comment: document.getElementById('reviewComment')?.value.trim() || ''
+            };
+            const response = await fetch(`/api/products/${productId}/reviews`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (window.showToast) {
+                window.showToast(data.message || (data.success ? 'Đã lưu đánh giá' : 'Không thể lưu đánh giá'), data.success ? 'success' : 'error');
+            }
+            if (data.success) window.location.reload();
+        });
+
+        deleteBtn?.addEventListener('click', async () => {
+            const reviewId = form.getAttribute('data-review-id');
+            if (!reviewId || !confirm('Xóa đánh giá này?')) return;
+            const response = await fetch(`/api/products/reviews/${reviewId}`, {
+                method: 'DELETE',
+                credentials: 'same-origin'
+            });
+            const data = await response.json();
+            if (window.showToast) {
+                window.showToast(data.message || (data.success ? 'Đã xóa đánh giá' : 'Không thể xóa đánh giá'), data.success ? 'success' : 'error');
+            }
+            if (data.success) window.location.reload();
+        });
+    }
+
     function init() {
         initQuantitySelector();
         initGallery();
         initZoom();
         initTabs();
         initAddToCart();
+        initReviews();
     }
 
     return { init: init };

@@ -7,6 +7,7 @@ import com.example.hebekery.dto.request.RegisterRequest;
 import com.example.hebekery.dto.request.UpdateUserRequest;
 import com.example.hebekery.service.OrderService;
 import com.example.hebekery.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,16 +41,25 @@ public class UserController {
     }
 
     @PostMapping("/api/user/login")
-    public Map<String, Object> login(@Valid @RequestBody LoginRequest request, HttpSession session) {
+    public Map<String, Object> login(@Valid @RequestBody LoginRequest request,
+                                     HttpSession session) {
         boolean loginSuccess = userService.login(request.getEmail(), request.getPassword());
 
         Map<String, Object> response = new HashMap<>();
         response.put("success", loginSuccess);
         if (loginSuccess) {
             UserResponse user = UserResponse.from(userService.getCurrentUser());
+            String role = user.getRole() == null ? "USER" : user.getRole().trim().toUpperCase();
             session.setAttribute("user", user);
+
             response.put("user", user);
-            response.put("redirectUrl", "ADMIN".equals(user.getRole()) ? "/admin" : "/");
+            if ("ADMIN".equals(role)) {
+                response.put("redirectUrl", "/admin");
+            } else if (user.isForcePasswordChange()) {
+                response.put("redirectUrl", "/profile?forcePasswordChange=true");
+            } else {
+                response.put("redirectUrl", "/");
+            }
             response.put("message", "Đăng nhập thành công");
         } else {
             response.put("message", "Email hoặc mật khẩu không đúng");
@@ -73,9 +84,14 @@ public class UserController {
 
     @PostMapping("/api/user/logout")
     public Map<String, Object> logout(HttpSession session) {
-        userService.logout();
-        session.removeAttribute("user");
+        clearSession(session);
         return success("Đăng xuất thành công");
+    }
+
+    @GetMapping("/logout")
+    public void logoutPage(HttpSession session, HttpServletResponse response) throws IOException {
+        clearSession(session);
+        response.sendRedirect("/login");
     }
 
     @PostMapping("/api/user/update")
@@ -107,6 +123,12 @@ public class UserController {
         Map<String, Object> response = success(null);
         response.put("orders", orderService.getOrdersByUser(userService.getCurrentUser().getId()));
         return response;
+    }
+
+    private void clearSession(HttpSession session) {
+        userService.logout();
+        session.removeAttribute("user");
+        session.invalidate();
     }
 
     private Map<String, Object> success(String message) {

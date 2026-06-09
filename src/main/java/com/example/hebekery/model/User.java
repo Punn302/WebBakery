@@ -22,6 +22,8 @@ public class User {
     private String role;
     @Column(nullable = false)
     private boolean active;
+    @Column(nullable = false)
+    private boolean forcePasswordChange;
     @Transient
     private boolean loggedIn;
 
@@ -73,4 +75,7 @@ public class User {
 
     public boolean isLoggedIn() { return loggedIn; }
     public void setLoggedIn(boolean loggedIn) { this.loggedIn = loggedIn; }
+
+    public boolean isForcePasswordChange() { return forcePasswordChange; }
+    public void setForcePasswordChange(boolean forcePasswordChange) { this.forcePasswordChange = forcePasswordChange; }
 }

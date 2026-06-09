@@ -14,6 +14,7 @@ import java.util.Optional;
 @Service
 @SessionScope
 public class UserService {
+    public static final String DEFAULT_CUSTOMER_PASSWORD = "123456";
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -99,6 +100,16 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public User resetCustomerPasswordToDefault(String id) {
+        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("Khong tim thay user"));
+        if (!"USER".equalsIgnoreCase(user.getRole())) {
+            throw new IllegalArgumentException("Chi reset mat khau mac dinh cho tai khoan khach");
+        }
+        user.setPassword(passwordEncoder.encode(DEFAULT_CUSTOMER_PASSWORD));
+        user.setForcePasswordChange(true);
+        return userRepository.save(user);
+    }
+
     public User updateCurrentUser(String name, String phone) {
         if (!isLoggedIn()) {
             throw new IllegalStateException("Vui lòng đăng nhập");
@@ -121,6 +132,7 @@ public class UserService {
         }
 
         currentUser.setPassword(passwordEncoder.encode(newPassword));
+        currentUser.setForcePasswordChange(false);
         currentUser = userRepository.save(currentUser);
         currentUser.setLoggedIn(true);
         return true;

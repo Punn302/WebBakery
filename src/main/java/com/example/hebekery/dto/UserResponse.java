@@ -9,24 +9,26 @@ public class UserResponse {
     private String phone;
     private String role;
     private boolean active;
+    private boolean forcePasswordChange;
 
     public UserResponse() {
     }
 
-    public UserResponse(String id, String email, String name, String phone, String role, boolean active) {
+    public UserResponse(String id, String email, String name, String phone, String role, boolean active, boolean forcePasswordChange) {
         this.id = id;
         this.email = email;
         this.name = name;
         this.phone = phone;
         this.role = role;
         this.active = active;
+        this.forcePasswordChange = forcePasswordChange;
     }
 
     public static UserResponse from(User user) {
         if (user == null) {
             return null;
         }
-        return new UserResponse(user.getId(), user.getEmail(), user.getName(), user.getPhone(), user.getRole(), user.isActive());
+        return new UserResponse(user.getId(), user.getEmail(), user.getName(), user.getPhone(), user.getRole(), user.isActive(), user.isForcePasswordChange());
     }
 
     public String getId() {
@@ -75,5 +77,13 @@ public class UserResponse {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean isForcePasswordChange() {
+        return forcePasswordChange;
+    }
+
+    public void setForcePasswordChange(boolean forcePasswordChange) {
+        this.forcePasswordChange = forcePasswordChange;
     }
 }

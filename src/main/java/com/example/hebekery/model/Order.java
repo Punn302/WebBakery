@@ -26,6 +26,8 @@ public class Order {
     private String paymentMethod;
     private String paymentStatus;
     private String orderStatus;
+    private String shippingCarrier;
+    private String trackingCode;
     @Column(length = 1000)
     private String returnReason;
     private String returnStatus;
@@ -33,6 +35,7 @@ public class Order {
     private String adminNote;
     private double total;
     private LocalDateTime createdAt;
+    private boolean inventoryDeducted;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<OrderItem> items = new ArrayList<>();
 
@@ -108,6 +111,22 @@ public class Order {
         this.orderStatus = orderStatus;
     }
 
+    public String getShippingCarrier() {
+        return shippingCarrier;
+    }
+
+    public void setShippingCarrier(String shippingCarrier) {
+        this.shippingCarrier = shippingCarrier;
+    }
+
+    public String getTrackingCode() {
+        return trackingCode;
+    }
+
+    public void setTrackingCode(String trackingCode) {
+        this.trackingCode = trackingCode;
+    }
+
     public String getReturnReason() {
         return returnReason;
     }
@@ -146,6 +165,14 @@ public class Order {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public boolean isInventoryDeducted() {
+        return inventoryDeducted;
+    }
+
+    public void setInventoryDeducted(boolean inventoryDeducted) {
+        this.inventoryDeducted = inventoryDeducted;
     }
 
     public List<OrderItem> getItems() {
