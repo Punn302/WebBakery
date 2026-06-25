@@ -5,6 +5,7 @@ import com.example.hebekery.dto.request.ChangePasswordRequest;
 import com.example.hebekery.dto.request.LoginRequest;
 import com.example.hebekery.dto.request.RegisterRequest;
 import com.example.hebekery.dto.request.UpdateUserRequest;
+import com.example.hebekery.model.User;
 import com.example.hebekery.service.CartService;
 import com.example.hebekery.service.OrderService;
 import com.example.hebekery.service.UserService;
@@ -44,17 +45,19 @@ public class UserController {
     }
 
     @PostMapping("/api/user/login")
-    public Map<String, Object> login(@Valid @RequestBody LoginRequest request,
-                                     HttpSession session) {
-        boolean loginSuccess = userService.login(request.getEmail(), request.getPassword());
+    public Map<String, Object> login(@Valid @RequestBody LoginRequest request, HttpSession session) {
+        User authenticatedUser = userService.login(request.getEmail(), request.getPassword());
+        boolean loginSuccess = authenticatedUser != null;
 
         Map<String, Object> response = new HashMap<>();
         response.put("success", loginSuccess);
         if (loginSuccess) {
-            UserResponse user = UserResponse.from(userService.getCurrentUser());
-            cartService.mergeSessionCartForUser(userService.getCurrentUser());
+            UserResponse user = UserResponse.from(authenticatedUser);
             String role = user.getRole() == null ? "USER" : user.getRole().trim().toUpperCase();
-            session.setAttribute("user", user);
+            if ("USER".equals(role)) {
+                cartService.mergeSessionCartForUser(authenticatedUser);
+                session.setAttribute("user", user);
+            }
 
             response.put("user", user);
             if ("ADMIN".equals(role)) {
@@ -88,14 +91,22 @@ public class UserController {
 
     @PostMapping("/api/user/logout")
     public Map<String, Object> logout(HttpSession session) {
-        clearSession(session);
+        userService.logoutUser();
+        session.removeAttribute("pendingMomoCheckout");
         return success("Đăng xuất thành công");
+    }
+
+    @PostMapping("/api/admin/logout")
+    public Map<String, Object> adminLogout() {
+        userService.logoutAdmin();
+        return success("Đăng xuất admin thành công");
     }
 
     @GetMapping("/logout")
     public void logoutPage(HttpSession session, HttpServletResponse response) throws IOException {
-        clearSession(session);
-        response.sendRedirect("/login");
+        userService.logoutUser();
+        session.removeAttribute("pendingMomoCheckout");
+        response.sendRedirect("/");
     }
 
     @PostMapping("/api/user/update")
@@ -127,12 +138,6 @@ public class UserController {
         Map<String, Object> response = success(null);
         response.put("orders", orderService.getOrdersByUser(userService.getCurrentUser().getId()));
         return response;
-    }
-
-    private void clearSession(HttpSession session) {
-        userService.logout();
-        session.removeAttribute("user");
-        session.invalidate();
     }
 
     private Map<String, Object> success(String message) {

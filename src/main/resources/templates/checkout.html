@@ -35,29 +35,58 @@
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Địa chỉ nhận hàng</label>
-                        <div th:if="${!#lists.isEmpty(addresses)}" class="mb-3">
-                            <select id="savedAddressSelect" class="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]">
-                                <option value="">Chọn địa chỉ đã lưu</option>
-                                <option th:each="address : ${addresses}"
-                                        th:value="${address.id}"
-                                        th:selected="${defaultAddress != null and address.id == defaultAddress.id}"
-                                        th:attr="data-name=${address.receiverName},data-phone=${address.phone},data-line=${address.addressLine},data-province=${address.province},data-district=${address.district},data-ward=${address.ward}"
-                                        th:text="${address.receiverName + ' - ' + address.phone + ' - ' + address.addressLine + ', ' + address.ward + ', ' + address.district + ', ' + address.province}">
-                                </option>
-                            </select>
+                        <div id="savedAddressPanel" th:if="${!#lists.isEmpty(addresses)}" class="space-y-3">
+                            <div id="currentSavedAddress"
+                                 class="rounded-xl border border-[#dce8dd] bg-[#f7fbf7] p-4"
+                                 th:if="${defaultAddress != null}"
+                                 th:attr="data-id=${defaultAddress.id},data-name=${defaultAddress.receiverName},data-phone=${defaultAddress.phone},data-line=${defaultAddress.addressLine},data-province=${defaultAddress.province},data-district=${defaultAddress.district},data-ward=${defaultAddress.ward}">
+                                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                                    <div>
+                                        <p class="font-semibold text-gray-800" th:text="${defaultAddress.receiverName}">Người nhận</p>
+                                        <p class="text-sm text-gray-500" th:text="${defaultAddress.phone}">SĐT</p>
+                                        <p class="text-sm text-gray-600 mt-1" th:text="${defaultAddress.addressLine + ', ' + defaultAddress.ward + ', ' + defaultAddress.district + ', ' + defaultAddress.province}">Địa chỉ</p>
+                                    </div>
+                                    <span th:if="${defaultAddress.defaultAddress}" class="text-xs font-semibold text-[#47654c] bg-white rounded-full px-3 py-1">Mặc định</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <button id="changeSavedAddressBtn" type="button" class="border border-gray-200 rounded-full px-4 py-2 text-sm font-semibold text-gray-600">Đổi địa chỉ</button>
+                                <button id="useNewAddressBtn" type="button" class="border border-[#47654c] rounded-full px-4 py-2 text-sm font-semibold text-[#47654c]">Nhập địa chỉ mới</button>
+                            </div>
+                            <div id="addressChoices" class="hidden space-y-3">
+                                <button th:each="address : ${addresses}"
+                                        type="button"
+                                        class="saved-address-option w-full text-left rounded-xl border border-gray-100 bg-white p-4 hover:border-[#47654c]"
+                                        th:attr="data-id=${address.id},data-name=${address.receiverName},data-phone=${address.phone},data-line=${address.addressLine},data-province=${address.province},data-district=${address.district},data-ward=${address.ward},data-default=${address.defaultAddress}">
+                                    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                                        <div>
+                                            <p class="font-semibold text-gray-800" th:text="${address.receiverName}">Người nhận</p>
+                                            <p class="text-sm text-gray-500" th:text="${address.phone}">SĐT</p>
+                                            <p class="text-sm text-gray-600 mt-1" th:text="${address.addressLine + ', ' + address.ward + ', ' + address.district + ', ' + address.province}">Địa chỉ</p>
+                                        </div>
+                                        <span th:if="${address.defaultAddress}" class="text-xs font-semibold text-[#47654c] bg-[#f7f3ec] rounded-full px-3 py-1">Mặc định</span>
+                                    </div>
+                                </button>
+                            </div>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-                            <select id="provinceSelect" class="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]">
-                                <option value="">Tỉnh/thành phố</option>
-                            </select>
-                            <select id="districtSelect" class="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]" disabled>
-                                <option value="">Quận/huyện</option>
-                            </select>
-                            <select id="wardSelect" class="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]" disabled>
-                                <option value="">Phường/xã</option>
-                            </select>
+                        <div id="newAddressForm" th:classappend="${!#lists.isEmpty(addresses)} ? ' hidden' : ''" class="space-y-3">
+                            <div th:if="${!#lists.isEmpty(addresses)}" class="flex justify-end">
+                                <button id="useSavedAddressBtn" type="button" class="text-sm font-semibold text-[#47654c]">Dùng địa chỉ đã lưu</button>
+                            </div>
+                            <p id="provinceLoadingText" class="text-sm text-gray-400">Đang tải danh sách tỉnh/thành...</p>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <select id="provinceSelect" class="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]">
+                                    <option value="">Tỉnh/thành phố</option>
+                                </select>
+                                <select id="districtSelect" class="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]" disabled>
+                                    <option value="">Quận/huyện</option>
+                                </select>
+                                <select id="wardSelect" class="border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]" disabled>
+                                    <option value="">Phường/xã</option>
+                                </select>
+                            </div>
+                            <textarea id="address" rows="3" class="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]" placeholder="Số nhà, tên đường" th:required="${#lists.isEmpty(addresses)}"></textarea>
                         </div>
-                        <textarea id="address" rows="3" class="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-[#47654c]" placeholder="Số nhà, tên đường" required></textarea>
                     </div>
 
                     <div>
@@ -112,6 +141,6 @@
 
 <div th:replace="~{layout/fragments :: footer}"></div>
 <script th:src="@{/js/common.js}"></script>
-<script th:src="@{/js/checkout.js(v=3)}"></script>
+<script th:src="@{/js/checkout.js(v=4)}"></script>
 </body>
 </html>

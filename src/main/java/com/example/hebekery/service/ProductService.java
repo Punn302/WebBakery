@@ -55,7 +55,7 @@ public class ProductService {
     }
 
     public List<String> getAllCategories() {
-        return List.of("Ngu coc & Granola", "Banh an kieng", "Snack healthy", "Thuc pham bo sung", "Combo qua tang");
+        return List.of("Ngũ cốc & Granola", "Bánh ăn kiêng", "Snack healthy", "Thực phẩm bổ sung", "Combo quà tặng");
     }
 
     public List<Product> getRelatedProducts(String currentId, String category) {

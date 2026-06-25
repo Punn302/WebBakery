@@ -2,56 +2,93 @@ package com.example.hebekery.service;
 
 import com.example.hebekery.model.User;
 import com.example.hebekery.repository.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.annotation.SessionScope;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@SessionScope
 public class UserService {
     public static final String DEFAULT_CUSTOMER_PASSWORD = "123456";
+    public static final String USER_AUTH = "USER_AUTH";
+    public static final String ADMIN_AUTH = "ADMIN_AUTH";
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private User currentUser = null;
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    public boolean login(String email, String password) {
+    public User login(String email, String password) {
         Optional<User> user = userRepository.findByEmailIgnoreCase(email);
-        if (user.isPresent() && user.get().isActive() && passwordMatches(password, user.get().getPassword())) {
-            currentUser = upgradePasswordIfNeeded(user.get(), password);
-            currentUser.setLoggedIn(true);
-            return true;
+        if (user.isEmpty() || !user.get().isActive() || !passwordMatches(password, user.get().getPassword())) {
+            return null;
         }
-        return false;
+
+        User authenticatedUser = upgradePasswordIfNeeded(user.get(), password);
+        authenticatedUser.setLoggedIn(true);
+        HttpSession session = currentSession(true);
+        if (isAdminRole(authenticatedUser)) {
+            session.setAttribute(ADMIN_AUTH, authenticatedUser);
+        } else {
+            session.setAttribute(USER_AUTH, authenticatedUser);
+        }
+        return authenticatedUser;
     }
 
     public void logout() {
+        logoutUser();
+    }
+
+    public void logoutUser() {
+        HttpSession session = currentSession(false);
+        if (session == null) {
+            return;
+        }
+        User currentUser = getCurrentUser();
         if (currentUser != null) {
             currentUser.setLoggedIn(false);
-            currentUser = null;
         }
+        session.removeAttribute(USER_AUTH);
+        session.removeAttribute("user");
+    }
+
+    public void logoutAdmin() {
+        HttpSession session = currentSession(false);
+        if (session == null) {
+            return;
+        }
+        User currentAdmin = getCurrentAdmin();
+        if (currentAdmin != null) {
+            currentAdmin.setLoggedIn(false);
+        }
+        session.removeAttribute(ADMIN_AUTH);
     }
 
     public User getCurrentUser() {
-        return currentUser;
+        return getSessionUser(USER_AUTH);
+    }
+
+    public User getCurrentAdmin() {
+        return getSessionUser(ADMIN_AUTH);
     }
 
     public boolean isLoggedIn() {
+        User currentUser = getCurrentUser();
         return currentUser != null && currentUser.isLoggedIn();
     }
 
     public boolean isAdmin() {
-        return isLoggedIn() && "ADMIN".equalsIgnoreCase(currentUser.getRole());
+        User currentAdmin = getCurrentAdmin();
+        return currentAdmin != null && currentAdmin.isLoggedIn() && isAdminRole(currentAdmin);
     }
 
     public boolean register(String email, String password, String name, String phone) {
@@ -101,9 +138,9 @@ public class UserService {
     }
 
     public User resetCustomerPasswordToDefault(String id) {
-        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("Khong tim thay user"));
+        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy user"));
         if (!"USER".equalsIgnoreCase(user.getRole())) {
-            throw new IllegalArgumentException("Chi reset mat khau mac dinh cho tai khoan khach");
+            throw new IllegalArgumentException("Chỉ reset mật khẩu mặc định cho tài khoản khách");
         }
         user.setPassword(passwordEncoder.encode(DEFAULT_CUSTOMER_PASSWORD));
         user.setForcePasswordChange(true);
@@ -115,10 +152,12 @@ public class UserService {
             throw new IllegalStateException("Vui lòng đăng nhập");
         }
 
+        User currentUser = getCurrentUser();
         currentUser.setName(name);
         currentUser.setPhone(phone);
         currentUser = userRepository.save(currentUser);
         currentUser.setLoggedIn(true);
+        currentSession(true).setAttribute(USER_AUTH, currentUser);
         return currentUser;
     }
 
@@ -127,6 +166,7 @@ public class UserService {
             throw new IllegalStateException("Vui lòng đăng nhập");
         }
 
+        User currentUser = getCurrentUser();
         if (!passwordMatches(currentPassword, currentUser.getPassword())) {
             return false;
         }
@@ -135,7 +175,29 @@ public class UserService {
         currentUser.setForcePasswordChange(false);
         currentUser = userRepository.save(currentUser);
         currentUser.setLoggedIn(true);
+        currentSession(true).setAttribute(USER_AUTH, currentUser);
         return true;
+    }
+
+    private User getSessionUser(String key) {
+        HttpSession session = currentSession(false);
+        if (session == null) {
+            return null;
+        }
+        Object value = session.getAttribute(key);
+        return value instanceof User user ? user : null;
+    }
+
+    private HttpSession currentSession(boolean create) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attributes == null) {
+            return null;
+        }
+        return attributes.getRequest().getSession(create);
+    }
+
+    private boolean isAdminRole(User user) {
+        return user != null && "ADMIN".equalsIgnoreCase(user.getRole());
     }
 
     private boolean passwordMatches(String rawPassword, String storedPassword) {

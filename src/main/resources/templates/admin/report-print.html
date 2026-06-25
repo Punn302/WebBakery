@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo Hebekery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print { display: none; }
+            body { background: #fff; }
+        }
+    </style>
+</head>
+<body class="bg-[#fbfaf7] text-gray-800">
+<main class="max-w-5xl mx-auto bg-white min-h-screen p-8">
+    <div class="no-print flex justify-end mb-6">
+        <button onclick="window.print()" class="bg-[#47654c] text-white rounded-lg px-5 py-3 font-semibold">In báo cáo</button>
+    </div>
+
+    <header class="border-b border-gray-200 pb-5 mb-6">
+        <p class="text-sm uppercase tracking-widest text-[#47654c] font-semibold">Hebekery</p>
+        <h1 class="text-3xl font-bold text-[#263d2b] mt-2">Báo cáo doanh thu và nhập hàng</h1>
+        <p class="text-gray-500 mt-2">Từ <span th:text="${from}"></span> đến <span th:text="${to}"></span></p>
+    </header>
+
+    <section class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div class="border border-gray-100 rounded-lg p-4">
+            <p class="text-sm text-gray-500">Doanh thu</p>
+            <p class="text-xl font-bold text-[#263d2b]" th:text="${#strings.replace(#numbers.formatDecimal(revenueTotal, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></p>
+        </div>
+        <div class="border border-gray-100 rounded-lg p-4">
+            <p class="text-sm text-gray-500">Lợi nhuận</p>
+            <p class="text-xl font-bold text-[#263d2b]" th:text="${#strings.replace(#numbers.formatDecimal(profitTotal, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></p>
+        </div>
+        <div class="border border-gray-100 rounded-lg p-4">
+            <p class="text-sm text-gray-500">Đơn doanh thu</p>
+            <p class="text-xl font-bold text-[#263d2b]" th:text="${revenueOrderCount}"></p>
+        </div>
+        <div class="border border-gray-100 rounded-lg p-4">
+            <p class="text-sm text-gray-500">Chi phí nhập</p>
+            <p class="text-xl font-bold text-[#263d2b]" th:text="${#strings.replace(#numbers.formatDecimal(importCostTotal, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></p>
+        </div>
+        <div class="border border-gray-100 rounded-lg p-4">
+            <p class="text-sm text-gray-500">SL nhập</p>
+            <p class="text-xl font-bold text-[#263d2b]" th:text="${importedQuantityTotal}"></p>
+        </div>
+    </section>
+
+    <section class="mb-8">
+        <h2 class="text-lg font-semibold text-[#263d2b] mb-4">Doanh thu theo ngày</h2>
+        <table class="w-full text-sm">
+            <thead class="bg-[#f7f3ec]"><tr><th class="text-left px-4 py-3">Ngày</th><th class="text-right px-4 py-3">Doanh thu</th></tr></thead>
+            <tbody>
+            <tr th:each="point : ${weeklyRevenue}" class="border-b border-gray-100">
+                <td class="px-4 py-3" th:text="${point.label}"></td>
+                <td class="px-4 py-3 text-right font-semibold" th:text="${#strings.replace(#numbers.formatDecimal(point.revenue, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="mb-8">
+        <h2 class="text-lg font-semibold text-[#263d2b] mb-4">Top sản phẩm bán chạy</h2>
+        <table class="w-full text-sm">
+            <thead class="bg-[#f7f3ec]"><tr><th class="text-left px-4 py-3">Sản phẩm</th><th class="text-right px-4 py-3">SL bán</th><th class="text-right px-4 py-3">Doanh thu</th></tr></thead>
+            <tbody>
+            <tr th:each="item : ${topSellingProducts}" class="border-b border-gray-100">
+                <td class="px-4 py-3" th:text="${item.productName}"></td>
+                <td class="px-4 py-3 text-right" th:text="${item.quantity}"></td>
+                <td class="px-4 py-3 text-right font-semibold" th:text="${#strings.replace(#numbers.formatDecimal(item.revenue, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2 class="text-lg font-semibold text-[#263d2b] mb-4">Phiếu nhập hàng</h2>
+        <table class="w-full text-sm">
+            <thead class="bg-[#f7f3ec]"><tr><th class="text-left px-4 py-3">Phiếu</th><th class="text-left px-4 py-3">Sản phẩm</th><th class="text-right px-4 py-3">SL</th><th class="text-right px-4 py-3">Tổng nhập</th></tr></thead>
+            <tbody>
+            <tr th:each="receipt : ${receipts}" class="border-b border-gray-100">
+                <td class="px-4 py-3" th:text="${receipt.receiptCode}"></td>
+                <td class="px-4 py-3" th:text="${receipt.productName}"></td>
+                <td class="px-4 py-3 text-right" th:text="${receipt.quantity}"></td>
+                <td class="px-4 py-3 text-right font-semibold" th:text="${#strings.replace(#numbers.formatDecimal(receipt.totalCost, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

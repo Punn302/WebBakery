@@ -1,4 +1,7 @@
 const Checkout = (function() {
+    let addressMode = 'new';
+    let selectedSavedAddress = null;
+
     function showMessage(type, text) {
         const box = document.getElementById('checkoutMessage');
         if (!box) return;
@@ -18,6 +21,98 @@ const Checkout = (function() {
                 const card = input.closest('.payment-card');
                 card.classList.remove('border-gray-200');
                 card.classList.add('border-[#47654c]', 'bg-[#f7f3ec]');
+            });
+        });
+    }
+
+    function setNewAddressRequired(required) {
+        document.getElementById('address')?.toggleAttribute('required', required);
+        document.getElementById('provinceSelect')?.toggleAttribute('required', required);
+        document.getElementById('districtSelect')?.toggleAttribute('required', required);
+        document.getElementById('wardSelect')?.toggleAttribute('required', required);
+    }
+
+    function showSavedMode() {
+        if (!selectedSavedAddress) {
+            showNewMode();
+            return;
+        }
+        addressMode = 'saved';
+        document.getElementById('savedAddressPanel')?.classList.remove('hidden');
+        document.getElementById('newAddressForm')?.classList.add('hidden');
+        document.getElementById('addressChoices')?.classList.add('hidden');
+        setNewAddressRequired(false);
+        fillContactFromSavedAddress(selectedSavedAddress);
+    }
+
+    function showNewMode() {
+        addressMode = 'new';
+        document.getElementById('newAddressForm')?.classList.remove('hidden');
+        document.getElementById('addressChoices')?.classList.add('hidden');
+        setNewAddressRequired(true);
+    }
+
+    function fullAddressFromDataset(dataset) {
+        return [
+            dataset.line,
+            dataset.ward,
+            dataset.district,
+            dataset.province
+        ].filter(Boolean).join(', ');
+    }
+
+    function fillContactFromSavedAddress(addressElement) {
+        if (!addressElement) return;
+        const nameInput = document.getElementById('customerName');
+        const phoneInput = document.getElementById('phone');
+        if (nameInput) nameInput.value = addressElement.dataset.name || nameInput.value;
+        if (phoneInput) phoneInput.value = addressElement.dataset.phone || phoneInput.value;
+    }
+
+    function renderCurrentSavedAddress(addressElement) {
+        const current = document.getElementById('currentSavedAddress');
+        if (!current || !addressElement) return;
+        current.dataset.id = addressElement.dataset.id || '';
+        current.dataset.name = addressElement.dataset.name || '';
+        current.dataset.phone = addressElement.dataset.phone || '';
+        current.dataset.line = addressElement.dataset.line || '';
+        current.dataset.province = addressElement.dataset.province || '';
+        current.dataset.district = addressElement.dataset.district || '';
+        current.dataset.ward = addressElement.dataset.ward || '';
+        current.innerHTML = `
+            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                <div>
+                    <p class="font-semibold text-gray-800">${current.dataset.name || ''}</p>
+                    <p class="text-sm text-gray-500">${current.dataset.phone || ''}</p>
+                    <p class="text-sm text-gray-600 mt-1">${fullAddressFromDataset(current.dataset)}</p>
+                </div>
+                ${addressElement.dataset.default === 'true' ? '<span class="text-xs font-semibold text-[#47654c] bg-white rounded-full px-3 py-1">Mặc định</span>' : ''}
+            </div>
+        `;
+    }
+
+    function initSavedAddresses() {
+        const current = document.getElementById('currentSavedAddress');
+        const firstOption = document.querySelector('.saved-address-option');
+        selectedSavedAddress = current || firstOption || null;
+        if (selectedSavedAddress) {
+            if (!current && firstOption) renderCurrentSavedAddress(firstOption);
+            showSavedMode();
+        } else {
+            showNewMode();
+        }
+
+        document.getElementById('changeSavedAddressBtn')?.addEventListener('click', () => {
+            document.getElementById('addressChoices')?.classList.toggle('hidden');
+        });
+        document.getElementById('useNewAddressBtn')?.addEventListener('click', showNewMode);
+        document.getElementById('useSavedAddressBtn')?.addEventListener('click', showSavedMode);
+
+        document.querySelectorAll('.saved-address-option').forEach(button => {
+            button.addEventListener('click', () => {
+                selectedSavedAddress = button;
+                renderCurrentSavedAddress(button);
+                showSavedMode();
             });
         });
     }
@@ -79,6 +174,9 @@ const Checkout = (function() {
     }
 
     function buildAddress() {
+        if (addressMode === 'saved' && selectedSavedAddress) {
+            return fullAddressFromDataset(selectedSavedAddress.dataset);
+        }
         return [
             document.getElementById('address').value.trim(),
             selectedText('wardSelect'),
@@ -105,83 +203,27 @@ const Checkout = (function() {
         select.disabled = false;
     }
 
-    function normalizeText(value) {
-        return String(value || '').trim().toLowerCase();
-    }
-
-    function selectByText(select, text) {
-        const expectedText = normalizeText(text);
-        if (!select || !expectedText) return false;
-        const option = Array.from(select.options).find(item => normalizeText(item.textContent) === expectedText);
-        if (!option) return false;
-        select.value = option.value;
-        return true;
-    }
-
-    function applySavedAddressFallback(option) {
-        if (!option || !option.value) return;
-        document.getElementById('customerName').value = option.dataset.name || document.getElementById('customerName').value;
-        document.getElementById('phone').value = option.dataset.phone || document.getElementById('phone').value;
-        document.getElementById('address').value = [
-            option.dataset.line,
-            option.dataset.ward,
-            option.dataset.district,
-            option.dataset.province
-        ].filter(Boolean).join(', ');
-    }
-
-    async function applySavedAddress(option) {
-        if (!option || !option.value) return;
-        const customerNameInput = document.getElementById('customerName');
-        const phoneInput = document.getElementById('phone');
-        const addressInput = document.getElementById('address');
-        const provinceSelect = document.getElementById('provinceSelect');
-        const districtSelect = document.getElementById('districtSelect');
-        const wardSelect = document.getElementById('wardSelect');
-
-        if (customerNameInput) customerNameInput.value = option.dataset.name || customerNameInput.value;
-        if (phoneInput) phoneInput.value = option.dataset.phone || phoneInput.value;
-        if (addressInput) addressInput.value = option.dataset.line || '';
-
-        if (!provinceSelect || !districtSelect || !wardSelect) return;
-        if (!selectByText(provinceSelect, option.dataset.province)) return;
-
-        districtSelect.innerHTML = '<option value="">Quận/huyện</option>';
-        wardSelect.innerHTML = '<option value="">Phường/xã</option>';
-        districtSelect.disabled = true;
-        wardSelect.disabled = true;
-
-        const province = await fetchProvinceApi('p/' + provinceSelect.value + '?depth=2');
-        fillSelect(districtSelect, province.districts || [], 'Quận/huyện');
-        if (!selectByText(districtSelect, option.dataset.district)) return;
-
-        const district = await fetchProvinceApi('d/' + districtSelect.value + '?depth=2');
-        fillSelect(wardSelect, district.wards || [], 'Phường/xã');
-        selectByText(wardSelect, option.dataset.ward);
-    }
-
     function initProvinceDropdowns() {
         const provinceSelect = document.getElementById('provinceSelect');
         const districtSelect = document.getElementById('districtSelect');
         const wardSelect = document.getElementById('wardSelect');
-        const savedAddressSelect = document.getElementById('savedAddressSelect');
+        const loadingText = document.getElementById('provinceLoadingText');
         if (!provinceSelect || !districtSelect || !wardSelect) return;
 
         fetchProvinceApi('?depth=1')
-            .then(async (provinces) => {
+            .then((provinces) => {
                 fillSelect(provinceSelect, provinces, 'Tỉnh/thành phố');
-                if (savedAddressSelect?.value) {
-                    await applySavedAddress(savedAddressSelect.selectedOptions[0]);
-                }
+                loadingText?.classList.add('hidden');
             })
             .catch(() => {
                 provinceSelect.innerHTML = '<option value="">Không tải được tỉnh/thành</option>';
-                if (savedAddressSelect?.value) {
-                    applySavedAddressFallback(savedAddressSelect.selectedOptions[0]);
+                provinceSelect.removeAttribute('required');
+                districtSelect.removeAttribute('required');
+                wardSelect.removeAttribute('required');
+                if (loadingText) {
+                    loadingText.textContent = 'Không tải được danh sách tỉnh/thành. Bạn vẫn có thể nhập địa chỉ chi tiết bên dưới.';
                 }
             });
-
-        savedAddressSelect?.addEventListener('change', () => applySavedAddress(savedAddressSelect.selectedOptions[0]));
 
         provinceSelect.addEventListener('change', async () => {
             districtSelect.innerHTML = '<option value="">Quận/huyện</option>';
@@ -204,6 +246,7 @@ const Checkout = (function() {
 
     function init() {
         initPaymentCards();
+        initSavedAddresses();
         initProvinceDropdowns();
         initForm();
     }

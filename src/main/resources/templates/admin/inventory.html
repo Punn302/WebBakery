@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Admin Inventory')}"></head>
+<body class="bg-[#fbfaf7] text-gray-800">
+<div class="min-h-screen lg:flex">
+    <aside th:replace="~{admin/fragments :: sidebar('inventory')}"></aside>
+    <main class="flex-1 px-4 md:px-8 py-8">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
+            <h1 class="text-3xl font-semibold text-[#263d2b]">Tồn kho</h1>
+            <form method="get" class="flex gap-2">
+                <input name="keyword" th:value="${keyword}" class="border border-gray-200 rounded-lg px-4 py-3" placeholder="Tìm sản phẩm">
+                <button class="bg-[#47654c] text-white px-5 py-3 rounded-lg font-semibold">Tìm</button>
+            </form>
+        </div>
+
+        <section class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <table class="w-full text-sm">
+                <thead class="bg-[#f7f3ec] text-gray-600">
+                <tr>
+                    <th class="text-left px-6 py-4">Sản phẩm</th>
+                    <th class="text-left px-6 py-4">Danh mục</th>
+                    <th class="text-left px-6 py-4">Tồn</th>
+                    <th class="text-left px-6 py-4">Giá vốn TB</th>
+                    <th class="text-left px-6 py-4">Ngưỡng</th>
+                    <th class="text-left px-6 py-4">Trạng thái</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="product : ${page.content}" class="border-t border-gray-100">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-4">
+                            <img th:src="${product.imageUrl}" th:alt="${product.name}" class="w-14 h-14 rounded-lg object-cover border border-gray-100">
+                            <div>
+                                <p class="font-semibold text-gray-800" th:text="${product.name}">Sản phẩm</p>
+                                <p class="text-xs text-gray-400" th:text="${product.id}">ID</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4" th:text="${product.category}">Danh mục</td>
+                    <td class="px-6 py-4 text-xl font-bold text-[#263d2b]" th:text="${product.stockQuantity}">0</td>
+                    <td class="px-6 py-4 text-[#47654c] font-semibold" th:text="${#strings.replace(#numbers.formatDecimal(product.averageCost, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}">0đ</td>
+                    <td class="px-6 py-4">
+                        <form th:action="@{/admin/inventory/{id}/threshold(id=${product.id})}" method="post" class="flex gap-2">
+                            <input name="lowStockThreshold" type="number" min="0" th:value="${product.lowStockThreshold}" class="w-20 border border-gray-200 rounded-lg px-3 py-2">
+                            <button class="border border-gray-200 rounded-lg px-3 py-2 font-semibold">Lưu</button>
+                        </form>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span th:if="${product.outOfStock}" class="inline-flex px-3 py-1 rounded-full bg-red-50 text-red-600 font-semibold">Hết hàng</span>
+                        <span th:if="${!product.outOfStock and product.lowStock}" class="inline-flex px-3 py-1 rounded-full bg-amber-50 text-amber-600 font-semibold">Sắp hết</span>
+                        <span th:if="${!product.outOfStock and !product.lowStock}" class="inline-flex px-3 py-1 rounded-full bg-[#edf4ee] text-[#47654c] font-semibold">Còn hàng</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+        <div th:replace="~{admin/pagination :: pager('/admin/inventory', ${page}, ${keyword})}"></div>
+    </main>
+</div>
+<script th:replace="~{admin/fragments :: logoutScript}"></script>
+</body>
+</html>

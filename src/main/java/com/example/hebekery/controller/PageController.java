@@ -124,10 +124,11 @@ public class PageController {
 
     @GetMapping("/login")
     public String loginPage(@RequestParam(required = false) String redirect, Model model) {
-        if (userService.isAdmin()) {
+        boolean adminRedirect = redirect != null && redirect.startsWith("/admin");
+        if (adminRedirect && userService.isAdmin()) {
             return "redirect:/admin";
         }
-        if (userService.isLoggedIn()) {
+        if (!adminRedirect && userService.isLoggedIn()) {
             return "redirect:/";
         }
         model.addAttribute("redirect", redirect);
@@ -136,9 +137,6 @@ public class PageController {
 
     @GetMapping("/register")
     public String registerPage() {
-        if (userService.isAdmin()) {
-            return "redirect:/admin";
-        }
         if (userService.isLoggedIn()) {
             return "redirect:/";
         }

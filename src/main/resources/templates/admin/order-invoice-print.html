@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Hóa đơn bán hàng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white text-gray-800">
+<main class="max-w-4xl mx-auto p-8">
+    <div class="flex justify-between border-b border-gray-200 pb-6">
+        <div>
+            <p class="text-sm uppercase tracking-widest text-[#47654c] font-semibold">Hebekery</p>
+            <h1 class="text-3xl font-bold mt-2">Hóa đơn bán hàng</h1>
+            <p class="text-gray-500 mt-2" th:text="${order.id}">HBK</p>
+        </div>
+        <button onclick="window.print()" class="print:hidden bg-[#47654c] text-white rounded-lg px-5 py-3 font-semibold">In hóa đơn</button>
+    </div>
+    <section class="grid grid-cols-2 gap-6 py-6">
+        <div>
+            <h2 class="font-semibold mb-2">Khách hàng</h2>
+            <p th:text="${order.customerName}"></p>
+            <p th:text="${order.phone}"></p>
+            <p th:text="${order.address}"></p>
+        </div>
+        <div>
+            <h2 class="font-semibold mb-2">Thanh toán và vận chuyển</h2>
+            <p>Phương thức: <span th:text="${order.paymentMethod}"></span></p>
+            <p>Trạng thái: <span th:text="${@orderService.statusText(order)}"></span></p>
+            <p>Đơn vị vận chuyển: <span th:text="${order.shippingCarrier ?: 'Chưa có'}"></span></p>
+            <p>Mã vận đơn: <span th:text="${order.trackingCode ?: 'Chưa có'}"></span></p>
+        </div>
+    </section>
+    <table class="w-full text-sm border border-gray-200">
+        <thead class="bg-[#f7f3ec]">
+        <tr><th class="text-left p-3">Sản phẩm</th><th class="text-left p-3">Giá</th><th class="text-left p-3">SL</th><th class="text-left p-3">Thành tiền</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${order.items}" class="border-t border-gray-200">
+            <td class="p-3" th:text="${item.productName}"></td>
+            <td class="p-3" th:text="${#strings.replace(#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></td>
+            <td class="p-3" th:text="${item.quantity}"></td>
+            <td class="p-3 font-semibold" th:text="${#strings.replace(#numbers.formatDecimal(item.total, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="text-right text-2xl font-bold text-[#47654c] mt-6">
+        Tổng tiền: <span th:text="${#strings.replace(#numbers.formatDecimal(order.total, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></span>
+    </div>
+</main>
+</body>
+</html>
