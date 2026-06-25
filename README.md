@@ -113,17 +113,6 @@ macOS/Linux:
 http://localhost:8080
 ```
 
-## Tài khoản demo
-
-Sau khi Flyway chạy migration lần đầu, project có dữ liệu mẫu:
-
-| Vai trò | Email | Mật khẩu |
-| --- | --- | --- |
-| User | user@hebekery.vn | 123456 |
-| Admin | admin@hebekery.vn | admin123 |
-
-> Lưu ý: tài khoản demo chỉ dùng cho môi trường học tập/local. Khi deploy thật cần đổi mật khẩu, hash lại dữ liệu seed và cấu hình bảo mật production.
-
 ## Upload ảnh sản phẩm
 
 Ảnh sản phẩm upload từ admin được lưu ở:
