@@ -61,7 +61,7 @@
 ---
 
 ### Bước 1.2: Đưa Secrets ra Biến Môi Trường & Cấu Hình
-- [ ] Thêm các thuộc tính vào `src/main/resources/application.properties`:
+- [x] Thêm các thuộc tính vào `src/main/resources/application.properties` và tạo file mẫu `.env.example`:
   ```properties
   # JWT Configuration
   jwt.secret=${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
@@ -79,9 +79,9 @@
   cloudinary.api-key=${CLOUDINARY_API_KEY:}
   cloudinary.api-secret=${CLOUDINARY_API_SECRET:}
   ```
-- [ ] Tạo class `SepayConfig.java` với `@ConfigurationProperties(prefix = "sepay")` hoặc inject thông qua `@Value`.
-- [ ] Cập nhật `OrderService.java` để inject cấu hình, xóa hoàn toàn các hằng số MoMo hardcode cũ.
-- [ ] **Tạo cấu hình và dịch vụ Cloudinary**:
+- [x] Tạo class `SepayConfig.java` với `@ConfigurationProperties(prefix = "sepay")` hoặc inject thông qua `@Value`.
+- [x] Cập nhật `OrderService.java` để inject cấu hình, xóa hoàn toàn các hằng số MoMo hardcode cũ.
+- [x] **Tạo cấu hình và dịch vụ Cloudinary**:
   - Tạo `CloudinaryConfig.java`: Khởi tạo Bean `Cloudinary` nạp từ properties.
   - Tạo Interface `UploadService.java` (Clean Architecture / DIP):
     - `UploadResult uploadImage(MultipartFile file, String folder)`

@@ -29,24 +29,6 @@ public class CheckoutController {
 
     @PostMapping("/api/checkout")
     public Map<String, Object> checkout(@Valid @RequestBody CheckoutRequest request, HttpSession session) {
-        if ("MOMO".equals(request.getPaymentMethod())) {
-            orderService.validateCheckout(userService.getCurrentUser(), cartService.getCartItems());
-            session.setAttribute("pendingMomoCheckout", request);
-
-            CheckoutResponse checkout = new CheckoutResponse(
-                    null,
-                    "MOMO",
-                    "PENDING",
-                    "/checkout/momo-test",
-                    "Chuyển đến MoMo test để xác nhận thanh toán."
-            );
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("checkout", checkout);
-            response.put("message", checkout.getMessage());
-            return response;
-        }
-
         CheckoutResponse checkout = orderService.createOrder(
                 userService.getCurrentUser(),
                 cartService.getCartItems(),
@@ -54,7 +36,7 @@ public class CheckoutController {
                 request
         );
 
-        if ("COD".equals(checkout.getPaymentMethod())) {
+        if ("COD".equalsIgnoreCase(checkout.getPaymentMethod())) {
             cartService.clearCart();
         }
 
@@ -62,14 +44,6 @@ public class CheckoutController {
         response.put("success", true);
         response.put("checkout", checkout);
         response.put("message", checkout.getMessage());
-        return response;
-    }
-
-    @PostMapping("/api/payment/momo/ipn")
-    public Map<String, Object> momoIpn() {
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("message", "MoMo IPN test endpoint da san sang");
         return response;
     }
 }
