@@ -91,24 +91,24 @@
 ---
 
 ### Bước 1.3: Xây dựng Cơ chế Xác thực Spring Security + JWT (Stateless)
-- [ ] **Tạo `JwtTokenProvider.java`**:
+- [x] **Tạo `JwtTokenProvider.java`**:
   - `generateToken(Authentication authentication)`
   - `generateRefreshToken(String username)`
   - `getUsernameFromToken(String token)`
   - `validateToken(String token)`
-- [ ] **Tạo `CustomUserDetails.java` và `CustomUserDetailsService.java`**:
+- [x] **Tạo `CustomUserDetails.java` và `CustomUserDetailsService.java`**:
   - Cài đặt `UserDetailsService` từ Spring Security.
   - Tải người dùng từ `UserRepository.findByEmailIgnoreCase()`.
   - Gán quyền `ROLE_USER` hoặc `ROLE_ADMIN` dựa theo trường `role` trong bảng `users`.
-- [ ] **Tạo `JwtAuthenticationFilter.java`**:
+- [x] **Tạo `JwtAuthenticationFilter.java`**:
   - Kế thừa `OncePerRequestFilter`.
   - Trích xuất token từ header `Authorization: Bearer <token>`.
   - Xác thực token và gán `UsernamePasswordAuthenticationToken` vào `SecurityContextHolder`.
-- [ ] **Tạo `JwtAuthenticationEntryPoint.java`**:
+- [x] **Tạo `JwtAuthenticationEntryPoint.java`**:
   - Trả về mã lỗi HTTP `401 Unauthorized` dạng JSON đồng nhất khi chưa xác thực.
-- [ ] **Tạo `CustomAccessDeniedHandler.java`**:
+- [x] **Tạo `CustomAccessDeniedHandler.java`**:
   - Trả về mã lỗi HTTP `403 Forbidden` dạng JSON đồng nhất khi không đủ quyền hạn.
-- [ ] **Tái cấu trúc `SecurityConfig.java`**:
+- [x] **Tái cấu trúc `SecurityConfig.java`**:
   - Kích hoạt `@EnableWebSecurity` và `@EnableMethodSecurity`.
   - Cấu hình `SecurityFilterChain`:
     - `sessionManagement` -> `SessionCreationPolicy.STATELESS`.
@@ -120,7 +120,7 @@
       - Quyền Nhân viên & Admin: Phân quyền theo RBAC `@PreAuthorize` cho 4 vai trò (`ADMIN`, `STAFF_WAREHOUSE`, `STAFF_SALES`, `USER`).
       - Quyền Upload Media: `/api/upload/**` (Admin và Thủ kho).
   - Đăng ký `JwtAuthenticationFilter` trước `UsernamePasswordAuthenticationFilter`.
-- [ ] **Xóa bỏ các thành phần lỗi thời**:
+- [x] **Xóa bỏ các thành phần lỗi thời**:
   - Xóa `AdminAccessFilter.java`.
   - Xóa logic lưu thông tin user trong `HttpSession` tại `UserService.java`.
   - Xóa bỏ logic hỗ trợ plain-text password fallback trong `UserService.passwordMatches()`.

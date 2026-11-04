@@ -2,9 +2,13 @@ package com.example.hebekery.service;
 
 import com.example.hebekery.model.User;
 import com.example.hebekery.repository.UserRepository;
+import com.example.hebekery.security.CustomUserDetails;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -33,13 +37,17 @@ public class UserService {
             return null;
         }
 
-        User authenticatedUser = upgradePasswordIfNeeded(user.get(), password);
+        User authenticatedUser = user.get();
         authenticatedUser.setLoggedIn(true);
-        HttpSession session = currentSession(true);
-        if (isAdminRole(authenticatedUser)) {
-            session.setAttribute(ADMIN_AUTH, authenticatedUser);
-        } else {
-            session.setAttribute(USER_AUTH, authenticatedUser);
+
+        // Hỗ trợ session cho luồng legacy tương thích ngược (nếu có ServletRequest)
+        HttpSession session = currentSession(false);
+        if (session != null) {
+            if (isAdminRole(authenticatedUser)) {
+                session.setAttribute(ADMIN_AUTH, authenticatedUser);
+            } else {
+                session.setAttribute(USER_AUTH, authenticatedUser);
+            }
         }
         return authenticatedUser;
     }
@@ -49,53 +57,68 @@ public class UserService {
     }
 
     public void logoutUser() {
+        SecurityContextHolder.clearContext();
         HttpSession session = currentSession(false);
-        if (session == null) {
-            return;
+        if (session != null) {
+            session.removeAttribute(USER_AUTH);
+            session.removeAttribute("user");
         }
-        User currentUser = getCurrentUser();
-        if (currentUser != null) {
-            currentUser.setLoggedIn(false);
-        }
-        session.removeAttribute(USER_AUTH);
-        session.removeAttribute("user");
     }
 
     public void logoutAdmin() {
+        SecurityContextHolder.clearContext();
         HttpSession session = currentSession(false);
-        if (session == null) {
-            return;
+        if (session != null) {
+            session.removeAttribute(ADMIN_AUTH);
         }
-        User currentAdmin = getCurrentAdmin();
-        if (currentAdmin != null) {
-            currentAdmin.setLoggedIn(false);
-        }
-        session.removeAttribute(ADMIN_AUTH);
     }
 
     public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof CustomUserDetails customUserDetails) {
+                return customUserDetails.getUser();
+            }
+            if (principal instanceof String email) {
+                return userRepository.findByEmailIgnoreCase(email).orElse(null);
+            }
+        }
         return getSessionUser(USER_AUTH);
     }
 
     public User getCurrentAdmin() {
+        User currentUser = getCurrentUser();
+        if (currentUser != null && isAdminRole(currentUser)) {
+            return currentUser;
+        }
         return getSessionUser(ADMIN_AUTH);
     }
 
     public boolean isLoggedIn() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
+            return true;
+        }
         User currentUser = getCurrentUser();
-        return currentUser != null && currentUser.isLoggedIn();
+        return currentUser != null;
     }
 
     public boolean isAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
+            return authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equalsIgnoreCase("ROLE_ADMIN") || a.getAuthority().equalsIgnoreCase("ADMIN"));
+        }
         User currentAdmin = getCurrentAdmin();
-        return currentAdmin != null && currentAdmin.isLoggedIn() && isAdminRole(currentAdmin);
+        return currentAdmin != null && isAdminRole(currentAdmin);
     }
 
     public boolean register(String email, String password, String name, String phone) {
         if (userRepository.existsByEmailIgnoreCase(email)) {
             return false;
         }
-        User user = new User(String.valueOf(System.currentTimeMillis()), email, passwordEncoder.encode(password), name, phone, "USER");
+        User user = new User(String.valueOf(System.currentTimeMillis()), email, passwordEncoder.encode(password), name, phone, "ROLE_USER");
         userRepository.save(user);
         return true;
     }
@@ -139,7 +162,7 @@ public class UserService {
 
     public User resetCustomerPasswordToDefault(String id) {
         User user = findById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy user"));
-        if (!"USER".equalsIgnoreCase(user.getRole())) {
+        if (!"USER".equalsIgnoreCase(user.getRole()) && !"ROLE_USER".equalsIgnoreCase(user.getRole())) {
             throw new IllegalArgumentException("Chỉ reset mật khẩu mặc định cho tài khoản khách");
         }
         user.setPassword(passwordEncoder.encode(DEFAULT_CUSTOMER_PASSWORD));
@@ -148,25 +171,28 @@ public class UserService {
     }
 
     public User updateCurrentUser(String name, String phone) {
-        if (!isLoggedIn()) {
+        User currentUser = getCurrentUser();
+        if (currentUser == null) {
             throw new IllegalStateException("Vui lòng đăng nhập");
         }
 
-        User currentUser = getCurrentUser();
         currentUser.setName(name);
         currentUser.setPhone(phone);
         currentUser = userRepository.save(currentUser);
-        currentUser.setLoggedIn(true);
-        currentSession(true).setAttribute(USER_AUTH, currentUser);
+
+        HttpSession session = currentSession(false);
+        if (session != null) {
+            session.setAttribute(USER_AUTH, currentUser);
+        }
         return currentUser;
     }
 
     public boolean changePassword(String currentPassword, String newPassword) {
-        if (!isLoggedIn()) {
+        User currentUser = getCurrentUser();
+        if (currentUser == null) {
             throw new IllegalStateException("Vui lòng đăng nhập");
         }
 
-        User currentUser = getCurrentUser();
         if (!passwordMatches(currentPassword, currentUser.getPassword())) {
             return false;
         }
@@ -174,8 +200,11 @@ public class UserService {
         currentUser.setPassword(passwordEncoder.encode(newPassword));
         currentUser.setForcePasswordChange(false);
         currentUser = userRepository.save(currentUser);
-        currentUser.setLoggedIn(true);
-        currentSession(true).setAttribute(USER_AUTH, currentUser);
+
+        HttpSession session = currentSession(false);
+        if (session != null) {
+            session.setAttribute(USER_AUTH, currentUser);
+        }
         return true;
     }
 
@@ -197,25 +226,17 @@ public class UserService {
     }
 
     private boolean isAdminRole(User user) {
-        return user != null && "ADMIN".equalsIgnoreCase(user.getRole());
+        if (user == null || user.getRole() == null) {
+            return false;
+        }
+        String role = user.getRole().trim().toUpperCase();
+        return "ADMIN".equals(role) || "ROLE_ADMIN".equals(role);
     }
 
     private boolean passwordMatches(String rawPassword, String storedPassword) {
         if (storedPassword == null) {
             return false;
         }
-        if (storedPassword.startsWith("$2a$") || storedPassword.startsWith("$2b$") || storedPassword.startsWith("$2y$")) {
-            return passwordEncoder.matches(rawPassword, storedPassword);
-        }
-        return storedPassword.equals(rawPassword);
-    }
-
-    private User upgradePasswordIfNeeded(User user, String rawPassword) {
-        String storedPassword = user.getPassword();
-        if (storedPassword != null && !storedPassword.startsWith("$2a$") && !storedPassword.startsWith("$2b$") && !storedPassword.startsWith("$2y$")) {
-            user.setPassword(passwordEncoder.encode(rawPassword));
-            return userRepository.save(user);
-        }
-        return user;
+        return passwordEncoder.matches(rawPassword, storedPassword);
     }
 }
