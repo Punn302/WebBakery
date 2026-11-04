@@ -92,9 +92,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/payment/sepay/webhook").permitAll()
                         // Staff & Warehouse APIs
                         .requestMatchers("/api/warehouse/**").hasAnyRole("ADMIN", "STAFF_WAREHOUSE")
+                        .requestMatchers("/api/upload/**").hasAnyRole("ADMIN", "STAFF_WAREHOUSE")
+                        .requestMatchers("/api/admin/products/**").hasAnyRole("ADMIN", "STAFF_WAREHOUSE")
                         // Staff & Sales APIs
                         .requestMatchers("/api/sales/**").hasAnyRole("ADMIN", "STAFF_SALES")
-                        // Admin APIs
+                        .requestMatchers("/api/admin/orders/**").hasAnyRole("ADMIN", "STAFF_SALES")
+                        // General Admin APIs
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // Customer / Authenticated APIs
                         .requestMatchers("/api/user/**", "/api/cart/**", "/api/checkout/**", "/api/orders/**", "/api/reviews/**", "/api/addresses/**").authenticated()

@@ -128,12 +128,12 @@
 ---
 
 ### Bước 1.4: Tách nhỏ các Controller (Phá vỡ God Controller)
-- [ ] **Tạo `AuthController.java` (`/api/auth`)**:
+- [x] **Tạo `AuthController.java` (`/api/auth`)**:
   - `POST /api/auth/login`: Nhận `LoginRequest`, xác thực qua `AuthenticationManager`, sinh và trả về `AuthResponse` (Access token, Refresh token, User profile).
   - `POST /api/auth/register`: Nhận `RegisterRequest`, mã hóa password bằng BCrypt, lưu User mới.
   - `POST /api/auth/refresh-token`: Cấp access token mới từ refresh token hợp lệ.
   - `POST /api/auth/logout`: Hủy token hoặc xóa thông tin ở phía client.
-- [ ] **Phân rã `AdminController.java` thành các REST Controller độc lập**:
+- [x] **Phân rã `AdminController.java` thành các REST Controller độc lập**:
   - `AdminUserController.java` (`/api/admin/users`):
     - `GET /api/admin/users`: Tìm kiếm, phân trang user.
     - `PUT /api/admin/users/{id}/role`: Phân quyền user.
@@ -165,7 +165,7 @@
   - `AdminContactController.java` (`/api/admin/contacts`):
     - `GET /api/admin/contacts`: Danh sách phản hồi.
     - `PATCH /api/admin/contacts/{id}/status`: Đổi trạng thái xử lý liên hệ.
-- [ ] **Tách `ProductController.java`**:
+- [x] **Tách `ProductController.java`**:
   - Chuyển thành `@RestController` thuần túy tại `/api/products`.
   - Bỏ endpoint chuyển hướng `/search`.
 

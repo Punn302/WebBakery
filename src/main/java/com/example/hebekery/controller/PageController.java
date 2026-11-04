@@ -51,6 +51,12 @@ public class PageController {
         return "about";
     }
 
+    @GetMapping("/search")
+    public String searchProducts(@RequestParam(required = false) String keyword) {
+        String encodedKeyword = UriUtils.encodeQueryParam(keyword == null ? "" : keyword, StandardCharsets.UTF_8);
+        return "redirect:/products?keyword=" + encodedKeyword;
+    }
+
     @GetMapping("/products")
     public String products(@RequestParam(defaultValue = "all") String category,
                            @RequestParam(defaultValue = "") String keyword,
