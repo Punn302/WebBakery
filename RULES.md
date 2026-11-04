@@ -266,6 +266,7 @@ Cú pháp commit bắt buộc: `<type>(<scope>): <mô tả ngắn gọn>`
 * **Atomic Commit**: Chia nhỏ commit khi hoàn thành từng đơn vị logic (DTO, Service, Controller/Component) thay vì để dồn cuối buổi.
 * **Zero Secret Exposure**: Không dán API key, token, password thật vào khung chat hoặc commit vào mã nguồn.
 * **No Scope Creep**: Không tùy tiện sửa các class hoặc cấu hình ngoài phạm vi task hiện tại.
+* **Chủ động Trao đổi & Thông báo Yêu cầu (Proactive Requirement Communication)**: Trong quá trình triển khai dự án, nếu phát sinh bất kỳ yêu cầu, tiền đề kỹ thuật, công cụ/extension cần cài đặt, biến môi trường/tài khoản cần cung cấp (MySQL, Cloudinary, SePay), hoặc quyết định thiết kế cần làm rõ, trợ lý AI **bắt buộc phải chủ động giải thích và thông báo ngay cho bạn** để hai bên cùng phối hợp kịp thời, không tự ý phỏng đoán hoặc âm thầm bỏ qua.
 
 ### 7.3. Khi KẾT THÚC phiên chat & Quy trình Mở PR (Session End & PR Handover)
 1. **Kiểm thử tự động (Verification)**:

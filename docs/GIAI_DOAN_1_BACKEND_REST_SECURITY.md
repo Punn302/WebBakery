@@ -172,7 +172,7 @@
 ---
 
 ### Bước 1.5: Chuẩn hóa Định dạng DTO & Wrapper `ApiResponse<T>`
-- [ ] Chuẩn hóa `com.example.hebekery.dto.ApiResponse<T>`:
+- [x] Chuẩn hóa `com.example.hebekery.dto.ApiResponse<T>`:
   ```java
   public class ApiResponse<T> {
       private boolean success;
@@ -187,19 +187,19 @@
       public static <T> ApiResponse<T> error(String message, Map<String, String> errors) { ... }
   }
   ```
-- [ ] Tạo đầy đủ các Response DTO để không làm lộ Entity:
+- [x] Tạo đầy đủ các Response DTO để không làm lộ Entity:
   - `AuthResponse.java` (token, refreshToken, user)
-  - `ProductDetailResponse.java`, `ProductListResponse.java`
+  - `ProductResponse.java` (thay thế ProductDetailResponse và ProductListResponse)
   - `OrderDetailResponse.java`, `OrderItemResponse.java`
   - `AddressResponse.java`
   - `InventoryTransactionResponse.java`
   - `UploadResponse.java` (url, publicId, format, size)
-- [ ] Xóa bỏ toàn bộ các hàm trả về `Map<String, Object>` ở Controller.
+- [x] Xóa bỏ toàn bộ các hàm trả về `Map<String, Object>` ở Controller.
 
 ---
 
 ### Bước 1.6: Hoàn thiện `GlobalExceptionHandler.java`
-- [ ] Bổ sung handler cho các lỗi bảo mật và xác thực:
+- [x] Bổ sung handler cho các lỗi bảo mật và xác thực:
   - `BadCredentialsException` -> 401 Unauthorized.
   - `AccessDeniedException` -> 403 Forbidden.
   - `SignatureException`, `MalformedJwtException`, `ExpiredJwtException` -> 401 Unauthorized.
