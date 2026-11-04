@@ -1,42 +1,33 @@
 package com.example.hebekery.controller;
 
-import com.example.hebekery.dto.UserResponse;
-import com.example.hebekery.dto.request.AdminOrderUpdateRequest;
-import com.example.hebekery.dto.request.AdminUserUpdateRequest;
 import com.example.hebekery.model.Product;
 import com.example.hebekery.service.ContactService;
 import com.example.hebekery.service.FileStorageService;
 import com.example.hebekery.service.OrderService;
 import com.example.hebekery.service.ProductService;
 import com.example.hebekery.service.PurchaseReceiptService;
-import com.example.hebekery.service.ReportService;
 import com.example.hebekery.service.ReportPdfService;
+import com.example.hebekery.service.ReportService;
 import com.example.hebekery.service.UserService;
-import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 
-import java.util.HashMap;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Controller
 public class AdminController {
@@ -50,7 +41,14 @@ public class AdminController {
     private final ReportService reportService;
     private final ReportPdfService reportPdfService;
 
-    public AdminController(UserService userService, OrderService orderService, ProductService productService, ContactService contactService, FileStorageService fileStorageService, PurchaseReceiptService purchaseReceiptService, ReportService reportService, ReportPdfService reportPdfService) {
+    public AdminController(UserService userService,
+                           OrderService orderService,
+                           ProductService productService,
+                           ContactService contactService,
+                           FileStorageService fileStorageService,
+                           PurchaseReceiptService purchaseReceiptService,
+                           ReportService reportService,
+                           ReportPdfService reportPdfService) {
         this.userService = userService;
         this.orderService = orderService;
         this.productService = productService;
@@ -284,7 +282,7 @@ public class AdminController {
                                         @RequestParam("unitCost") List<Double> unitCosts,
                                         @RequestParam(defaultValue = "") String note) {
         requireAdminPage();
-        List<com.example.hebekery.model.PurchaseReceipt> receipts = purchaseReceiptService.createBatch(productIds, quantities, unitCosts, supplier, note);
+        purchaseReceiptService.createBatch(productIds, quantities, unitCosts, supplier, note);
         return "redirect:/admin/reports";
     }
 
@@ -382,113 +380,10 @@ public class AdminController {
         return "redirect:/admin/inventory";
     }
 
-    @GetMapping("/api/admin/users")
-    @ResponseBody
-    public Map<String, Object> users() {
-        requireAdmin();
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("users", userService.getAllUsers().stream().map(UserResponse::from).collect(Collectors.toList()));
-        return response;
-    }
-
-    @PostMapping("/api/admin/users/{id}")
-    @ResponseBody
-    public Map<String, Object> updateUser(@PathVariable String id, @RequestBody AdminUserUpdateRequest request) {
-        requireAdmin();
-        if (Boolean.TRUE.equals(request.getResetDefaultPassword())) {
-            userService.resetCustomerPasswordToDefault(id);
-        }
-        if (request.getRole() != null && !request.getRole().isBlank()) {
-            userService.updateUserRole(id, request.getRole());
-        }
-        if (request.getActive() != null) {
-            userService.setUserActive(id, request.getActive());
-        }
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("user", UserResponse.from(userService.findById(id).orElseThrow()));
-        return response;
-    }
-
-    @GetMapping("/api/admin/products")
-    @ResponseBody
-    public Map<String, Object> products() {
-        requireAdmin();
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("products", productService.getAllProducts());
-        return response;
-    }
-
-    @PostMapping("/api/admin/products")
-    @ResponseBody
-    public Map<String, Object> saveProduct(@Valid @RequestBody Product product) {
-        requireAdmin();
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("product", productService.saveProduct(product));
-        return response;
-    }
-
-    @DeleteMapping("/api/admin/products/{id}")
-    @ResponseBody
-    public Map<String, Object> deleteProduct(@PathVariable String id) {
-        requireAdmin();
-        boolean deleted = productService.deleteProduct(id);
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", deleted);
-        return response;
-    }
-
-    @GetMapping("/api/admin/orders")
-    @ResponseBody
-    public Map<String, Object> orders() {
-        requireAdmin();
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("orders", orderService.getAllOrders());
-        return response;
-    }
-
-    @PostMapping("/api/admin/orders/{id}")
-    @ResponseBody
-    public Map<String, Object> updateOrder(@PathVariable String id, @RequestBody AdminOrderUpdateRequest request) {
-        requireAdmin();
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("order", orderService.updateStatus(id, request.getOrderStatus(), request.getPaymentStatus()));
-        return response;
-    }
-
-    @GetMapping("/api/admin/contacts")
-    @ResponseBody
-    public Map<String, Object> contacts() {
-        requireAdmin();
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("contacts", contactService.getAll());
-        return response;
-    }
-
-    @PostMapping("/api/admin/contacts/{id}/status")
-    @ResponseBody
-    public Map<String, Object> updateContact(@PathVariable String id, @RequestBody Map<String, String> payload) {
-        requireAdmin();
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("contact", contactService.updateStatus(id, payload.getOrDefault("status", "DONE")));
-        return response;
-    }
-
     private void requireAdminPage() {
         if (!userService.isAdmin()) {
             throw new IllegalStateException("Ban can dang nhap bang tai khoan admin");
         }
-    }
-
-    private void requireAdmin() {
-        requireAdminPage();
     }
 
     private String csvValue(String value) {

@@ -1,19 +1,29 @@
 package com.example.hebekery.controller;
 
+import com.example.hebekery.dto.ApiResponse;
+import com.example.hebekery.dto.OrderDetailResponse;
+import com.example.hebekery.model.Order;
 import com.example.hebekery.service.OrderService;
 import com.example.hebekery.service.UserService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
+@RequestMapping
 public class OrderController {
+
     private final OrderService orderService;
     private final UserService userService;
 
@@ -23,58 +33,62 @@ public class OrderController {
     }
 
     @GetMapping("/api/orders/track")
-    public Map<String, Object> track(@RequestParam(required = false) String orderId, @RequestParam(required = false) String phone) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("orders", orderService.trackOrders(orderId, phone));
-        return response;
+    public ResponseEntity<ApiResponse<List<OrderDetailResponse>>> track(
+            @RequestParam(required = false) String orderId,
+            @RequestParam(required = false) String phone) {
+        List<Order> orders = orderService.trackOrders(orderId, phone);
+        List<OrderDetailResponse> dtos = orders.stream()
+                .map(OrderDetailResponse::from)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success("Tra cứu đơn hàng thành công", dtos));
     }
 
-    @GetMapping("/api/user/orders/{id}")
-    public Map<String, Object> detail(@PathVariable String id) {
+    @GetMapping({"/api/user/orders/{id}", "/api/orders/{id}"})
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<OrderDetailResponse>> detail(@PathVariable String id) {
         requireLogin();
-        var order = orderService.getOrderById(id);
-        if (!order.getUserId().equals(userService.getCurrentUser().getId())) {
-            throw new IllegalArgumentException("Bạn không có quyền xem đơn hàng này");
+        Order order = orderService.getOrderById(id);
+        if (order == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.failure("Không tìm thấy đơn hàng với mã: " + id));
         }
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("order", order);
-        return response;
+        if (!order.getUserId().equals(userService.getCurrentUser().getId()) && !userService.isAdmin()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.failure("Bạn không có quyền xem đơn hàng này"));
+        }
+        return ResponseEntity.ok(ApiResponse.success("Lấy chi tiết đơn hàng thành công", OrderDetailResponse.from(order)));
     }
 
-    @PostMapping("/api/user/orders/{id}/cancel")
-    public Map<String, Object> cancel(@PathVariable String id) {
+    @PostMapping({"/api/user/orders/{id}/cancel", "/api/orders/{id}/cancel"})
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<OrderDetailResponse>> cancel(@PathVariable String id) {
         requireLogin();
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("order", orderService.cancelOrder(id, userService.getCurrentUser().getId()));
-        return response;
+        Order order = orderService.cancelOrder(id, userService.getCurrentUser().getId());
+        return ResponseEntity.ok(ApiResponse.success("Hủy đơn hàng thành công", OrderDetailResponse.from(order)));
     }
 
-    @PostMapping("/api/user/orders/{id}/received")
-    public Map<String, Object> received(@PathVariable String id) {
+    @PostMapping({"/api/user/orders/{id}/received", "/api/orders/{id}/received"})
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<OrderDetailResponse>> received(@PathVariable String id) {
         requireLogin();
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("order", orderService.markReceived(id, userService.getCurrentUser().getId()));
-        response.put("message", "Đã xác nhận nhận hàng");
-        return response;
+        Order order = orderService.markReceived(id, userService.getCurrentUser().getId());
+        return ResponseEntity.ok(ApiResponse.success("Đã xác nhận nhận hàng thành công", OrderDetailResponse.from(order)));
     }
 
-    @PostMapping("/api/user/orders/{id}/return")
-    public Map<String, Object> requestReturn(@PathVariable String id, @RequestBody Map<String, String> payload) {
+    @PostMapping({"/api/user/orders/{id}/return", "/api/orders/{id}/return"})
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<OrderDetailResponse>> requestReturn(
+            @PathVariable String id,
+            @RequestBody Map<String, String> payload) {
         requireLogin();
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("order", orderService.requestReturn(id, userService.getCurrentUser().getId(), payload.get("reason")));
-        response.put("message", "Đã gửi yêu cầu đổi trả");
-        return response;
+        String reason = payload.get("reason");
+        Order order = orderService.requestReturn(id, userService.getCurrentUser().getId(), reason);
+        return ResponseEntity.ok(ApiResponse.success("Đã gửi yêu cầu đổi trả thành công", OrderDetailResponse.from(order)));
     }
 
     private void requireLogin() {
-        if (!userService.isLoggedIn()) {
-            throw new IllegalStateException("Vui lòng đăng nhập");
+        if (!userService.isLoggedIn() || userService.getCurrentUser() == null) {
+            throw new IllegalStateException("Vui lòng đăng nhập để thực hiện thao tác này");
         }
     }
 }

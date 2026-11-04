@@ -1,6 +1,9 @@
 package com.example.hebekery.controller;
 
+import com.example.hebekery.dto.ApiResponse;
+import com.example.hebekery.dto.OrderResponse;
 import com.example.hebekery.dto.UserResponse;
+import com.example.hebekery.dto.UserStatusResponse;
 import com.example.hebekery.dto.request.ChangePasswordRequest;
 import com.example.hebekery.dto.request.LoginRequest;
 import com.example.hebekery.dto.request.RegisterRequest;
@@ -12,14 +15,16 @@ import com.example.hebekery.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @RestController
 public class UserController {
@@ -35,47 +40,35 @@ public class UserController {
     }
 
     @GetMapping("/api/user/status")
-    public Map<String, Object> getUserStatus() {
-        Map<String, Object> response = new HashMap<>();
-        response.put("loggedIn", userService.isLoggedIn());
-        if (userService.isLoggedIn()) {
-            response.put("user", UserResponse.from(userService.getCurrentUser()));
-        }
-        return response;
+    public ResponseEntity<ApiResponse<UserStatusResponse>> getUserStatus() {
+        boolean loggedIn = userService.isLoggedIn();
+        UserResponse user = loggedIn ? UserResponse.from(userService.getCurrentUser()) : null;
+        UserStatusResponse status = new UserStatusResponse(loggedIn, user);
+        return ResponseEntity.ok(ApiResponse.success("Lấy trạng thái người dùng thành công", status));
     }
 
     @PostMapping("/api/user/login")
-    public Map<String, Object> login(@Valid @RequestBody LoginRequest request, HttpSession session) {
+    public ResponseEntity<ApiResponse<UserResponse>> login(@Valid @RequestBody LoginRequest request, HttpSession session) {
         User authenticatedUser = userService.login(request.getEmail(), request.getPassword());
-        boolean loginSuccess = authenticatedUser != null;
+        if (authenticatedUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.failure("Email hoặc mật khẩu không đúng"));
+        }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", loginSuccess);
-        if (loginSuccess) {
-            UserResponse user = UserResponse.from(authenticatedUser);
-            String role = user.getRole() == null ? "USER" : user.getRole().trim().toUpperCase();
-            if ("USER".equals(role)) {
-                cartService.mergeSessionCartForUser(authenticatedUser);
+        UserResponse user = UserResponse.from(authenticatedUser);
+        try {
+            cartService.mergeSessionCartForUser(authenticatedUser);
+            if (session != null) {
                 session.setAttribute("user", user);
             }
-
-            response.put("user", user);
-            if ("ADMIN".equals(role)) {
-                response.put("redirectUrl", "/admin");
-            } else if (user.isForcePasswordChange()) {
-                response.put("redirectUrl", "/profile?forcePasswordChange=true");
-            } else {
-                response.put("redirectUrl", "/");
-            }
-            response.put("message", "Đăng nhập thành công");
-        } else {
-            response.put("message", "Email hoặc mật khẩu không đúng");
+        } catch (Exception ignored) {
         }
-        return response;
+
+        return ResponseEntity.ok(ApiResponse.success("Đăng nhập thành công", user));
     }
 
     @PostMapping("/api/user/register")
-    public Map<String, Object> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<ApiResponse<Void>> register(@Valid @RequestBody RegisterRequest request) {
         boolean registerSuccess = userService.register(
                 request.getEmail(),
                 request.getPassword(),
@@ -83,69 +76,69 @@ public class UserController {
                 request.getPhone()
         );
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", registerSuccess);
-        response.put("message", registerSuccess ? "Đăng ký thành công" : "Email đã được đăng ký");
-        return response;
+        if (!registerSuccess) {
+            return ResponseEntity.badRequest().body(ApiResponse.failure("Email đã được đăng ký"));
+        }
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Đăng ký tài khoản thành công", null));
     }
 
     @PostMapping("/api/user/logout")
-    public Map<String, Object> logout(HttpSession session) {
+    public ResponseEntity<ApiResponse<Void>> logout(HttpSession session) {
         userService.logoutUser();
-        session.removeAttribute("pendingMomoCheckout");
-        return success("Đăng xuất thành công");
+        if (session != null) {
+            session.removeAttribute("pendingMomoCheckout");
+        }
+        return ResponseEntity.ok(ApiResponse.success("Đăng xuất thành công", null));
     }
 
     @PostMapping("/api/admin/logout")
-    public Map<String, Object> adminLogout() {
+    public ResponseEntity<ApiResponse<Void>> adminLogout() {
         userService.logoutAdmin();
-        return success("Đăng xuất admin thành công");
+        return ResponseEntity.ok(ApiResponse.success("Đăng xuất admin thành công", null));
     }
 
     @GetMapping("/logout")
     public void logoutPage(HttpSession session, HttpServletResponse response) throws IOException {
         userService.logoutUser();
-        session.removeAttribute("pendingMomoCheckout");
+        if (session != null) {
+            session.removeAttribute("pendingMomoCheckout");
+        }
         response.sendRedirect("/");
     }
 
     @PostMapping("/api/user/update")
-    public Map<String, Object> updateUser(@Valid @RequestBody UpdateUserRequest request, HttpSession session) {
-        UserResponse user = UserResponse.from(userService.updateCurrentUser(request.getName(), request.getPhone()));
-        session.setAttribute("user", user);
+    public ResponseEntity<ApiResponse<UserResponse>> updateUser(@Valid @RequestBody UpdateUserRequest request, HttpSession session) {
+        User updated = userService.updateCurrentUser(request.getName(), request.getPhone());
+        UserResponse user = UserResponse.from(updated);
+        if (session != null) {
+            session.setAttribute("user", user);
+        }
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật thông tin thành công", user));
+    }
 
-        Map<String, Object> response = success("Cập nhật thông tin thành công");
-        response.put("user", user);
-        return response;
+    @PutMapping("/api/user/profile")
+    public ResponseEntity<ApiResponse<UserResponse>> updateProfile(@Valid @RequestBody UpdateUserRequest request) {
+        User updated = userService.updateCurrentUser(request.getName(), request.getPhone());
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật hồ sơ thành công", UserResponse.from(updated)));
     }
 
     @PostMapping("/api/user/change-password")
-    public Map<String, Object> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+    public ResponseEntity<ApiResponse<Void>> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
         boolean changeSuccess = userService.changePassword(request.getCurrentPassword(), request.getNewPassword());
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", changeSuccess);
-        response.put("message", changeSuccess ? "Đổi mật khẩu thành công" : "Mật khẩu hiện tại không đúng");
-        return response;
+        if (!changeSuccess) {
+            return ResponseEntity.badRequest().body(ApiResponse.failure("Mật khẩu hiện tại không đúng"));
+        }
+        return ResponseEntity.ok(ApiResponse.success("Đổi mật khẩu thành công", null));
     }
 
     @GetMapping("/api/user/orders")
-    public Map<String, Object> getUserOrders() {
-        if (!userService.isLoggedIn()) {
-            throw new IllegalStateException("Vui lòng đăng nhập");
+    public ResponseEntity<ApiResponse<List<OrderResponse>>> getUserOrders() {
+        if (!userService.isLoggedIn() || userService.getCurrentUser() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.failure("Vui lòng đăng nhập để xem lịch sử đơn hàng"));
         }
-
-        Map<String, Object> response = success(null);
-        response.put("orders", orderService.getOrdersByUser(userService.getCurrentUser().getId()));
-        return response;
-    }
-
-    private Map<String, Object> success(String message) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        if (message != null) {
-            response.put("message", message);
-        }
-        return response;
+        List<OrderResponse> orders = orderService.getOrdersByUser(userService.getCurrentUser().getId());
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách đơn hàng thành công", orders));
     }
 }

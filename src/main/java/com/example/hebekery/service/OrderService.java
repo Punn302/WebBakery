@@ -1,5 +1,6 @@
 package com.example.hebekery.service;
 
+import com.example.hebekery.config.SepayConfig;
 import com.example.hebekery.dto.CheckoutResponse;
 import com.example.hebekery.dto.OrderResponse;
 import com.example.hebekery.dto.request.CheckoutRequest;
@@ -18,40 +19,30 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
 
-    private static final String MOMO_PARTNER_CODE = "MOMO";
-    private static final String MOMO_ACCESS_KEY = "F8BBA842ECF85";
-    private static final String MOMO_SECRET_KEY = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
-    private static final String MOMO_ENDPOINT = "https://test-payment.momo.vn/v2/gateway/api/create";
-    private static final String MOMO_RETURN_URL = "http://localhost:8080/checkout/success";
-    private static final String MOMO_NOTIFY_URL = "http://localhost:8080/api/payment/momo/ipn";
-
     private final OrderRepository orderRepository;
     private final OrderStatusHistoryRepository orderStatusHistoryRepository;
     private final ReturnHistoryRepository returnHistoryRepository;
     private final ProductService productService;
+    private final SepayConfig sepayConfig;
 
-    public OrderService(OrderRepository orderRepository, OrderStatusHistoryRepository orderStatusHistoryRepository, ReturnHistoryRepository returnHistoryRepository, ProductService productService) {
+    public OrderService(OrderRepository orderRepository,
+                        OrderStatusHistoryRepository orderStatusHistoryRepository,
+                        ReturnHistoryRepository returnHistoryRepository,
+                        ProductService productService,
+                        SepayConfig sepayConfig) {
         this.orderRepository = orderRepository;
         this.orderStatusHistoryRepository = orderStatusHistoryRepository;
         this.returnHistoryRepository = returnHistoryRepository;
         this.productService = productService;
+        this.sepayConfig = sepayConfig;
     }
 
     @Transactional
@@ -74,13 +65,14 @@ public class OrderService {
         orderRepository.save(order);
         addHistory(order, "User tạo đơn hàng", "USER");
 
-        if ("MOMO".equals(request.getPaymentMethod())) {
+        if ("VIETQR".equalsIgnoreCase(request.getPaymentMethod()) || "MOMO".equalsIgnoreCase(request.getPaymentMethod())) {
+            String paymentUrl = sepayConfig.generateVietQrUrl(order.getId(), order.getTotal());
             return new CheckoutResponse(
                     order.getId(),
-                    "MOMO",
+                    "VIETQR",
                     "PENDING",
-                    createMomoPaymentUrl(order),
-                    "Đơn hàng đã tạo. Chuyển đến MoMo test để thanh toán."
+                    paymentUrl,
+                    "Đơn hàng đã tạo. Vui lòng quét mã VietQR để hoàn tất thanh toán."
             );
         }
 
@@ -104,7 +96,7 @@ public class OrderService {
     }
 
     @Transactional
-    public CheckoutResponse createPaidMomoOrder(User user, List<CartItem> cartItems, double subtotal, CheckoutRequest request) {
+    public CheckoutResponse createPaidOrder(User user, List<CartItem> cartItems, double subtotal, CheckoutRequest request) {
         validateCheckout(user, cartItems);
 
         Order order = new Order();
@@ -114,22 +106,27 @@ public class OrderService {
         order.setPhone(request.getPhone());
         order.setAddress(request.getAddress());
         order.setNote(request.getNote());
-        order.setPaymentMethod("MOMO");
+        order.setPaymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod() : "VIETQR");
         order.setPaymentStatus("PAID");
         order.setOrderStatus("PENDING");
         order.setTotal(subtotal + 30000);
         order.setCreatedAt(LocalDateTime.now());
         order.setItems(copyItems(order, cartItems));
         orderRepository.save(order);
-        addHistory(order, "User thanh toán MoMo test thành công", "USER");
+        addHistory(order, "Đơn hàng đã được thanh toán", "SYSTEM");
 
         return new CheckoutResponse(
                 order.getId(),
-                "MOMO",
+                order.getPaymentMethod(),
                 "PAID",
                 null,
-                "Thanh toán MoMo thành công. Đơn hàng đã được ghi nhận."
+                "Thanh toán thành công. Đơn hàng đã được ghi nhận."
         );
+    }
+
+    @Transactional
+    public CheckoutResponse createPaidMomoOrder(User user, List<CartItem> cartItems, double subtotal, CheckoutRequest request) {
+        return createPaidOrder(user, cartItems, subtotal, request);
     }
 
     public List<OrderResponse> getOrdersByUser(String userId) {
@@ -445,94 +442,5 @@ public class OrderService {
         String source = order.getId() == null ? String.valueOf(System.currentTimeMillis()) : order.getId().replaceAll("[^0-9A-Za-z]", "");
         String suffix = source.length() > 10 ? source.substring(source.length() - 10) : source;
         return "VD-" + suffix + "-" + (System.currentTimeMillis() % 10000);
-    }
-
-    private String createMomoPaymentUrl(Order order) {
-        String requestId = UUID.randomUUID().toString();
-        String orderInfo = "Thanh toán đơn hàng " + order.getId();
-        String amount = String.valueOf((long) order.getTotal());
-        String extraData = "";
-        String requestType = "captureWallet";
-
-        String rawSignature = "accessKey=" + MOMO_ACCESS_KEY
-                + "&amount=" + amount
-                + "&extraData=" + extraData
-                + "&ipnUrl=" + MOMO_NOTIFY_URL
-                + "&orderId=" + order.getId()
-                + "&orderInfo=" + orderInfo
-                + "&partnerCode=" + MOMO_PARTNER_CODE
-                + "&redirectUrl=" + MOMO_RETURN_URL
-                + "&requestId=" + requestId
-                + "&requestType=" + requestType;
-
-        String signature = hmacSha256(rawSignature, MOMO_SECRET_KEY);
-
-        String payload = "{"
-                + "\"partnerCode\":\"" + MOMO_PARTNER_CODE + "\","
-                + "\"accessKey\":\"" + MOMO_ACCESS_KEY + "\","
-                + "\"requestId\":\"" + requestId + "\","
-                + "\"amount\":\"" + amount + "\","
-                + "\"orderId\":\"" + order.getId() + "\","
-                + "\"orderInfo\":\"" + orderInfo + "\","
-                + "\"redirectUrl\":\"" + MOMO_RETURN_URL + "\","
-                + "\"ipnUrl\":\"" + MOMO_NOTIFY_URL + "\","
-                + "\"extraData\":\"" + extraData + "\","
-                + "\"requestType\":\"" + requestType + "\","
-                + "\"signature\":\"" + signature + "\""
-                + "}";
-
-        try {
-            HttpRequest httpRequest = HttpRequest.newBuilder()
-                    .uri(URI.create(MOMO_ENDPOINT))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(payload))
-                    .build();
-            HttpResponse<String> response = HttpClient.newHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
-            String payUrl = extractJsonString(response.body(), "payUrl");
-            if (payUrl != null && !payUrl.isBlank()) {
-                return payUrl;
-            }
-        } catch (Exception ignored) {
-            // Runtime may be offline during local development. Fallback keeps the checkout flow testable.
-        }
-
-        return "/checkout/momo-test?orderId=" + encode(order.getId());
-    }
-
-    private String extractJsonString(String json, String key) {
-        if (json == null) {
-            return null;
-        }
-        String marker = "\"" + key + "\":\"";
-        int start = json.indexOf(marker);
-        if (start < 0) {
-            return null;
-        }
-        start += marker.length();
-        int end = json.indexOf("\"", start);
-        if (end < 0) {
-            return null;
-        }
-        return json.substring(start, end).replace("\\/", "/");
-    }
-
-    private String hmacSha256(String data, String secretKey) {
-        try {
-            Mac hmacSha256 = Mac.getInstance("HmacSHA256");
-            SecretKeySpec keySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-            hmacSha256.init(keySpec);
-            byte[] hash = hmacSha256.doFinal(data.getBytes(StandardCharsets.UTF_8));
-            StringBuilder result = new StringBuilder();
-            for (byte b : hash) {
-                result.append(String.format("%02x", b));
-            }
-            return result.toString();
-        } catch (Exception ex) {
-            throw new IllegalStateException("Không thể tạo chữ ký MoMo");
-        }
-    }
-
-    private String encode(String value) {
-        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 }

@@ -1,69 +1,37 @@
 package com.example.hebekery.service;
 
+import com.example.hebekery.dto.UploadResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.Locale;
-import java.util.Set;
-import java.util.UUID;
-
 @Service
 public class FileStorageService {
-    private static final long MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
-    private static final Set<String> ALLOWED_EXTENSIONS = Set.of("jpg", "jpeg", "png", "webp", "gif");
-    private final Path productUploadDir = Path.of("uploads", "products").toAbsolutePath().normalize();
+    private static final Logger log = LoggerFactory.getLogger(FileStorageService.class);
+    private final UploadService uploadService;
+
+    public FileStorageService(UploadService uploadService) {
+        this.uploadService = uploadService;
+    }
 
     public String saveProductImage(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             return null;
         }
-        if (file.getSize() > MAX_IMAGE_SIZE_BYTES) {
-            throw new IllegalArgumentException("Ảnh sản phẩm không được vượt quá 2MB");
-        }
-        String originalName = file.getOriginalFilename() == null ? "" : file.getOriginalFilename();
-        String extension = extensionOf(originalName);
-        if (!ALLOWED_EXTENSIONS.contains(extension)) {
-            throw new IllegalArgumentException("Chỉ hỗ trợ ảnh jpg, jpeg, png, webp, gif");
-        }
         try {
-            Files.createDirectories(productUploadDir);
-            String filename = UUID.randomUUID() + "." + extension;
-            Path target = productUploadDir.resolve(filename).normalize();
-            if (!target.startsWith(productUploadDir)) {
-                throw new IllegalArgumentException("Tên file không hợp lệ");
-            }
-            Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
-            return "/uploads/products/" + filename;
-        } catch (IOException ex) {
-            throw new IllegalStateException("Không thể lưu ảnh sản phẩm");
+            UploadResponse uploadResponse = uploadService.uploadImage(file, "hebekery/products");
+            return uploadResponse.getUrl();
+        } catch (Exception ex) {
+            log.error("Không thể lưu ảnh qua UploadService: {}", ex.getMessage());
+            throw ex;
         }
     }
 
     public void deleteProductImage(String imageUrl) {
-        if (imageUrl == null || !imageUrl.startsWith("/uploads/products/")) {
+        if (imageUrl == null || imageUrl.isBlank()) {
             return;
         }
-        String filename = imageUrl.substring("/uploads/products/".length());
-        Path target = productUploadDir.resolve(filename).normalize();
-        if (!target.startsWith(productUploadDir)) {
-            return;
-        }
-        try {
-            Files.deleteIfExists(target);
-        } catch (IOException ignored) {
-            // Không chặn nghiệp vụ sản phẩm nếu file đã bị xóa thủ công hoặc đang bị khóa.
-        }
-    }
-
-    private String extensionOf(String filename) {
-        int dotIndex = filename.lastIndexOf('.');
-        if (dotIndex < 0 || dotIndex == filename.length() - 1) {
-            throw new IllegalArgumentException("File ảnh phải có phần mở rộng");
-        }
-        return filename.substring(dotIndex + 1).toLowerCase(Locale.ROOT);
+        uploadService.deleteImage(imageUrl);
     }
 }

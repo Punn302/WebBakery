@@ -1,5 +1,6 @@
 package com.example.hebekery.controller;
 
+import com.example.hebekery.dto.ApiResponse;
 import com.example.hebekery.dto.CheckoutResponse;
 import com.example.hebekery.dto.request.CheckoutRequest;
 import com.example.hebekery.service.CartService;
@@ -7,14 +8,17 @@ import com.example.hebekery.service.OrderService;
 import com.example.hebekery.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RestController
+@RequestMapping("/api/checkout")
+@PreAuthorize("isAuthenticated()")
 public class CheckoutController {
 
     private final CartService cartService;
@@ -27,24 +31,15 @@ public class CheckoutController {
         this.userService = userService;
     }
 
-    @PostMapping("/api/checkout")
-    public Map<String, Object> checkout(@Valid @RequestBody CheckoutRequest request, HttpSession session) {
-        if ("MOMO".equals(request.getPaymentMethod())) {
-            orderService.validateCheckout(userService.getCurrentUser(), cartService.getCartItems());
-            session.setAttribute("pendingMomoCheckout", request);
+    @PostMapping
+    public ResponseEntity<ApiResponse<CheckoutResponse>> checkout(@Valid @RequestBody CheckoutRequest request, HttpSession session) {
+        if (!userService.isLoggedIn() || userService.getCurrentUser() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.failure("Vui lòng đăng nhập để tiến hành đặt hàng"));
+        }
 
-            CheckoutResponse checkout = new CheckoutResponse(
-                    null,
-                    "MOMO",
-                    "PENDING",
-                    "/checkout/momo-test",
-                    "Chuyển đến MoMo test để xác nhận thanh toán."
-            );
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("checkout", checkout);
-            response.put("message", checkout.getMessage());
-            return response;
+        if (cartService.getCartItems().isEmpty()) {
+            return ResponseEntity.badRequest().body(ApiResponse.failure("Giỏ hàng của bạn đang trống"));
         }
 
         CheckoutResponse checkout = orderService.createOrder(
@@ -54,22 +49,11 @@ public class CheckoutController {
                 request
         );
 
-        if ("COD".equals(checkout.getPaymentMethod())) {
+        if ("COD".equalsIgnoreCase(checkout.getPaymentMethod())) {
             cartService.clearCart();
         }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("checkout", checkout);
-        response.put("message", checkout.getMessage());
-        return response;
-    }
-
-    @PostMapping("/api/payment/momo/ipn")
-    public Map<String, Object> momoIpn() {
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("message", "MoMo IPN test endpoint da san sang");
-        return response;
+        String msg = checkout.getMessage() != null ? checkout.getMessage() : "Đặt hàng thành công";
+        return ResponseEntity.ok(ApiResponse.success(msg, checkout));
     }
 }
