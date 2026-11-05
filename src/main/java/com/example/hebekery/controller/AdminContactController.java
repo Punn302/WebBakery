@@ -4,6 +4,10 @@ import com.example.hebekery.dto.ApiResponse;
 import com.example.hebekery.dto.ContactResponse;
 import com.example.hebekery.model.ContactMessage;
 import com.example.hebekery.service.ContactService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +27,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin/contacts")
 @PreAuthorize("hasRole('ADMIN')")
+@Tag(name = "Admin Contact Management", description = "Quản lý và xử lý phản hồi liên hệ của khách hàng")
 public class AdminContactController {
 
     private final ContactService contactService;
@@ -31,20 +36,22 @@ public class AdminContactController {
         this.contactService = contactService;
     }
 
+    @Operation(summary = "Tìm kiếm tin nhắn liên hệ", description = "Lấy danh sách các liên hệ của khách hàng theo từ khóa và phân trang", security = @SecurityRequirement(name = "BearerAuth"))
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ContactResponse>>> searchContacts(
-            @RequestParam(defaultValue = "") String keyword,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @Parameter(description = "Từ khóa tìm kiếm theo tên hoặc nội dung") @RequestParam(defaultValue = "") String keyword,
+            @Parameter(description = "Số thứ tự trang") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Số tin nhắn trên mỗi trang") @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(Math.max(page, 0), size, Sort.by("createdAt").descending());
         Page<ContactMessage> messages = contactService.search(keyword, pageable);
         Page<ContactResponse> dtos = messages.map(ContactResponse::from);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách tin nhắn liên hệ thành công", dtos));
     }
 
+    @Operation(summary = "Cập nhật trạng thái xử lý liên hệ", description = "Chuyển trạng thái liên hệ sang DONE (đã xử lý) hoặc PENDING", security = @SecurityRequirement(name = "BearerAuth"))
     @PatchMapping("/{id}/status")
     public ResponseEntity<ApiResponse<ContactResponse>> updateContactStatus(
-            @PathVariable String id,
+            @Parameter(description = "Mã định danh tin nhắn liên hệ") @PathVariable String id,
             @RequestBody Map<String, String> payload) {
         String status = payload.getOrDefault("status", "DONE");
         ContactMessage updated = contactService.updateStatus(id, status);

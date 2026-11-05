@@ -1,16 +1,22 @@
 package com.example.hebekery.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
+@Schema(description = "Yêu cầu đăng nhập tài khoản")
 public class LoginRequest {
-    @NotBlank(message = "Email khong duoc de trong")
-    @Email(message = "Email khong hop le")
+
+    @Schema(description = "Địa chỉ email đã đăng ký", example = "khachhang@hebekery.vn")
+    @NotBlank(message = "Email không được để trống")
+    @Email(message = "Email không hợp lệ")
     private String email;
 
-    @NotBlank(message = "Mat khau khong duoc de trong")
+    @Schema(description = "Mật khẩu tài khoản", example = "123456")
+    @NotBlank(message = "Mật khẩu không được để trống")
     private String password;
 
+    @Schema(description = "Ghi nhớ trạng thái đăng nhập", example = "false")
     private boolean rememberMe;
 
     public String getEmail() {

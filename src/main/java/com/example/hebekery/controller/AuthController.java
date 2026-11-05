@@ -13,6 +13,9 @@ import com.example.hebekery.security.CustomUserDetails;
 import com.example.hebekery.security.JwtTokenProvider;
 import com.example.hebekery.service.CartService;
 import com.example.hebekery.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -30,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Authentication", description = "Các endpoint đăng nhập, đăng ký, làm mới token và thông tin phiên làm việc")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -53,6 +57,7 @@ public class AuthController {
         this.cartService = cartService;
     }
 
+    @Operation(summary = "Đăng nhập hệ thống", description = "Xác thực tài khoản qua email/mật khẩu và trả về JWT access token + refresh token")
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
         try {
@@ -93,6 +98,7 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "Đăng ký tài khoản khách hàng", description = "Đăng ký tài khoản mới với vai trò mặc định là USER")
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserResponse>> register(@Valid @RequestBody RegisterRequest request) {
         if (userRepository.existsByEmailIgnoreCase(request.getEmail())) {
@@ -117,6 +123,7 @@ public class AuthController {
                 .body(ApiResponse.success("Đăng ký tài khoản thành công", UserResponse.from(createdUser)));
     }
 
+    @Operation(summary = "Làm mới Access Token", description = "Cấp lại JWT access token mới khi token cũ hết hạn thông qua Refresh token")
     @PostMapping("/refresh-token")
     public ResponseEntity<ApiResponse<TokenRefreshResponse>> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
         String refreshToken = request.getRefreshToken();
@@ -138,6 +145,7 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Làm mới token thành công", response));
     }
 
+    @Operation(summary = "Đăng xuất tài khoản", description = "Hủy phiên xác thực của người dùng hiện tại")
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout() {
         userService.logout();
@@ -145,6 +153,7 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Đăng xuất thành công", null));
     }
 
+    @Operation(summary = "Lấy hồ sơ người dùng hiện tại", description = "Trả về thông tin chi tiết của người dùng đang đăng nhập (yêu cầu Bearer token)", security = @SecurityRequirement(name = "BearerAuth"))
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser() {
         User currentUser = userService.getCurrentUser();

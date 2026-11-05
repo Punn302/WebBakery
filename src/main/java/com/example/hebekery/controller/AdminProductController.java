@@ -7,6 +7,10 @@ import com.example.hebekery.model.Category;
 import com.example.hebekery.model.Product;
 import com.example.hebekery.service.CategoryService;
 import com.example.hebekery.service.ProductService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +35,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin/products")
 @PreAuthorize("hasAnyRole('ADMIN', 'STAFF_WAREHOUSE')")
+@Tag(name = "Admin Product Management", description = "Quản lý sản phẩm dành cho quản trị viên và thủ kho")
 public class AdminProductController {
 
     private final ProductService productService;
@@ -41,19 +46,22 @@ public class AdminProductController {
         this.categoryService = categoryService;
     }
 
+    @Operation(summary = "Tìm kiếm sản phẩm quản trị", description = "Lấy danh sách sản phẩm phân trang cho trang quản trị (yêu cầu ADMIN hoặc STAFF_WAREHOUSE)", security = @SecurityRequirement(name = "BearerAuth"))
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ProductResponse>>> searchProducts(
-            @RequestParam(defaultValue = "") String keyword,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @Parameter(description = "Từ khóa tìm kiếm theo tên/SKU") @RequestParam(defaultValue = "") String keyword,
+            @Parameter(description = "Số thứ tự trang") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Số lượng trên mỗi trang") @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(Math.max(page, 0), size, Sort.by("id").descending());
         Page<Product> products = productService.searchProducts(keyword, pageable);
         Page<ProductResponse> responsePage = products.map(ProductResponse::from);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách sản phẩm thành công", responsePage));
     }
 
+    @Operation(summary = "Lấy thông tin sản phẩm theo mã", description = "Xem chi tiết một sản phẩm quản trị theo ID", security = @SecurityRequirement(name = "BearerAuth"))
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ProductResponse>> getProductById(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<ProductResponse>> getProductById(
+            @Parameter(description = "Mã SKU / ID sản phẩm") @PathVariable String id) {
         Product product = productService.getProductById(id);
         if (product == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -62,6 +70,7 @@ public class AdminProductController {
         return ResponseEntity.ok(ApiResponse.success("Lấy thông tin sản phẩm thành công", ProductResponse.from(product)));
     }
 
+    @Operation(summary = "Tạo mới sản phẩm", description = "Thêm sản phẩm mới vào danh mục hàng hóa", security = @SecurityRequirement(name = "BearerAuth"))
     @PostMapping
     public ResponseEntity<ApiResponse<ProductResponse>> createProduct(@Valid @RequestBody ProductRequest request) {
         Product product = new Product();
@@ -79,16 +88,17 @@ public class AdminProductController {
         product.setLowStockThreshold(request.getLowStockThreshold());
         product.setAverageCost(request.getAverageCost());
         product.setActive(request.isActive());
-        product.setFeatured(request.isFeatured());
+        product.setFeatured(request.getFeatured() != null && request.getFeatured());
 
         Product saved = productService.saveProduct(product);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Tạo sản phẩm mới thành công", ProductResponse.from(saved)));
     }
 
+    @Operation(summary = "Cập nhật sản phẩm", description = "Chỉnh sửa thông tin chi tiết một sản phẩm đã có", security = @SecurityRequirement(name = "BearerAuth"))
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
-            @PathVariable String id,
+            @Parameter(description = "Mã SKU / ID sản phẩm") @PathVariable String id,
             @Valid @RequestBody ProductRequest request) {
         Product existing = productService.getProductById(id);
         if (existing == null) {
@@ -116,14 +126,16 @@ public class AdminProductController {
         }
         existing.setLowStockThreshold(request.getLowStockThreshold());
         existing.setActive(request.isActive());
-        existing.setFeatured(request.isFeatured());
+        existing.setFeatured(request.getFeatured() != null && request.getFeatured());
 
         Product updated = productService.saveProduct(existing);
         return ResponseEntity.ok(ApiResponse.success("Cập nhật thông tin sản phẩm thành công", ProductResponse.from(updated)));
     }
 
+    @Operation(summary = "Xóa sản phẩm", description = "Xóa sản phẩm khỏi hệ thống nếu chưa có ràng buộc đơn hàng", security = @SecurityRequirement(name = "BearerAuth"))
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<Void>> deleteProduct(
+            @Parameter(description = "Mã SKU / ID sản phẩm") @PathVariable String id) {
         boolean deleted = productService.deleteProduct(id);
         if (!deleted) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -132,9 +144,10 @@ public class AdminProductController {
         return ResponseEntity.ok(ApiResponse.success("Xóa sản phẩm thành công", null));
     }
 
+    @Operation(summary = "Cập nhật ngưỡng cảnh báo sắp hết hàng", description = "Cập nhật giá trị lowStockThreshold cho sản phẩm", security = @SecurityRequirement(name = "BearerAuth"))
     @PatchMapping("/{id}/threshold")
     public ResponseEntity<ApiResponse<ProductResponse>> updateThreshold(
-            @PathVariable String id,
+            @Parameter(description = "Mã SKU / ID sản phẩm") @PathVariable String id,
             @RequestBody Map<String, Integer> payload) {
         Integer threshold = payload.get("threshold");
         if (threshold == null || threshold < 0) {

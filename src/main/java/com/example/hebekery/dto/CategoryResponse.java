@@ -1,19 +1,38 @@
 package com.example.hebekery.dto;
 
 import com.example.hebekery.model.Category;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
 
+@Schema(description = "Thông tin danh mục sản phẩm")
 public class CategoryResponse {
 
+    @Schema(description = "Mã định danh danh mục", example = "1")
     private Long id;
+
+    @Schema(description = "Tên danh mục bánh", example = "Bánh Mì Healthy")
     private String name;
+
+    @Schema(description = "Chuỗi định danh URL (Slug)", example = "banh-mi-healthy")
     private String slug;
+
+    @Schema(description = "Mô tả danh mục", example = "Các dòng bánh mì nguyên cám, yến mạch không chất bảo quản")
     private String description;
+
+    @Schema(description = "Trạng thái hoạt động", example = "true")
     private boolean active;
+
+    @Schema(description = "Thời điểm tạo danh mục", example = "2026-11-05T10:00:00")
     private LocalDateTime createdAt;
+
+    @Schema(description = "Thời điểm cập nhật danh mục lần cuối", example = "2026-11-05T10:00:00")
     private LocalDateTime updatedAt;
+
+    @Schema(description = "Người tạo danh mục", example = "admin@hebekery.vn")
     private String createdBy;
+
+    @Schema(description = "Người cập nhật lần cuối", example = "admin@hebekery.vn")
     private String updatedBy;
 
     public CategoryResponse() {

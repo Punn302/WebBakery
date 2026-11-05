@@ -6,6 +6,10 @@ import com.example.hebekery.dto.TopSellingProduct;
 import com.example.hebekery.service.PurchaseReceiptService;
 import com.example.hebekery.service.ReportPdfService;
 import com.example.hebekery.service.ReportService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -22,6 +26,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/reports")
 @PreAuthorize("hasRole('ADMIN')")
+@Tag(name = "Admin Reports & Analytics", description = "Báo cáo doanh thu, lợi nhuận gộp và xuất PDF/CSV thống kê")
 public class AdminReportController {
 
     private final ReportService reportService;
@@ -36,10 +41,11 @@ public class AdminReportController {
         this.purchaseReceiptService = purchaseReceiptService;
     }
 
+    @Operation(summary = "Xem tổng hợp báo cáo doanh thu & lợi nhuận", description = "Tính toán tổng doanh thu, lợi nhuận, chi phí nhập hàng và biểu đồ tăng trưởng theo khoảng ngày (yêu cầu quyền ADMIN)", security = @SecurityRequirement(name = "BearerAuth"))
     @GetMapping("/revenue")
     public ResponseEntity<ApiResponse<RevenueReportResponse>> getRevenueReport(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+            @Parameter(description = "Từ ngày (YYYY-MM-DD)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = "Đến ngày (YYYY-MM-DD)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         LocalDate reportFrom = from == null ? LocalDate.now().minusDays(29) : from;
         LocalDate reportTo = to == null ? LocalDate.now() : to;
 
@@ -56,10 +62,11 @@ public class AdminReportController {
         return ResponseEntity.ok(ApiResponse.success("Lấy báo cáo doanh thu thành công", report));
     }
 
+    @Operation(summary = "Lấy danh sách sản phẩm bán chạy nhất", description = "Top các sản phẩm đạt doanh số và sản lượng cao nhất trong kỳ", security = @SecurityRequirement(name = "BearerAuth"))
     @GetMapping("/top-selling")
     public ResponseEntity<ApiResponse<List<TopSellingProduct>>> getTopSelling(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+            @Parameter(description = "Từ ngày (YYYY-MM-DD)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = "Đến ngày (YYYY-MM-DD)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         LocalDate reportFrom = from == null ? LocalDate.now().minusDays(29) : from;
         LocalDate reportTo = to == null ? LocalDate.now() : to;
 
@@ -67,10 +74,11 @@ public class AdminReportController {
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách sản phẩm bán chạy thành công", products));
     }
 
+    @Operation(summary = "Xuất báo cáo PDF doanh thu", description = "Tải về file tài liệu PDF tổng kết doanh số và biểu đồ thống kê", security = @SecurityRequirement(name = "BearerAuth"))
     @GetMapping("/export-pdf")
     public ResponseEntity<byte[]> exportPdf(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+            @Parameter(description = "Từ ngày (YYYY-MM-DD)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = "Đến ngày (YYYY-MM-DD)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         LocalDate reportFrom = from == null ? LocalDate.now().minusDays(29) : from;
         LocalDate reportTo = to == null ? LocalDate.now() : to;
 
@@ -81,10 +89,11 @@ public class AdminReportController {
                 .body(pdf);
     }
 
+    @Operation(summary = "Xuất báo cáo CSV số liệu", description = "Tải file dữ liệu bảng tính CSV để phân tích nâng cao", security = @SecurityRequirement(name = "BearerAuth"))
     @GetMapping(value = "/export-csv", produces = "text/csv; charset=UTF-8")
     public ResponseEntity<String> exportCsv(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+            @Parameter(description = "Từ ngày (YYYY-MM-DD)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = "Đến ngày (YYYY-MM-DD)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         LocalDate reportFrom = from == null ? LocalDate.now().minusDays(29) : from;
         LocalDate reportTo = to == null ? LocalDate.now() : to;
 

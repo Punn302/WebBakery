@@ -1,15 +1,20 @@
 package com.example.hebekery.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
+@Schema(description = "Yêu cầu cập nhật số lượng sản phẩm trong giỏ hàng")
 public class UpdateCartRequest {
-    @NotBlank(message = "Ma san pham khong duoc de trong")
+
+    @Schema(description = "Mã sản phẩm", example = "P001")
+    @NotBlank(message = "Mã sản phẩm không được để trống")
     private String productId;
 
-    @Min(value = 1, message = "So luong phai lon hon 0")
-    @Max(value = 99, message = "So luong khong duoc vuot qua 99")
+    @Schema(description = "Số lượng cập nhật mới", example = "3")
+    @Min(value = 1, message = "Số lượng phải lớn hơn 0")
+    @Max(value = 99, message = "Số lượng không được vượt quá 99")
     private int quantity;
 
     public String getProductId() {
