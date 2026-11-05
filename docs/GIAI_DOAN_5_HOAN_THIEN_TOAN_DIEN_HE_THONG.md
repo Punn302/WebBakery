@@ -184,7 +184,7 @@ graph TD
 
 > **Mục tiêu**: Xóa bỏ hoàn toàn tình trạng redirect tạm bợ; xây dựng 4 trang chuyên trách chuẩn mực cho Admin & Staff; nâng cấp cơ chế kiểm soát tuyến đường `ProtectedRoute` và Sidebar `AdminLayout` đáp ứng hoàn hảo 3 nhóm vai trò quản trị (`ADMIN`, `STAFF_WAREHOUSE`, `STAFF_SALES`).
 
-- [ ] **Task B.1: Nâng cấp Phân quyền Giao diện Đa Vai trò (`ProtectedRoute` & `AdminLayout`)**
+- [x] **Task B.1: Nâng cấp Phân quyền Giao diện Đa Vai trò (`ProtectedRoute` & `AdminLayout`)**
   - **File cập nhật**:
     - `web-bakery-frontend/src/components/common/ProtectedRoute.tsx`
     - `web-bakery-frontend/src/components/layout/AdminLayout.tsx`
@@ -197,7 +197,7 @@ graph TD
        - `ROLE_STAFF_WAREHOUSE`: Chỉ hiển thị 1 mục: **Kho hàng & Nhập kho** (`/admin/inventory`). Ẩn hoàn toàn Doanh thu, User, Đơn hàng, Khách hàng.
     3. Thẻ Badge thông tin người dùng trên Header Sidebar hiển thị chính xác tên vai trò: *"Chủ tiệm (Admin)"*, *"Nhân viên Bán hàng & CSKH"*, *"Thủ kho & Bếp bánh"*.
 
-- [ ] **Task B.2: Xây dựng Trang Quản Lý Tài Khoản & Phân Quyền (`AdminUsersPage.tsx`)**
+- [x] **Task B.2: Xây dựng Trang Quản Lý Tài Khoản & Phân Quyền (`AdminUsersPage.tsx`)**
   - **File tạo mới**: `web-bakery-frontend/src/features/admin/AdminUsersPage.tsx`
   - **API tích hợp**: Gọi `AdminUserController` (`GET /api/admin/users`, `PUT /api/admin/users/{id}/role`, `PATCH /api/admin/users/{id}/status`, `POST /api/admin/users/{id}/reset-password`).
   - **Giao diện & Tính năng (Chuẩn Minimalist Rounded-None & Tactile Button)**:
@@ -209,7 +209,7 @@ graph TD
        - Nút "Reset Mật Khẩu" về mật khẩu mặc định (có thông báo cảnh báo xác nhận trước khi thực hiện).
     4. Phân trang dữ liệu (Pagination bar).
 
-- [ ] **Task B.3: Xây dựng Trang Quản Lý Kho & Nhập Hàng (`AdminInventoryPage.tsx`)**
+- [x] **Task B.3: Xây dựng Trang Quản Lý Kho & Nhập Hàng (`AdminInventoryPage.tsx`)**
   - **File tạo mới**: `web-bakery-frontend/src/features/admin/AdminInventoryPage.tsx`
   - **API tích hợp**: Gọi `AdminInventoryController` (`GET /api/admin/inventory`, `POST /api/admin/inventory/receipts`, `GET /api/admin/inventory/receipts`, `GET /api/admin/inventory/transactions`).
   - **Giao diện & Tính năng**:
@@ -225,7 +225,7 @@ graph TD
     4. **Tab Lịch sử biến động kho (`InventoryTransaction`)**:
        - Theo dõi nhật ký: Loại giao dịch (`PURCHASE` - Nhập hàng, `ORDER` - Xuất bán, `RETURN` - Hoàn trả, `DAMAGE` - Hao hụt), số lượng biến động, tồn trước và sau giao dịch.
 
-- [ ] **Task B.4: Xây dựng Trang Báo Cáo Tài Chính & Doanh Thu (`AdminReportsPage.tsx`)**
+- [x] **Task B.4: Xây dựng Trang Báo Cáo Tài Chính & Doanh Thu (`AdminReportsPage.tsx`)**
   - **File tạo mới**: `web-bakery-frontend/src/features/admin/AdminReportsPage.tsx`
   - **API tích hợp**: Gọi `AdminReportController` (`GET /api/admin/reports/revenue`, `GET /api/admin/reports/top-selling`, `GET /api/admin/reports/cogs`, `GET /api/admin/reports/export/pdf`, `GET /api/admin/reports/export/csv`).
   - **Giao diện & Tính năng**:
@@ -240,7 +240,7 @@ graph TD
        - Nút **"Tải Báo Cáo Excel (CSV)"**: Kích hoạt tải về file CSV chuẩn UTF-8 phục vụ kế toán.
        - Nút **"Xuất Báo Cáo PDF"**: Gọi backend tạo file PDF định dạng A4 chính thức có đóng dấu và bảng biểu từ OpenPDF.
 
-- [ ] **Task B.5: Xây dựng Trang Hộp Thư CSKH & Liên Hệ (`AdminContactPage.tsx`)**
+- [x] **Task B.5: Xây dựng Trang Hộp Thư CSKH & Liên Hệ (`AdminContactPage.tsx`)**
   - **File tạo mới**: `web-bakery-frontend/src/features/admin/AdminContactPage.tsx`
   - **API tích hợp**: Gọi `AdminContactController` (`GET /api/admin/contacts`, `PATCH /api/admin/contacts/{id}/status`).
   - **Giao diện & Tính năng**:

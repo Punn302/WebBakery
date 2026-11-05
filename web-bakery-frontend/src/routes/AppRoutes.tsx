@@ -2,7 +2,7 @@ import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
-import { AuthProvider } from '@/hooks/useAuth'
+import { AuthProvider, useAuth } from '@/hooks/useAuth'
 import { CartProvider } from '@/hooks/useCart'
 
 // Layouts
@@ -29,6 +29,10 @@ import { ProfilePage } from '@/features/auth/ProfilePage'
 import { AdminDashboardPage } from '@/features/admin/AdminDashboardPage'
 import { AdminProductsPage } from '@/features/admin/AdminProductsPage'
 import { AdminOrdersPage } from '@/features/admin/AdminOrdersPage'
+import { AdminUsersPage } from '@/features/admin/AdminUsersPage'
+import { AdminInventoryPage } from '@/features/admin/AdminInventoryPage'
+import { AdminReportsPage } from '@/features/admin/AdminReportsPage'
+import { AdminContactPage } from '@/features/admin/AdminContactPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +42,18 @@ const queryClient = new QueryClient({
     },
   },
 })
+
+// Dynamic Admin redirect based on user role to eliminate unauthorized bounces
+const AdminIndexRedirect: React.FC = () => {
+  const { user } = useAuth()
+  if (user?.role === 'STAFF_WAREHOUSE') {
+    return <Navigate to="/admin/inventory" replace />
+  }
+  if (user?.role === 'STAFF_SALES') {
+    return <Navigate to="/admin/orders" replace />
+  }
+  return <Navigate to="/admin/dashboard" replace />
+}
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -87,22 +103,72 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/register" element={<RegisterPage />} />
               </Route>
 
-              {/* Admin Protected Routes */}
+              {/* Admin Protected Routes with RBAC */}
               <Route
                 path="/admin"
                 element={
-                  <ProtectedRoute requiredRole="ADMIN">
+                  <ProtectedRoute allowedRoles={['ADMIN', 'STAFF_WAREHOUSE', 'STAFF_SALES']}>
                     <AdminLayout />
                   </ProtectedRoute>
                 }
               >
-                <Route index element={<Navigate to="/admin/dashboard" replace />} />
-                <Route path="dashboard" element={<AdminDashboardPage />} />
-                <Route path="products" element={<AdminProductsPage />} />
-                <Route path="orders" element={<AdminOrdersPage />} />
-                <Route path="inventory" element={<AdminProductsPage />} />
-                <Route path="users" element={<AdminDashboardPage />} />
-                <Route path="reports" element={<AdminDashboardPage />} />
+                <Route index element={<AdminIndexRedirect />} />
+                <Route
+                  path="dashboard"
+                  element={
+                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminDashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="products"
+                  element={
+                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminProductsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="orders"
+                  element={
+                    <ProtectedRoute allowedRoles={['ADMIN', 'STAFF_SALES']}>
+                      <AdminOrdersPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="inventory"
+                  element={
+                    <ProtectedRoute allowedRoles={['ADMIN', 'STAFF_WAREHOUSE']}>
+                      <AdminInventoryPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="users"
+                  element={
+                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminUsersPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="reports"
+                  element={
+                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminReportsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="contacts"
+                  element={
+                    <ProtectedRoute allowedRoles={['ADMIN', 'STAFF_SALES']}>
+                      <AdminContactPage />
+                    </ProtectedRoute>
+                  }
+                />
               </Route>
 
               {/* Fallback 404 */}

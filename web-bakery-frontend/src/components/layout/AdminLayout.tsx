@@ -7,22 +7,82 @@ import {
   Users,
   Warehouse,
   FileBarChart,
+  Mail,
   ArrowLeft,
   ShieldCheck,
+  UserCheck,
+  Truck,
 } from 'lucide-react'
+import { useAuth } from '@/hooks/useAuth'
 import { cn } from '@/utils/cn'
 
 export const AdminLayout: React.FC = () => {
   const location = useLocation()
+  const { user } = useAuth()
 
-  const navItems = [
-    { label: 'Tổng quan', path: '/admin/dashboard', icon: LayoutDashboard },
-    { label: 'Sản phẩm', path: '/admin/products', icon: Package },
-    { label: 'Đơn hàng', path: '/admin/orders', icon: ShoppingBag },
-    { label: 'Kho hàng & Nhập kho', path: '/admin/inventory', icon: Warehouse },
-    { label: 'Khách hàng', path: '/admin/users', icon: Users },
-    { label: 'Báo cáo doanh thu', path: '/admin/reports', icon: FileBarChart },
+  const allNavItems = [
+    {
+      label: 'Tổng quan',
+      path: '/admin/dashboard',
+      icon: LayoutDashboard,
+      roles: ['ADMIN'],
+    },
+    {
+      label: 'Sản phẩm',
+      path: '/admin/products',
+      icon: Package,
+      roles: ['ADMIN'],
+    },
+    {
+      label: 'Đơn hàng',
+      path: '/admin/orders',
+      icon: ShoppingBag,
+      roles: ['ADMIN', 'STAFF_SALES'],
+    },
+    {
+      label: 'Kho hàng & Nhập kho',
+      path: '/admin/inventory',
+      icon: Warehouse,
+      roles: ['ADMIN', 'STAFF_WAREHOUSE'],
+    },
+    {
+      label: 'Quản lý tài khoản',
+      path: '/admin/users',
+      icon: Users,
+      roles: ['ADMIN'],
+    },
+    {
+      label: 'Báo cáo doanh thu',
+      path: '/admin/reports',
+      icon: FileBarChart,
+      roles: ['ADMIN'],
+    },
+    {
+      label: 'Hộp thư liên hệ',
+      path: '/admin/contacts',
+      icon: Mail,
+      roles: ['ADMIN', 'STAFF_SALES'],
+    },
   ]
+
+  const userRole = user?.role || 'ADMIN'
+  const visibleNavItems = allNavItems.filter((item) => item.roles.includes(userRole))
+
+  const getRoleLabel = () => {
+    switch (userRole) {
+      case 'ADMIN':
+        return { label: 'Chủ tiệm (Admin)', icon: ShieldCheck, color: 'text-[#47654c]' }
+      case 'STAFF_SALES':
+        return { label: 'Nhân viên Bán hàng & CSKH', icon: UserCheck, color: 'text-[#0284c7]' }
+      case 'STAFF_WAREHOUSE':
+        return { label: 'Thủ kho & Bếp bánh', icon: Truck, color: 'text-[#d97724]' }
+      default:
+        return { label: 'Quản trị viên', icon: ShieldCheck, color: 'text-[#47654c]' }
+    }
+  }
+
+  const roleInfo = getRoleLabel()
+  const RoleIcon = roleInfo.icon
 
   return (
     <div className="min-h-screen flex bg-[#f7f5f0] text-[#1c1917]">
@@ -37,15 +97,15 @@ export const AdminLayout: React.FC = () => {
               <h2 className="font-extrabold text-sm uppercase tracking-wider text-[#1c1917]">
                 Hebekery Admin
               </h2>
-              <span className="text-[10px] text-[#47654c] font-semibold flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3" /> Quản trị viên
+              <span className={cn('text-[10px] font-semibold flex items-center gap-1', roleInfo.color)}>
+                <RoleIcon className="w-3 h-3" /> {roleInfo.label}
               </span>
             </div>
           </div>
         </div>
 
         <nav className="flex-1 p-3 space-y-1">
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const Icon = item.icon
             const isActive = location.pathname.startsWith(item.path)
             return (
@@ -82,6 +142,9 @@ export const AdminLayout: React.FC = () => {
         <header className="h-14 border-b border-[#e7e5e4] bg-white px-8 flex items-center justify-between sticky top-0 z-30">
           <div className="text-xs text-[#78716c]">
             Hệ thống Quản trị Bán hàng & Chuỗi Cung ứng Hebekery
+          </div>
+          <div className="text-xs font-semibold text-[#1c1917]">
+            {user?.name || user?.email}
           </div>
         </header>
 

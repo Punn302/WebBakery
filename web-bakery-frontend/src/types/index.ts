@@ -1,10 +1,12 @@
 // Auth & User Types
+export type UserRole = 'USER' | 'ADMIN' | 'STAFF_WAREHOUSE' | 'STAFF_SALES'
+
 export interface User {
   id: string
   email: string
   name: string
   phone?: string
-  role: 'USER' | 'ADMIN'
+  role: UserRole
   active: boolean
   forcePasswordChange?: boolean
   createdAt?: string
@@ -79,6 +81,7 @@ export interface OrderItem {
   price: number
   quantity: number
   total: number
+  costAtSale?: number
 }
 
 export interface OrderStatusHistory {
@@ -109,7 +112,7 @@ export interface Order {
   phone: string
   address: string
   note?: string
-  paymentMethod: 'COD' | 'VIETQR'
+  paymentMethod: 'COD' | 'VIETQR' | 'MOMO'
   paymentStatus: 'PENDING' | 'PAID'
   orderStatus:
     | 'PENDING'
@@ -139,7 +142,92 @@ export interface CheckoutRequest {
   district?: string
   ward?: string
   note?: string
-  paymentMethod: 'COD' | 'VIETQR'
+  paymentMethod: 'COD' | 'VIETQR' | 'MOMO'
+}
+
+// Inventory & Purchase Receipt Types
+export interface PurchaseReceipt {
+  id: string
+  receiptCode: string
+  productId: string
+  productName: string
+  quantity: number
+  unitCost: number
+  totalCost: number
+  supplier: string
+  importedAt: string
+  note?: string
+}
+
+export interface PurchaseReceiptBatchRequest {
+  productIds: string[]
+  quantities: number[]
+  unitCosts: number[]
+  supplier: string
+  note?: string
+}
+
+export interface InventoryTransaction {
+  id: string
+  productId: string
+  productName: string
+  type: 'IMPORT' | 'EXPORT' | 'RETURN' | 'DAMAGE' | 'ORDER'
+  quantity: number
+  stockBefore: number
+  stockAfter: number
+  unitCost?: number
+  referenceType?: string
+  referenceId?: string
+  note?: string
+  createdAt: string
+}
+
+// Financial Report Types
+export interface RevenueTrendItem {
+  date: string
+  revenue: number
+  orderCount: number
+}
+
+export interface TopSellingProduct {
+  productId: string
+  productName: string
+  imageUrl?: string
+  quantity: number
+  revenue: number
+}
+
+export interface RevenueReportResponse {
+  revenueTotal: number
+  revenueOrderCount: number
+  cancelledOrderCount: number
+  importCostTotal: number
+  importedQuantityTotal: number
+  profitTotal: number
+  revenueTrend: RevenueTrendItem[]
+  topSellingProducts: TopSellingProduct[]
+}
+
+// Contact Message Types
+export interface ContactMessage {
+  id: string
+  name: string
+  email: string
+  phone?: string
+  subject?: string
+  message: string
+  status: 'NEW' | 'RESOLVED' | 'SPAM'
+  createdAt: string
+}
+
+// Payment Status Types
+export interface PaymentStatus {
+  orderId: string
+  orderCode: string
+  orderStatus: string
+  paymentStatus: string
+  isPaid: boolean
+  total: number
 }
 
 // API General Types
