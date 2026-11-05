@@ -12,22 +12,25 @@
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-4479a1?logo=mysql)](https://www.mysql.com/)
 [![Liquibase](https://img.shields.io/badge/Liquibase-Database%20Migration-red?logo=liquibase)](https://www.liquibase.org/)
 
-Website thương mại điện tử chuyên cung cấp các dòng bánh, hạt và ngũ cốc dinh dưỡng lành mạnh (Healthy Bakery, Eat Clean, Granola, Biscotti). Hệ thống bao gồm Frontend React 19 SPA, Backend Spring Boot 3.4 RESTful API, tự động hóa thanh toán VietQR SePay và trọn gói triển khai Docker Compose.
+Website thương mại điện tử chuyên cung cấp các dòng bánh, hạt và ngũ cốc dinh dưỡng lành mạnh (Healthy Bakery, Eat Clean, Granola, Biscotti). Hệ thống bao gồm Frontend React 19 SPA, Backend Spring Boot 3.4 RESTful API, tự động hóa thanh toán VietQR SePay và trọn gói triển khai Docker Compose. Dữ liệu sản phẩm và hình ảnh được lưu trữ trực tiếp trên Cloudinary CDN và tự động nạp qua Liquibase Migration.
 
 ---
 
 ## 📸 Hình ảnh giao diện thực tế (Screenshots)
 
-### 1. Trang chủ (Homepage & Menu)
+### 1. Trang chủ (Homepage & Bán chạy nhất)
 ![Trang chủ Hebekery](docs/screenshots/home.png)
 
-### 2. Công cụ tính BMI, TDEE & Gợi ý thực đơn dinh dưỡng
+### 2. Thực đơn bánh dinh dưỡng (Đầy đủ ảnh Cloudinary CDN & Bộ lọc)
+![Thực đơn Bánh Dinh Dưỡng](docs/screenshots/products.png)
+
+### 3. Công cụ tính BMI, TDEE & Gợi ý combo thực đơn 7 ngày
 ![Công cụ BMI & Combo 7 ngày](docs/screenshots/bmi.png)
 
-### 3. Tra cứu đơn hàng công khai (Không cần đăng nhập)
+### 4. Tra cứu đơn hàng công khai (Không cần đăng nhập)
 ![Tra cứu đơn hàng](docs/screenshots/order-lookup.png)
 
-### 4. Tài liệu Swagger OpenAPI tương tác trực tiếp
+### 5. Tài liệu Swagger OpenAPI tương tác trực tiếp
 ![Swagger UI Documentation](docs/screenshots/swagger.png)
 
 ---
@@ -85,10 +88,23 @@ Hệ thống có sẵn các tài khoản demo tương ứng với từng nhóm v
 
 ---
 
+## 💳 Cấu hình SePay Webhook (Thanh toán VietQR)
+
+Khi tạo Webhook trong SePay Dashboard:
+- **Tên Webhook**: Đặt tên bất kỳ gợi nhớ (ví dụ: `Hebekery Webhook Dev`).
+- **URL nhận Webhook**:
+  - *Môi trường Local (dùng ngrok/tunnel)*: `https://<subdomain>.ngrok-free.app/api/payment/sepay/webhook`
+  - *Môi trường Production*: `https://your-domain.com/api/payment/sepay/webhook`
+  - *Test nội bộ (cURL/Postman)*: `http://localhost:8080/api/payment/sepay/webhook`
+- **Xác thực API Key**: Điền API Key của SePay vào biến `SEPAY_WEBHOOK_API_KEY` trong file `.env`.
+
+---
+
 ## 🛠️ Công nghệ sử dụng
 
 - **Frontend**: React 19, TypeScript, Vite, Tailwind CSS, Lucide Icons, Axios, Vitest.
 - **Backend**: Spring Boot 3.4.x (Java 17), Spring Security 6 (JWT & RBAC), Spring Data JPA, Liquibase.
+- **Media CDN**: Cloudinary CDN lưu trữ ảnh sản phẩm trực tuyến.
 - **Thanh toán**: Tự động đối soát giao dịch VietQR ngân hàng qua Webhook SePay (15 phút).
 - **Hạ tầng**: Docker, Docker Compose (4 containers: MySQL, Backend, Frontend, Nginx Reverse Proxy Gateway).
 

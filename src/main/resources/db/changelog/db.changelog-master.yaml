@@ -9,3 +9,5 @@ databaseChangeLog:
       file: db/changelog/changes/004-seed-initial-data.yaml
   - include:
       file: db/changelog/changes/005-add-enterprise-tables.yaml
+  - include:
+      file: db/changelog/changes/006-rich-healthy-bakery-catalog.yaml
