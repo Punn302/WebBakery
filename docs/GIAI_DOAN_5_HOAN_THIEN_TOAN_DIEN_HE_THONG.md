@@ -332,7 +332,7 @@ graph TD
 
 - [x] **Task D.1: Xây dựng Dockerfile cho Frontend (`web-bakery-frontend/Dockerfile`)**
   - Sử dụng Multi-stage build tối ưu kích thước:
-    - *Stage 1 (Builder)*: Dùng `node:20-alpine`, cài dependencies, chạy `npm run build` sinh thư mục `dist/`.
+    - *Stage 1 (Builder)*: Dùng `node:22-alpine`, cài dependencies, chạy `npm run build` sinh thư mục `dist/`.
     - *Stage 2 (Production Server)*: Dùng `nginx:alpine`, copy bản build từ Stage 1 vào `/usr/share/nginx/html`.
 
 - [x] **Task D.2: Cấu hình `nginx.conf` Hợp Nhất Hệ Thống (Unified Gateway)**
@@ -360,7 +360,7 @@ graph TD
   - **File tạo mới**: `.github/workflows/ci-cd.yml`
   - **Nhiệm vụ tự động chạy trên mọi PR vào `main`**:
     1. Backend: Cài đặt JDK 17, khởi động MySQL service container, chạy Liquibase migration và chạy toàn bộ kiểm thử `mvn clean test` (JaCoCo report).
-    2. Frontend: Cài đặt Node.js 20, kiểm tra kiểu `npx tsc --noEmit`, chạy linter và chạy toàn bộ bài kiểm thử `npm run test` (Vitest).
+    2. Frontend: Cài đặt Node.js 22, kiểm tra kiểu `npx tsc --noEmit`, chạy linter và chạy toàn bộ bài kiểm thử `npm run test` (Vitest).
 
 ---
 
