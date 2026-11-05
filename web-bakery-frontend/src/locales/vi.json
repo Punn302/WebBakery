@@ -1,0 +1,60 @@
+{
+  "nav": {
+    "home": "Trang chủ",
+    "products": "Thực đơn",
+    "about": "Về Hebekery",
+    "contact": "Liên hệ",
+    "bmi": "Tính BMI & TDEE",
+    "cart": "Giỏ hàng",
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "profile": "Tài khoản",
+    "myOrders": "Đơn hàng của tôi",
+    "admin": "Quản trị",
+    "logout": "Đăng xuất"
+  },
+  "hero": {
+    "badge": "Tiệm Bánh Dinh Dưỡng & Ăn Kiêng Healthy",
+    "title": "Bánh Tươi Mỗi Ngày, Tốt Cho Vóc Dáng & Sức Khỏe",
+    "subtitle": "Nguyên liệu ngũ cốc nguyên cám, hạt dinh dưỡng tự nhiên, không đường tinh luyện và 100% không chất bảo quản.",
+    "cta": "Khám phá thực đơn",
+    "ctaSecondary": "Về chúng tôi"
+  },
+  "cart": {
+    "title": "Giỏ Hàng Của Bạn",
+    "empty": "Giỏ hàng hiện đang trống",
+    "checkout": "Tiến hành thanh toán",
+    "total": "Tổng thanh toán",
+    "items": "sản phẩm",
+    "continueShopping": "Tiếp tục mua hàng"
+  },
+  "orderStatus": {
+    "PENDING": "Chờ xử lý",
+    "PROCESSING": "Đang làm bánh",
+    "SHIPPING": "Đang giao hàng",
+    "DELIVERED": "Đã giao hàng",
+    "RECEIVED": "Đã nhận hàng",
+    "CANCELLED": "Đã hủy",
+    "RETURN_REQUESTED": "Yêu cầu đổi trả",
+    "RETURNED": "Đã đổi trả"
+  },
+  "paymentStatus": {
+    "PENDING": "Chờ thanh toán",
+    "PAID": "Đã thanh toán"
+  },
+  "common": {
+    "search": "Tìm kiếm sản phẩm...",
+    "addToCart": "Thêm vào giỏ",
+    "outOfStock": "Hết hàng",
+    "filter": "Bộ lọc",
+    "all": "Tất cả",
+    "calories": "Calories",
+    "details": "Xem chi tiết",
+    "loading": "Đang tải dữ liệu...",
+    "save": "Lưu thay đổi",
+    "cancel": "Hủy bỏ",
+    "confirm": "Xác nhận",
+    "success": "Thành công",
+    "error": "Đã có lỗi xảy ra"
+  }
+}

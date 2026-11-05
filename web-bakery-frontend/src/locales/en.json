@@ -1,0 +1,60 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Menu",
+    "about": "About",
+    "contact": "Contact",
+    "bmi": "BMI & TDEE",
+    "cart": "Cart",
+    "login": "Login",
+    "register": "Register",
+    "profile": "Profile",
+    "myOrders": "My Orders",
+    "admin": "Admin",
+    "logout": "Logout"
+  },
+  "hero": {
+    "badge": "Nutritional & Healthy Bakery",
+    "title": "Fresh Daily Bakes, Good For Your Health & Shape",
+    "subtitle": "Whole grain flours, natural organic seeds, refined sugar-free, and 100% preservative-free.",
+    "cta": "Explore Menu",
+    "ctaSecondary": "Our Story"
+  },
+  "cart": {
+    "title": "Your Shopping Cart",
+    "empty": "Your cart is currently empty",
+    "checkout": "Proceed to Checkout",
+    "total": "Total",
+    "items": "items",
+    "continueShopping": "Continue Shopping"
+  },
+  "orderStatus": {
+    "PENDING": "Pending",
+    "PROCESSING": "Processing",
+    "SHIPPING": "Shipping",
+    "DELIVERED": "Delivered",
+    "RECEIVED": "Received",
+    "CANCELLED": "Cancelled",
+    "RETURN_REQUESTED": "Return Requested",
+    "RETURNED": "Returned"
+  },
+  "paymentStatus": {
+    "PENDING": "Pending",
+    "PAID": "Paid"
+  },
+  "common": {
+    "search": "Search products...",
+    "addToCart": "Add to Cart",
+    "outOfStock": "Out of Stock",
+    "filter": "Filter",
+    "all": "All",
+    "calories": "Calories",
+    "details": "View Details",
+    "loading": "Loading...",
+    "save": "Save Changes",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "success": "Success",
+    "error": "An error occurred"
+  }
+}
