@@ -1,11 +1,28 @@
 import React, { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import type { Product } from '@/types'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Minus, ShoppingBag, Flame, Wheat, Activity } from 'lucide-react'
+import {
+  Plus,
+  Minus,
+  ShoppingBag,
+  Activity,
+  Star,
+  MessageSquare,
+  UserCheck,
+} from 'lucide-react'
 import { useCart } from '@/hooks/useCart'
-import { formatCurrency, optimizeCloudinaryUrl } from '@/utils/format'
+import { reviewApi } from '@/api'
+import { formatCurrency, formatDate, optimizeCloudinaryUrl } from '@/utils/format'
+import { cn } from '@/utils/cn'
 
 interface ProductDetailModalProps {
   product: Product | null
@@ -21,6 +38,12 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   const { addItem } = useCart()
   const [quantity, setQuantity] = useState(1)
 
+  const { data: reviewSummary, isLoading: isLoadingReviews } = useQuery({
+    queryKey: ['product-reviews', product?.id],
+    queryFn: () => (product ? reviewApi.getProductReviews(product.id) : null),
+    enabled: !!product && open,
+  })
+
   if (!product) return null
 
   const handleAddToCart = async () => {
@@ -29,9 +52,14 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
     onClose()
   }
 
+  const reviews = reviewSummary?.reviews || []
+  const avgRating = reviewSummary?.averageRating || 0
+  const reviewCount = reviewSummary?.reviewCount || 0
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent onClose={onClose} className="max-w-xl p-0 overflow-hidden">
+      <DialogContent onClose={onClose} className="max-w-2xl p-0 max-h-[90vh] overflow-y-auto">
+        {/* Top Product Info Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2">
           {/* Image */}
           <div className="relative aspect-square md:aspect-auto bg-[#faf8f5] border-b md:border-b-0 md:border-r border-[#e7e5e4]">
@@ -51,23 +79,46 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
           {/* Details */}
           <div className="p-6 flex flex-col justify-between">
-            <div className="space-y-4">
+            <div className="space-y-3.5">
               <DialogHeader>
                 <DialogTitle className="text-xl">{product.name}</DialogTitle>
-                <DialogDescription className="text-xs text-[#78716c] pt-1">
-                  Mã SP: {product.id} • {product.stock > 0 ? `Còn hàng (${product.stock})` : 'Tạm hết'}
+                <DialogDescription className="text-xs text-[#78716c] pt-0.5">
+                  Mã SP: {product.id} •{' '}
+                  {product.stock > 0 ? `Còn hàng (${product.stock})` : 'Tạm hết'}
                 </DialogDescription>
               </DialogHeader>
+
+              {/* Rating Summary Pill */}
+              <div className="flex items-center gap-2 text-xs">
+                <div className="flex items-center text-[#d97724]">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={cn(
+                        'w-3.5 h-3.5',
+                        star <= Math.round(avgRating)
+                          ? 'fill-[#d97724] text-[#d97724]'
+                          : 'fill-none text-[#d6d3d1]'
+                      )}
+                    />
+                  ))}
+                </div>
+                <span className="font-bold text-[#1c1917]">
+                  {avgRating > 0 ? avgRating.toFixed(1) : '5.0'} / 5.0
+                </span>
+                <span className="text-[#78716c]">({reviewCount} lượt đánh giá)</span>
+              </div>
 
               <div className="text-xl font-bold text-[#47654c]">
                 {formatCurrency(product.price)}
               </div>
 
               <p className="text-xs text-[#57534e] leading-relaxed">
-                {product.description || 'Sản phẩm dinh dưỡng cao cấp, chế biến tươi mới không phụ gia công nghiệp.'}
+                {product.description ||
+                  'Sản phẩm dinh dưỡng cao cấp, chế biến tươi mới không phụ gia công nghiệp.'}
               </p>
 
-              {/* Nutritional Info */}
+              {/* Nutritional Macro Info */}
               <div className="border border-[#e7e5e4] p-3 bg-[#faf8f5] space-y-2">
                 <div className="text-xs font-bold text-[#1c1917] flex items-center gap-1.5">
                   <Activity className="w-3.5 h-3.5 text-[#47654c]" />
@@ -95,7 +146,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             </div>
 
             {/* Actions */}
-            <div className="pt-6 border-t border-[#f5f5f4] space-y-3 mt-4">
+            <div className="pt-4 border-t border-[#f5f5f4] space-y-3 mt-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-[#1c1917]">Số lượng:</span>
                 <div className="flex items-center border border-[#d6d3d1]">
@@ -129,6 +180,69 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               </Button>
             </div>
           </div>
+        </div>
+
+        {/* Customer Reviews Section */}
+        <div className="border-t border-[#e7e5e4] p-6 bg-white space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-[#1c1917] flex items-center gap-2">
+              <MessageSquare className="w-4 h-4 text-[#47654c]" />
+              <span>Đánh Giá Từ Khách Hàng Thực Tế</span>
+            </h3>
+            <span className="text-xs text-[#78716c]">{reviews.length} nhận xét</span>
+          </div>
+
+          {isLoadingReviews ? (
+            <div className="py-6 text-center text-xs text-[#78716c]">Đang nạp nhận xét...</div>
+          ) : reviews.length === 0 ? (
+            <div className="py-8 text-center border border-dashed border-[#e7e5e4] bg-[#faf8f5] p-5 space-y-1">
+              <p className="text-xs font-semibold text-[#1c1917]">
+                Chưa có đánh giá nào cho sản phẩm này
+              </p>
+              <p className="text-[11px] text-[#78716c]">
+                Hãy đặt bánh và trở thành người đầu tiên chia sẻ cảm nhận vị giác của bạn!
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3 max-h-60 overflow-y-auto divide-y divide-[#f5f5f4]">
+              {reviews.map((rev) => (
+                <div key={rev.id} className="pt-3 first:pt-0 space-y-1.5 text-xs">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-[#47654c] text-white flex items-center justify-center font-bold text-[10px]">
+                        {rev.userName ? rev.userName.charAt(0).toUpperCase() : 'K'}
+                      </div>
+                      <span className="font-bold text-[#1c1917]">{rev.userName}</span>
+                      <span className="text-[10px] text-[#15803d] flex items-center gap-0.5">
+                        <UserCheck className="w-3 h-3" /> Đã mua hàng
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center text-[#d97724]">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star
+                            key={s}
+                            className={cn(
+                              'w-3 h-3',
+                              s <= rev.rating
+                                ? 'fill-[#d97724] text-[#d97724]'
+                                : 'fill-none text-[#d6d3d1]'
+                            )}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-[10px] text-[#78716c]">
+                        {formatDate(rev.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <p className="text-[#57534e] leading-relaxed pl-8">{rev.comment}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

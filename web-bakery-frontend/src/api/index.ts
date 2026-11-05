@@ -14,10 +14,17 @@ import type {
   PageResponse,
   PurchaseReceipt,
   PurchaseReceiptBatchRequest,
+  InventoryTransaction,
   RevenueReportResponse,
   TopSellingProduct,
   ContactMessage,
   PaymentStatus,
+  Address,
+  AddressRequest,
+  ProductReview,
+  ProductReviewSummary,
+  ContactSubmitRequest,
+  ProductReviewRequest,
 } from '@/types'
 
 // Auth APIs
@@ -52,6 +59,10 @@ export const productApi = {
     const res = await axiosClient.get<Product>(`/products/${id}`)
     return res.data
   },
+  getCategories: async (): Promise<Category[]> => {
+    const res = await axiosClient.get<Category[]>('/categories')
+    return res.data
+  },
   createProduct: async (data: Partial<Product>): Promise<Product> => {
     const res = await axiosClient.post<Product>('/admin/products', data)
     return res.data
@@ -62,6 +73,21 @@ export const productApi = {
   },
   deleteProduct: async (id: string): Promise<void> => {
     await axiosClient.delete(`/admin/products/${id}`)
+  },
+  adminCreateProduct: async (data: Partial<Product>): Promise<Product> => {
+    const res = await axiosClient.post<Product>('/admin/products', data)
+    return res.data
+  },
+  adminUpdateProduct: async (id: string, data: Partial<Product>): Promise<Product> => {
+    const res = await axiosClient.put<Product>(`/admin/products/${id}`, data)
+    return res.data
+  },
+  adminDeleteProduct: async (id: string): Promise<void> => {
+    await axiosClient.delete(`/admin/products/${id}`)
+  },
+  adminCreateCategory: async (data: Partial<Category>): Promise<Category> => {
+    const res = await axiosClient.post<Category>('/admin/categories', data)
+    return res.data
   },
 }
 
@@ -125,6 +151,12 @@ export const orderApi = {
   confirmReceived: async (id: string): Promise<Order> => {
     const res = await axiosClient.put<Order>(`/orders/${id}/received`)
     return res.data
+  },
+  trackOrders: async (params: { orderId?: string; phone?: string }): Promise<Order[]> => {
+    const res = await axiosClient.get<{ success: boolean; data: Order[] }>('/orders/track', {
+      params,
+    })
+    return res.data?.data ?? (res.data as unknown as Order[])
   },
   adminSearchOrders: async (params?: {
     keyword?: string
@@ -281,11 +313,52 @@ export const adminContactApi = {
   },
 }
 
+// Address APIs
+export const addressApi = {
+  getAddresses: async (): Promise<Address[]> => {
+    const res = await axiosClient.get<{ success: boolean; data: Address[] }>('/addresses')
+    return res.data?.data ?? (res.data as unknown as Address[])
+  },
+  createAddress: async (data: AddressRequest): Promise<Address> => {
+    const res = await axiosClient.post<{ success: boolean; data: Address }>('/addresses', data)
+    return res.data?.data ?? (res.data as unknown as Address)
+  },
+  updateAddress: async (id: string, data: AddressRequest): Promise<Address> => {
+    const res = await axiosClient.put<{ success: boolean; data: Address }>(`/addresses/${id}`, data)
+    return res.data?.data ?? (res.data as unknown as Address)
+  },
+  deleteAddress: async (id: string): Promise<void> => {
+    await axiosClient.delete(`/addresses/${id}`)
+  },
+}
+
+// Review APIs
+export const reviewApi = {
+  getProductReviews: async (productId: string): Promise<ProductReviewSummary> => {
+    const res = await axiosClient.get<{ success: boolean; data: ProductReviewSummary }>(
+      `/products/${productId}/reviews`
+    )
+    return res.data?.data ?? (res.data as unknown as ProductReviewSummary)
+  },
+  submitReview: async (productId: string, data: ProductReviewRequest): Promise<ProductReview> => {
+    const res = await axiosClient.post<{ success: boolean; data: ProductReview }>(
+      `/products/${productId}/reviews`,
+      data
+    )
+    return res.data?.data ?? (res.data as unknown as ProductReview)
+  },
+  deleteReview: async (reviewId: string): Promise<void> => {
+    await axiosClient.delete(`/products/reviews/${reviewId}`)
+  },
+}
+
 // Payment Status API (Polling)
 export const paymentApi = {
   getOrderPaymentStatus: async (orderId: string): Promise<PaymentStatus> => {
-    const res = await axiosClient.get<PaymentStatus>(`/payment/sepay/orders/${orderId}/status`)
-    return res.data
+    const res = await axiosClient.get<{ success: boolean; data: PaymentStatus }>(
+      `/payment/sepay/orders/${orderId}/status`
+    )
+    return res.data?.data ?? (res.data as unknown as PaymentStatus)
   },
 }
 
@@ -300,5 +373,13 @@ export const uploadApi = {
       },
     })
     return res.data
+  },
+}
+
+// Contact Public API
+export const contactApi = {
+  submitContact: async (data: ContactSubmitRequest): Promise<ContactMessage> => {
+    const res = await axiosClient.post<{ success: boolean; data: ContactMessage }>('/contact', data)
+    return res.data?.data ?? (res.data as unknown as ContactMessage)
   },
 }

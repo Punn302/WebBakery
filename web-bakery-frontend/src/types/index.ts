@@ -244,3 +244,61 @@ export interface PageResponse<T> {
   size: number
   number: number
 }
+
+
+// Address Types
+export interface Address {
+  id: string
+  userId: string
+  receiverName: string
+  phone: string
+  addressLine: string
+  province?: string
+  district?: string
+  ward?: string
+  fullAddress: string
+  defaultAddress: boolean
+}
+
+export interface AddressRequest {
+  receiverName: string
+  phone: string
+  addressLine: string
+  province?: string
+  district?: string
+  ward?: string
+  defaultAddress?: boolean
+}
+
+// Review Types
+export interface ProductReview {
+  id: string
+  productId: string
+  userId: string
+  userName: string
+  rating: number
+  comment: string
+  createdAt: string
+  updatedAt?: string
+}
+
+export interface ProductReviewSummary {
+  reviews: ProductReview[]
+  canReview: boolean
+  myReview?: ProductReview | null
+  averageRating: number
+  reviewCount: number
+}
+
+export interface ProductReviewRequest {
+  rating: number
+  comment: string
+}
+
+export interface ContactSubmitRequest {
+  name: string
+  email: string
+  phone: string
+  subject: string
+  message: string
+}

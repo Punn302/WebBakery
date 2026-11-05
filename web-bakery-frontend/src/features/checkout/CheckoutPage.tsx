@@ -1,18 +1,19 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ShoppingBag, CreditCard, Banknote, QrCode, CheckCircle2, ArrowRight } from 'lucide-react'
+import { Banknote, QrCode, CheckCircle2, ArrowRight, Clock, AlertTriangle, ShieldCheck } from 'lucide-react'
 import { useCart } from '@/hooks/useCart'
 import { useAuth } from '@/hooks/useAuth'
-import { orderApi } from '@/api'
+import { orderApi, paymentApi } from '@/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { formatCurrency, optimizeCloudinaryUrl } from '@/utils/format'
 import { toast } from 'sonner'
-import type { Order } from '@/types'
+import type { Order, Address } from '@/types'
+import { AddressSelector } from '@/components/common/AddressSelector'
 
 const checkoutSchema = z.object({
   customerName: z.string().min(2, 'Họ tên người nhận phải có ít nhất 2 ký tự'),
@@ -27,13 +28,26 @@ const checkoutSchema = z.object({
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>
 
+const QR_COUNTDOWN_SECONDS = 900 // 15 minutes = 900 seconds
+
 export const CheckoutPage: React.FC = () => {
   const { items, subtotal, clearCart } = useCart()
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const navigate = useNavigate()
+
   const [createdOrder, setCreatedOrder] = useState<Order | null>(null)
   const [showQrModal, setShowQrModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Address Selector state
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null)
+  const [isManualAddress, setIsManualAddress] = useState(false)
+
+  // VietQR Countdown & Polling state
+  const [timeLeft, setTimeLeft] = useState(QR_COUNTDOWN_SECONDS)
+  const [isPaidSuccess, setIsPaidSuccess] = useState(false)
+  const [isExpired, setIsExpired] = useState(false)
+  const pollingRef = useRef<number | null>(null)
 
   const {
     register,
@@ -57,6 +71,90 @@ export const CheckoutPage: React.FC = () => {
 
   const selectedPaymentMethod = watch('paymentMethod')
 
+  const handleSelectSavedAddress = useCallback((addr: Address) => {
+    setSelectedAddressId(addr.id)
+    setIsManualAddress(false)
+    setValue('customerName', addr.receiverName, { shouldValidate: true })
+    setValue('phone', addr.phone, { shouldValidate: true })
+    setValue('province', addr.province || 'TP. Hồ Chí Minh', { shouldValidate: true })
+    setValue('district', addr.district || 'Quận 1', { shouldValidate: true })
+    setValue('ward', addr.ward || 'Phường Bến Nghé', { shouldValidate: true })
+    setValue('address', addr.addressLine || addr.fullAddress, { shouldValidate: true })
+  }, [setValue])
+
+  const handleSelectManualAddress = useCallback(() => {
+    setSelectedAddressId(null)
+    setIsManualAddress(true)
+  }, [])
+
+  // 15-minute Countdown Timer Effect
+  useEffect(() => {
+    if (!showQrModal || isPaidSuccess || isExpired) return
+
+    setTimeLeft(QR_COUNTDOWN_SECONDS)
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer)
+          setIsExpired(true)
+          toast.error('Đơn hàng đã hết hạn thanh toán (quá 15 phút).')
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [showQrModal, isPaidSuccess, isExpired])
+
+  // Polling Payment Status Effect (Every 3 seconds)
+  useEffect(() => {
+    if (!showQrModal || !createdOrder || isPaidSuccess || isExpired) {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current)
+        pollingRef.current = null
+      }
+      return
+    }
+
+    const checkStatus = async () => {
+      try {
+        const res = await paymentApi.getOrderPaymentStatus(createdOrder.id)
+        if (res?.isPaid || res?.paymentStatus === 'PAID') {
+          setIsPaidSuccess(true)
+          if (pollingRef.current) {
+            clearInterval(pollingRef.current)
+            pollingRef.current = null
+          }
+          toast.success('Ngân hàng đã xác nhận thanh toán thành công!')
+          setTimeout(() => {
+            setShowQrModal(false)
+            navigate('/orders')
+          }, 2000)
+        }
+      } catch {
+        // Silently continue polling on intermittent network errors
+      }
+    }
+
+    // Run immediately once, then set interval
+    checkStatus()
+    pollingRef.current = window.setInterval(checkStatus, 3000)
+
+    return () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current)
+        pollingRef.current = null
+      }
+    }
+  }, [showQrModal, createdOrder, isPaidSuccess, isExpired, navigate])
+
+  const formatCountdown = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  }
+
   const onSubmit = async (data: CheckoutFormData) => {
     if (items.length === 0) {
       toast.error('Giỏ hàng trống!')
@@ -78,13 +176,18 @@ export const CheckoutPage: React.FC = () => {
       await clearCart()
 
       if (data.paymentMethod === 'VIETQR') {
+        setIsPaidSuccess(false)
+        setIsExpired(false)
+        setTimeLeft(QR_COUNTDOWN_SECONDS)
         setShowQrModal(true)
       } else {
         toast.success('Đặt hàng thành công!')
         navigate('/orders')
       }
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Đặt hàng thất bại!'
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Đặt hàng thất bại!'
       toast.error(msg)
     } finally {
       setIsSubmitting(false)
@@ -121,6 +224,16 @@ export const CheckoutPage: React.FC = () => {
               1. Địa Chỉ Nhận Hàng
             </h2>
 
+            {/* Address Selector for authenticated users */}
+            {isAuthenticated && (
+              <AddressSelector
+                selectedAddressId={selectedAddressId}
+                onSelectAddress={handleSelectSavedAddress}
+                onSelectManual={handleSelectManualAddress}
+                isManualSelected={isManualAddress}
+              />
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-[#1c1917] mb-1">
@@ -145,21 +258,21 @@ export const CheckoutPage: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-[#1c1917] mb-1">Tỉnh / Thành</label>
+                <label className="block text-xs font-semibold text-[#1c1917] mb-1">Tỉnh / Thành *</label>
                 <Input {...register('province')} />
                 {errors.province && (
                   <p className="text-[11px] text-[#dc2626] mt-1">{errors.province.message}</p>
                 )}
               </div>
               <div>
-                <label className="block text-xs font-semibold text-[#1c1917] mb-1">Quận / Huyện</label>
+                <label className="block text-xs font-semibold text-[#1c1917] mb-1">Quận / Huyện *</label>
                 <Input {...register('district')} />
                 {errors.district && (
                   <p className="text-[11px] text-[#dc2626] mt-1">{errors.district.message}</p>
                 )}
               </div>
               <div>
-                <label className="block text-xs font-semibold text-[#1c1917] mb-1">Phường / Xã</label>
+                <label className="block text-xs font-semibold text-[#1c1917] mb-1">Phường / Xã *</label>
                 <Input {...register('ward')} />
                 {errors.ward && (
                   <p className="text-[11px] text-[#dc2626] mt-1">{errors.ward.message}</p>
@@ -305,44 +418,112 @@ export const CheckoutPage: React.FC = () => {
         </div>
       </form>
 
-      {/* VietQR Dynamic Modal */}
+      {/* VietQR Dynamic Modal with 15:00 Countdown & Automatic Polling */}
       {createdOrder && (
         <Dialog open={showQrModal} onOpenChange={setShowQrModal}>
           <DialogContent onClose={() => navigate('/orders')} className="max-w-md text-center p-6 space-y-4">
             <DialogHeader>
-              <DialogTitle className="text-lg">Quét Mã VietQR Để Thanh Toán</DialogTitle>
+              <DialogTitle className="text-lg flex items-center justify-center gap-2">
+                <QrCode className="w-5 h-5 text-[#47654c]" />
+                <span>Quét Mã VietQR Để Thanh Toán</span>
+              </DialogTitle>
               <DialogDescription className="text-xs text-[#78716c]">
                 Đơn hàng #{createdOrder.orderCode} • Tổng tiền: {formatCurrency(createdOrder.total)}
               </DialogDescription>
             </DialogHeader>
 
-            <div className="flex flex-col items-center justify-center p-4 bg-white border border-[#e7e5e4]">
-              {/* VietQR QuickLink image API */}
-              <img
-                src={`https://img.vietqr.io/image/MB-0987654321-compact2.png?amount=${createdOrder.total}&addInfo=${encodeURIComponent(
-                  createdOrder.orderCode
-                )}&accountName=${encodeURIComponent('TIEM BANH HEBEKERY')}`}
-                alt="VietQR Payment"
-                className="w-64 h-64 object-contain"
-              />
-              <div className="text-xs text-[#78716c] space-y-1 mt-3">
-                <p>Ngân hàng: <strong>MBBank</strong></p>
-                <p>Số tài khoản: <strong>0987654321</strong></p>
-                <p>Chủ TK: <strong>TIEM BANH HEBEKERY</strong></p>
-                <p>Nội dung: <strong className="text-[#d97724]">{createdOrder.orderCode}</strong></p>
+            {/* Countdown Timer Bar */}
+            {!isPaidSuccess && !isExpired && (
+              <div className="space-y-1.5 p-2.5 bg-[#faf8f5] border border-[#e7e5e4]">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="flex items-center gap-1.5 font-semibold text-[#57534e]">
+                    <Clock className="w-3.5 h-3.5 text-[#d97724] animate-spin" />
+                    <span>Thời gian giữ đơn hàng:</span>
+                  </span>
+                  <span className="font-mono font-bold text-sm text-[#d97724]">
+                    {formatCountdown(timeLeft)}
+                  </span>
+                </div>
+                <div className="w-full h-1.5 bg-[#e7e5e4] overflow-hidden">
+                  <div
+                    className="h-full bg-[#d97724] transition-all duration-1000"
+                    style={{ width: `${(timeLeft / QR_COUNTDOWN_SECONDS) * 100}%` }}
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
-            <Button
-              variant="default"
-              className="w-full"
-              onClick={() => {
-                setShowQrModal(false)
-                navigate('/orders')
-              }}
-            >
-              Tôi Đã Chuyển Khoản • Xem Đơn Hàng
-            </Button>
+            {/* Expired State */}
+            {isExpired && (
+              <div className="p-4 bg-[#fef2f2] border border-[#fecaca] text-[#dc2626] space-y-2">
+                <AlertTriangle className="w-8 h-8 mx-auto" />
+                <p className="font-bold text-sm">Đơn hàng đã hết hạn thanh toán (quá 15 phút)</p>
+                <p className="text-xs text-[#991b1b]">
+                  Kiện hàng đã được hoàn kho để phục vụ khách hàng khác. Vui lòng đặt lại đơn mới.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setShowQrModal(false)
+                    navigate('/products')
+                  }}
+                  className="mt-2"
+                >
+                  Về thực đơn
+                </Button>
+              </div>
+            )}
+
+            {/* Success State */}
+            {isPaidSuccess && (
+              <div className="p-6 bg-[#f0fdf4] border border-[#bbf7d0] text-[#15803d] space-y-3 animate-in zoom-in-95 duration-300">
+                <CheckCircle2 className="w-12 h-12 mx-auto text-[#16a34a] animate-bounce" />
+                <p className="font-extrabold text-base">Thanh Toán Thành Công!</p>
+                <p className="text-xs text-[#166534]">
+                  Hệ thống ngân hàng SePay đã đối soát thành công. Tiệm bánh Hebekery đang bắt đầu làm bánh tươi cho bạn!
+                </p>
+                <p className="text-[11px] text-[#78716c]">Tự động chuyển trang sau 2 giây...</p>
+              </div>
+            )}
+
+            {/* Normal QR Display */}
+            {!isPaidSuccess && !isExpired && (
+              <>
+                <div className="flex flex-col items-center justify-center p-4 bg-white border border-[#e7e5e4] relative">
+                  {/* VietQR QuickLink image API */}
+                  <img
+                    src={`https://img.vietqr.io/image/MB-0987654321-compact2.png?amount=${createdOrder.total}&addInfo=${encodeURIComponent(
+                      createdOrder.orderCode
+                    )}&accountName=${encodeURIComponent('TIEM BANH HEBEKERY')}`}
+                    alt="VietQR Payment"
+                    className="w-60 h-60 object-contain"
+                  />
+                  <div className="text-xs text-[#78716c] space-y-1 mt-3">
+                    <p>Ngân hàng: <strong>MBBank</strong></p>
+                    <p>Số tài khoản: <strong>0987654321</strong></p>
+                    <p>Chủ TK: <strong>TIEM BANH HEBEKERY</strong></p>
+                    <p>Nội dung CK: <strong className="text-[#d97724] font-mono text-sm">{createdOrder.orderCode}</strong></p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-center gap-2 text-xs text-[#47654c] bg-[#47654c]/5 p-2 border border-[#47654c]/20">
+                  <ShieldCheck className="w-4 h-4 shrink-0" />
+                  <span>Hệ thống đang tự động nhận diện thanh toán qua SePay Webhook...</span>
+                </div>
+
+                <Button
+                  variant="default"
+                  className="w-full"
+                  onClick={() => {
+                    setShowQrModal(false)
+                    navigate('/orders')
+                  }}
+                >
+                  Tôi Đã Chuyển Khoản • Xem Đơn Hàng
+                </Button>
+              </>
+            )}
           </DialogContent>
         </Dialog>
       )}

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ShoppingBag, User as UserIcon, Menu, X, Shield } from 'lucide-react'
+import { ShoppingBag, User as UserIcon, Menu, X, Shield, Search } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useAuth } from '@/hooks/useAuth'
 import { useCart } from '@/hooks/useCart'
@@ -38,7 +38,7 @@ export const Header: React.FC = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-8 text-sm font-medium text-[#292524]">
+        <nav className="hidden md:flex items-center space-x-7 text-sm font-medium text-[#292524]">
           <Link to="/" className="hover:text-[#47654c] transition-colors">
             {t('nav.home')}
           </Link>
@@ -53,6 +53,13 @@ export const Header: React.FC = () => {
           </Link>
           <Link to="/contact" className="hover:text-[#47654c] transition-colors">
             {t('nav.contact')}
+          </Link>
+          <Link
+            to="/tracking"
+            className="hover:text-[#47654c] transition-colors flex items-center gap-1 text-[#d97724] font-semibold"
+          >
+            <Search className="w-3.5 h-3.5" />
+            <span>Tra cứu đơn</span>
           </Link>
         </nav>
 
@@ -192,6 +199,14 @@ export const Header: React.FC = () => {
               className="block text-sm font-medium py-1 text-[#292524] hover:text-[#47654c]"
             >
               {t('nav.contact')}
+            </Link>
+            <Link
+              to="/tracking"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block text-sm font-semibold py-1 text-[#d97724] hover:text-[#b45309] flex items-center gap-1.5"
+            >
+              <Search className="w-4 h-4" />
+              <span>Tra cứu đơn hàng</span>
             </Link>
           </motion.div>
         )}

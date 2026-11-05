@@ -254,7 +254,7 @@ graph TD
 
 > **Mục tiêu**: Nâng cấp toàn diện các luồng tương tác trên Storefront; biến Hebekery thành nền tảng mua sắm mượt mà, tiện lợi, tích hợp đầy đủ các đặc thù của thương hiệu bánh Healthy (Macro, Sổ địa chỉ, Đánh giá sản phẩm, Tra cứu đơn công khai).
 
-- [ ] **Task C.1: Tích hợp Sổ Địa Chỉ Giao Hàng (`AddressSelector`) vào `CheckoutPage` & `ProfilePage`**
+- [x] **Task C.1: Tích hợp Sổ Địa Chỉ Giao Hàng (`AddressSelector`) vào `CheckoutPage` & `ProfilePage`**
   - **File tạo mới/cập nhật**:
     - `web-bakery-frontend/src/components/common/AddressSelector.tsx`
     - `web-bakery-frontend/src/features/checkout/CheckoutPage.tsx`
@@ -268,7 +268,7 @@ graph TD
     2. Trên trang Hồ sơ cá nhân (`ProfilePage`):
        - Thêm phân vùng **"Sổ Địa Chỉ Của Tôi"**: Cho phép xem danh sách, Thêm địa chỉ mới, Sửa, Xóa và Đặt làm mặc định (`POST`, `PUT`, `DELETE /api/addresses`).
 
-- [ ] **Task C.2: Nâng cấp Modal VietQR Động kèm Đếm Ngược 15:00 & Polling Tự Động**
+- [x] **Task C.2: Nâng cấp Modal VietQR Động kèm Đếm Ngược 15:00 & Polling Tự Động**
   - **File cập nhật**: `web-bakery-frontend/src/features/checkout/CheckoutPage.tsx`
   - **Giao diện & Logic**:
     1. **Đồng hồ đếm ngược 15:00**:
@@ -282,7 +282,7 @@ graph TD
          - Hiển thị toast thông báo: *"Ngân hàng đã xác nhận thanh toán thành công!"*.
          - Tự động điều hướng khách sang trang `/orders` sau 2 giây.
 
-- [ ] **Task C.3: Bổ sung Nút "Đã Nhận Hàng" & Modal Đánh Giá Sao (`ProductReview`)**
+- [x] **Task C.3: Bổ sung Nút "Đã Nhận Hàng" & Modal Đánh Giá Sao (`ProductReview`)**
   - **File cập nhật**: `web-bakery-frontend/src/features/orders/OrderTrackingPage.tsx`
   - **Nghiệp vụ chi tiết**:
     1. **Nút "Đã Nhận Hàng"**:
@@ -293,14 +293,14 @@ graph TD
        - Mở Modal Đánh giá: Chọn số sao (1 đến 5 sao bằng icon ngôi sao xúc giác), nhập bình luận nhận xét về chất lượng bánh healthy.
        - Gọi API `POST /api/products/{productId}/reviews` để lưu đánh giá.
 
-- [ ] **Task C.4: Hiển thị Đánh Giá & Xếp Hạng Sao trên Modal Chi Tiết Sản Phẩm**
+- [x] **Task C.4: Hiển thị Đánh Giá & Xếp Hạng Sao trên Modal Chi Tiết Sản Phẩm**
   - **File cập nhật**: `web-bakery-frontend/src/features/products/ProductDetailModal.tsx`
   - **Nghiệp vụ chi tiết**:
     - Gọi API `GET /api/products/{productId}/reviews` khi mở modal.
     - Hiển thị điểm trung bình sao (ví dụ: ⭐ 4.8 / 5.0) và tổng số lượt đánh giá.
     - Danh sách các nhận xét từ khách hàng thực tế (Tên khách, ngày đánh giá, số sao, nội dung nhận xét).
 
-- [ ] **Task C.5: Trang Tra Cứu Đơn Hàng Công Khai Cho Khách Vãng Lai (Guest)**
+- [x] **Task C.5: Trang Tra Cứu Đơn Hàng Công Khai Cho Khách Vãng Lai (Guest)**
   - **File tạo mới/cập nhật**:
     - `web-bakery-frontend/src/features/orders/PublicOrderLookupPage.tsx`
     - `web-bakery-frontend/src/routes/AppRoutes.tsx` (Route công khai `/tracking`)
@@ -310,7 +310,7 @@ graph TD
     - Gọi API tra cứu công khai `GET /api/orders/track?phone=...&orderId=...`.
     - Hiển thị timeline tiến trình đơn hàng (Chờ xác nhận $\rightarrow$ Làm bánh $\rightarrow$ Đang giao $\rightarrow$ Đã giao), đơn vị vận chuyển và mã vận đơn tracking mà không yêu cầu đăng nhập.
 
-- [ ] **Task C.6: Nâng cấp Trang BMI/TDEE - Gợi Ý Thực Đơn Tuần & 1-Click Upsell**
+- [x] **Task C.6: Nâng cấp Trang BMI/TDEE - Gợi Ý Thực Đơn Tuần & 1-Click Upsell**
   - **File cập nhật**: `web-bakery-frontend/src/features/tools/BmiCalculatorPage.tsx`
   - **Nghiệp vụ chi tiết**:
     - Dựa vào kết quả Calo mục tiêu (Giảm cân / Giữ dáng / Tăng cơ):
@@ -318,7 +318,7 @@ graph TD
     - Hiển thị tổng calo hàng ngày và giá combo ưu đãi (giảm 10% so với mua lẻ).
     - Nút bấm **"1-Click: Thêm Trọn Bộ Thực Đơn Tuần Vào Giỏ"**: Tự động đưa toàn bộ các sản phẩm trong combo vào giỏ hàng và mở giỏ hàng trượt ra (`CartDrawer`).
 
-- [ ] **Task C.7: Kết nối Form Liên Hệ Trực Tiếp vào Backend API**
+- [x] **Task C.7: Kết nối Form Liên Hệ Trực Tiếp vào Backend API**
   - **File cập nhật**: `web-bakery-frontend/src/features/pages/ContactPage.tsx`
   - **Nghiệp vụ**:
     - Thay thế đoạn giả lập `handleSubmit` bằng mutation gọi trực tiếp API `POST /api/contact` với payload `{ name, email, phone, subject, message }`.
