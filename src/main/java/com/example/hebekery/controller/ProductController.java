@@ -31,19 +31,30 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ProductResponse>>> getProducts(
+            @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "all") String category,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size) {
         Pageable pageable = PageRequest.of(Math.max(page, 0), size, Sort.by("id").ascending());
         Page<Product> products;
-        if (keyword != null && !keyword.isBlank()) {
+        if (categoryId != null) {
+            products = productService.searchProducts(categoryId, keyword, pageable);
+        } else if (keyword != null && !keyword.isBlank()) {
             products = productService.searchProducts(keyword.trim(), pageable);
         } else {
             products = productService.getProductsPage(category, pageable);
         }
         Page<ProductResponse> responsePage = products.map(ProductResponse::from);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách sản phẩm thành công", responsePage));
+    }
+
+    public ResponseEntity<ApiResponse<Page<ProductResponse>>> getProducts(
+            String keyword,
+            String category,
+            int page,
+            int size) {
+        return getProducts(null, keyword, category, page, size);
     }
 
     @GetMapping("/{id}")
@@ -76,7 +87,8 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ApiResponse.failure("Không tìm thấy sản phẩm"));
         }
-        List<ProductResponse> related = productService.getRelatedProducts(id, current.getCategory()).stream()
+        String categoryName = current.getCategoryName();
+        List<ProductResponse> related = productService.getRelatedProducts(id, categoryName).stream()
                 .map(ProductResponse::from)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách sản phẩm liên quan thành công", related));

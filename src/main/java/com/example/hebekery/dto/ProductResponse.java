@@ -5,6 +5,7 @@ import com.example.hebekery.model.Product;
 public class ProductResponse {
     private String id;
     private String name;
+    private Long categoryId;
     private String category;
     private String description;
     private double price;
@@ -15,6 +16,7 @@ public class ProductResponse {
     private int lowStockThreshold;
     private double averageCost;
     private boolean active;
+    private boolean isFeatured;
     private boolean outOfStock;
     private boolean lowStock;
 
@@ -28,7 +30,10 @@ public class ProductResponse {
         ProductResponse response = new ProductResponse();
         response.setId(product.getId());
         response.setName(product.getName());
-        response.setCategory(product.getCategory());
+        response.setCategory(product.getCategoryName());
+        if (product.getCategory() != null) {
+            response.setCategoryId(product.getCategory().getId());
+        }
         response.setDescription(product.getDescription());
         response.setPrice(product.getPrice());
         response.setImageUrl(product.getImageUrl());
@@ -38,6 +43,7 @@ public class ProductResponse {
         response.setLowStockThreshold(product.getLowStockThreshold());
         response.setAverageCost(product.getAverageCost());
         response.setActive(product.isActive());
+        response.setFeatured(product.isFeatured());
         response.setOutOfStock(product.isOutOfStock());
         response.setLowStock(product.isLowStock());
         return response;
@@ -57,6 +63,14 @@ public class ProductResponse {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
     }
 
     public String getCategory() {
@@ -137,6 +151,14 @@ public class ProductResponse {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean isFeatured() {
+        return isFeatured;
+    }
+
+    public void setFeatured(boolean featured) {
+        isFeatured = featured;
     }
 
     public boolean isOutOfStock() {

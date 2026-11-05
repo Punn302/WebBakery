@@ -5,11 +5,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "product_reviews")
-public class ProductReview {
+public class ProductReview extends BaseEntity {
     @Id
     private String id;
     private String productId;
@@ -18,8 +16,6 @@ public class ProductReview {
     private int rating;
     @Column(length = 1000)
     private String comment;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -33,8 +29,4 @@ public class ProductReview {
     public void setRating(int rating) { this.rating = rating; }
     public String getComment() { return comment; }
     public void setComment(String comment) { this.comment = comment; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

@@ -1,31 +1,37 @@
 package com.example.hebekery.service;
 
+import com.example.hebekery.dto.request.SyncCartItemDto;
 import com.example.hebekery.model.CartItem;
 import com.example.hebekery.model.Product;
 import com.example.hebekery.model.User;
 import com.example.hebekery.repository.CartItemRepository;
-import jakarta.transaction.Transactional;
+import com.example.hebekery.repository.ProductRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.annotation.SessionScope;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@SessionScope
 public class CartService {
 
     private final CartItemRepository cartItemRepository;
     private final UserService userService;
-    private final List<CartItem> sessionCartItems = new ArrayList<>();
+    private final ProductRepository productRepository;
 
-    public CartService(CartItemRepository cartItemRepository, UserService userService) {
+    public CartService(CartItemRepository cartItemRepository,
+                       UserService userService,
+                       ProductRepository productRepository) {
         this.cartItemRepository = cartItemRepository;
         this.userService = userService;
+        this.productRepository = productRepository;
     }
 
     public int getQuantity(String productId) {
+        if (!isLoggedIn()) {
+            return 0;
+        }
         return getCartItems().stream()
                 .filter(item -> item.getProductId().equals(productId))
                 .mapToInt(CartItem::getQuantity)
@@ -35,53 +41,65 @@ public class CartService {
 
     @Transactional
     public void addToCart(Product product, int quantity) {
-        List<CartItem> items = getMutableCartItems();
-        Optional<CartItem> existingItem = items.stream()
-                .filter(item -> item.getProductId().equals(product.getId()))
-                .findFirst();
-
-        CartItem item;
-        if (existingItem.isPresent()) {
-            item = existingItem.get();
+        if (!isLoggedIn()) {
+            return;
+        }
+        String userId = userService.getCurrentUser().getId();
+        Optional<CartItem> existing = cartItemRepository.findByUserIdAndProductId(userId, product.getId());
+        if (existing.isPresent()) {
+            CartItem item = existing.get();
             item.setQuantity(item.getQuantity() + quantity);
+            cartItemRepository.save(item);
         } else {
-            item = new CartItem(
+            CartItem item = new CartItem(
                     product.getId(),
                     product.getName(),
                     product.getImageUrl(),
                     product.getPrice(),
                     quantity
             );
-            items.add(item);
+            item.setUserId(userId);
+            cartItemRepository.save(item);
         }
-        saveIfLoggedIn(item);
     }
 
     @Transactional
     public void updateQuantity(String productId, int quantity) {
-        getMutableCartItems().stream()
-                .filter(item -> item.getProductId().equals(productId))
-                .findFirst()
-                .ifPresent(item -> {
-                    item.setQuantity(quantity);
-                    saveIfLoggedIn(item);
-                });
+        if (!isLoggedIn()) {
+            return;
+        }
+        String userId = userService.getCurrentUser().getId();
+        if (quantity <= 0) {
+            removeFromCart(productId);
+            return;
+        }
+        cartItemRepository.findByUserIdAndProductId(userId, productId).ifPresent(item -> {
+            item.setQuantity(quantity);
+            cartItemRepository.save(item);
+        });
     }
 
     @Transactional
     public void removeFromCart(String productId) {
-        if (isLoggedIn()) {
-            cartItemRepository.deleteByUserIdAndProductId(userService.getCurrentUser().getId(), productId);
+        if (!isLoggedIn()) {
             return;
         }
-        sessionCartItems.removeIf(item -> item.getProductId().equals(productId));
+        String userId = userService.getCurrentUser().getId();
+        cartItemRepository.deleteByUserIdAndProductId(userId, productId);
     }
 
     public List<CartItem> getCartItems() {
-        if (isLoggedIn()) {
-            return cartItemRepository.findByUserId(userService.getCurrentUser().getId());
+        if (!isLoggedIn()) {
+            return Collections.emptyList();
         }
-        return sessionCartItems;
+        return cartItemRepository.findByUserId(userService.getCurrentUser().getId());
+    }
+
+    public List<CartItem> getCartItems(String userId) {
+        if (userId == null || userId.isBlank()) {
+            return Collections.emptyList();
+        }
+        return cartItemRepository.findByUserId(userId);
     }
 
     public double getTotalPrice() {
@@ -100,58 +118,63 @@ public class CartService {
     public void clearCart() {
         if (isLoggedIn()) {
             cartItemRepository.deleteByUserId(userService.getCurrentUser().getId());
+        }
+    }
+
+    @Transactional
+    public void clearCart(String userId) {
+        if (userId != null && !userId.isBlank()) {
+            cartItemRepository.deleteByUserId(userId);
+        }
+    }
+
+    @Transactional
+    public void syncCart(String userId, List<SyncCartItemDto> items) {
+        if (userId == null || userId.isBlank() || items == null || items.isEmpty()) {
             return;
         }
-        sessionCartItems.clear();
+
+        for (SyncCartItemDto dto : items) {
+            if (dto.getProductId() == null || dto.getQuantity() <= 0) {
+                continue;
+            }
+
+            Optional<Product> productOpt = productRepository.findById(dto.getProductId());
+            if (productOpt.isEmpty() || !productOpt.get().isActive()) {
+                continue;
+            }
+
+            Product product = productOpt.get();
+            int validQuantity = Math.min(dto.getQuantity(), Math.max(product.getStockQuantity(), 1));
+
+            Optional<CartItem> existing = cartItemRepository.findByUserIdAndProductId(userId, product.getId());
+            if (existing.isPresent()) {
+                CartItem item = existing.get();
+                int newQty = Math.min(item.getQuantity() + validQuantity, Math.max(product.getStockQuantity(), 1));
+                item.setQuantity(newQty);
+                cartItemRepository.save(item);
+            } else {
+                CartItem item = new CartItem(
+                        product.getId(),
+                        product.getName(),
+                        product.getImageUrl(),
+                        product.getPrice(),
+                        validQuantity
+                );
+                item.setUserId(userId);
+                cartItemRepository.save(item);
+            }
+        }
     }
 
     @Transactional
     public void saveCartForUser(User user) {
-        mergeSessionCartForUser(user);
+        // Stateless: Cart is automatically persisted to database for authenticated users
     }
 
     @Transactional
     public void mergeSessionCartForUser(User user) {
-        if (user == null || sessionCartItems.isEmpty()) {
-            return;
-        }
-        List<CartItem> savedItems = cartItemRepository.findByUserId(user.getId());
-        for (CartItem sessionItem : sessionCartItems) {
-            Optional<CartItem> existingItem = savedItems.stream()
-                    .filter(item -> item.getProductId().equals(sessionItem.getProductId()))
-                    .findFirst();
-            if (existingItem.isPresent()) {
-                CartItem item = existingItem.get();
-                item.setQuantity(item.getQuantity() + sessionItem.getQuantity());
-                cartItemRepository.save(item);
-            } else {
-                CartItem item = new CartItem(
-                        sessionItem.getProductId(),
-                        sessionItem.getProductName(),
-                        sessionItem.getImageUrl(),
-                        sessionItem.getPrice(),
-                        sessionItem.getQuantity()
-                );
-                item.setUserId(user.getId());
-                cartItemRepository.save(item);
-            }
-        }
-        sessionCartItems.clear();
-    }
-
-    private List<CartItem> getMutableCartItems() {
-        if (isLoggedIn()) {
-            return cartItemRepository.findByUserId(userService.getCurrentUser().getId());
-        }
-        return sessionCartItems;
-    }
-
-    private void saveIfLoggedIn(CartItem item) {
-        if (!isLoggedIn()) {
-            return;
-        }
-        item.setUserId(userService.getCurrentUser().getId());
-        cartItemRepository.save(item);
+        // Stateless: Client synchronizes local storage cart via POST /api/cart/sync upon login
     }
 
     private boolean isLoggedIn() {

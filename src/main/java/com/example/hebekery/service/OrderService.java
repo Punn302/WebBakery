@@ -50,7 +50,10 @@ public class OrderService {
         validateCheckout(user, cartItems);
 
         Order order = new Order();
-        order.setId("HBK-" + System.currentTimeMillis());
+        String technicalId = "ORD-" + java.util.UUID.randomUUID();
+        String businessCode = "HBK-" + LocalDate.now().toString().replace("-", "") + "-" + java.util.UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+        order.setId(technicalId);
+        order.setOrderCode(businessCode);
         order.setUserId(user.getId());
         order.setCustomerName(request.getCustomerName());
         order.setPhone(request.getPhone());
@@ -100,7 +103,10 @@ public class OrderService {
         validateCheckout(user, cartItems);
 
         Order order = new Order();
-        order.setId("HBK-" + System.currentTimeMillis());
+        String technicalId = "ORD-" + java.util.UUID.randomUUID();
+        String businessCode = "HBK-" + LocalDate.now().toString().replace("-", "") + "-" + java.util.UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+        order.setId(technicalId);
+        order.setOrderCode(businessCode);
         order.setUserId(user.getId());
         order.setCustomerName(request.getCustomerName());
         order.setPhone(request.getPhone());
@@ -155,14 +161,14 @@ public class OrderService {
     }
 
     public Order getOrderById(String orderId) {
-        return orderRepository.findById(orderId).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng"));
+        return orderRepository.findWithItemsById(orderId).or(() -> orderRepository.findByOrderCode(orderId)).or(() -> orderRepository.findById(orderId)).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng"));
     }
 
     public List<Order> trackOrders(String orderId, String phone) {
-        return orderRepository.findAll().stream()
-                .filter(order -> orderId == null || orderId.isBlank() || order.getId().equalsIgnoreCase(orderId.trim()))
-                .filter(order -> phone == null || phone.isBlank() || order.getPhone().equals(phone.trim()))
-                .collect(Collectors.toList());
+        if (orderId != null && !orderId.isBlank()) { return orderRepository.findWithItemsById(orderId.trim()).or(() -> orderRepository.findByOrderCode(orderId.trim())).map(List::of).orElse(List.of()); } if (phone != null && !phone.isBlank()) { return orderRepository.findByPhone(phone.trim()); } return List.of();
+
+
+
     }
 
     @Transactional
@@ -328,22 +334,22 @@ public class OrderService {
                     orderItem.setCostAtSale(product == null ? 0 : product.getAverageCost());
                     orderItem.setOrder(order);
                     return orderItem;
-                })
-                .collect(Collectors.toList());
+                }).collect(Collectors.toList());
+
     }
 
     private OrderResponse toResponse(Order order) {
-        OrderItem firstItem = order.getItems().isEmpty() ? null : order.getItems().get(0);
+        OrderItem firstItem = (order.getItems() == null || order.getItems().isEmpty()) ? null : order.getItems().get(0);
         return new OrderResponse(
                 order.getId(),
-                order.getCreatedAt().toString(),
+                order.getCreatedAt() != null ? order.getCreatedAt().toString() : "",
                 statusClass(order),
                 statusText(order),
                 order.getOrderStatus(),
                 order.getPaymentStatus(),
                 firstItem == null ? "" : firstItem.getImageUrl(),
                 firstItem == null ? "" : firstItem.getProductName(),
-                order.getItems().stream().mapToInt(OrderItem::getQuantity).sum(),
+                order.getItems() == null ? 0 : order.getItems().stream().mapToInt(OrderItem::getQuantity).sum(),
                 order.getTotal()
         );
     }

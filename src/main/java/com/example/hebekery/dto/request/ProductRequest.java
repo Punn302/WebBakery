@@ -9,7 +9,7 @@ public class ProductRequest {
     @NotBlank(message = "Tên sản phẩm không được để trống")
     private String name;
 
-    @NotBlank(message = "Danh mục không được để trống")
+    private Long categoryId;
     private String category;
 
     private String description;
@@ -29,6 +29,7 @@ public class ProductRequest {
 
     private double averageCost;
     private boolean active = true;
+    private Boolean isFeatured = false;
 
     public ProductRequest() {
     }
@@ -47,6 +48,14 @@ public class ProductRequest {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
     }
 
     public String getCategory() {
@@ -127,5 +136,21 @@ public class ProductRequest {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public Boolean getIsFeatured() {
+        return isFeatured;
+    }
+
+    public void setIsFeatured(Boolean featured) {
+        isFeatured = featured;
+    }
+
+    public boolean isFeatured() {
+        return isFeatured != null && isFeatured;
+    }
+
+    public void setFeatured(boolean featured) {
+        isFeatured = featured;
     }
 }

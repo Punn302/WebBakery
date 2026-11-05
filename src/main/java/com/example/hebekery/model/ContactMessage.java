@@ -1,6 +1,5 @@
 package com.example.hebekery.model;
 
-import java.time.LocalDateTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -8,7 +7,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "contact_messages")
-public class ContactMessage {
+public class ContactMessage extends BaseEntity {
     @Id
     private String id;
     private String name;
@@ -18,7 +17,6 @@ public class ContactMessage {
     @Column(length = 2000)
     private String message;
     private String status;
-    private LocalDateTime createdAt;
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -34,6 +32,4 @@ public class ContactMessage {
     public void setMessage(String message) { this.message = message; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

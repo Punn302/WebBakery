@@ -1,0 +1,174 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-add-auditing-to-users
+      author: hebekery
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: created_at
+                  type: datetime
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: datetime
+              - column:
+                  name: created_by
+                  type: varchar(100)
+              - column:
+                  name: updated_by
+                  type: varchar(100)
+
+  - changeSet:
+      id: 003-add-auditing-to-categories
+      author: hebekery
+      changes:
+        - addColumn:
+            tableName: categories
+            columns:
+              - column:
+                  name: created_at
+                  type: datetime
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: datetime
+              - column:
+                  name: created_by
+                  type: varchar(100)
+              - column:
+                  name: updated_by
+                  type: varchar(100)
+
+  - changeSet:
+      id: 003-add-auditing-to-products
+      author: hebekery
+      changes:
+        - addColumn:
+            tableName: products
+            columns:
+              - column:
+                  name: created_at
+                  type: datetime
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: datetime
+              - column:
+                  name: created_by
+                  type: varchar(100)
+              - column:
+                  name: updated_by
+                  type: varchar(100)
+
+  - changeSet:
+      id: 003-add-auditing-to-orders
+      author: hebekery
+      changes:
+        - addColumn:
+            tableName: orders
+            columns:
+              - column:
+                  name: updated_at
+                  type: datetime
+              - column:
+                  name: created_by
+                  type: varchar(100)
+              - column:
+                  name: updated_by
+                  type: varchar(100)
+
+  - changeSet:
+      id: 003-add-auditing-to-addresses
+      author: hebekery
+      changes:
+        - addColumn:
+            tableName: addresses
+            columns:
+              - column:
+                  name: created_at
+                  type: datetime
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: datetime
+              - column:
+                  name: created_by
+                  type: varchar(100)
+              - column:
+                  name: updated_by
+                  type: varchar(100)
+
+  - changeSet:
+      id: 003-add-auditing-to-contact-messages
+      author: hebekery
+      changes:
+        - addColumn:
+            tableName: contact_messages
+            columns:
+              - column:
+                  name: updated_at
+                  type: datetime
+              - column:
+                  name: created_by
+                  type: varchar(100)
+              - column:
+                  name: updated_by
+                  type: varchar(100)
+
+  - changeSet:
+      id: 003-add-auditing-to-purchase-receipts
+      author: hebekery
+      changes:
+        - addColumn:
+            tableName: purchase_receipts
+            columns:
+              - column:
+                  name: created_at
+                  type: datetime
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: datetime
+              - column:
+                  name: created_by
+                  type: varchar(100)
+              - column:
+                  name: updated_by
+                  type: varchar(100)
+
+  - changeSet:
+      id: 003-add-auditing-to-cart-items
+      author: hebekery
+      changes:
+        - addColumn:
+            tableName: cart_items
+            columns:
+              - column:
+                  name: created_at
+                  type: datetime
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: datetime
+              - column:
+                  name: created_by
+                  type: varchar(100)
+              - column:
+                  name: updated_by
+                  type: varchar(100)
+
+  - changeSet:
+      id: 003-add-auditing-to-product-reviews
+      author: hebekery
+      changes:
+        - addColumn:
+            tableName: product_reviews
+            columns:
+              - column:
+                  name: created_by
+                  type: varchar(100)
+              - column:
+                  name: updated_by
+                  type: varchar(100)

@@ -1,26 +1,33 @@
 package com.example.hebekery.service;
 
-import com.example.hebekery.model.Product;
+import com.example.hebekery.model.Category;
 import com.example.hebekery.model.InventoryTransaction;
+import com.example.hebekery.model.Product;
+import com.example.hebekery.repository.CategoryRepository;
 import com.example.hebekery.repository.InventoryTransactionRepository;
 import com.example.hebekery.repository.ProductRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Service
 public class ProductService {
 
     private final ProductRepository productRepository;
     private final InventoryTransactionRepository inventoryTransactionRepository;
+    private final CategoryRepository categoryRepository;
 
-    public ProductService(ProductRepository productRepository, InventoryTransactionRepository inventoryTransactionRepository) {
+    public ProductService(ProductRepository productRepository,
+                          InventoryTransactionRepository inventoryTransactionRepository,
+                          CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
         this.inventoryTransactionRepository = inventoryTransactionRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     public List<Product> getAllProducts() {
@@ -32,22 +39,21 @@ public class ProductService {
     }
 
     public List<Product> getLowStockProducts() {
-        return getAllProducts().stream()
-                .filter(product -> product.isOutOfStock() || product.isLowStock())
-                .toList();
+        return productRepository.findLowStockProducts();
     }
 
     public List<Product> getFeaturedProducts() {
-        return getAllProducts().stream()
-                .filter(p -> p.getId().equals("P001") || p.getId().equals("P004") || p.getId().equals("P005") || p.getId().equals("P008"))
-                .collect(Collectors.toList());
+        return productRepository.findByIsFeaturedTrueAndActiveTrue();
     }
 
     public Page<Product> getProductsPage(String category, Pageable pageable) {
         if (category == null || category.isBlank() || "all".equalsIgnoreCase(category)) {
             return productRepository.findByActiveTrue(pageable);
         }
-        return productRepository.findByCategoryAndActiveTrue(category, pageable);
+        if (category.trim().matches("\\d+")) {
+            return productRepository.findByCategory_IdAndActiveTrue(Long.parseLong(category.trim()), pageable);
+        }
+        return productRepository.findByCategory_NameIgnoreCaseAndActiveTrue(category.trim(), pageable);
     }
 
     public Product getProductById(String id) {
@@ -55,43 +61,52 @@ public class ProductService {
     }
 
     public List<String> getAllCategories() {
-        return List.of("Ngũ cốc & Granola", "Bánh ăn kiêng", "Snack healthy", "Thực phẩm bổ sung", "Combo quà tặng");
+        List<Category> categories = categoryRepository.findByActiveTrueOrderByNameAsc();
+        if (categories.isEmpty()) {
+            return List.of("Ngũ cốc & Granola", "Bánh ăn kiêng", "Snack healthy", "Thực phẩm bổ sung", "Combo quà tặng");
+        }
+        return categories.stream().map(Category::getName).toList();
     }
 
     public List<Product> getRelatedProducts(String currentId, String category) {
-        return getAllProducts().stream()
-                .filter(p -> !p.getId().equals(currentId))
-                .filter(p -> p.getCategory().equals(category))
-                .limit(4)
-                .collect(Collectors.toList());
+        if (category == null || category.isBlank()) {
+            return List.of();
+        }
+        if (category.trim().matches("\\d+")) {
+            return productRepository.findRelatedProductsByCategoryId(currentId, Long.parseLong(category.trim()), PageRequest.of(0, 4));
+        }
+        return productRepository.findRelatedProductsByCategoryName(currentId, category.trim(), PageRequest.of(0, 4));
+    }
+
+    public List<Product> getRelatedProducts(String currentId, Long categoryId) {
+        if (categoryId == null) {
+            return List.of();
+        }
+        return productRepository.findRelatedProductsByCategoryId(currentId, categoryId, PageRequest.of(0, 4));
     }
 
     public List<Product> searchProducts(String keyword) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return getAllProducts();
         }
-
-        String searchTerm = keyword.toLowerCase().trim();
-        return getAllProducts().stream()
-                .filter(product ->
-                        product.getName().toLowerCase().contains(searchTerm) ||
-                                product.getDescription().toLowerCase().contains(searchTerm) ||
-                                product.getCategory().toLowerCase().contains(searchTerm) ||
-                                product.getBadge().toLowerCase().contains(searchTerm))
-                .collect(Collectors.toList());
+        return productRepository.searchActive(keyword.trim(), PageRequest.of(0, 100)).getContent();
     }
 
     public Page<Product> searchProducts(String keyword, Pageable pageable) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return productRepository.findByActiveTrue(pageable);
         }
-        String term = keyword.trim();
-        return productRepository.searchActive(term, pageable);
+        return productRepository.searchActive(keyword.trim(), pageable);
+    }
+
+    public Page<Product> searchProducts(Long categoryId, String keyword, Pageable pageable) {
+        String term = (keyword != null && !keyword.isBlank()) ? keyword.trim() : null;
+        return productRepository.searchProducts(categoryId, term, pageable);
     }
 
     public Product saveProduct(Product product) {
         if (product.getId() == null || product.getId().isBlank()) {
-            product.setId("P" + System.currentTimeMillis());
+            product.setId("P-" + UUID.randomUUID().toString());
         }
         if (product.getBadge() == null) {
             product.setBadge("");

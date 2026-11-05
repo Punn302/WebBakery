@@ -4,12 +4,14 @@ import com.example.hebekery.dto.ApiResponse;
 import com.example.hebekery.dto.CartResponse;
 import com.example.hebekery.dto.request.AddToCartRequest;
 import com.example.hebekery.dto.request.RemoveCartItemRequest;
+import com.example.hebekery.dto.request.SyncCartRequest;
 import com.example.hebekery.dto.request.UpdateCartRequest;
 import com.example.hebekery.model.Product;
 import com.example.hebekery.service.CartService;
 import com.example.hebekery.service.ProductService;
 import com.example.hebekery.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,6 +35,10 @@ public class CartController {
 
     @PostMapping("/add")
     public ResponseEntity<ApiResponse<CartResponse>> addToCart(@Valid @RequestBody AddToCartRequest request) {
+        if (!userService.isLoggedIn()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.failure("Vui lòng đăng nhập để lưu giỏ hàng trực tuyến hoặc quản lý qua LocalStorage"));
+        }
         Product product = productService.getProductById(request.getProductId());
         if (product == null) {
             return ResponseEntity.badRequest().body(ApiResponse.failure("Sản phẩm không tồn tại"));
@@ -55,8 +61,23 @@ public class CartController {
         return ResponseEntity.ok(ApiResponse.success("Lấy thông tin giỏ hàng thành công", getCartData()));
     }
 
+    @PostMapping("/sync")
+    public ResponseEntity<ApiResponse<CartResponse>> syncCart(@Valid @RequestBody SyncCartRequest request) {
+        if (!userService.isLoggedIn()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.failure("Vui lòng đăng nhập để đồng bộ giỏ hàng"));
+        }
+        String userId = userService.getCurrentUser().getId();
+        cartService.syncCart(userId, request.getItems());
+        return ResponseEntity.ok(ApiResponse.success("Đồng bộ giỏ hàng thành công", getCartData()));
+    }
+
     @PostMapping("/update")
     public ResponseEntity<ApiResponse<CartResponse>> updateCart(@Valid @RequestBody UpdateCartRequest request) {
+        if (!userService.isLoggedIn()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.failure("Vui lòng đăng nhập để cập nhật giỏ hàng trực tuyến"));
+        }
         Product product = productService.getProductById(request.getProductId());
         if (product == null) {
             return ResponseEntity.badRequest().body(ApiResponse.failure("Sản phẩm không tồn tại"));
@@ -74,8 +95,20 @@ public class CartController {
 
     @PostMapping("/remove")
     public ResponseEntity<ApiResponse<CartResponse>> removeFromCart(@Valid @RequestBody RemoveCartItemRequest request) {
+        if (!userService.isLoggedIn()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.failure("Vui lòng đăng nhập để xóa sản phẩm khỏi giỏ hàng trực tuyến"));
+        }
         cartService.removeFromCart(request.getProductId());
         return ResponseEntity.ok(ApiResponse.success("Đã xóa sản phẩm khỏi giỏ hàng", getCartData()));
+    }
+
+    @PostMapping("/clear")
+    public ResponseEntity<ApiResponse<Void>> clearCart() {
+        if (userService.isLoggedIn()) {
+            cartService.clearCart();
+        }
+        return ResponseEntity.ok(ApiResponse.success("Đã làm trống giỏ hàng", null));
     }
 
     @PostMapping("/save")

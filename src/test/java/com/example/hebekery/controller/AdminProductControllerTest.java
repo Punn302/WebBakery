@@ -23,6 +23,8 @@ class AdminProductControllerTest {
 
     @Mock
     private ProductService productService;
+    @Mock
+    private com.example.hebekery.service.CategoryService categoryService;
 
     @InjectMocks
     private AdminProductController adminProductController;
