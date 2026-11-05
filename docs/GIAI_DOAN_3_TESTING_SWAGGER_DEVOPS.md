@@ -109,7 +109,7 @@
 ---
 
 ### Bước 3.3: Container hóa ứng dụng với Docker
-- [ ] **Tạo file `Dockerfile` (Multi-stage build)** tại gốc dự án `WebBakery`:
+- [x] **Tạo file `Dockerfile` (Multi-stage build)** tại gốc dự án `WebBakery`:
   ```dockerfile
   # Stage 1: Build JAR bằng Maven
   FROM maven:3.9-eclipse-temurin-17 AS builder
@@ -128,7 +128,7 @@
   EXPOSE 8080
   ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
   ```
-- [ ] **Tạo `.dockerignore`**:
+- [x] **Tạo `.dockerignore`**:
   ```text
   target/
   .mvn/
@@ -144,7 +144,7 @@
 ---
 
 ### Bước 3.4: Thiết lập Môi trường với Docker Compose
-- [ ] **Tạo file `docker-compose.yml`**:
+- [x] **Tạo file `docker-compose.yml`**:
   ```yaml
   version: '3.8'
 
@@ -214,7 +214,7 @@
 ---
 
 ### Bước 3.5: Cấu hình Nginx (Reverse Proxy & Load Balancing)
-- [ ] **Tạo file `nginx.conf`**:
+- [x] **Tạo file `nginx.conf`**:
   - Đóng vai trò Reverse Proxy nhận request từ client ở port 80 và chuyển tiếp tới backend:
   - Cho phép tải tệp multipart (ảnh sản phẩm) lên đến 10MB (`client_max_body_size 10M`).
   - Không cần cấu hình cache/alias `/uploads/` cục bộ vì ảnh được phục vụ trực tiếp qua Cloudinary CDN.
