@@ -22,6 +22,18 @@ public class CartItem extends BaseEntity {
 
     public CartItem() {}
 
+    public CartItem(String userId, Product product, int quantity) {
+        this.userId = userId;
+        if (product != null) {
+            this.productId = product.getId();
+            this.productName = product.getName();
+            this.imageUrl = product.getImageUrl();
+            this.price = product.getPrice();
+        }
+        this.quantity = quantity;
+        this.total = this.price * quantity;
+    }
+
     public CartItem(String productId, String productName, String imageUrl, double price, int quantity) {
         this.productId = productId;
         this.productName = productName;
