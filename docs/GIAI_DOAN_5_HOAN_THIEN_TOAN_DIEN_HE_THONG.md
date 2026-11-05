@@ -108,7 +108,7 @@ graph TD
 
 > **Mục tiêu**: Xây dựng hoàn chỉnh luồng thanh toán tự động không chạm (Zero-touch Payment) qua VietQR & SePay Webhook; bổ sung API kiểm tra trạng thái đơn phục vụ Polling; đảm bảo tính toàn vẹn dữ liệu (Idempotency) và quản lý bảng nâng cao theo đúng bản thiết kế.
 
-- [ ] **Task A.1: Xây dựng SePay Webhook Controller & Service**
+- [x] **Task A.1: Xây dựng SePay Webhook Controller & Service**
   - **File tạo mới**:
     - `src/main/java/com/example/hebekery/dto/request/SepayWebhookPayload.java`
     - `src/main/java/com/example/hebekery/controller/SepayWebhookController.java`
@@ -133,7 +133,7 @@ graph TD
     - Gửi request sai API Key -> Trả về HTTP 401.
     - Gửi lặp lại cùng một payload -> Không trừ kho lặp lại, trả về HTTP 200.
 
-- [ ] **Task A.2: Xây dựng Endpoint Polling Kiểm tra Trạng thái Đơn hàng**
+- [x] **Task A.2: Xây dựng Endpoint Polling Kiểm tra Trạng thái Đơn hàng**
   - **File cập nhật**: `src/main/java/com/example/hebekery/controller/CheckoutController.java`
   - **Endpoint bổ sung**: `GET /api/checkout/orders/{orderId}/status` (hoặc `GET /api/payment/status/{orderId}`)
   - **Dữ liệu trả về**:
@@ -148,18 +148,18 @@ graph TD
     ```
   - **Mục đích**: Để giao diện Modal VietQR trên React Frontend có thể gọi định kỳ (mỗi 3 giây) kiểm tra xem đơn hàng đã được ngân hàng xác nhận hay chưa, tự động đóng popup và thông báo thành công.
 
-- [ ] **Task A.3: Tác vụ Quét Tự động Hủy Đơn VietQR Quá Hạn (Scheduled Task)**
+- [x] **Task A.3: Tác vụ Quét Tự động Hủy Đơn VietQR Quá Hạn (Scheduled Task)**
   - **File tạo mới**: `src/main/java/com/example/hebekery/scheduler/OrderCleanupScheduler.java`
   - **Nghiệp vụ**:
     - Bật `@EnableScheduling` trong cấu hình Spring Boot.
     - Chạy định kỳ mỗi 5 phút: Quét các đơn hàng có phương thức `VIETQR`, `paymentStatus = 'PENDING'`, tạo trước thời điểm hiện tại $> 15$ phút.
     - Cập nhật trạng thái đơn sang `CANCELLED`, hoàn lại số lượng tồn kho tạm giữ (nếu có), ghi log lý do: *"Hết hạn 15 phút thanh toán VietQR"*.
 
-- [ ] **Task A.4: Cập nhật Phân quyền RBAC cho `AdminContactController`**
+- [x] **Task A.4: Cập nhật Phân quyền RBAC cho `AdminContactController`**
   - **File cập nhật**: `src/main/java/com/example/hebekery/controller/AdminContactController.java`
   - **Chi tiết**: Thay đổi `@PreAuthorize("hasRole('ADMIN')")` thành `@PreAuthorize("hasAnyRole('ADMIN', 'STAFF_SALES')")` để nhân viên CSKH (`STAFF_SALES`) có quyền tiếp nhận và phản hồi tin nhắn của khách hàng theo đúng ma trận nghiệp vụ.
 
-- [ ] **Task A.5: Bổ sung Bảng CSDL Nâng cao qua Liquibase ChangeSet 005**
+- [x] **Task A.5: Bổ sung Bảng CSDL Nâng cao qua Liquibase ChangeSet 005**
   - **File tạo mới**: `src/main/resources/db/changelog/changes/005-add-enterprise-tables.yaml`
   - **Cập nhật Master**: Khai báo `005-add-enterprise-tables.yaml` vào `db.changelog-master.yaml`.
   - **Các bảng bổ sung theo Thiết kế Doanh nghiệp (Phần 11)**:
@@ -172,7 +172,7 @@ graph TD
     - `CustomerProfile.java`, `CustomerProfileRepository.java`.
     - `Voucher.java`, `VoucherRepository.java`.
 
-- [ ] **Task A.6: Viết Bộ Unit & Integration Tests cho Backend Mới**
+- [x] **Task A.6: Viết Bộ Unit & Integration Tests cho Backend Mới**
   - **File tạo mới**:
     - `src/test/java/com/example/hebekery/controller/SepayWebhookControllerTest.java`: Test xác thực header Apikey, test chuyển đơn sang PAID thành công, test idempotency khi bắn trùng referenceCode, test sai số tiền.
     - `src/test/java/com/example/hebekery/scheduler/OrderCleanupSchedulerTest.java`: Test tự động quét và hủy đơn VietQR quá hạn 15 phút.
