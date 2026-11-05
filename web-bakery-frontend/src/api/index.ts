@@ -1,6 +1,7 @@
 import { axiosClient } from './axiosClient'
 import type {
   User,
+  UserRole,
   AuthResponse,
   LoginRequest,
   RegisterRequest,
@@ -11,6 +12,12 @@ import type {
   Order,
   CheckoutRequest,
   PageResponse,
+  PurchaseReceipt,
+  PurchaseReceiptBatchRequest,
+  RevenueReportResponse,
+  TopSellingProduct,
+  ContactMessage,
+  PaymentStatus,
 } from '@/types'
 
 // Auth APIs
@@ -115,6 +122,10 @@ export const orderApi = {
     const res = await axiosClient.post<Order>(`/orders/${id}/return`, { reason })
     return res.data
   },
+  confirmReceived: async (id: string): Promise<Order> => {
+    const res = await axiosClient.put<Order>(`/orders/${id}/received`)
+    return res.data
+  },
   adminSearchOrders: async (params?: {
     keyword?: string
     status?: string
@@ -147,6 +158,133 @@ export const orderApi = {
       decision,
       adminNote,
     })
+    return res.data
+  },
+}
+
+// Admin Users APIs
+export const adminUserApi = {
+  getUsers: async (params?: {
+    keyword?: string
+    page?: number
+    size?: number
+  }): Promise<PageResponse<User>> => {
+    const res = await axiosClient.get<PageResponse<User>>('/admin/users', { params })
+    return res.data
+  },
+  getUserById: async (id: string): Promise<User> => {
+    const res = await axiosClient.get<User>(`/admin/users/${id}`)
+    return res.data
+  },
+  updateUserRole: async (id: string, role: UserRole): Promise<User> => {
+    const res = await axiosClient.put<User>(`/admin/users/${id}/role`, { role })
+    return res.data
+  },
+  updateUserStatus: async (id: string, active: boolean): Promise<User> => {
+    const res = await axiosClient.patch<User>(`/admin/users/${id}/status`, { active })
+    return res.data
+  },
+  resetPassword: async (id: string, newPassword?: string): Promise<User> => {
+    const res = await axiosClient.post<User>(
+      `/admin/users/${id}/reset-password`,
+      newPassword ? { newPassword } : {}
+    )
+    return res.data
+  },
+}
+
+// Admin Inventory APIs
+export const adminInventoryApi = {
+  getInventory: async (params?: {
+    keyword?: string
+    page?: number
+    size?: number
+  }): Promise<PageResponse<Product>> => {
+    const res = await axiosClient.get<PageResponse<Product>>('/admin/inventory', { params })
+    return res.data
+  },
+  updateThreshold: async (id: string, threshold: number): Promise<Product> => {
+    const res = await axiosClient.put<Product>(`/admin/inventory/${id}/threshold`, { threshold })
+    return res.data
+  },
+  createPurchaseReceipt: async (
+    data: PurchaseReceiptBatchRequest
+  ): Promise<PurchaseReceipt[]> => {
+    const res = await axiosClient.post<PurchaseReceipt[]>('/admin/inventory/receipts', data)
+    return res.data
+  },
+  getPurchaseReceipts: async (params?: {
+    keyword?: string
+    from?: string
+    to?: string
+    page?: number
+    size?: number
+  }): Promise<PageResponse<PurchaseReceipt>> => {
+    const res = await axiosClient.get<PageResponse<PurchaseReceipt>>('/admin/inventory/receipts', {
+      params,
+    })
+    return res.data
+  },
+  getReceiptDetails: async (receiptCode: string): Promise<PurchaseReceipt[]> => {
+    const res = await axiosClient.get<PurchaseReceipt[]>(
+      `/admin/inventory/receipts/${receiptCode}`
+    )
+    return res.data
+  },
+}
+
+// Admin Reports APIs
+export const adminReportApi = {
+  getRevenueReport: async (params?: {
+    from?: string
+    to?: string
+  }): Promise<RevenueReportResponse> => {
+    const res = await axiosClient.get<RevenueReportResponse>('/admin/reports/revenue', { params })
+    return res.data
+  },
+  getTopSelling: async (params?: {
+    from?: string
+    to?: string
+  }): Promise<TopSellingProduct[]> => {
+    const res = await axiosClient.get<TopSellingProduct[]>('/admin/reports/top-selling', { params })
+    return res.data
+  },
+  downloadPdf: async (from?: string, to?: string): Promise<Blob> => {
+    const res = await axiosClient.get('/admin/reports/export-pdf', {
+      params: { from, to },
+      responseType: 'blob',
+    })
+    return res.data
+  },
+  downloadCsv: async (from?: string, to?: string): Promise<string> => {
+    const res = await axiosClient.get('/admin/reports/export-csv', {
+      params: { from, to },
+      responseType: 'text',
+    })
+    return res.data
+  },
+}
+
+// Admin Contacts APIs
+export const adminContactApi = {
+  getContacts: async (params?: {
+    keyword?: string
+    page?: number
+    size?: number
+  }): Promise<PageResponse<ContactMessage>> => {
+    const res = await axiosClient.get<PageResponse<ContactMessage>>('/admin/contacts', { params })
+    return res.data
+  },
+  updateStatus: async (id: string, status: 'RESOLVED' | 'SPAM'): Promise<ContactMessage> => {
+    const res = await axiosClient.patch<ContactMessage>(`/admin/contacts/${id}/status`, { status })
+    return res.data
+  },
+}
+
+// Payment Status API (Polling)
+export const paymentApi = {
+  getOrderPaymentStatus: async (orderId: string): Promise<PaymentStatus> => {
+    const res = await axiosClient.get<PaymentStatus>(`/payment/sepay/orders/${orderId}/status`)
     return res.data
   },
 }
