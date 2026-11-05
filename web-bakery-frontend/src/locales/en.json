@@ -11,7 +11,8 @@
     "profile": "Profile",
     "myOrders": "My Orders",
     "admin": "Admin",
-    "logout": "Logout"
+    "logout": "Logout",
+    "tracking": "Track Order"
   },
   "hero": {
     "badge": "Nutritional & Healthy Bakery",

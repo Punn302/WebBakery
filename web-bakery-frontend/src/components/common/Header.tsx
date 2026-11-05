@@ -24,17 +24,11 @@ export const Header: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-9 h-9 bg-[#47654c] text-white flex items-center justify-center font-bold text-lg select-none">
-            H
-          </div>
-          <div className="flex flex-col">
-            <span className="font-extrabold text-lg tracking-wider text-[#1c1917] uppercase">
-              Hebekery
-            </span>
-            <span className="text-[10px] uppercase tracking-widest text-[#47654c] font-semibold -mt-1">
-              Healthy Bakery
-            </span>
-          </div>
+          <img
+            src="/images/logo.webp"
+            alt="Hebekery"
+            className="h-9 w-auto object-contain transition-transform group-hover:scale-105"
+          />
         </Link>
 
         {/* Desktop Navigation */}
@@ -59,7 +53,7 @@ export const Header: React.FC = () => {
             className="hover:text-[#47654c] transition-colors flex items-center gap-1 text-[#d97724] font-semibold"
           >
             <Search className="w-3.5 h-3.5" />
-            <span>Tra cứu đơn</span>
+            <span>{t('nav.tracking')}</span>
           </Link>
         </nav>
 
@@ -68,10 +62,10 @@ export const Header: React.FC = () => {
           {/* Language Switcher */}
           <button
             onClick={toggleLanguage}
-            className="text-xs font-semibold px-2 py-1 border border-[#e7e5e4] hover:bg-black/5 transition-colors cursor-pointer"
-            title="Đổi ngôn ngữ"
+            className="text-xs font-bold px-2 py-1 border border-[#e7e5e4] hover:bg-black/5 transition-colors cursor-pointer select-none"
+            title={i18n.language.startsWith('vi') ? 'Chuyển sang English' : 'Chuyển sang Tiếng Việt'}
           >
-            {i18n.language.startsWith('en') ? '🇻🇳 VI' : '🇬🇧 EN'}
+            {i18n.language.startsWith('vi') ? '🇻🇳 VI' : '🇬🇧 EN'}
           </button>
 
           {/* Cart Icon with Motion Badge */}
@@ -127,23 +121,15 @@ export const Header: React.FC = () => {
               </Button>
             </div>
           ) : (
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/login')}
-              >
-                {t('nav.login')}
-              </Button>
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => navigate('/register')}
-                className="hidden sm:inline-flex"
-              >
-                {t('nav.register')}
-              </Button>
-            </div>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => navigate('/login')}
+              className="flex items-center gap-1.5"
+            >
+              <UserIcon className="w-3.5 h-3.5" />
+              <span>{t('nav.login')}</span>
+            </Button>
           )}
 
           {/* Mobile Menu Toggle */}
@@ -206,7 +192,7 @@ export const Header: React.FC = () => {
               className="block text-sm font-semibold py-1 text-[#d97724] hover:text-[#b45309] flex items-center gap-1.5"
             >
               <Search className="w-4 h-4" />
-              <span>Tra cứu đơn hàng</span>
+              <span>{t('nav.tracking')}</span>
             </Link>
           </motion.div>
         )}

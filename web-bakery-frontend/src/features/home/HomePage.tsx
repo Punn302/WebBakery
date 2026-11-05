@@ -26,139 +26,125 @@ export const HomePage: React.FC = () => {
   return (
     <div className="space-y-16">
       {/* Hero Section */}
-      <section className="relative border border-[#e7e5e4] bg-[#f4efe6] overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-12 items-center">
-          {/* Left Hero Content */}
-          <div className="lg:col-span-7 p-8 sm:p-12 md:p-16 space-y-6 relative z-10">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="inline-flex items-center gap-2 px-3 py-1 bg-[#47654c]/10 text-[#47654c] text-xs font-bold tracking-wide uppercase select-none"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{t('hero.badge')}</span>
-            </motion.div>
+      <section className="relative border border-[#e7e5e4] overflow-hidden min-h-[440px] sm:min-h-[480px] md:min-h-[520px] flex items-center shadow-sm">
+        {/* Full-width Banner Background Image */}
+        <img
+          src="https://res.cloudinary.com/dw41xzins/image/upload/v1793895327/hebekery_hero_banner.jpg"
+          onError={(e) => {
+            const target = e.currentTarget;
+            if (target.src !== '/images/hero-banner.jpg') {
+              target.src = '/images/hero-banner.jpg';
+            }
+          }}
+          alt="Tiệm bánh Hebekery Healthy Artisan Bread"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
 
-            <motion.h1
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-              className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight text-[#1c1917] leading-tight"
-            >
-              {t('hero.title')}
-            </motion.h1>
+        {/* Gradient Overlay for Legibility */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/65 to-black/35" />
 
-            <motion.p
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-              className="text-sm sm:text-base text-[#57534e] max-w-xl leading-relaxed"
-            >
-              {t('hero.subtitle')}
-            </motion.p>
+        {/* Text Layer On Top */}
+        <div className="relative z-10 max-w-2xl p-8 sm:p-12 md:p-16 space-y-6 text-white">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md text-amber-300 border border-white/20 text-xs font-bold tracking-wide uppercase select-none"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>{t('hero.badge')}</span>
+          </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.3 }}
-              className="flex flex-wrap gap-3 pt-2"
-            >
-              <Button
-                size="lg"
-                variant="default"
-                className="flex items-center gap-2"
-                onClick={() => navigate('/products')}
-              >
-                <span>{t('hero.cta')}</span>
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-              <Button
-                size="lg"
-                variant="secondary"
-                onClick={() => navigate('/about')}
-              >
-                {t('hero.ctaSecondary')}
-              </Button>
-            </motion.div>
+          <motion.h1
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight text-white leading-tight drop-shadow-md"
+          >
+            {t('hero.title')}
+          </motion.h1>
 
-            {/* Micro Badges / Value points */}
-            <div className="pt-4 border-t border-[#e7e5e4] flex flex-wrap items-center gap-6 text-xs text-[#57534e]">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#47654c]" />
-                <span className="font-semibold">100% Bột nguyên cám</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#47654c]" />
-                <span className="font-semibold">0g Đường tinh luyện</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#47654c]" />
-                <span className="font-semibold">Nướng mới mỗi sáng</span>
-              </div>
+          <motion.p
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="text-sm sm:text-base text-stone-200 max-w-xl leading-relaxed"
+          >
+            {t('hero.subtitle')}
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+            className="flex flex-wrap gap-3 pt-2"
+          >
+            <Button
+              size="lg"
+              variant="default"
+              className="flex items-center gap-2 bg-[#47654c] hover:bg-[#38523c] text-white border-none shadow-lg cursor-pointer font-bold"
+              onClick={() => navigate('/products')}
+            >
+              <span>{t('hero.cta')}</span>
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+            <Button
+              size="lg"
+              variant="secondary"
+              onClick={() => navigate('/about')}
+              className="bg-white/90 hover:bg-white text-[#1c1917] border-none shadow-md cursor-pointer font-bold"
+            >
+              {t('hero.ctaSecondary')}
+            </Button>
+          </motion.div>
+
+          {/* Micro Trust Badges */}
+          <div className="pt-4 border-t border-white/20 flex flex-wrap items-center gap-6 text-xs text-stone-200 font-medium">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span>100% Bột nguyên cám</span>
             </div>
-          </div>
-
-          {/* Right Hero Banner Image */}
-          <div className="lg:col-span-5 relative h-72 sm:h-96 lg:h-full min-h-[380px] p-6 sm:p-8 lg:p-10 flex items-center justify-center">
-            <div className="relative w-full h-full max-h-[360px] overflow-hidden border-2 border-[#47654c]/20 shadow-xl group">
-              <img
-                src="https://res.cloudinary.com/dw41xzins/image/upload/v1793895327/hebekery_hero_banner.jpg"
-                onError={(e) => {
-                  const target = e.currentTarget;
-                  if (target.src !== '/images/hero-banner.jpg') {
-                    target.src = '/images/hero-banner.jpg';
-                  }
-                }}
-                alt="Tiệm bánh Hebekery Healthy Artisan Bread"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent flex flex-col justify-end p-5 text-white">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-amber-300">
-                  Thủ Công Tinh Tuyển
-                </span>
-                <span className="text-base sm:text-lg font-extrabold uppercase">
-                  Bánh Mì & Ngũ Cốc Eat Clean
-                </span>
-              </div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span>0g Đường tinh luyện</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span>Nướng tươi mỗi sáng</span>
             </div>
           </div>
         </div>
 
         {/* Decorative Watermark */}
-        <div className="absolute right-4 -bottom-6 text-[#47654c]/5 font-black text-8xl md:text-9xl select-none pointer-events-none uppercase">
+        <div className="absolute right-4 -bottom-6 text-white/5 font-black text-8xl md:text-9xl select-none pointer-events-none uppercase">
           HEBEKERY
         </div>
       </section>
 
-      {/* Value Propositions: 4 Cards with Embedded Images */}
+      {/* Value Propositions: 4 Full-Bleed Cards with Overlay Text */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           {
             icon: ShieldCheck,
             title: '100% Nguyên Liệu Sạch',
-            desc: 'Nguyên cám hữu cơ, hạt dinh dưỡng chọn lọc chuẩn VietGAP.',
             image: 'https://res.cloudinary.com/dw41xzins/image/upload/v1793895346/hebekery_feature_clean_ingredients.jpg',
             fallback: '/images/feature-clean-ingredients.jpg',
           },
           {
             icon: HeartHandshake,
             title: 'Không Đường Tinh Luyện',
-            desc: 'Vị ngọt thanh dịu nhẹ tự nhiên từ mật hoa và quả khô.',
             image: 'https://res.cloudinary.com/dw41xzins/image/upload/v1793895347/hebekery_feature_no_sugar.jpg',
             fallback: '/images/feature-no-sugar.jpg',
           },
           {
             icon: Truck,
             title: 'Giao Bánh Tươi Trong Ngày',
-            desc: 'Nướng mẻ mới mỗi sớm, đóng gói kín giữ trọn giòn tan.',
             image: 'https://res.cloudinary.com/dw41xzins/image/upload/v1793895348/hebekery_feature_fresh_daily.jpg',
             fallback: '/images/feature-fresh-daily.jpg',
           },
           {
             icon: Activity,
             title: 'Kiểm Soát Calo Từng Bánh',
-            desc: 'Minh bạch lượng đạm, chất béo và calo trên từng khẩu phần.',
             image: 'https://res.cloudinary.com/dw41xzins/image/upload/v1793895349/hebekery_feature_calorie_control.jpg',
             fallback: '/images/feature-calorie-control.jpg',
           },
@@ -167,36 +153,34 @@ export const HomePage: React.FC = () => {
           return (
             <div
               key={idx}
-              className="group border border-[#e7e5e4] bg-white overflow-hidden hover:border-[#47654c] hover:shadow-md transition-all flex flex-col"
+              className="group relative h-48 sm:h-56 overflow-hidden border border-[#e7e5e4] shadow-sm hover:shadow-xl hover:border-[#47654c] transition-all cursor-default"
             >
-              {/* Card Image */}
-              <div className="relative h-40 w-full overflow-hidden bg-[#f4efe6]">
-                <img
-                  src={item.image}
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (target.src !== item.fallback) {
-                      target.src = item.fallback;
-                    }
-                  }}
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute top-2.5 left-2.5 w-8 h-8 bg-white/95 backdrop-blur-sm text-[#47654c] flex items-center justify-center shadow-sm">
-                  <Icon className="w-4 h-4" />
-                </div>
+              {/* Full Card Background Image */}
+              <img
+                src={item.image}
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (target.src !== item.fallback) {
+                    target.src = item.fallback;
+                  }
+                }}
+                alt={item.title}
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+
+              {/* Gradient Overlay for Text Readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10 group-hover:from-black/95 transition-colors" />
+
+              {/* Floating Icon badge on top-left */}
+              <div className="absolute top-3.5 left-3.5 w-8 h-8 bg-white/90 backdrop-blur-md text-[#47654c] flex items-center justify-center shadow">
+                <Icon className="w-4 h-4" />
               </div>
 
-              {/* Card Text Content */}
-              <div className="p-4 space-y-1 flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 className="font-bold text-sm text-[#1c1917] group-hover:text-[#47654c] transition-colors">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-[#78716c] leading-relaxed mt-1">
-                    {item.desc}
-                  </p>
-                </div>
+              {/* Text Layer on top (bottom aligned) - Title Only */}
+              <div className="absolute bottom-0 inset-x-0 p-4 sm:p-5">
+                <h3 className="font-extrabold text-base text-white tracking-wide uppercase drop-shadow group-hover:text-amber-300 transition-colors">
+                  {item.title}
+                </h3>
               </div>
             </div>
           );

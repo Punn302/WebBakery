@@ -4,14 +4,15 @@
     "products": "Thực đơn",
     "about": "Về Hebekery",
     "contact": "Liên hệ",
-    "bmi": "Tính BMI & TDEE",
+    "bmi": "BMI & TDEE",
     "cart": "Giỏ hàng",
     "login": "Đăng nhập",
     "register": "Đăng ký",
     "profile": "Tài khoản",
     "myOrders": "Đơn hàng của tôi",
     "admin": "Quản trị",
-    "logout": "Đăng xuất"
+    "logout": "Đăng xuất",
+    "tracking": "Tra cứu đơn"
   },
   "hero": {
     "badge": "Tiệm Bánh Dinh Dưỡng & Ăn Kiêng Healthy",
