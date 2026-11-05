@@ -64,7 +64,7 @@
 ---
 
 ### Bước 3.2: Xây dựng Bộ Kiểm Thử Tự Động (Unit Test & Integration Test)
-- [ ] **Cấu hình JaCoCo trong `pom.xml` để đo lường độ bao phủ (Code Coverage)**:
+- [x] **Cấu hình JaCoCo trong `pom.xml` để đo lường độ bao phủ (Code Coverage)**:
   ```xml
   <plugin>
       <groupId>org.jacoco</groupId>
@@ -82,7 +82,7 @@
       </executions>
   </plugin>
   ```
-- [ ] **Viết Unit Test cho Service Layer (JUnit 5 + Mockito)**:
+- [x] **Viết Unit Test cho Service Layer (JUnit 5 + Mockito)**:
   - `UserServiceTest.java`:
     - `testLogin_Success`: Đăng nhập đúng email & mật khẩu -> trả về User.
     - `testLogin_WrongPassword`: Đăng nhập sai mật khẩu -> trả về null / ném ngoại lệ.
@@ -100,10 +100,10 @@
   - `CartServiceTest.java`:
     - `testAddToCart_MergeQuantity`: Thêm sản phẩm đã có trong giỏ -> tăng số lượng chính xác.
     - `testCalculateTotalPrice`: Tính đúng tổng tiền của tất cả mặt hàng trong giỏ.
-- [ ] **Viết Integration Test cho Controller Layer (`@WebMvcTest`)**:
+- [x] **Viết Integration Test cho Controller Layer (`@WebMvcTest`)**:
   - `AuthControllerTest.java`: Test endpoint `/api/auth/login` với MockMvc, kiểm tra response status và JSON token trả về.
   - `ProductControllerTest.java`: Test endpoint `/api/products` phân trang và tìm kiếm.
-- [ ] **Viết Repository Test (`@DataJpaTest`)**:
+- [x] **Viết Repository Test (`@DataJpaTest`)**:
   - `OrderRepositoryTest.java`: Test câu lệnh query tìm kiếm đơn theo nhiều tiêu chí (keyword, status, khoảng ngày).
 
 ---

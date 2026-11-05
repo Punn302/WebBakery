@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -95,5 +96,65 @@ class ProductServiceTest {
 
         assertEquals(1, result.getTotalElements());
         verify(productRepository, times(1)).searchActive(eq("Biscotti"), any());
+    }
+
+    @Test
+    @DisplayName("testEnsureAvailable_OutOfStock: Ném ngoại lệ khi sản phẩm hết hàng tồn kho (<= 0)")
+    void testEnsureAvailable_OutOfStock() {
+        Product p = new Product("P001", "Biscotti", "Banh", "Mo ta", 50000, "url", "badge");
+        p.setStockQuantity(0);
+
+        when(productRepository.findById("P001")).thenReturn(Optional.of(p));
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                productService.ensureAvailable("P001", 1)
+        );
+        assertTrue(ex.getMessage().contains("het hang"));
+    }
+
+    @Test
+    @DisplayName("testEnsureAvailable_ExceedStock: Ném ngoại lệ khi số lượng đặt mua vượt quá tồn kho khả dụng")
+    void testEnsureAvailable_ExceedStock() {
+        Product p = new Product("P001", "Biscotti", "Banh", "Mo ta", 50000, "url", "badge");
+        p.setStockQuantity(5);
+
+        when(productRepository.findById("P001")).thenReturn(Optional.of(p));
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                productService.ensureAvailable("P001", 10)
+        );
+        assertTrue(ex.getMessage().contains("Chi con 5"));
+    }
+
+    @Test
+    @DisplayName("testSaveProduct_NewProduct: Tự sinh mã ID SKU dạng P-UUID nếu truyền vào ID rỗng")
+    void testSaveProduct_NewProduct() {
+        Product p = new Product();
+        p.setName("Bánh Sừng Bò Yến Mạch");
+        p.setPrice(45000.0);
+
+        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Product saved = productService.saveProduct(p);
+
+        assertNotNull(saved.getId());
+        assertTrue(saved.getId().startsWith("P-"));
+        assertEquals("Bánh Sừng Bò Yến Mạch", saved.getName());
+        verify(productRepository).save(p);
+    }
+
+    @Test
+    @DisplayName("testUpdateLowStockThreshold: Cập nhật ngưỡng cảnh báo tồn kho thành công")
+    void testUpdateLowStockThreshold() {
+        Product p = new Product("P001", "Biscotti", "Banh", "Mo ta", 50000, "url", "badge");
+        p.setLowStockThreshold(5);
+
+        when(productRepository.findById("P001")).thenReturn(Optional.of(p));
+        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Product updated = productService.updateLowStockThreshold("P001", 12);
+
+        assertEquals(12, updated.getLowStockThreshold());
+        verify(productRepository).save(p);
     }
 }
