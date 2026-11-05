@@ -1,185 +1,114 @@
-# Hebekery
+# 🥐 Tiệm Bánh Dinh Dưỡng Hebekery
 
-Hebekery là website thương mại điện tử cho tiệm bánh healthy, xây dựng bằng Spring Boot, Thymeleaf và MySQL. Project có đầy đủ luồng người dùng mua hàng, quản lý admin, tồn kho, nhập hàng, báo cáo doanh thu và đổi trả đơn hàng.
+[![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-blue?logo=githubactions)](https://github.com)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.x-brightgreen?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Java](https://img.shields.io/badge/Java-17-orange?logo=openjdk)](https://www.oracle.com/java/)
+[![React](https://img.shields.io/badge/React-19-61dafb?logo=react)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-6.x-purple?logo=vite)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.x-38b2ac?logo=tailwindcss)](https://tailwindcss.com/)
+[![Docker](https://img.shields.io/badge/Docker-Compose%20v2-2496ed?logo=docker)](https://www.docker.com/)
+[![Nginx](https://img.shields.io/badge/Nginx-Alpine-green?logo=nginx)](https://nginx.org/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479a1?logo=mysql)](https://www.mysql.com/)
+[![Liquibase](https://img.shields.io/badge/Liquibase-Database%20Migration-red?logo=liquibase)](https://www.liquibase.org/)
 
-## Tính năng chính
+Website thương mại điện tử chuyên cung cấp các dòng bánh, hạt và ngũ cốc dinh dưỡng lành mạnh (Healthy Bakery, Eat Clean, Granola, Biscotti). Hệ thống bao gồm Frontend React 19 SPA, Backend Spring Boot 3.4 RESTful API, tự động hóa thanh toán VietQR SePay và trọn gói triển khai Docker Compose. Dữ liệu sản phẩm và hình ảnh được lưu trữ trực tiếp trên Cloudinary CDN và tự động nạp qua Liquibase Migration.
 
-### Người dùng
+---
 
-- Xem trang chủ, giới thiệu, kiến thức dinh dưỡng, BMI, TDEE và liên hệ.
-- Xem danh sách sản phẩm, lọc theo danh mục, tìm kiếm, phân trang và xem chi tiết sản phẩm.
-- Đăng ký, đăng nhập, đăng xuất, cập nhật hồ sơ và đổi mật khẩu.
-- Giỏ hàng lưu theo tài khoản; giỏ khách được gộp lại sau khi đăng nhập.
-- Thanh toán COD hoặc MoMo test flow.
-- Sổ địa chỉ trong trang profile, có tỉnh/thành, quận/huyện, phường/xã.
-- Theo dõi đơn hàng, xem chi tiết đơn, hủy đơn, xác nhận đã nhận hàng.
-- Yêu cầu đổi trả sau khi đã nhận hàng, kèm lý do bắt buộc.
-- Đánh giá sản phẩm sau khi nhận hàng.
+## 📸 Hình ảnh giao diện thực tế (Screenshots)
 
-### Quản trị viên
+### 1. Trang chủ (Homepage & Bán chạy nhất)
+![Trang chủ Hebekery](docs/screenshots/home.png)
 
-- Dashboard quản trị với thống kê doanh thu, biểu đồ theo thời gian và cảnh báo tồn kho thấp.
-- Quản lý người dùng: tìm kiếm, phân trang, đổi trạng thái, phân quyền và reset mật khẩu khách hàng.
-- Quản lý sản phẩm: thêm, sửa, ẩn sản phẩm, upload ảnh, preview ảnh lớn, tìm kiếm và phân trang.
-- Quản lý đơn hàng: lọc theo trạng thái, ngày, phương thức thanh toán; xem chi tiết, cập nhật vận chuyển, in hóa đơn.
-- Xử lý đổi trả: duyệt hoặc từ chối yêu cầu, ghi chú admin và hoàn kho khi duyệt.
-- Quản lý liên hệ từ khách hàng.
-- Quản lý tồn kho, ngưỡng cảnh báo tồn thấp và lịch sử nhập/xuất/hoàn kho.
-- Lập phiếu nhập nhiều sản phẩm, in phiếu nhập.
-- Báo cáo doanh thu, giá vốn, lợi nhuận, top sản phẩm bán chạy, in báo cáo, export CSV/PDF.
+### 2. Thực đơn bánh dinh dưỡng (Đầy đủ ảnh Cloudinary CDN & Bộ lọc)
+![Thực đơn Bánh Dinh Dưỡng](docs/screenshots/products.png)
 
-## Công nghệ sử dụng
+### 3. Công cụ tính BMI, TDEE & Gợi ý combo thực đơn 7 ngày
+![Công cụ BMI & Combo 7 ngày](docs/screenshots/bmi.png)
 
-- Java 17
-- Spring Boot 4.0.6
-- Spring MVC
-- Spring Data JPA
-- Spring Validation
-- Spring Security
-- Thymeleaf
-- MySQL
-- Flyway Migration
-- OpenPDF
-- Maven Wrapper
+### 4. Tra cứu đơn hàng công khai (Không cần đăng nhập)
+![Tra cứu đơn hàng](docs/screenshots/order-lookup.png)
 
-## Cấu trúc thư mục
+### 5. Tài liệu Swagger OpenAPI tương tác trực tiếp
+![Swagger UI Documentation](docs/screenshots/swagger.png)
 
-```text
-src/main/java/com/example/hebekery
-+-- config          # Cấu hình security, filter, web resource
-+-- controller      # Controller cho user, admin, cart, checkout, order...
-+-- dto             # DTO request/response
-+-- exception       # Global error response
-+-- model           # JPA entity
-+-- repository      # Spring Data repository
-+-- service         # Business logic
+---
 
-src/main/resources
-+-- db/migration    # Flyway migration SQL
-+-- static          # CSS, JS, ảnh tĩnh
-+-- templates       # Thymeleaf templates
-```
+## ⚡ Hướng dẫn khởi chạy nhanh (Quick Start)
 
-## Yêu cầu môi trường
+### Cách 1: Khởi chạy 1 lệnh với Docker Compose (Khuyến nghị)
 
-- JDK 17+
-- MySQL 8+
-- Maven Wrapper đã có sẵn trong project
-
-## Cài đặt và chạy local
-
-1. Clone project:
+Chỉ cần máy bạn đã cài **Docker Desktop**:
 
 ```bash
-git clone <repository-url>
-cd Hebekery
+# 1. Tạo file cấu hình môi trường từ mẫu
+cp .env.example .env
+
+# 2. Khởi chạy toàn bộ hệ thống (MySQL, Backend, Frontend, Nginx Gateway)
+docker compose up -d --build
 ```
 
-2. Tạo database MySQL:
+Sau khi chạy xong, mở trình duyệt truy cập:
+- 🌐 **Website**: [http://localhost](http://localhost)
+- 📑 **Swagger API Docs**: [http://localhost/swagger-ui/index.html](http://localhost/swagger-ui/index.html)
 
-```sql
-CREATE DATABASE hebekery CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
+---
 
-3. Cấu hình biến môi trường.
+### Cách 2: Chạy môi trường phát triển cục bộ (Local Dev)
 
-PowerShell:
+Yêu cầu: **JDK 17+**, **Node.js 22+**, **MySQL 8.0+** (đã tạo database `hebekery`).
 
-```powershell
-$env:DB_URL="jdbc:mysql://localhost:3306/hebekery?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Ho_Chi_Minh"
-$env:DB_USERNAME="root"
-$env:DB_PASSWORD="your_password"
-```
-
-Hoặc cấu hình trực tiếp trong Run Configuration của IDE.
-
-4. Chạy project:
-
-Windows:
-
-```powershell
-.\mvnw.cmd spring-boot:run
-```
-
-macOS/Linux:
-
+**1. Khởi chạy Backend (Spring Boot 3.4)**
 ```bash
-./mvnw spring-boot:run
+./mvnw clean spring-boot:run
 ```
+> Backend chạy tại: `http://localhost:8080` (Tự động nạp dữ liệu mẫu ban đầu qua Liquibase).
 
-5. Mở trình duyệt:
-
-```text
-http://localhost:8080
+**2. Khởi chạy Frontend (React 19 Vite)**
+```bash
+cd web-bakery-frontend
+npm install
+npm run dev
 ```
+> Frontend chạy tại: `http://localhost:5173`.
 
-## Upload ảnh sản phẩm
+---
 
-Ảnh sản phẩm upload từ admin được lưu ở:
+## 👥 Phân quyền vai trò hệ thống (RBAC)
 
-```text
-uploads/products
-```
+Hệ thống thiết kế và kiểm soát phân quyền dựa trên 4 nhóm vai trò:
+- **Quản trị viên (`ADMIN`)**: Quản trị người dùng, sản phẩm, tồn kho, đơn hàng, báo cáo doanh thu.
+- **Nhân viên Sale (`STAFF_SALES`)**: Xử lý duyệt đơn hàng, cập nhật giao hàng, phản hồi liên hệ khách hàng.
+- **Nhân viên Kho (`STAFF_WAREHOUSE`)**: Quản lý sản phẩm, danh mục, kiểm kê số lượng tồn kho.
+- **Khách hàng (`USER`)**: Mua hàng, tính BMI, thanh toán VietQR / COD, đánh giá sản phẩm (đăng ký thành viên trực tiếp qua `/register`).
 
-Project giới hạn file ảnh tối đa 2MB và hỗ trợ các định dạng `jpg`, `jpeg`, `png`, `webp`, `gif`.
+---
 
-## Database migration
+## 💳 Cấu hình SePay Webhook (Thanh toán VietQR)
 
-Project dùng Flyway để quản lý schema. Các file migration nằm trong:
+Khi tạo Webhook trong SePay Dashboard:
+- **Tên Webhook**: Đặt tên bất kỳ gợi nhớ (ví dụ: `Hebekery Webhook Dev`).
+- **URL nhận Webhook**:
+  - *Môi trường Local (dùng ngrok/tunnel)*: `https://<subdomain>.ngrok-free.app/api/payment/sepay/webhook`
+  - *Môi trường Production*: `https://your-domain.com/api/payment/sepay/webhook`
+  - *Test nội bộ (cURL/Postman)*: `http://localhost:8080/api/payment/sepay/webhook`
+- **Xác thực API Key**: Điền API Key của SePay vào biến `SEPAY_WEBHOOK_API_KEY` trong file `.env`.
 
-```text
-src/main/resources/db/migration
-```
+---
 
-Khi database đã chạy một migration, không sửa trực tiếp file migration cũ vì sẽ gây lỗi checksum mismatch. Nếu cần thay đổi schema hoặc dữ liệu, hãy tạo migration mới theo thứ tự version tiếp theo, ví dụ:
+## 🛠️ Công nghệ sử dụng
 
-```text
-V15__your_change_name.sql
-```
+- **Frontend**: React 19, TypeScript, Vite, Tailwind CSS, Lucide Icons, Axios, Vitest.
+- **Backend**: Spring Boot 3.4.x (Java 17), Spring Security 6 (JWT & RBAC), Spring Data JPA, Liquibase.
+- **Media CDN**: Cloudinary CDN lưu trữ ảnh sản phẩm trực tuyến.
+- **Thanh toán**: Tự động đối soát giao dịch VietQR ngân hàng qua Webhook SePay (15 phút).
+- **Hạ tầng**: Docker, Docker Compose (4 containers: MySQL, Backend, Frontend, Nginx Reverse Proxy Gateway).
 
-## Cấu hình quan trọng
+---
 
-File cấu hình chính:
+## 🧪 Kiểm thử tự động (Automated Tests)
 
-```text
-src/main/resources/application.properties
-```
-
-Các cấu hình đang dùng:
-
-- `DB_URL`: đường dẫn MySQL.
-- `DB_USERNAME`: tài khoản MySQL.
-- `DB_PASSWORD`: mật khẩu MySQL.
-- `spring.jpa.hibernate.ddl-auto=validate`: Hibernate chỉ kiểm tra schema, không tự tạo bảng.
-- `spring.flyway.enabled=true`: Flyway tự chạy migration khi khởi động.
-- `spring.servlet.multipart.max-file-size=2MB`: giới hạn upload ảnh.
-
-## Lưu ý trước khi public GitHub
-
-- Không commit mật khẩu database, secret key hoặc thông tin thật của cổng thanh toán.
-- MoMo hiện là test flow phục vụ demo. Nếu muốn triển khai thanh toán thật, nên chuyển toàn bộ cấu hình MoMo sang biến môi trường.
-- Không sửa migration cũ đã chạy trên database.
-- Không commit thư mục `target/`.
-- Nên cân nhắc không commit dữ liệu upload thật trong `uploads/products/` nếu đó là dữ liệu production.
-
-## Một số lỗi thường gặp
-
-### Port 8080 đã được sử dụng
-
-Dừng process đang chiếm port 8080 hoặc đổi `server.port` trong `application.properties`.
-
-### Flyway checksum mismatch
-
-Lỗi này xảy ra khi file migration cũ bị sửa sau khi đã chạy trên database. Cách xử lý đúng là khôi phục file migration cũ và tạo migration mới cho thay đổi tiếp theo.
-
-### Schema validation: missing table
-
-Kiểm tra lại database đã tạo đúng tên, biến môi trường `DB_URL` đã trỏ đúng database và Flyway đã chạy migration thành công.
-
-### AccessDeniedException khi compile/package
-
-Nếu app đang chạy hoặc IDE đang giữ file trong `target/`, hãy dừng ứng dụng rồi chạy lại lệnh Maven.
-
-## Trạng thái project
-
-Project phù hợp để demo hoặc phát triển tiếp thành website bán hàng hoàn chỉnh. Các phần nên gia cố trước khi production gồm: bảo mật role-based đầy đủ, tách secret sang environment variables, kiểm thử tự động, logging/audit, hardening CSRF/session và cấu hình deploy.
+- **Backend**: 107/107 JUnit 5 & MockMvc tests Passed (100%).
+- **Frontend**: 12/12 Vitest tests Passed (100%).
+- **CI/CD**: Tự động kiểm thử qua GitHub Actions trên mỗi lần đẩy mã nguồn.

@@ -10,12 +10,11 @@ export const Footer: React.FC = () => {
           {/* Col 1: Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-[#47654c] text-white flex items-center justify-center font-bold">
-                H
-              </div>
-              <span className="font-extrabold text-lg uppercase tracking-wider text-[#1c1917]">
-                Hebekery
-              </span>
+              <img
+                src="/images/logo.webp"
+                alt="Hebekery"
+                className="h-8 w-auto object-contain"
+              />
             </div>
             <p className="text-xs leading-relaxed text-[#78716c]">
               Tiệm bánh dinh dưỡng, bánh ăn kiêng và ngũ cốc sấy giòn thủ công. Chăm chút từng chiếc bánh với tình yêu sức khỏe và nguyên liệu tự nhiên nguyên bản.

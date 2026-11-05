@@ -35,7 +35,10 @@ services:
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
-      SEPAY_API_KEY: ${SEPAY_API_KEY:-}
+      SEPAY_WEBHOOK_API_KEY: ${SEPAY_WEBHOOK_API_KEY:-sepay_secret_key_12345}
+      SEPAY_ACCOUNT_NUMBER: ${SEPAY_ACCOUNT_NUMBER:-0987654321}
+      SEPAY_BANK_CODE: ${SEPAY_BANK_CODE:-MBBank}
+      SEPAY_ACCOUNT_HOLDER: ${SEPAY_ACCOUNT_HOLDER:-TIEM BANH HEBEKERY}
     ports:
       - "8080:8080"
     networks:
@@ -47,8 +50,6 @@ services:
       dockerfile: Dockerfile
     container_name: hebekery_frontend
     restart: always
-    volumes:
-      - frontend_dist:/usr/share/nginx/html
     networks:
       - hebekery_net
 
@@ -63,13 +64,11 @@ services:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - frontend_dist:/usr/share/nginx/html:ro
     networks:
       - hebekery_net
 
 volumes:
   mysql_data:
-  frontend_dist:
 
 networks:
   hebekery_net:

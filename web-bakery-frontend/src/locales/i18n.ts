@@ -12,12 +12,13 @@ i18n
       vi: { translation: vi },
       en: { translation: en },
     },
+    lng: 'vi',
     fallbackLng: 'vi',
     interpolation: {
       escapeValue: false,
     },
     detection: {
-      order: ['localStorage', 'navigator'],
+      order: ['localStorage'],
       caches: ['localStorage'],
     },
   })

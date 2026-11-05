@@ -1,3 +1,4 @@
+const unwrap = <T>(res: any): T => res.data?.data ?? res.data;
 import { axiosClient } from './axiosClient'
 import type {
   User,
@@ -31,15 +32,15 @@ import type {
 export const authApi = {
   login: async (data: LoginRequest): Promise<AuthResponse> => {
     const res = await axiosClient.post<AuthResponse>('/auth/login', data)
-    return res.data
+    return unwrap(res)
   },
   register: async (data: RegisterRequest): Promise<User> => {
     const res = await axiosClient.post<User>('/auth/register', data)
-    return res.data
+    return unwrap(res)
   },
   me: async (): Promise<User> => {
     const res = await axiosClient.get<User>('/auth/me')
-    return res.data
+    return unwrap(res)
   },
 }
 
@@ -53,41 +54,41 @@ export const productApi = {
     activeOnly?: boolean
   }): Promise<PageResponse<Product>> => {
     const res = await axiosClient.get<PageResponse<Product>>('/products', { params })
-    return res.data
+    return unwrap(res)
   },
   getProductById: async (id: string): Promise<Product> => {
     const res = await axiosClient.get<Product>(`/products/${id}`)
-    return res.data
+    return unwrap(res)
   },
   getCategories: async (): Promise<Category[]> => {
     const res = await axiosClient.get<Category[]>('/categories')
-    return res.data
+    return unwrap(res)
   },
   createProduct: async (data: Partial<Product>): Promise<Product> => {
     const res = await axiosClient.post<Product>('/admin/products', data)
-    return res.data
+    return unwrap(res)
   },
   updateProduct: async (id: string, data: Partial<Product>): Promise<Product> => {
     const res = await axiosClient.put<Product>(`/admin/products/${id}`, data)
-    return res.data
+    return unwrap(res)
   },
   deleteProduct: async (id: string): Promise<void> => {
     await axiosClient.delete(`/admin/products/${id}`)
   },
   adminCreateProduct: async (data: Partial<Product>): Promise<Product> => {
     const res = await axiosClient.post<Product>('/admin/products', data)
-    return res.data
+    return unwrap(res)
   },
   adminUpdateProduct: async (id: string, data: Partial<Product>): Promise<Product> => {
     const res = await axiosClient.put<Product>(`/admin/products/${id}`, data)
-    return res.data
+    return unwrap(res)
   },
   adminDeleteProduct: async (id: string): Promise<void> => {
     await axiosClient.delete(`/admin/products/${id}`)
   },
   adminCreateCategory: async (data: Partial<Category>): Promise<Category> => {
     const res = await axiosClient.post<Category>('/admin/categories', data)
-    return res.data
+    return unwrap(res)
   },
 }
 
@@ -95,7 +96,7 @@ export const productApi = {
 export const categoryApi = {
   getCategories: async (): Promise<Category[]> => {
     const res = await axiosClient.get<Category[]>('/categories')
-    return res.data
+    return unwrap(res)
   },
 }
 
@@ -103,26 +104,26 @@ export const categoryApi = {
 export const cartApi = {
   getCart: async (): Promise<CartResponse> => {
     const res = await axiosClient.get<CartResponse>('/cart')
-    return res.data
+    return unwrap(res)
   },
   addToCart: async (productId: string, quantity = 1): Promise<CartResponse> => {
     const res = await axiosClient.post<CartResponse>('/cart/add', { productId, quantity })
-    return res.data
+    return unwrap(res)
   },
   updateQuantity: async (productId: string, quantity: number): Promise<CartResponse> => {
     const res = await axiosClient.put<CartResponse>(`/cart/items/${productId}`, { quantity })
-    return res.data
+    return unwrap(res)
   },
   removeFromCart: async (productId: string): Promise<CartResponse> => {
     const res = await axiosClient.delete<CartResponse>(`/cart/items/${productId}`)
-    return res.data
+    return unwrap(res)
   },
   clearCart: async (): Promise<void> => {
     await axiosClient.delete('/cart')
   },
   syncCart: async (items: CartItem[]): Promise<CartResponse> => {
     const res = await axiosClient.post<CartResponse>('/cart/sync', items)
-    return res.data
+    return unwrap(res)
   },
 }
 
@@ -130,33 +131,33 @@ export const cartApi = {
 export const orderApi = {
   createOrder: async (data: CheckoutRequest): Promise<Order> => {
     const res = await axiosClient.post<Order>('/orders', data)
-    return res.data
+    return unwrap(res)
   },
   getMyOrders: async (): Promise<Order[]> => {
     const res = await axiosClient.get<Order[]>('/orders/my-orders')
-    return res.data
+    return unwrap(res)
   },
   getOrderById: async (id: string): Promise<Order> => {
     const res = await axiosClient.get<Order>(`/orders/${id}`)
-    return res.data
+    return unwrap(res)
   },
   cancelOrder: async (id: string, reason: string): Promise<Order> => {
     const res = await axiosClient.post<Order>(`/orders/${id}/cancel`, { reason })
-    return res.data
+    return unwrap(res)
   },
   requestReturn: async (id: string, reason: string): Promise<Order> => {
     const res = await axiosClient.post<Order>(`/orders/${id}/return`, { reason })
-    return res.data
+    return unwrap(res)
   },
   confirmReceived: async (id: string): Promise<Order> => {
     const res = await axiosClient.put<Order>(`/orders/${id}/received`)
-    return res.data
+    return unwrap(res)
   },
   trackOrders: async (params: { orderId?: string; phone?: string }): Promise<Order[]> => {
     const res = await axiosClient.get<{ success: boolean; data: Order[] }>('/orders/track', {
       params,
     })
-    return res.data?.data ?? (res.data as unknown as Order[])
+    return unwrap(res)
   },
   adminSearchOrders: async (params?: {
     keyword?: string
@@ -166,7 +167,7 @@ export const orderApi = {
     size?: number
   }): Promise<PageResponse<Order>> => {
     const res = await axiosClient.get<PageResponse<Order>>('/admin/orders', { params })
-    return res.data
+    return unwrap(res)
   },
   adminUpdateStatus: async (
     id: string,
@@ -179,7 +180,7 @@ export const orderApi = {
       shippingCarrier: carrier,
       trackingCode,
     })
-    return res.data
+    return unwrap(res)
   },
   adminReviewReturn: async (
     id: string,
@@ -190,7 +191,7 @@ export const orderApi = {
       decision,
       adminNote,
     })
-    return res.data
+    return unwrap(res)
   },
 }
 
@@ -202,26 +203,26 @@ export const adminUserApi = {
     size?: number
   }): Promise<PageResponse<User>> => {
     const res = await axiosClient.get<PageResponse<User>>('/admin/users', { params })
-    return res.data
+    return unwrap(res)
   },
   getUserById: async (id: string): Promise<User> => {
     const res = await axiosClient.get<User>(`/admin/users/${id}`)
-    return res.data
+    return unwrap(res)
   },
   updateUserRole: async (id: string, role: UserRole): Promise<User> => {
     const res = await axiosClient.put<User>(`/admin/users/${id}/role`, { role })
-    return res.data
+    return unwrap(res)
   },
   updateUserStatus: async (id: string, active: boolean): Promise<User> => {
     const res = await axiosClient.patch<User>(`/admin/users/${id}/status`, { active })
-    return res.data
+    return unwrap(res)
   },
   resetPassword: async (id: string, newPassword?: string): Promise<User> => {
     const res = await axiosClient.post<User>(
       `/admin/users/${id}/reset-password`,
       newPassword ? { newPassword } : {}
     )
-    return res.data
+    return unwrap(res)
   },
 }
 
@@ -233,17 +234,17 @@ export const adminInventoryApi = {
     size?: number
   }): Promise<PageResponse<Product>> => {
     const res = await axiosClient.get<PageResponse<Product>>('/admin/inventory', { params })
-    return res.data
+    return unwrap(res)
   },
   updateThreshold: async (id: string, threshold: number): Promise<Product> => {
     const res = await axiosClient.put<Product>(`/admin/inventory/${id}/threshold`, { threshold })
-    return res.data
+    return unwrap(res)
   },
   createPurchaseReceipt: async (
     data: PurchaseReceiptBatchRequest
   ): Promise<PurchaseReceipt[]> => {
     const res = await axiosClient.post<PurchaseReceipt[]>('/admin/inventory/receipts', data)
-    return res.data
+    return unwrap(res)
   },
   getPurchaseReceipts: async (params?: {
     keyword?: string
@@ -255,13 +256,13 @@ export const adminInventoryApi = {
     const res = await axiosClient.get<PageResponse<PurchaseReceipt>>('/admin/inventory/receipts', {
       params,
     })
-    return res.data
+    return unwrap(res)
   },
   getReceiptDetails: async (receiptCode: string): Promise<PurchaseReceipt[]> => {
     const res = await axiosClient.get<PurchaseReceipt[]>(
       `/admin/inventory/receipts/${receiptCode}`
     )
-    return res.data
+    return unwrap(res)
   },
 }
 
@@ -272,28 +273,28 @@ export const adminReportApi = {
     to?: string
   }): Promise<RevenueReportResponse> => {
     const res = await axiosClient.get<RevenueReportResponse>('/admin/reports/revenue', { params })
-    return res.data
+    return unwrap(res)
   },
   getTopSelling: async (params?: {
     from?: string
     to?: string
   }): Promise<TopSellingProduct[]> => {
     const res = await axiosClient.get<TopSellingProduct[]>('/admin/reports/top-selling', { params })
-    return res.data
+    return unwrap(res)
   },
   downloadPdf: async (from?: string, to?: string): Promise<Blob> => {
     const res = await axiosClient.get('/admin/reports/export-pdf', {
       params: { from, to },
       responseType: 'blob',
     })
-    return res.data
+    return unwrap(res)
   },
   downloadCsv: async (from?: string, to?: string): Promise<string> => {
     const res = await axiosClient.get('/admin/reports/export-csv', {
       params: { from, to },
       responseType: 'text',
     })
-    return res.data
+    return unwrap(res)
   },
 }
 
@@ -305,11 +306,11 @@ export const adminContactApi = {
     size?: number
   }): Promise<PageResponse<ContactMessage>> => {
     const res = await axiosClient.get<PageResponse<ContactMessage>>('/admin/contacts', { params })
-    return res.data
+    return unwrap(res)
   },
   updateStatus: async (id: string, status: 'RESOLVED' | 'SPAM'): Promise<ContactMessage> => {
     const res = await axiosClient.patch<ContactMessage>(`/admin/contacts/${id}/status`, { status })
-    return res.data
+    return unwrap(res)
   },
 }
 
@@ -317,15 +318,15 @@ export const adminContactApi = {
 export const addressApi = {
   getAddresses: async (): Promise<Address[]> => {
     const res = await axiosClient.get<{ success: boolean; data: Address[] }>('/addresses')
-    return res.data?.data ?? (res.data as unknown as Address[])
+    return unwrap(res)
   },
   createAddress: async (data: AddressRequest): Promise<Address> => {
     const res = await axiosClient.post<{ success: boolean; data: Address }>('/addresses', data)
-    return res.data?.data ?? (res.data as unknown as Address)
+    return unwrap(res)
   },
   updateAddress: async (id: string, data: AddressRequest): Promise<Address> => {
     const res = await axiosClient.put<{ success: boolean; data: Address }>(`/addresses/${id}`, data)
-    return res.data?.data ?? (res.data as unknown as Address)
+    return unwrap(res)
   },
   deleteAddress: async (id: string): Promise<void> => {
     await axiosClient.delete(`/addresses/${id}`)
@@ -338,14 +339,14 @@ export const reviewApi = {
     const res = await axiosClient.get<{ success: boolean; data: ProductReviewSummary }>(
       `/products/${productId}/reviews`
     )
-    return res.data?.data ?? (res.data as unknown as ProductReviewSummary)
+    return unwrap(res)
   },
   submitReview: async (productId: string, data: ProductReviewRequest): Promise<ProductReview> => {
     const res = await axiosClient.post<{ success: boolean; data: ProductReview }>(
       `/products/${productId}/reviews`,
       data
     )
-    return res.data?.data ?? (res.data as unknown as ProductReview)
+    return unwrap(res)
   },
   deleteReview: async (reviewId: string): Promise<void> => {
     await axiosClient.delete(`/products/reviews/${reviewId}`)
@@ -358,7 +359,7 @@ export const paymentApi = {
     const res = await axiosClient.get<{ success: boolean; data: PaymentStatus }>(
       `/payment/sepay/orders/${orderId}/status`
     )
-    return res.data?.data ?? (res.data as unknown as PaymentStatus)
+    return unwrap(res)
   },
 }
 
@@ -372,7 +373,7 @@ export const uploadApi = {
         'Content-Type': 'multipart/form-data',
       },
     })
-    return res.data
+    return unwrap(res)
   },
 }
 
@@ -380,6 +381,6 @@ export const uploadApi = {
 export const contactApi = {
   submitContact: async (data: ContactSubmitRequest): Promise<ContactMessage> => {
     const res = await axiosClient.post<{ success: boolean; data: ContactMessage }>('/contact', data)
-    return res.data?.data ?? (res.data as unknown as ContactMessage)
+    return unwrap(res)
   },
 }
