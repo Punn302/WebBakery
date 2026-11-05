@@ -19,6 +19,7 @@ import { AboutPage } from '@/features/pages/AboutPage'
 import { ContactPage } from '@/features/pages/ContactPage'
 import { CheckoutPage } from '@/features/checkout/CheckoutPage'
 import { OrderTrackingPage } from '@/features/orders/OrderTrackingPage'
+import { PublicOrderLookupPage } from '@/features/orders/PublicOrderLookupPage'
 
 // Auth Pages
 import { LoginPage } from '@/features/auth/LoginPage'
@@ -69,6 +70,7 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/bmi-tdee" element={<BmiCalculatorPage />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />
+                <Route path="/tracking" element={<PublicOrderLookupPage />} />
 
                 {/* User Protected Routes */}
                 <Route

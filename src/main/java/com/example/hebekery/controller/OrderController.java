@@ -78,7 +78,7 @@ public class OrderController {
     }
 
     @Operation(summary = "Xác nhận đã nhận hàng", description = "Khách hàng bấm xác nhận khi đã nhận được kiện hàng", security = @SecurityRequirement(name = "BearerAuth"))
-    @PostMapping({"/api/user/orders/{id}/received", "/api/orders/{id}/received"})
+    @RequestMapping(value = {"/api/user/orders/{id}/received", "/api/orders/{id}/received"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST, org.springframework.web.bind.annotation.RequestMethod.PUT})
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<OrderDetailResponse>> received(
             @Parameter(description = "Mã định danh đơn hàng") @PathVariable String id) {
