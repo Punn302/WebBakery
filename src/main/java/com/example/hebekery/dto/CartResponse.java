@@ -1,12 +1,20 @@
 package com.example.hebekery.dto;
 
 import com.example.hebekery.model.CartItem;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
+@Schema(description = "Phản hồi dữ liệu giỏ hàng")
 public class CartResponse {
+
+    @Schema(description = "Danh sách các mặt hàng trong giỏ")
     private List<CartItem> items;
+
+    @Schema(description = "Tổng giá trị đơn hàng trong giỏ (VNĐ)", example = "130000.0")
     private double totalPrice;
+
+    @Schema(description = "Tổng số lượng sản phẩm trong giỏ", example = "2")
     private int cartCount;
 
     public CartResponse() {

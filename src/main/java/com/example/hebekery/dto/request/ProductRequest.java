@@ -1,34 +1,56 @@
 package com.example.hebekery.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
+@Schema(description = "Yêu cầu tạo mới hoặc cập nhật sản phẩm")
 public class ProductRequest {
+
+    @Schema(description = "Mã SKU hoặc định danh sản phẩm (bắt buộc khi tạo mới)", example = "P018")
     private String id;
 
+    @Schema(description = "Tên sản phẩm bánh", example = "Bánh Mì Lúa Mạch Đen Men Tự Nhiên")
     @NotBlank(message = "Tên sản phẩm không được để trống")
     private String name;
 
+    @Schema(description = "ID danh mục sản phẩm", example = "1")
     private Long categoryId;
+
+    @Schema(description = "Tên danh mục sản phẩm (tương thích ngược)", example = "Bánh Mì Healthy")
     private String category;
 
+    @Schema(description = "Mô tả sản phẩm, thành phần dinh dưỡng và công dụng", example = "Bánh mì sourdough lúa mạch đen lên men chậm...")
     private String description;
 
+    @Schema(description = "Giá bán niêm yết (VNĐ)", example = "75000.0")
     @Min(value = 0, message = "Giá sản phẩm phải lớn hơn hoặc bằng 0")
     private double price;
 
+    @Schema(description = "Đường dẫn ảnh Cloudinary", example = "https://res.cloudinary.com/hebekery/image/upload/v1/products/sourdough.jpg")
     private String imageUrl;
+
+    @Schema(description = "Huy hiệu hiển thị (Mới, Bán chạy, Giảm giá)", example = "Mới")
     private String badge;
+
+    @Schema(description = "Thẻ phân loại phụ", example = "Sourdough")
     private String tag;
 
+    @Schema(description = "Số lượng tồn kho ban đầu", example = "50")
     @Min(value = 0, message = "Số lượng tồn kho không được âm")
     private int stockQuantity;
 
+    @Schema(description = "Ngưỡng cảnh báo sắp hết hàng", example = "5")
     @Min(value = 0, message = "Ngưỡng cảnh báo sắp hết hàng không được âm")
     private int lowStockThreshold = 5;
 
+    @Schema(description = "Giá vốn bình quân ban đầu (WAC)", example = "40000.0")
     private double averageCost;
+
+    @Schema(description = "Trạng thái kinh doanh", example = "true")
     private boolean active = true;
+
+    @Schema(description = "Hiển thị ở mục nổi bật trang chủ", example = "false")
     private Boolean isFeatured = false;
 
     public ProductRequest() {
@@ -138,19 +160,11 @@ public class ProductRequest {
         this.active = active;
     }
 
-    public Boolean getIsFeatured() {
+    public Boolean getFeatured() {
         return isFeatured;
     }
 
-    public void setIsFeatured(Boolean featured) {
-        isFeatured = featured;
-    }
-
-    public boolean isFeatured() {
-        return isFeatured != null && isFeatured;
-    }
-
-    public void setFeatured(boolean featured) {
+    public void setFeatured(Boolean featured) {
         isFeatured = featured;
     }
 }

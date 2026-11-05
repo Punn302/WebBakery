@@ -1,10 +1,23 @@
 package com.example.hebekery.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Phản hồi xác thực người dùng sau khi đăng nhập thành công")
 public class AuthResponse {
+
+    @Schema(description = "JSON Web Token (JWT) dùng cho các request tiếp theo", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
     private String accessToken;
+
+    @Schema(description = "Refresh token để cấp mới access token khi hết hạn", example = "d9f8e7d6-c5b4-4a3b-8c2d-1e0f9a8b7c6d")
     private String refreshToken;
+
+    @Schema(description = "Loại token xác thực", example = "Bearer")
     private String tokenType = "Bearer";
+
+    @Schema(description = "Thời gian hết hạn của token (tính bằng giây)", example = "86400")
     private long expiresIn;
+
+    @Schema(description = "Thông tin hồ sơ người dùng đã đăng nhập")
     private UserResponse user;
 
     public AuthResponse() {

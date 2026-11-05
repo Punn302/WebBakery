@@ -1,23 +1,30 @@
 package com.example.hebekery.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+@Schema(description = "Yêu cầu đăng ký tài khoản khách hàng mới")
 public class RegisterRequest {
-    @NotBlank(message = "Email khong duoc de trong")
-    @Email(message = "Email khong hop le")
+
+    @Schema(description = "Địa chỉ email đăng ký", example = "khachmoi@gmail.com")
+    @NotBlank(message = "Email không được để trống")
+    @Email(message = "Email không hợp lệ")
     private String email;
 
-    @NotBlank(message = "Mat khau khong duoc de trong")
-    @Size(min = 6, message = "Mat khau phai co it nhat 6 ky tu")
+    @Schema(description = "Mật khẩu bảo mật (tối thiểu 6 ký tự)", example = "matkhau123")
+    @NotBlank(message = "Mật khẩu không được để trống")
+    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
     private String password;
 
-    @NotBlank(message = "Ho ten khong duoc de trong")
+    @Schema(description = "Họ và tên khách hàng", example = "Trần Thị Mai")
+    @NotBlank(message = "Họ tên không được để trống")
     private String name;
 
-    @Pattern(regexp = "^$|^[0-9]{10,11}$", message = "So dien thoai khong hop le")
+    @Schema(description = "Số điện thoại liên lạc", example = "0912345678")
+    @Pattern(regexp = "^$|^[0-9]{10,11}$", message = "Số điện thoại không hợp lệ")
     private String phone;
 
     public String getEmail() {

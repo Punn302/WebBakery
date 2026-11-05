@@ -1,14 +1,30 @@
 package com.example.hebekery.dto;
 
 import com.example.hebekery.model.User;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(description = "Thông tin chi tiết người dùng")
 public class UserResponse {
+
+    @Schema(description = "Mã định danh người dùng", example = "USR-001")
     private String id;
+
+    @Schema(description = "Địa chỉ email đăng nhập", example = "khachhang@hebekery.vn")
     private String email;
+
+    @Schema(description = "Họ và tên người dùng", example = "Nguyễn Văn A")
     private String name;
+
+    @Schema(description = "Số điện thoại liên lạc", example = "0987654321")
     private String phone;
+
+    @Schema(description = "Vai trò người dùng trong hệ thống (ADMIN, STAFF_WAREHOUSE, STAFF_SALES, USER)", example = "USER")
     private String role;
+
+    @Schema(description = "Trạng thái hoạt động của tài khoản", example = "true")
     private boolean active;
+
+    @Schema(description = "Yêu cầu bắt buộc đổi mật khẩu khi đăng nhập lần đầu", example = "false")
     private boolean forcePasswordChange;
 
     public UserResponse() {

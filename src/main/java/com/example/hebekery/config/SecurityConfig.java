@@ -88,6 +88,7 @@ public class SecurityConfig {
                         // Public APIs
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/contact/**").permitAll()
                         .requestMatchers("/api/payment/sepay/webhook").permitAll()
                         // Staff & Warehouse APIs

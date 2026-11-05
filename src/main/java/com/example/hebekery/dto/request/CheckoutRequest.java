@@ -1,23 +1,31 @@
 package com.example.hebekery.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
+@Schema(description = "Thông tin đặt hàng và thanh toán")
 public class CheckoutRequest {
-    @NotBlank(message = "Ho ten khong duoc de trong")
+
+    @Schema(description = "Họ tên người nhận hàng", example = "Nguyễn Văn A")
+    @NotBlank(message = "Họ tên không được để trống")
     private String customerName;
 
-    @NotBlank(message = "So dien thoai khong duoc de trong")
-    @Pattern(regexp = "^[0-9]{10,11}$", message = "So dien thoai khong hop le")
+    @Schema(description = "Số điện thoại nhận hàng", example = "0987654321")
+    @NotBlank(message = "Số điện thoại không được để trống")
+    @Pattern(regexp = "^[0-9]{10,11}$", message = "Số điện thoại không hợp lệ")
     private String phone;
 
-    @NotBlank(message = "Dia chi khong duoc de trong")
+    @Schema(description = "Địa chỉ chi tiết nhận hàng", example = "123 Đường Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh")
+    @NotBlank(message = "Địa chỉ không được để trống")
     private String address;
 
+    @Schema(description = "Ghi chú giao hàng", example = "Giao vào giờ hành chính")
     private String note;
 
-    @NotBlank(message = "Phuong thuc thanh toan khong duoc de trong")
-    @Pattern(regexp = "COD|MOMO", message = "Phuong thuc thanh toan khong hop le")
+    @Schema(description = "Phương thức thanh toán (COD, MOMO, SEPAY)", example = "COD")
+    @NotBlank(message = "Phương thức thanh toán không được để trống")
+    @Pattern(regexp = "COD|MOMO|SEPAY", message = "Phương thức thanh toán không hợp lệ (hỗ trợ: COD, MOMO, SEPAY)")
     private String paymentMethod;
 
     public String getCustomerName() {
