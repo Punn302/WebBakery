@@ -1,0 +1,366 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-seed-users
+      author: hebekery
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: id, value: "1" }
+              - column: { name: email, value: "user@hebekery.vn" }
+              - column: { name: password, value: "$2a$10$RlU6BD08cNC2xYeP8tCPcez/.AsMLr8ZEvYG7ElLmgJXf/V0RpF/y" }
+              - column: { name: name, value: "Nguyễn Văn A" }
+              - column: { name: phone, value: "0912345678" }
+              - column: { name: role, value: "USER" }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: force_password_change, valueBoolean: false }
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: id, value: "2" }
+              - column: { name: email, value: "admin@hebekery.vn" }
+              - column: { name: password, value: "$2a$10$bzfUhajG9qnA6vKL3VlfFeRbEBhTc93Pb.9Wm1L9GZ2fFkgrxSVOm" }
+              - column: { name: name, value: "Admin Hebekery" }
+              - column: { name: phone, value: "0987654321" }
+              - column: { name: role, value: "ADMIN" }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: force_password_change, valueBoolean: false }
+
+  - changeSet:
+      id: 004-seed-categories
+      author: hebekery
+      changes:
+        - insert:
+            tableName: categories
+            columns:
+              - column: { name: id, valueNumeric: 1 }
+              - column: { name: name, value: "Ngũ cốc & Granola" }
+              - column: { name: slug, value: "ngu-coc-granola" }
+              - column: { name: description, value: "Các sản phẩm ngũ cốc và Granola dinh dưỡng sấy giòn tự nhiên" }
+              - column: { name: active, valueBoolean: true }
+        - insert:
+            tableName: categories
+            columns:
+              - column: { name: id, valueNumeric: 2 }
+              - column: { name: name, value: "Bánh ăn kiêng" }
+              - column: { name: slug, value: "banh-an-kieng" }
+              - column: { name: description, value: "Bánh biscotti, bánh hạt dinh dưỡng ít calo, không đường tinh luyện" }
+              - column: { name: active, valueBoolean: true }
+        - insert:
+            tableName: categories
+            columns:
+              - column: { name: id, valueNumeric: 3 }
+              - column: { name: name, value: "Snack healthy" }
+              - column: { name: slug, value: "snack-healthy" }
+              - column: { name: description, value: "Các loại hạt rang mộc, thanh hạt năng lượng và trái cây sấy dẻo" }
+              - column: { name: active, valueBoolean: true }
+        - insert:
+            tableName: categories
+            columns:
+              - column: { name: id, valueNumeric: 4 }
+              - column: { name: name, value: "Thực phẩm bổ sung" }
+              - column: { name: slug, value: "thuc-pham-bo-sung" }
+              - column: { name: description, value: "Bột rau củ quả hữu cơ, protein thực vật và hạt siêu dinh dưỡng" }
+              - column: { name: active, valueBoolean: true }
+        - insert:
+            tableName: categories
+            columns:
+              - column: { name: id, valueNumeric: 5 }
+              - column: { name: name, value: "Combo quà tặng" }
+              - column: { name: slug, value: "combo-qua-tang" }
+              - column: { name: description, value: "Hộp quà sức khỏe tinh tế, ý nghĩa cho người thân và đối tác" }
+              - column: { name: active, valueBoolean: true }
+
+  - changeSet:
+      id: 004-seed-products
+      author: hebekery
+      changes:
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P001" }
+              - column: { name: name, value: "Granola Truyền Thống" }
+              - column: { name: category, value: "Ngũ cốc & Granola" }
+              - column: { name: category_id, valueNumeric: 1 }
+              - column: { name: description, value: "Granola yến mạch, mật ong, hạt điều, hạnh nhân" }
+              - column: { name: price, valueNumeric: 219000 }
+              - column: { name: image_url, value: "/images/granola-traditional.jpg" }
+              - column: { name: badge, value: "Bán chạy" }
+              - column: { name: tag, value: "Ăn sáng" }
+              - column: { name: stock_quantity, valueNumeric: 100 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 150000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: true }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P002" }
+              - column: { name: name, value: "Granola Chocolate" }
+              - column: { name: category, value: "Ngũ cốc & Granola" }
+              - column: { name: category_id, valueNumeric: 1 }
+              - column: { name: description, value: "Granola vị chocolate đậm đà" }
+              - column: { name: price, valueNumeric: 239000 }
+              - column: { name: image_url, value: "/images/granola-choco.jpg" }
+              - column: { name: badge, value: "Hot" }
+              - column: { name: tag, value: "Mới" }
+              - column: { name: stock_quantity, valueNumeric: 80 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 160000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: false }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P003" }
+              - column: { name: name, value: "Granola Matcha" }
+              - column: { name: category, value: "Ngũ cốc & Granola" }
+              - column: { name: category_id, valueNumeric: 1 }
+              - column: { name: description, value: "Granola matcha Nhật Bản" }
+              - column: { name: price, valueNumeric: 249000 }
+              - column: { name: image_url, value: "/images/granola-matcha.jpeg" }
+              - column: { name: badge, value: "Cao cấp" }
+              - column: { name: tag, value: "Trà xanh" }
+              - column: { name: stock_quantity, valueNumeric: 75 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 170000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: false }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P004" }
+              - column: { name: name, value: "Bánh Biscotti Ý" }
+              - column: { name: category, value: "Bánh ăn kiêng" }
+              - column: { name: category_id, valueNumeric: 2 }
+              - column: { name: description, value: "Bánh quy giòn low-carb" }
+              - column: { name: price, valueNumeric: 180000 }
+              - column: { name: image_url, value: "/images/biscotti.jpg" }
+              - column: { name: badge, value: "Thủ công" }
+              - column: { name: tag, value: "Ít carb" }
+              - column: { name: stock_quantity, valueNumeric: 90 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 120000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: true }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P005" }
+              - column: { name: name, value: "Bánh Keto Cookies" }
+              - column: { name: category, value: "Bánh ăn kiêng" }
+              - column: { name: category_id, valueNumeric: 2 }
+              - column: { name: description, value: "Cookies không đường, giàu chất xơ" }
+              - column: { name: price, valueNumeric: 160000 }
+              - column: { name: image_url, value: "/images/keto-cookies.jpg" }
+              - column: { name: badge, value: "Paleo Friendly" }
+              - column: { name: tag, value: "Low-carb" }
+              - column: { name: stock_quantity, valueNumeric: 60 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 110000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: true }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P006" }
+              - column: { name: name, value: "Bánh Hạnh Nhân" }
+              - column: { name: category, value: "Bánh ăn kiêng" }
+              - column: { name: category_id, valueNumeric: 2 }
+              - column: { name: description, value: "Bánh hạnh nhân nguyên cám" }
+              - column: { name: price, valueNumeric: 189000 }
+              - column: { name: image_url, value: "/images/almond-cookies.jpg" }
+              - column: { name: badge, value: "Mới" }
+              - column: { name: tag, value: "Protein" }
+              - column: { name: stock_quantity, valueNumeric: 85 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 130000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: false }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P007" }
+              - column: { name: name, value: "Bánh Matcha Hạnh Nhân" }
+              - column: { name: category, value: "Bánh ăn kiêng" }
+              - column: { name: category_id, valueNumeric: 2 }
+              - column: { name: description, value: "Bánh hạnh nhân matcha" }
+              - column: { name: price, valueNumeric: 199000 }
+              - column: { name: image_url, value: "/images/matcha-almond.jpg" }
+              - column: { name: badge, value: "Giới hạn" }
+              - column: { name: tag, value: "Trà xanh" }
+              - column: { name: stock_quantity, valueNumeric: 50 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 140000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: false }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P008" }
+              - column: { name: name, value: "Thanh Yến Mạch Hữu Cơ" }
+              - column: { name: category, value: "Snack healthy" }
+              - column: { name: category_id, valueNumeric: 3 }
+              - column: { name: description, value: "Thanh yến mạch mật ong hạt chia" }
+              - column: { name: price, valueNumeric: 220000 }
+              - column: { name: image_url, value: "/images/oat-bars.jpg" }
+              - column: { name: badge, value: "Dinh dưỡng" }
+              - column: { name: tag, value: "Năng lượng" }
+              - column: { name: stock_quantity, valueNumeric: 120 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 150000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: true }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P009" }
+              - column: { name: name, value: "Trái Cây Sấy Tổng Hợp" }
+              - column: { name: category, value: "Snack healthy" }
+              - column: { name: category_id, valueNumeric: 3 }
+              - column: { name: description, value: "Trái cây sấy giòn tự nhiên" }
+              - column: { name: price, valueNumeric: 159000 }
+              - column: { name: image_url, value: "/images/dried-fruit.jpg" }
+              - column: { name: badge, value: "Tự nhiên" }
+              - column: { name: tag, value: "Thuần chay" }
+              - column: { name: stock_quantity, valueNumeric: 95 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 100000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: false }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P010" }
+              - column: { name: name, value: "Hạt Điều Rang Muối" }
+              - column: { name: category, value: "Snack healthy" }
+              - column: { name: category_id, valueNumeric: 3 }
+              - column: { name: description, value: "Hạt điều cao cấp rang muối" }
+              - column: { name: price, valueNumeric: 149000 }
+              - column: { name: image_url, value: "/images/cashew.jpg" }
+              - column: { name: badge, value: "Bán chạy" }
+              - column: { name: tag, value: "Protein" }
+              - column: { name: stock_quantity, valueNumeric: 110 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 95000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: false }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P011" }
+              - column: { name: name, value: "Hạnh Nhân Sấy Mật Ong" }
+              - column: { name: category, value: "Snack healthy" }
+              - column: { name: category_id, valueNumeric: 3 }
+              - column: { name: description, value: "Hạnh nhân sấy mật ong" }
+              - column: { name: price, valueNumeric: 169000 }
+              - column: { name: image_url, value: "/images/almond-honey.jpg" }
+              - column: { name: badge, value: "Mới" }
+              - column: { name: tag, value: "Năng lượng" }
+              - column: { name: stock_quantity, valueNumeric: 70 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 115000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: false }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P012" }
+              - column: { name: name, value: "Bột Matcha Nguyên Chất" }
+              - column: { name: category, value: "Thực phẩm bổ sung" }
+              - column: { name: category_id, valueNumeric: 4 }
+              - column: { name: description, value: "Bột matcha Nhật Bản nguyên chất" }
+              - column: { name: price, valueNumeric: 299000 }
+              - column: { name: image_url, value: "/images/matcha-powder.jpg" }
+              - column: { name: badge, value: "Cao cấp" }
+              - column: { name: tag, value: "Chống oxy hóa" }
+              - column: { name: stock_quantity, valueNumeric: 40 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 200000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: false }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P013" }
+              - column: { name: name, value: "Hạt Chia Hữu Cơ" }
+              - column: { name: category, value: "Thực phẩm bổ sung" }
+              - column: { name: category_id, valueNumeric: 4 }
+              - column: { name: description, value: "Hạt chia giàu omega-3" }
+              - column: { name: price, valueNumeric: 129000 }
+              - column: { name: image_url, value: "/images/chia-seed.jpg" }
+              - column: { name: badge, value: "Hữu cơ" }
+              - column: { name: tag, value: "Siêu thực phẩm" }
+              - column: { name: stock_quantity, valueNumeric: 85 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 85000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: false }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P014" }
+              - column: { name: name, value: "Thanh Protein Thực Vật" }
+              - column: { name: category, value: "Thực phẩm bổ sung" }
+              - column: { name: category_id, valueNumeric: 4 }
+              - column: { name: description, value: "Thanh protein thực vật bổ sung năng lượng" }
+              - column: { name: price, valueNumeric: 189000 }
+              - column: { name: image_url, value: "/images/protein-bar.jpg" }
+              - column: { name: badge, value: "Fitness" }
+              - column: { name: tag, value: "20g protein" }
+              - column: { name: stock_quantity, valueNumeric: 65 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 125000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: false }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P015" }
+              - column: { name: name, value: "Combo Detox 7 Ngày" }
+              - column: { name: category, value: "Combo quà tặng" }
+              - column: { name: category_id, valueNumeric: 5 }
+              - column: { name: description, value: "Bộ sản phẩm detox 7 ngày" }
+              - column: { name: price, valueNumeric: 850000 }
+              - column: { name: image_url, value: "/images/detox-combo.jpg" }
+              - column: { name: badge, value: "Bán chạy" }
+              - column: { name: tag, value: "Detox" }
+              - column: { name: stock_quantity, valueNumeric: 30 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 580000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: false }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P016" }
+              - column: { name: name, value: "Combo Ăn Sáng Lành Mạnh" }
+              - column: { name: category, value: "Combo quà tặng" }
+              - column: { name: category_id, valueNumeric: 5 }
+              - column: { name: description, value: "Granola, yến mạch, mật ong, hạt chia" }
+              - column: { name: price, valueNumeric: 450000 }
+              - column: { name: image_url, value: "/images/breakfast-combo.jpg" }
+              - column: { name: badge, value: "Tiết kiệm" }
+              - column: { name: tag, value: "Quà tặng" }
+              - column: { name: stock_quantity, valueNumeric: 45 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 310000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: false }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P017" }
+              - column: { name: name, value: "Combo Quà Tết Healthy" }
+              - column: { name: category, value: "Combo quà tặng" }
+              - column: { name: category_id, valueNumeric: 5 }
+              - column: { name: description, value: "Set sản phẩm cao cấp tốt cho sức khỏe" }
+              - column: { name: price, valueNumeric: 599000 }
+              - column: { name: image_url, value: "/images/lunar-combo.jpg" }
+              - column: { name: badge, value: "Giới hạn" }
+              - column: { name: tag, value: "Tết" }
+              - column: { name: stock_quantity, valueNumeric: 25 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 410000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: false }

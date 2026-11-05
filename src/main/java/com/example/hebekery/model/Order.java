@@ -1,8 +1,5 @@
 package com.example.hebekery.model;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,32 +8,46 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "orders")
-public class Order {
+public class Order extends BaseEntity {
     @Id
     private String id;
+
+    @Column(name = "order_code", length = 64)
+    private String orderCode;
+
     private String userId;
     private String customerName;
     private String phone;
+
     @Column(length = 1000)
     private String address;
+
     @Column(length = 1000)
     private String note;
+
     private String paymentMethod;
     private String paymentStatus;
     private String orderStatus;
     private String shippingCarrier;
     private String trackingCode;
+
     @Column(length = 1000)
     private String returnReason;
+
     private String returnStatus;
+
     @Column(length = 1000)
     private String adminNote;
+
     private double total;
-    private LocalDateTime createdAt;
     private boolean inventoryDeducted;
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<OrderItem> items = new ArrayList<>();
 
     public String getId() {
@@ -45,6 +56,14 @@ public class Order {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getOrderCode() {
+        return orderCode;
+    }
+
+    public void setOrderCode(String orderCode) {
+        this.orderCode = orderCode;
     }
 
     public String getUserId() {
@@ -151,20 +170,16 @@ public class Order {
         this.adminNote = adminNote;
     }
 
+    public double total() {
+        return total;
+    }
+
     public double getTotal() {
         return total;
     }
 
     public void setTotal(double total) {
         this.total = total;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 
     public boolean isInventoryDeducted() {

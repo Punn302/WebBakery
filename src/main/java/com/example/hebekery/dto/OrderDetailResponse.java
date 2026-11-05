@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 public class OrderDetailResponse {
     private String id;
+    private String orderCode;
     private String userId;
     private String customerName;
     private String phone;
@@ -35,6 +36,7 @@ public class OrderDetailResponse {
         }
         OrderDetailResponse dto = new OrderDetailResponse();
         dto.setId(order.getId());
+        dto.setOrderCode(order.getOrderCode() != null ? order.getOrderCode() : order.getId());
         dto.setUserId(order.getUserId());
         dto.setCustomerName(order.getCustomerName());
         dto.setPhone(order.getPhone());
@@ -69,6 +71,14 @@ public class OrderDetailResponse {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getOrderCode() {
+        return orderCode;
+    }
+
+    public void setOrderCode(String orderCode) {
+        this.orderCode = orderCode;
     }
 
     public String getUserId() {

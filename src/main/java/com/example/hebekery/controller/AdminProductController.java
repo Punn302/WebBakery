@@ -3,7 +3,9 @@ package com.example.hebekery.controller;
 import com.example.hebekery.dto.ApiResponse;
 import com.example.hebekery.dto.ProductResponse;
 import com.example.hebekery.dto.request.ProductRequest;
+import com.example.hebekery.model.Category;
 import com.example.hebekery.model.Product;
+import com.example.hebekery.service.CategoryService;
 import com.example.hebekery.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -32,9 +34,11 @@ import java.util.Map;
 public class AdminProductController {
 
     private final ProductService productService;
+    private final CategoryService categoryService;
 
-    public AdminProductController(ProductService productService) {
+    public AdminProductController(ProductService productService, CategoryService categoryService) {
         this.productService = productService;
+        this.categoryService = categoryService;
     }
 
     @GetMapping
@@ -62,7 +66,10 @@ public class AdminProductController {
     public ResponseEntity<ApiResponse<ProductResponse>> createProduct(@Valid @RequestBody ProductRequest request) {
         Product product = new Product();
         product.setName(request.getName());
-        product.setCategory(request.getCategory());
+
+        Category category = resolveCategory(request);
+        product.setCategory(category);
+
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
         product.setImageUrl(request.getImageUrl());
@@ -72,6 +79,7 @@ public class AdminProductController {
         product.setLowStockThreshold(request.getLowStockThreshold());
         product.setAverageCost(request.getAverageCost());
         product.setActive(request.isActive());
+        product.setFeatured(request.isFeatured());
 
         Product saved = productService.saveProduct(product);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -89,7 +97,12 @@ public class AdminProductController {
         }
 
         existing.setName(request.getName());
-        existing.setCategory(request.getCategory());
+
+        Category category = resolveCategory(request);
+        if (category != null) {
+            existing.setCategory(category);
+        }
+
         existing.setDescription(request.getDescription());
         existing.setPrice(request.getPrice());
         if (request.getImageUrl() != null && !request.getImageUrl().isBlank()) {
@@ -103,13 +116,13 @@ public class AdminProductController {
         }
         existing.setLowStockThreshold(request.getLowStockThreshold());
         existing.setActive(request.isActive());
+        existing.setFeatured(request.isFeatured());
 
         Product updated = productService.saveProduct(existing);
         return ResponseEntity.ok(ApiResponse.success("Cập nhật thông tin sản phẩm thành công", ProductResponse.from(updated)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable String id) {
         boolean deleted = productService.deleteProduct(id);
         if (!deleted) {
@@ -119,24 +132,37 @@ public class AdminProductController {
         return ResponseEntity.ok(ApiResponse.success("Xóa sản phẩm thành công", null));
     }
 
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<ApiResponse<ProductResponse>> toggleProductStatus(
+    @PatchMapping("/{id}/threshold")
+    public ResponseEntity<ApiResponse<ProductResponse>> updateThreshold(
             @PathVariable String id,
-            @RequestBody Map<String, Boolean> payload) {
-        Product existing = productService.getProductById(id);
-        if (existing == null) {
+            @RequestBody Map<String, Integer> payload) {
+        Integer threshold = payload.get("threshold");
+        if (threshold == null || threshold < 0) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.failure("Ngưỡng cảnh báo phải là số nguyên >= 0"));
+        }
+        try {
+            Product updated = productService.updateLowStockThreshold(id, threshold);
+            return ResponseEntity.ok(ApiResponse.success("Cập nhật ngưỡng cảnh báo thành công", ProductResponse.from(updated)));
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.failure("Không tìm thấy sản phẩm"));
+                    .body(ApiResponse.failure(e.getMessage()));
         }
+    }
 
-        Boolean active = payload.get("active");
-        if (active == null) {
-            return ResponseEntity.badRequest().body(ApiResponse.failure("Trạng thái active không được để trống"));
+    private Category resolveCategory(ProductRequest request) {
+        if (categoryService == null) {
+            return null;
         }
-
-        existing.setActive(active);
-        Product updated = productService.saveProduct(existing);
-        String msg = active ? "Kích hoạt kinh doanh sản phẩm thành công" : "Ẩn sản phẩm thành công";
-        return ResponseEntity.ok(ApiResponse.success(msg, ProductResponse.from(updated)));
+        if (request.getCategoryId() != null) {
+            Category cat = categoryService.getCategoryEntityById(request.getCategoryId());
+            if (cat != null) {
+                return cat;
+            }
+        }
+        if (request.getCategory() != null && !request.getCategory().isBlank()) {
+            return categoryService.getOrCreateCategoryByName(request.getCategory().trim());
+        }
+        return null;
     }
 }

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "inventory_transactions")
-public class InventoryTransaction {
+public class InventoryTransaction extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,7 +25,6 @@ public class InventoryTransaction {
     private String referenceId;
     @Column(length = 1000)
     private String note;
-    private LocalDateTime createdAt;
 
     public InventoryTransaction() {
     }
@@ -41,7 +40,7 @@ public class InventoryTransaction {
         this.referenceType = referenceType;
         this.referenceId = referenceId;
         this.note = note;
-        this.createdAt = LocalDateTime.now();
+        setCreatedAt(LocalDateTime.now());
     }
 
     public Long getId() { return id; }
@@ -64,6 +63,4 @@ public class InventoryTransaction {
     public void setReferenceId(String referenceId) { this.referenceId = referenceId; }
     public String getNote() { return note; }
     public void setNote(String note) { this.note = note; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

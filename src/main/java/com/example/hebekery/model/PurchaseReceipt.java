@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "purchase_receipts")
-public class PurchaseReceipt {
+public class PurchaseReceipt extends BaseEntity {
     @Id
     private String id;
     private String receiptCode;
@@ -69,7 +69,6 @@ public class PurchaseReceipt {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
-        this.totalCost = this.unitCost * quantity;
     }
 
     public double getUnitCost() {
@@ -78,7 +77,6 @@ public class PurchaseReceipt {
 
     public void setUnitCost(double unitCost) {
         this.unitCost = unitCost;
-        this.totalCost = unitCost * this.quantity;
     }
 
     public double getTotalCost() {

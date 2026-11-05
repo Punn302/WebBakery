@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changes/001-initial-schema.yaml
+  - include:
+      file: db/changelog/changes/002-add-categories-table.yaml
+  - include:
+      file: db/changelog/changes/003-add-auditing-columns.yaml
+  - include:
+      file: db/changelog/changes/004-seed-initial-data.yaml

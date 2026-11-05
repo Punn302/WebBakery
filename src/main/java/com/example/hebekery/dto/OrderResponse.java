@@ -2,6 +2,7 @@ package com.example.hebekery.dto;
 
 public class OrderResponse {
     private String id;
+    private String orderCode;
     private String date;
     private String statusClass;
     private String statusText;
@@ -17,6 +18,7 @@ public class OrderResponse {
 
     public OrderResponse(String id, String date, String statusClass, String statusText, int itemCount, double total) {
         this.id = id;
+        this.orderCode = id;
         this.date = date;
         this.statusClass = statusClass;
         this.statusText = statusText;
@@ -27,6 +29,7 @@ public class OrderResponse {
     public OrderResponse(String id, String date, String statusClass, String statusText, String orderStatus,
                          String paymentStatus, String imageUrl, String productName, int itemCount, double total) {
         this.id = id;
+        this.orderCode = id;
         this.date = date;
         this.statusClass = statusClass;
         this.statusText = statusText;
@@ -44,6 +47,14 @@ public class OrderResponse {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getOrderCode() {
+        return orderCode;
+    }
+
+    public void setOrderCode(String orderCode) {
+        this.orderCode = orderCode;
     }
 
     public String getDate() {

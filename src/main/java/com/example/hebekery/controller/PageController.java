@@ -87,7 +87,7 @@ public class PageController {
         }
 
         model.addAttribute("product", product);
-        model.addAttribute("relatedProducts", productService.getRelatedProducts(id, product.getCategory()));
+        model.addAttribute("relatedProducts", productService.getRelatedProducts(id, product.getCategoryName()));
         model.addAttribute("reviews", productReviewService.getReviews(id));
         model.addAttribute("canReview", productReviewService.canReview(id, userService.getCurrentUser()));
         model.addAttribute("myReview", userService.isLoggedIn()
