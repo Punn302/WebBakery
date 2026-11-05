@@ -1,0 +1,82 @@
+name: Hebekery Full-Stack CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # ==========================================================
+  # Job 1: Backend CI (Spring Boot 3.x / Java 17 / MySQL)
+  # ==========================================================
+  backend-ci:
+    name: Backend Tests & Build
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: hebekery
+          MYSQL_ROOT_PASSWORD: root_password
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17 (Eclipse Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run Backend Tests & JaCoCo Coverage
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/hebekery?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Ho_Chi_Minh
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: root_password
+          JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+          SEPAY_API_KEY: sepay_test_api_key_12345
+        run: mvn clean test -B
+
+  # ==========================================================
+  # Job 2: Frontend CI (React 19 / TypeScript / Vitest / Vite)
+  # ==========================================================
+  frontend-ci:
+    name: Frontend Tests & Production Build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: web-bakery-frontend
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: web-bakery-frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: TypeScript Type Checking
+        run: npx tsc -b
+
+      - name: Oxlint Linter
+        run: npm run lint
+
+      - name: Run Vitest Unit Tests
+        run: npm run test
+
+      - name: Run Vite Production Build
+        run: npm run build

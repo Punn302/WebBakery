@@ -330,12 +330,12 @@ graph TD
 
 > **Mục tiêu**: Đóng gói toàn bộ ứng dụng thành kiến trúc container khép kín; Nginx đóng vai trò Reverse Proxy toàn năng phục vụ cả Frontend React SPA và Backend REST API; sẵn sàng chạy production chỉ với 1 câu lệnh `docker compose up -d`.
 
-- [ ] **Task D.1: Xây dựng Dockerfile cho Frontend (`web-bakery-frontend/Dockerfile`)**
+- [x] **Task D.1: Xây dựng Dockerfile cho Frontend (`web-bakery-frontend/Dockerfile`)**
   - Sử dụng Multi-stage build tối ưu kích thước:
-    - *Stage 1 (Builder)*: Dùng `node:20-alpine`, cài dependencies, chạy `npm run build` sinh thư mục `dist/`.
+    - *Stage 1 (Builder)*: Dùng `node:22-alpine`, cài dependencies, chạy `npm run build` sinh thư mục `dist/`.
     - *Stage 2 (Production Server)*: Dùng `nginx:alpine`, copy bản build từ Stage 1 vào `/usr/share/nginx/html`.
 
-- [ ] **Task D.2: Cấu hình `nginx.conf` Hợp Nhất Hệ Thống (Unified Gateway)**
+- [x] **Task D.2: Cấu hình `nginx.conf` Hợp Nhất Hệ Thống (Unified Gateway)**
   - **File cập nhật**: `nginx.conf`
   - **Cấu hình định tuyến**:
     1. Gốc `/`: Phục vụ các file tĩnh của Frontend React SPA với cơ chế định tuyến client:
@@ -349,18 +349,18 @@ graph TD
     3. Tài liệu API `/swagger-ui/` và `/v3/api-docs`: Chuyển tiếp sang Backend để đội ngũ dev kiểm thử trực tiếp trên cổng 80.
     4. Giới hạn tải lên `client_max_body_size 25M` để hỗ trợ upload ảnh phân giải cao.
 
-- [ ] **Task D.3: Cập nhật `docker-compose.yml` Đầy Đủ 4 Dịch Vụ**
+- [x] **Task D.3: Cập nhật `docker-compose.yml` Đầy Đủ 4 Dịch Vụ**
   - **Services gồm**:
     1. `mysql`: MySQL 8.0, cấu hình healthcheck, volume lưu trữ dữ liệu bền vững.
     2. `backend`: Spring Boot 3.x, phụ thuộc `mysql` (chờ healthy), nạp biến môi trường từ `.env`.
     3. `frontend`: Build tự động từ thư mục `web-bakery-frontend`.
     4. `nginx`: Cổng 80 duy nhất ra bên ngoài, kết nối cả frontend tĩnh và backend API.
 
-- [ ] **Task D.4: Thiết lập CI/CD GitHub Actions Workflow**
+- [x] **Task D.4: Thiết lập CI/CD GitHub Actions Workflow**
   - **File tạo mới**: `.github/workflows/ci-cd.yml`
   - **Nhiệm vụ tự động chạy trên mọi PR vào `main`**:
     1. Backend: Cài đặt JDK 17, khởi động MySQL service container, chạy Liquibase migration và chạy toàn bộ kiểm thử `mvn clean test` (JaCoCo report).
-    2. Frontend: Cài đặt Node.js 20, kiểm tra kiểu `npx tsc --noEmit`, chạy linter và chạy toàn bộ bài kiểm thử `npm run test` (Vitest).
+    2. Frontend: Cài đặt Node.js 22, kiểm tra kiểu `npx tsc --noEmit`, chạy linter và chạy toàn bộ bài kiểm thử `npm run test` (Vitest).
 
 ---
 
