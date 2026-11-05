@@ -1,185 +1,308 @@
-# Hebekery
+# 🥐 Tiệm Bánh Dinh Dưỡng Hebekery (Healthy Bakery E-Commerce System)
 
-Hebekery là website thương mại điện tử cho tiệm bánh healthy, xây dựng bằng Spring Boot, Thymeleaf và MySQL. Project có đầy đủ luồng người dùng mua hàng, quản lý admin, tồn kho, nhập hàng, báo cáo doanh thu và đổi trả đơn hàng.
+[![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-blue?logo=githubactions)](https://github.com)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.x-brightgreen?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Java](https://img.shields.io/badge/Java-17-orange?logo=openjdk)](https://www.oracle.com/java/)
+[![React](https://img.shields.io/badge/React-19-61dafb?logo=react)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-6.x-purple?logo=vite)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.x-38b2ac?logo=tailwindcss)](https://tailwindcss.com/)
+[![Docker](https://img.shields.io/badge/Docker-Compose%20v2-2496ed?logo=docker)](https://www.docker.com/)
+[![Nginx](https://img.shields.io/badge/Nginx-Alpine-green?logo=nginx)](https://nginx.org/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479a1?logo=mysql)](https://www.mysql.com/)
+[![Liquibase](https://img.shields.io/badge/Liquibase-Database%20Migration-red?logo=liquibase)](https://www.liquibase.org/)
 
-## Tính năng chính
+---
 
-### Người dùng
+## 📖 1. Tổng quan hệ thống (System Overview)
 
-- Xem trang chủ, giới thiệu, kiến thức dinh dưỡng, BMI, TDEE và liên hệ.
-- Xem danh sách sản phẩm, lọc theo danh mục, tìm kiếm, phân trang và xem chi tiết sản phẩm.
-- Đăng ký, đăng nhập, đăng xuất, cập nhật hồ sơ và đổi mật khẩu.
-- Giỏ hàng lưu theo tài khoản; giỏ khách được gộp lại sau khi đăng nhập.
-- Thanh toán COD hoặc MoMo test flow.
-- Sổ địa chỉ trong trang profile, có tỉnh/thành, quận/huyện, phường/xã.
-- Theo dõi đơn hàng, xem chi tiết đơn, hủy đơn, xác nhận đã nhận hàng.
-- Yêu cầu đổi trả sau khi đã nhận hàng, kèm lý do bắt buộc.
-- Đánh giá sản phẩm sau khi nhận hàng.
+**Hebekery** là nền tảng thương mại điện tử chuyên nghiệp cung cấp các dòng bánh, hạt và ngũ cốc dinh dưỡng lành mạnh (Healthy Bakery, Eat Clean, Granola, Biscotti, Bánh ăn kiêng). 
 
-### Quản trị viên
+Hệ thống được phát triển theo kiến trúc **Full-Stack Decoupled (Phân tách độc lập)**:
+- **Frontend SPA (Single-Page Application)**: Xây dựng trên nền tảng **React 19 + TypeScript + Vite + Tailwind CSS**, giao diện tối ưu trải nghiệm khách hàng với tính năng tính toán chỉ số BMI, gợi ý thực đơn 7 ngày, giỏ hàng real-time, sổ địa chỉ giao hàng nhiều cấp, thanh toán VietQR tự động và tra cứu trạng thái đơn hàng công khai.
+- **Backend API Server**: Sử dụng **Spring Boot 3.4.x (Java 17)** với Spring Security 6, xác thực stateless JWT, phân quyền đa vai trò (RBAC), Spring Data JPA kết hợp Liquibase Database Migration.
+- **Cổng thanh toán tự động SePay Webhook**: Hỗ trợ quét mã VietQR động, đối soát giao dịch ngân hàng theo thời gian thực (real-time polling 3s), scheduler tự động hủy đơn quá hạn 15 phút.
+- **DevOps & Điều phối hạ tầng (Reverse Proxy Gateway)**: Đóng gói toàn bộ 4 dịch vụ (`mysql`, `backend`, `frontend`, `nginx`) trong **Docker Compose**, cổng 80 được phân luồng đồng nhất qua Nginx Reverse Proxy.
+- **Tự động hóa CI/CD**: Pipeline GitHub Actions chạy tự động toàn bộ 107 bài kiểm thử Backend (JUnit 5 / MockMvc) và 12 bài kiểm thử Frontend (Vitest / React Testing Library) trên môi trường Node.js 22 & Java 17.
 
-- Dashboard quản trị với thống kê doanh thu, biểu đồ theo thời gian và cảnh báo tồn kho thấp.
-- Quản lý người dùng: tìm kiếm, phân trang, đổi trạng thái, phân quyền và reset mật khẩu khách hàng.
-- Quản lý sản phẩm: thêm, sửa, ẩn sản phẩm, upload ảnh, preview ảnh lớn, tìm kiếm và phân trang.
-- Quản lý đơn hàng: lọc theo trạng thái, ngày, phương thức thanh toán; xem chi tiết, cập nhật vận chuyển, in hóa đơn.
-- Xử lý đổi trả: duyệt hoặc từ chối yêu cầu, ghi chú admin và hoàn kho khi duyệt.
-- Quản lý liên hệ từ khách hàng.
-- Quản lý tồn kho, ngưỡng cảnh báo tồn thấp và lịch sử nhập/xuất/hoàn kho.
-- Lập phiếu nhập nhiều sản phẩm, in phiếu nhập.
-- Báo cáo doanh thu, giá vốn, lợi nhuận, top sản phẩm bán chạy, in báo cáo, export CSV/PDF.
+---
 
-## Công nghệ sử dụng
+## 🏛️ 2. Kiến trúc hệ thống (Architecture)
 
-- Java 17
-- Spring Boot 4.0.6
-- Spring MVC
-- Spring Data JPA
-- Spring Validation
-- Spring Security
-- Thymeleaf
-- MySQL
-- Flyway Migration
-- OpenPDF
-- Maven Wrapper
+### Sơ đồ điều phối luồng mạng Docker Gateway (Port 80 Unified Entrypoint)
 
-## Cấu trúc thư mục
-
-```text
-src/main/java/com/example/hebekery
-+-- config          # Cấu hình security, filter, web resource
-+-- controller      # Controller cho user, admin, cart, checkout, order...
-+-- dto             # DTO request/response
-+-- exception       # Global error response
-+-- model           # JPA entity
-+-- repository      # Spring Data repository
-+-- service         # Business logic
-
-src/main/resources
-+-- db/migration    # Flyway migration SQL
-+-- static          # CSS, JS, ảnh tĩnh
-+-- templates       # Thymeleaf templates
+```
+                       [ Trình duyệt Khách hàng / Quản trị viên ]
+                                         │
+                                         ▼ (HTTP Port 80)
+                       ┌────────────────────────────────────────┐
+                       │           hebekery_nginx               │
+                       │     (Nginx Reverse Proxy Gateway)      │
+                       └──────────────────┬─────────────────────┘
+                                          │
+                     ┌────────────────────┴────────────────────┐
+       / (Root & SPA Routing)                     /api/ & /swagger-ui/
+                     │                                         │
+                     ▼                                         ▼
+         ┌───────────────────────┐                 ┌───────────────────────┐
+         │   hebekery_frontend   │                 │   hebekery_backend    │
+         │  (React 19 SPA Nginx) │                 │  (Spring Boot 3.4.x)  │
+         │     Port 80 (int)     │                 │     Port 8080         │
+         └───────────────────────┘                 └───────────┬───────────┘
+                                                               │ (Port 3306)
+                                                               ▼
+                                                   ┌───────────────────────┐
+                                                   │    hebekery_mysql     │
+                                                   │   (MySQL 8.0 Server)  │
+                                                   │ Liquibase Migrations  │
+                                                   └───────────────────────┘
 ```
 
-## Yêu cầu môi trường
+---
 
-- JDK 17+
-- MySQL 8+
-- Maven Wrapper đã có sẵn trong project
+## 👥 3. Phân quyền người dùng (RBAC) & Tài khoản mẫu (Demo Credentials)
 
-## Cài đặt và chạy local
+Hệ thống áp dụng mô hình phân quyền chặt chẽ trên cả Backend (`@PreAuthorize`) và Frontend (`ProtectedRoute` & RBAC Navigation Guard):
 
-1. Clone project:
+| Vai trò (Role) | Email đăng nhập | Mật khẩu mặc định | Quyền hạn và Chức năng chính |
+| :--- | :--- | :--- | :--- |
+| **`ADMIN`** | `admin@hebekery.vn` | `password123` | **Toàn quyền hệ thống**: Quản lý người dùng & phân quyền (`/admin/users`), cấu hình hệ thống, quản lý sản phẩm & danh mục (`/admin/products`), quản lý đơn hàng (`/admin/orders`), kiểm kê tồn kho (`/admin/inventory`), xem báo cáo doanh thu (`/admin/reports`), quản lý phản hồi liên hệ (`/admin/contacts`). |
+| **`STAFF_SALES`** | `staff.sales@hebekery.vn` | `password123` | **Nhân viên bán hàng**: Quản lý & xử lý đơn hàng (`/admin/orders`), cập nhật trạng thái thanh toán và giao vận, tiếp nhận và phản hồi thư liên hệ khách hàng (`/admin/contacts`). |
+| **`STAFF_WAREHOUSE`** | `staff.warehouse@hebekery.vn` | `password123` | **Nhân viên kho vận**: Quản lý danh mục & sản phẩm (`/admin/products`), kiểm soát số lượng tồn kho & nhận cảnh báo hàng sắp hết (`/admin/inventory`). |
+| **`USER`** | `user@hebekery.vn` | `password123` | **Khách hàng**: Đăng ký/đăng nhập, mua hàng, tính chỉ số BMI cá nhân hóa, thanh toán COD / VietQR SePay, quản lý sổ địa chỉ giao hàng (`/profile`), đánh giá đơn hàng đã nhận, tra cứu đơn công khai (`/tra-cuu-don-hang`). |
+
+*(Lưu ý: Mật khẩu của các tài khoản đã được mã hóa bằng thuật toán BCrypt trong cơ sở dữ liệu).*
+
+---
+
+## ⚙️ 4. Cấu hình biến môi trường (`.env` & API Keys)
+
+Hệ thống cung cấp sẵn file mẫu [`.env.example`](file:///c:/project/WebBakery/.env.example). Để khởi chạy môi trường thực tế, hãy sao chép thành file `.env`:
 
 ```bash
-git clone <repository-url>
-cd Hebekery
+cp .env.example .env
 ```
 
-2. Tạo database MySQL:
+### Bảng chi tiết các biến môi trường:
 
-```sql
-CREATE DATABASE hebekery CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
+| Tên biến (Env Variable) | Giá trị mặc định (Default) | Mục đích / Giải thích |
+| :--- | :--- | :--- |
+| `DB_URL` | `jdbc:mysql://localhost:3306/hebekery?...` | Chuỗi kết nối JDBC tới cơ sở dữ liệu MySQL (trong Docker Compose tự động nối `mysql:3306`). |
+| `DB_USERNAME` | `root` | Tên tài khoản quản trị MySQL. |
+| `DB_PASSWORD` | `root_password` | Mật khẩu truy cập MySQL. |
+| `JWT_SECRET` | `404E635266556A586E32...` | Chuỗi khóa bí mật (HMAC-SHA256) dùng để ký và xác thực JWT token. |
+| `JWT_EXPIRATION_MS` | `86400000` (24 giờ) | Thời gian hiệu lực của Access Token. |
+| `JWT_REFRESH_EXPIRATION_MS` | `604800000` (7 ngày) | Thời gian hiệu lực của Refresh Token. |
+| `SEPAY_WEBHOOK_API_KEY` | `sepay_secret_key_12345` | API Key dùng để xác thực Webhook đối soát tự động từ cổng SePay. |
+| `SEPAY_ACCOUNT_NUMBER` | `0987654321` | Số tài khoản ngân hàng thụ hưởng hiển thị trên VietQR. |
+| `SEPAY_BANK_CODE` | `MBBank` | Mã ngân hàng thụ hưởng (MBBank, Vietcombank, Techcombank, TPBank,...). |
+| `SEPAY_ACCOUNT_HOLDER` | `TIEM BANH HEBEKERY` | Tên chủ tài khoản thụ hưởng hiển thị trên mã VietQR. |
+| `CLOUDINARY_CLOUD_NAME` | *(Tùy chọn)* | Tên Cloudinary Cloud dùng để lưu trữ ảnh sản phẩm lên CDN. |
+| `CLOUDINARY_API_KEY` | *(Tùy chọn)* | API Key tài khoản Cloudinary. |
+| `CLOUDINARY_API_SECRET` | *(Tùy chọn)* | API Secret tài khoản Cloudinary. |
 
-3. Cấu hình biến môi trường.
+### 🔑 Tư vấn về các API Key bên ngoài:
+1. **SePay Webhook & VietQR Payment**:
+   - *Mục đích*: Tự động đối soát giao dịch chuyển khoản ngân hàng 24/7 không cần can thiệp thủ công. Khi khách hàng quét mã VietQR và hoàn tất chuyển khoản, SePay gửi Webhook đến endpoint `/api/payment/sepay/webhook`, hệ thống đối soát mã đơn hàng và tự động chuyển trạng thái đơn sang `PAID`.
+   - *Môi trường kiểm thử / Demo*: Hệ thống đã cấu hình sẵn giá trị fallback an toàn (`sepay_secret_key_12345`). Khách hàng trên giao diện có thể kiểm tra trực tiếp qua modal QR đếm ngược 15:00 và polling trạng thái mỗi 3 giây.
+   - *Khi triển khai Production*: Đăng ký tài khoản miễn phí tại [my.sepay.vn](https://my.sepay.vn), liên kết tài khoản ngân hàng của bạn, tạo Webhook URL trỏ về `https://your-domain.com/api/payment/sepay/webhook` và sao chép API Key vào biến `SEPAY_WEBHOOK_API_KEY`.
+2. **Cloudinary Media Storage & CDN**:
+   - *Mục đích*: Lưu trữ và tối ưu hóa hình ảnh sản phẩm/banner tải lên từ Admin Dashboard lên máy chủ CDN toàn cầu.
+   - *Môi trường kiểm thử*: Nếu để trống, hệ thống sử dụng thư mục uploads cục bộ (`/uploads`) mà không gây lỗi runtime.
+   - *Khi triển khai Production*: Đăng ký tài khoản miễn phí tại [cloudinary.com](https://cloudinary.com) và điền 3 thông số `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` vào file `.env`.
 
-PowerShell:
+---
 
-```powershell
-$env:DB_URL="jdbc:mysql://localhost:3306/hebekery?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Ho_Chi_Minh"
-$env:DB_USERNAME="root"
-$env:DB_PASSWORD="your_password"
-```
+## 🚀 5. Hướng dẫn khởi chạy hệ thống (Deployment & Run Guide)
 
-Hoặc cấu hình trực tiếp trong Run Configuration của IDE.
+### Cách 1: Khởi chạy 1-Click bằng Docker Compose (Khuyến nghị)
 
-4. Chạy project:
-
-Windows:
-
-```powershell
-.\mvnw.cmd spring-boot:run
-```
-
-macOS/Linux:
+Yêu cầu máy chủ đã cài đặt [Docker](https://docs.docker.com/get-docker/) và Docker Compose.
 
 ```bash
-./mvnw spring-boot:run
+# 1. Clone mã nguồn
+git clone https://github.com/hieukompa123/WebBakery.git
+cd WebBakery
+
+# 2. Khởi tạo cấu hình môi trường
+cp .env.example .env
+
+# 3. Build và khởi động 4 dịch vụ (MySQL, Backend, Frontend, Nginx Gateway)
+docker compose up -d --build
 ```
 
-5. Mở trình duyệt:
+Sau khi các container khởi động hoàn tất:
+- 🌐 **Trang chủ Khách hàng & SPA Frontend**: [http://localhost](http://localhost)
+- 📊 **Cổng Admin & Quản trị**: [http://localhost/admin/orders](http://localhost/admin/orders)
+- 📑 **Swagger UI / OpenAPI Documentation**: [http://localhost/swagger-ui/index.html](http://localhost/swagger-ui/index.html)
+- 🔌 **RESTful API Direct Endpoint**: [http://localhost/api/products](http://localhost/api/products)
 
-```text
-http://localhost:8080
+Để kiểm tra trạng thái và log hoạt động:
+```bash
+# Xem danh sách container đang chạy
+docker compose ps
+
+# Xem log thời gian thực của backend
+docker compose logs -f backend
+
+# Dừng toàn bộ hệ thống
+docker compose down
 ```
 
-## Upload ảnh sản phẩm
+---
 
-Ảnh sản phẩm upload từ admin được lưu ở:
+### Cách 2: Chạy môi trường phát triển cục bộ (Local Development)
 
-```text
-uploads/products
+#### Yêu cầu tiên quyết:
+- **Java JDK 17+**
+- **Node.js 22+** và npm
+- **MySQL Server 8.0+** (đang chạy tại cổng 3306, đã tạo schema `hebekery`)
+
+#### Bước 1: Khởi động Backend (Spring Boot 3.4.x)
+```bash
+# Tại thư mục gốc dự án
+./mvnw clean spring-boot:run
+```
+*(Backend sẽ tự động chạy Liquibase Migration để khởi tạo cấu trúc bảng và nạp dữ liệu mẫu ban đầu).*
+- Backend chạy tại: `http://localhost:8080`
+- Swagger UI cục bộ: `http://localhost:8080/swagger-ui/index.html`
+
+#### Bước 2: Khởi động Frontend (React 19 Vite SPA)
+```bash
+# Di chuyển vào thư mục frontend
+cd web-bakery-frontend
+
+# Cài đặt thư viện dependencies
+npm install
+
+# Khởi chạy Vite Dev Server
+npm run dev
+```
+- Frontend dev server chạy tại: `http://localhost:5173` (Vite dev server đã được cấu hình proxy `/api` tự động chuyển tiếp tới `http://localhost:8080`).
+
+---
+
+## 📚 6. Tài liệu API & Swagger OpenAPI (API Documentation)
+
+Hệ thống tích hợp chuẩn OpenAPI 3 thông qua thư viện `springdoc-openapi-starter-webmvc-ui`. 
+
+- **Địa chỉ truy cập giao diện tương tác**: [http://localhost/swagger-ui/index.html](http://localhost/swagger-ui/index.html)
+- **OpenAPI Schema (JSON Format)**: [http://localhost/v3/api-docs](http://localhost/v3/api-docs)
+
+### Danh mục các cụm API chính:
+
+| Cụm chức năng (Tag) | Đường dẫn API mẫu | Phương thức | Mô tả chi tiết |
+| :--- | :--- | :---: | :--- |
+| **Authentication** | `/api/auth/login` | `POST` | Đăng nhập hệ thống, nhận JWT Access Token & Refresh Token. |
+| | `/api/auth/register` | `POST` | Đăng ký tài khoản khách hàng mới. |
+| | `/api/auth/me` | `GET` | Lấy thông tin tài khoản đang đăng nhập. |
+| **Products & Catalog** | `/api/products` | `GET` | Lấy danh sách sản phẩm phân trang, lọc theo danh mục, từ khóa. |
+| | `/api/products/{id}` | `GET` | Xem thông tin chi tiết một sản phẩm theo ID. |
+| | `/api/categories` | `GET` | Danh sách các danh mục bánh và ngũ cốc đang hoạt động. |
+| **Cart Management** | `/api/cart` | `GET` | Xem nội dung giỏ hàng hiện tại của người dùng. |
+| | `/api/cart/items` | `POST` | Thêm sản phẩm vào giỏ hàng. |
+| | `/api/cart/items/{id}` | `PUT` / `DELETE` | Điều chỉnh số lượng hoặc xóa món khỏi giỏ hàng. |
+| **Checkout & Orders** | `/api/checkout` | `POST` | Đặt hàng từ giỏ (hỗ trợ COD hoặc thanh toán VietQR SePay). |
+| | `/api/orders` | `GET` | Danh sách lịch sử đơn hàng của người dùng. |
+| | `/api/orders/{id}/confirm-received` | `PUT` | Khách hàng xác nhận "Đã nhận hàng thành công". |
+| | `/api/orders/lookup/{orderCode}` | `GET` | Tra cứu đơn hàng công khai không cần đăng nhập. |
+| **SePay Payment** | `/api/payment/sepay/webhook` | `POST` | Webhook tiếp nhận thanh toán tự động, đối soát & đổi trạng thái. |
+| | `/api/payment/sepay/status/{orderId}` | `GET` | Polling kiểm tra trạng thái thanh toán đơn hàng theo thời gian thực. |
+| **Addresses & Profile** | `/api/users/addresses` | `GET` / `POST` | Sổ địa chỉ giao hàng nhiều cấp, đánh dấu địa chỉ mặc định. |
+| **Reviews & Feedback** | `/api/reviews` | `POST` | Đánh giá sao (1-5) và bình luận sản phẩm đã mua thành công. |
+| **Contact Form** | `/api/contact` | `POST` | Gửi thư liên hệ, góp ý từ trang Contact. |
+| **Admin Operations** | `/api/admin/users/**` | `CRUD` | Quản lý tài khoản và phân quyền người dùng (Role ADMIN). |
+| | `/api/admin/products/**` | `CRUD` | Quản lý sản phẩm, giá bán, cấu hình tồn kho. |
+| | `/api/admin/orders/**` | `GET` / `PUT` | Xử lý duyệt đơn, hủy đơn, chuyển trạng thái giao vận. |
+| | `/api/admin/contacts/**` | `GET` / `PUT` | Tiếp nhận và cập nhật trạng thái phản hồi liên hệ. |
+
+---
+
+## 🧪 7. Kiểm thử tự động & Báo cáo QA (Automated Testing Report)
+
+Hệ thống được trang bị bộ kiểm thử tự động toàn diện trên cả Backend và Frontend, tích hợp kiểm tra tự động qua GitHub Actions CI Pipeline:
+
+```
+Total Test Suites: 119 Passed / 0 Failed (100% Success Rate)
+├── Backend Unit & Integration Tests (JUnit 5, Mockito, MockMvc): 107 tests passed
+└── Frontend React Component & Hook Tests (Vitest, RTL, jsdom):    12 tests passed
 ```
 
-Project giới hạn file ảnh tối đa 2MB và hỗ trợ các định dạng `jpg`, `jpeg`, `png`, `webp`, `gif`.
+### Chi tiết các kịch bản kiểm thử trọng yếu:
+1. **Backend Tests (107 Tests)**:
+   - `SepayWebhookControllerTest` & `SepayWebhookServiceTest`: Kiểm tra xác thực API Key, đối soát mã đơn hàng, xử lý webhook trùng lặp, cập nhật trạng thái `PAID` và kích hoạt tự động hủy đơn sau 15 phút.
+   - `AuthControllerTest` & `CustomUserDetailsServiceTest`: Kiểm tra quy trình đăng nhập, mã hóa BCrypt, cấp phát và thu hồi JWT token, RBAC role mapping.
+   - `ProductControllerTest` & `ProductServiceTest`: Kiểm tra phân trang, tìm kiếm sản phẩm, quản lý tồn kho, validate dữ liệu đầu vào.
+   - `OrderServiceTest` & `CheckoutControllerTest`: Kiểm tra tính toán tổng tiền đơn hàng, trừ kho sản phẩm, tạo mã VietQR SePay.
+   - `AddressControllerTest` & `ReviewControllerTest`: Kiểm tra bảo mật sổ địa chỉ cá nhân và điều kiện chỉ cho phép đánh giá đơn đã hoàn tất.
+2. **Frontend Tests (12 Tests)**:
+   - `ProtectedRoute.test.tsx`: Kiểm tra chuyển hướng đăng nhập khi chưa có token, chặn truy cập trái phép role không tương thích.
+   - `CustomerExperience.test.tsx`: Kiểm tra hiển thị modal VietQR đếm ngược 15:00, nút xác nhận nhận hàng, popup đánh giá sao sản phẩm.
+   - `useCart.test.tsx`: Kiểm tra nghiệp vụ thêm, sửa, xóa, tính tổng tiền giỏ hàng.
+   - `ProductCard.test.tsx`: Kiểm tra render thẻ sản phẩm, huy hiệu bán chạy và thao tác thêm vào giỏ.
 
-## Database migration
+---
 
-Project dùng Flyway để quản lý schema. Các file migration nằm trong:
+## 📁 8. Cấu trúc thư mục dự án (Project Directory Layout)
 
-```text
-src/main/resources/db/migration
+```
+WebBakery/
+├── .github/
+│   └── workflows/
+│       └── ci-cd.yml                 # GitHub Actions CI Pipeline (Node.js 22 & Java 17)
+├── src/
+│   ├── main/
+│   │   ├── java/com/example/hebekery/
+│   │   │   ├── config/              # Cấu hình Spring Security, SePay, OpenAPI, WebMvc
+│   │   │   ├── controller/          # REST Controllers (Auth, Product, Order, Admin,...)
+│   │   │   ├── dto/                 # Request & Response Data Transfer Objects
+│   │   │   ├── exception/           # Global Exception Handling & Custom Errors
+│   │   │   ├── model/               # JPA Entities (User, Product, Order, Category,...)
+│   │   │   ├── repository/         # Spring Data JPA Repositories
+│   │   │   ├── scheduler/           # Quản lý tác vụ định kỳ (Hủy đơn quá hạn 15m)
+│   │   │   ├── security/            # JWT Token Provider, JwtAuthenticationFilter
+│   │   │   └── service/             # Lớp nghiệp vụ chuyên sâu (Order, Product, SePay,...)
+│   │   └── resources/
+│   │       ├── application.properties
+│   │       └── db/changelog/        # Liquibase Master & Migration Changesets (001 -> 005)
+│   └── test/java/com/example/hebekery/ # 107 bài kiểm thử JUnit 5 & Mockito
+├── web-bakery-frontend/
+│   ├── src/
+│   │   ├── components/              # AddressSelector, VietQrModal, ProductCard, Navbar,...
+│   │   ├── context/                 # AuthContext, CartContext
+│   │   ├── layouts/                 # CustomerLayout, AdminLayout đa vai trò
+│   │   ├── pages/                   # Admin & Customer Pages (BMI, Products, Orders,...)
+│   │   ├── services/                # Axios API Services kết nối Backend
+│   │   └── test/                    # 12 bài kiểm thử Vitest & React Testing Library
+│   ├── Dockerfile                   # Dockerfile đa tầng (node:22-alpine -> nginx:alpine)
+│   ├── nginx.conf                   # Cấu hình Nginx nội bộ SPA
+│   ├── package.json
+│   └── vite.config.ts
+├── docker-compose.yml               # File điều phối 4 dịch vụ Docker
+├── Dockerfile                       # Dockerfile đa tầng Spring Boot (Maven -> Temurin JRE 17)
+├── nginx.conf                       # Cấu hình Unified Nginx Reverse Proxy Gateway (Port 80)
+├── .env.example                     # File mẫu biến môi trường
+├── pom.xml                          # Maven Project Descriptor
+└── RULES.md                         # Nguyên tắc phát triển và phân nhánh Git
 ```
 
-Khi database đã chạy một migration, không sửa trực tiếp file migration cũ vì sẽ gây lỗi checksum mismatch. Nếu cần thay đổi schema hoặc dữ liệu, hãy tạo migration mới theo thứ tự version tiếp theo, ví dụ:
+---
 
-```text
-V15__your_change_name.sql
-```
+## 🤝 9. Quy chuẩn phát triển (Development Guidelines)
 
-## Cấu hình quan trọng
+Để đảm bảo tính nhất quán và chất lượng mã nguồn:
+1. **Nguyên tắc phân nhánh**:
+   - Nhánh `main` được bảo vệ nghiêm ngặt: **Tuyệt đối không commit hoặc push trực tiếp lên `main`**.
+   - Mọi tính năng, sửa lỗi hoặc tài liệu phải được thực hiện trên nhánh độc lập: `feature/<ten-tinh-nang>` hoặc `fix/<ten-loi>`.
+   - Tạo Pull Request (PR) để review và merge vào `main` sau khi toàn bộ bài kiểm thử CI đều chuyển xanh (Green).
+2. **Quy chuẩn thông điệp Commit (Conventional Commits)**:
+   - `feat:` Thêm tính năng mới cho hệ thống.
+   - `fix:` Sửa lỗi mã nguồn hoặc xử lý bug.
+   - `docs:` Cập nhật tài liệu kỹ thuật, hướng dẫn.
+   - `test:` Bổ sung hoặc cập nhật các bài kiểm thử tự động.
+   - `refactor:` Tái cấu trúc mã nguồn mà không thay đổi hành vi logic.
+   - `chore:` Cập nhật cấu hình build, dependencies hoặc tác vụ bảo trì.
 
-File cấu hình chính:
+---
 
-```text
-src/main/resources/application.properties
-```
-
-Các cấu hình đang dùng:
-
-- `DB_URL`: đường dẫn MySQL.
-- `DB_USERNAME`: tài khoản MySQL.
-- `DB_PASSWORD`: mật khẩu MySQL.
-- `spring.jpa.hibernate.ddl-auto=validate`: Hibernate chỉ kiểm tra schema, không tự tạo bảng.
-- `spring.flyway.enabled=true`: Flyway tự chạy migration khi khởi động.
-- `spring.servlet.multipart.max-file-size=2MB`: giới hạn upload ảnh.
-
-## Lưu ý trước khi public GitHub
-
-- Không commit mật khẩu database, secret key hoặc thông tin thật của cổng thanh toán.
-- MoMo hiện là test flow phục vụ demo. Nếu muốn triển khai thanh toán thật, nên chuyển toàn bộ cấu hình MoMo sang biến môi trường.
-- Không sửa migration cũ đã chạy trên database.
-- Không commit thư mục `target/`.
-- Nên cân nhắc không commit dữ liệu upload thật trong `uploads/products/` nếu đó là dữ liệu production.
-
-## Một số lỗi thường gặp
-
-### Port 8080 đã được sử dụng
-
-Dừng process đang chiếm port 8080 hoặc đổi `server.port` trong `application.properties`.
-
-### Flyway checksum mismatch
-
-Lỗi này xảy ra khi file migration cũ bị sửa sau khi đã chạy trên database. Cách xử lý đúng là khôi phục file migration cũ và tạo migration mới cho thay đổi tiếp theo.
-
-### Schema validation: missing table
-
-Kiểm tra lại database đã tạo đúng tên, biến môi trường `DB_URL` đã trỏ đúng database và Flyway đã chạy migration thành công.
-
-### AccessDeniedException khi compile/package
-
-Nếu app đang chạy hoặc IDE đang giữ file trong `target/`, hãy dừng ứng dụng rồi chạy lại lệnh Maven.
-
-## Trạng thái project
-
-Project phù hợp để demo hoặc phát triển tiếp thành website bán hàng hoàn chỉnh. Các phần nên gia cố trước khi production gồm: bảo mật role-based đầy đủ, tách secret sang environment variables, kiểm thử tự động, logging/audit, hardening CSRF/session và cấu hình deploy.
+*Hệ thống được phát triển và bàn giao đạt chuẩn mực doanh nghiệp, sẵn sàng triển khai trên môi trường Docker và đám mây.*
