@@ -2,11 +2,14 @@ package com.example.hebekery.controller;
 
 import com.example.hebekery.dto.ApiResponse;
 import com.example.hebekery.dto.CheckoutResponse;
+import com.example.hebekery.dto.PaymentStatusResponse;
 import com.example.hebekery.dto.request.CheckoutRequest;
+import com.example.hebekery.model.Order;
 import com.example.hebekery.service.CartService;
 import com.example.hebekery.service.OrderService;
 import com.example.hebekery.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpSession;
@@ -14,6 +17,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,5 +65,22 @@ public class CheckoutController {
 
         String msg = checkout.getMessage() != null ? checkout.getMessage() : "Đặt hàng thành công";
         return ResponseEntity.ok(ApiResponse.success(msg, checkout));
+    }
+
+    @Operation(summary = "Kiểm tra trạng thái thanh toán đơn hàng (Polling)", description = "Lấy trạng thái thanh toán của đơn hàng sau khi tạo để cập nhật giao diện tự động", security = @SecurityRequirement(name = "BearerAuth"))
+    @GetMapping("/orders/{orderId}/status")
+    public ResponseEntity<ApiResponse<PaymentStatusResponse>> getOrderStatus(
+            @Parameter(description = "Mã ID đơn hàng hoặc mã orderCode") @PathVariable String orderId) {
+        Order order = orderService.getOrderById(orderId);
+        boolean isPaid = "PAID".equalsIgnoreCase(order.getPaymentStatus());
+        PaymentStatusResponse status = new PaymentStatusResponse(
+                order.getId(),
+                order.getOrderCode(),
+                order.getOrderStatus(),
+                order.getPaymentStatus(),
+                isPaid,
+                order.getTotal()
+        );
+        return ResponseEntity.ok(ApiResponse.success("Lấy trạng thái thanh toán thành công", status));
     }
 }

@@ -26,8 +26,8 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/contacts")
-@PreAuthorize("hasRole('ADMIN')")
-@Tag(name = "Admin Contact Management", description = "Quản lý và xử lý phản hồi liên hệ của khách hàng")
+@PreAuthorize("hasAnyRole('ADMIN', 'STAFF_SALES')")
+@Tag(name = "Admin Contact Management", description = "Quản lý và xử lý phản hồi liên hệ của khách hàng (dành cho Admin & CSKH)")
 public class AdminContactController {
 
     private final ContactService contactService;
@@ -48,13 +48,16 @@ public class AdminContactController {
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách tin nhắn liên hệ thành công", dtos));
     }
 
-    @Operation(summary = "Cập nhật trạng thái xử lý liên hệ", description = "Chuyển trạng thái liên hệ sang DONE (đã xử lý) hoặc PENDING", security = @SecurityRequirement(name = "BearerAuth"))
+    @Operation(summary = "Cập nhật trạng thái tin nhắn liên hệ", description = "Chuyển trạng thái liên hệ sang RESOLVED hoặc SPAM", security = @SecurityRequirement(name = "BearerAuth"))
     @PatchMapping("/{id}/status")
-    public ResponseEntity<ApiResponse<ContactResponse>> updateContactStatus(
-            @Parameter(description = "Mã định danh tin nhắn liên hệ") @PathVariable String id,
+    public ResponseEntity<ApiResponse<ContactResponse>> updateStatus(
+            @Parameter(description = "Mã tin nhắn") @PathVariable String id,
             @RequestBody Map<String, String> payload) {
-        String status = payload.getOrDefault("status", "DONE");
+        String status = payload.get("status");
+        if (status == null || status.isBlank()) {
+            return ResponseEntity.badRequest().body(ApiResponse.failure("Trạng thái không được để trống"));
+        }
         ContactMessage updated = contactService.updateStatus(id, status);
-        return ResponseEntity.ok(ApiResponse.success("Cập nhật trạng thái liên hệ thành công", ContactResponse.from(updated)));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật trạng thái thành công", ContactResponse.from(updated)));
     }
 }

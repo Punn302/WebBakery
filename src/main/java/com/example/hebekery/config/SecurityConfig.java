@@ -42,7 +42,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(10);
     }
 
     @Bean
@@ -53,15 +53,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "http://localhost:5173",
-                "http://127.0.0.1:3000",
-                "http://127.0.0.1:5173"
-        ));
+        configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With", "Origin"));
-        configuration.setExposedHeaders(List.of("Authorization"));
+        configuration.setExposedHeaders(List.of("Authorization", "Content-Disposition"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
@@ -90,7 +85,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/contact/**").permitAll()
-                        .requestMatchers("/api/payment/sepay/webhook").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/orders/track").permitAll()
+                        .requestMatchers("/api/payment/**").permitAll()
                         // Staff & Warehouse APIs
                         .requestMatchers("/api/warehouse/**").hasAnyRole("ADMIN", "STAFF_WAREHOUSE")
                         .requestMatchers("/api/upload/**").hasAnyRole("ADMIN", "STAFF_WAREHOUSE")
@@ -98,6 +94,7 @@ public class SecurityConfig {
                         // Staff & Sales APIs
                         .requestMatchers("/api/sales/**").hasAnyRole("ADMIN", "STAFF_SALES")
                         .requestMatchers("/api/admin/orders/**").hasAnyRole("ADMIN", "STAFF_SALES")
+                        .requestMatchers("/api/admin/contacts/**").hasAnyRole("ADMIN", "STAFF_SALES")
                         // General Admin APIs
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // Customer / Authenticated APIs
