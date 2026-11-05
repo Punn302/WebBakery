@@ -75,16 +75,13 @@ npm run dev
 
 ---
 
-## 🔐 Tài khoản đăng nhập dùng thử (Demo Accounts)
+## 👥 Phân quyền vai trò hệ thống (RBAC)
 
-Hệ thống có sẵn các tài khoản demo tương ứng với từng nhóm vai trò:
-
-| Vai trò (Role) | Email đăng nhập | Mật khẩu mặc định | Quyền hạn chính |
-| :--- | :--- | :--- | :--- |
-| **Quản trị viên (`ADMIN`)** | `admin@hebekery.vn` | `password123` | Quản trị người dùng, sản phẩm, tồn kho, đơn hàng, báo cáo doanh thu |
-| **Nhân viên Sale (`STAFF_SALES`)** | `staff.sales@hebekery.vn` | `password123` | Xử lý duyệt đơn hàng, cập nhật giao hàng, phản hồi liên hệ khách |
-| **Nhân viên Kho (`STAFF_WAREHOUSE`)**| `staff.warehouse@hebekery.vn` | `password123` | Quản lý sản phẩm, danh mục, kiểm kê số lượng tồn kho |
-| **Khách hàng (`USER`)** | `user@hebekery.vn` | `password123` | Mua hàng, tính BMI, thanh toán VietQR / COD, đánh giá sản phẩm |
+Hệ thống thiết kế và kiểm soát phân quyền dựa trên 4 nhóm vai trò:
+- **Quản trị viên (`ADMIN`)**: Quản trị người dùng, sản phẩm, tồn kho, đơn hàng, báo cáo doanh thu.
+- **Nhân viên Sale (`STAFF_SALES`)**: Xử lý duyệt đơn hàng, cập nhật giao hàng, phản hồi liên hệ khách hàng.
+- **Nhân viên Kho (`STAFF_WAREHOUSE`)**: Quản lý sản phẩm, danh mục, kiểm kê số lượng tồn kho.
+- **Khách hàng (`USER`)**: Mua hàng, tính BMI, thanh toán VietQR / COD, đánh giá sản phẩm (đăng ký thành viên trực tiếp qua `/register`).
 
 ---
 
