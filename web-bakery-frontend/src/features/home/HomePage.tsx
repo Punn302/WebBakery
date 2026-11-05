@@ -171,9 +171,9 @@ export const HomePage: React.FC = () => {
               {/* Gradient Overlay for Text Readability */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10 group-hover:from-black/95 transition-colors" />
 
-              {/* Floating Icon badge on top-left */}
-              <div className="absolute top-3.5 left-3.5 w-8 h-8 bg-white/90 backdrop-blur-md text-[#47654c] flex items-center justify-center shadow">
-                <Icon className="w-4 h-4" />
+              {/* Icon on top-left without background card */}
+              <div className="absolute top-4 left-4 text-white drop-shadow-md group-hover:text-amber-300 transition-colors">
+                <Icon className="w-6 h-6" />
               </div>
 
               {/* Text Layer on top (bottom aligned) - Title Only */}
