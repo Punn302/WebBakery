@@ -15,6 +15,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
   const [isAdded, setIsAdded] = useState(false)
   const [isFavorite, setIsFavorite] = useState(false)
 
+  const handleCardClick = () => {
+    if (onSelect) {
+      onSelect(product)
+    } else if (typeof window !== 'undefined') {
+      window.location.href = `/products/${product.id}`
+    }
+  }
+
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation()
     if (product.stock <= 0) return
@@ -31,6 +39,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
   const isOutOfStock = product.stock <= 0
   const originalPrice = Math.round((product.price * 1.18) / 1000) * 1000
   const displayCalories = product.calories && product.calories > 0 ? product.calories : 112
+  const categoryName =
+    typeof product.category === 'object' && product.category !== null
+      ? (product.category as { name: string }).name
+      : typeof product.category === 'string'
+      ? product.category
+      : 'Bánh ăn kiêng'
 
   return (
     <motion.div
@@ -39,7 +53,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
       viewport={{ once: true }}
       whileHover={{ y: -3 }}
       transition={{ duration: 0.2 }}
-      onClick={() => onSelect?.(product)}
+      onClick={handleCardClick}
       className="group relative border border-[#E5E2DF] bg-white rounded-2xl overflow-hidden flex flex-col justify-between tactile-card hover:border-[#006561] transition-all cursor-pointer select-none"
     >
       <div>
@@ -88,7 +102,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
           {/* Category Tag & Calo Badge Row */}
           <div className="flex items-center justify-between gap-1 text-[11px]">
             <span className="text-[10px] font-bold tracking-wider uppercase text-[#6B6661] truncate max-w-[60%]">
-              {product.category?.name || 'BÁNH HEALTHY'}
+              {categoryName}
             </span>
             <div className="flex items-center gap-1 font-mono text-[10px] font-semibold text-[#006561] bg-[#006561]/8 px-2 py-0.5 rounded-full shrink-0">
               <Zap className="w-3 h-3 text-[#C9785C]" />

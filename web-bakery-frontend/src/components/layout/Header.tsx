@@ -231,8 +231,8 @@ export const Header: React.FC = () => {
             </Link>
 
             <Link
-              to="/about"
-              className="px-3 py-2 text-[13px] font-bold uppercase tracking-wider text-[#2A2725] hover:text-[#006561] transition-colors"
+              to="/blogs"
+              className={`px-3 py-2 text-[13px] font-bold uppercase tracking-wider transition-colors ${location.pathname.startsWith('/blog') ? 'text-[#006561] font-black' : 'text-[#2A2725] hover:text-[#006561]'}`}
             >
               Blog
             </Link>

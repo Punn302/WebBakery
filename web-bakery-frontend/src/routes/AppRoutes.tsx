@@ -14,6 +14,9 @@ import { ProtectedRoute } from '@/components/common/ProtectedRoute'
 // Customer Pages
 import { HomePage } from '@/features/home/HomePage'
 import { ProductCatalogPage } from '@/features/products/ProductCatalogPage'
+import { ProductDetailPage } from '@/features/products/ProductDetailPage'
+import { BlogListPage } from '@/features/blogs/BlogListPage'
+import { BlogDetailPage } from '@/features/blogs/BlogDetailPage'
 import { BmiCalculatorPage } from '@/features/tools/BmiCalculatorPage'
 import { AboutPage } from '@/features/pages/AboutPage'
 import { ContactPage } from '@/features/pages/ContactPage'
@@ -67,6 +70,13 @@ export const AppRoutes: React.FC = () => {
               <Route element={<MainLayout />}>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/products" element={<ProductCatalogPage />} />
+                <Route path="/products/:id" element={<ProductDetailPage />} />
+                <Route path="/product/:id" element={<ProductDetailPage />} />
+                <Route path="/blogs" element={<BlogListPage />} />
+                <Route path="/blog" element={<BlogListPage />} />
+                <Route path="/kien-thuc-dinh-duong" element={<BlogListPage />} />
+                <Route path="/blogs/:slug" element={<BlogDetailPage />} />
+                <Route path="/blog/:slug" element={<BlogDetailPage />} />
                 <Route path="/menu" element={<ProductCatalogPage />} />
                 <Route path="/collections" element={<ProductCatalogPage />} />
                 <Route path="/bmi-tdee" element={<BmiCalculatorPage />} />
