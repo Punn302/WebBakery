@@ -16,7 +16,7 @@ import heroStitch from '@/assets/hero_stitch.jpg'
 
 export const AboutPage: React.FC = () => {
   return (
-    <div className="max-w-6xl mx-auto space-y-12 sm:space-y-16 py-2 pb-16">
+    <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-16 py-6 pb-16">
       {/* ================= 1. Editorial Header Banner ================= */}
       <div className="space-y-4 border-b border-[#E5E2DF] pb-8 text-center sm:text-left">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#006561]/10 text-[#006561] text-xs font-semibold uppercase tracking-widest">

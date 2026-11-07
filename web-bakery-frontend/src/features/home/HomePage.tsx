@@ -1,30 +1,146 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { motion } from 'motion/react'
+import React, { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'motion/react'
 import {
+  ChevronLeft,
+  ChevronRight,
   ArrowRight,
   Sparkles,
-  ShieldCheck,
-  Award,
-  Leaf,
-  Truck,
-  Calculator,
   Flame,
   Activity,
-  HeartPulse,
   Scale,
-  ChevronRight,
+  HeartPulse,
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { productApi } from '@/api'
 import { ProductCard } from '@/features/products/ProductCard'
 import { ProductDetailModal } from '@/features/products/ProductDetailModal'
 import type { Product } from '@/types'
-import heroStitchImg from '@/assets/hero_stitch.jpg'
+
+// Real Hebekery Hero Slides
+const HERO_SLIDES = [
+  {
+    id: 1,
+    title: 'NGŨ CỐC GRANOLA DINH DƯỠNG',
+    link: '/products?category=Granola',
+    image: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/slide-img1.png?1790765513162',
+    accentColor: '#006561',
+  },
+  {
+    id: 2,
+    title: 'BÁNH BISCOTTI ĂN KIÊNG',
+    link: '/products?category=Biscotti',
+    image: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/slide-img2.png?1790765513162',
+    accentColor: '#91350a',
+  },
+  {
+    id: 3,
+    title: 'BÁNH NGÓI HẠNH NHÂN KETO',
+    link: '/products?category=B%C3%A1nh+ng%C3%B3i',
+    image: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/slide-img3.png?1790765513162',
+    accentColor: '#c8983d',
+  },
+  {
+    id: 4,
+    title: 'TRÁI CÂY SẤY NHẬP KHẨU',
+    link: '/products?category=H%E1%BA%A1t',
+    image: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/slide-img4.png?1790765513162',
+    accentColor: '#B23A2A',
+  },
+  {
+    id: 5,
+    title: 'COOKIES HẠNH NHÂN',
+    link: '/products?category=Cookies',
+    image: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/slide-img5.png?1790765513162',
+    accentColor: '#006561',
+  },
+]
+
+// Real Hebekery Policy Items
+const POLICIES = [
+  {
+    icon: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/i_policy_1.png?1790765513162',
+    title: 'ISO 22000:2018',
+    desc: 'Quản lý ATTP đạt chuẩn quốc tế',
+  },
+  {
+    icon: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/i_policy_2.png?1790765513162',
+    title: 'HACCP Codex',
+    desc: 'Kiểm soát an toàn từng khâu',
+  },
+  {
+    icon: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/i_policy_3.png?1790765513162',
+    title: 'Nguyên liệu rõ ràng',
+    desc: 'Minh bạch calo & dinh dưỡng',
+  },
+  {
+    icon: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/i_policy_4.png?1790765513162',
+    title: 'Giao hàng toàn quốc',
+    desc: 'Freeship từ 299k, giao 2h HCM',
+  },
+]
+
+// Real Hebekery 6 Categories
+const PRODUCT_LINES = [
+  {
+    id: 'granola',
+    title: 'Granola',
+    desc: '9 loại hạt rang tại bếp, nướng mẻ nhỏ — vị nguyên cám & matcha.',
+    image: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/img_cate_1.png?1790765513162',
+    link: '/products?category=Granola',
+  },
+  {
+    id: 'biscotti',
+    title: 'Biscotti',
+    desc: 'Bánh nướng 2 lần giòn rụm, 0g đường tinh luyện.',
+    image: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/img_cate_2.png?1790765513162',
+    link: '/products?category=Biscotti',
+  },
+  {
+    id: 'nut-bar',
+    title: 'Thanh hạt',
+    desc: 'Thanh năng lượng hạt dinh dưỡng cho buổi tập & bữa phụ.',
+    image: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/img_cate_3.png?1790765513162',
+    link: '/products?category=Thanh+h%E1%BA%A1t',
+  },
+  {
+    id: 'banh-ngoi',
+    title: 'Bánh ngói',
+    desc: 'Hạnh nhân lát mỏng nướng giòn chuẩn Keto.',
+    image: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/img_cate_4.png?1790765513162',
+    link: '/products?category=B%C3%A1nh+ng%C3%B3i',
+  },
+  {
+    id: 'cookies',
+    title: 'Cookies',
+    desc: 'Bánh quy hạnh nhân socola chip ăn vặt lành mạnh.',
+    image: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/img_cate_5.png?1790765513162',
+    link: '/products?category=Cookies',
+  },
+  {
+    id: 'mix-nuts',
+    title: 'Mix Nuts',
+    desc: 'Hạt dinh dưỡng sấy lạnh nhập khẩu cao cấp.',
+    image: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/img_cate_6.png?1790765513162',
+    link: '/products?category=H%E1%BA%A1t',
+  },
+]
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate()
+  const [currentSlide, setCurrentSlide] = useState(0)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+
+  // Auto-play hero slider
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length)
+    }, 5000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length)
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)
 
   // Live backend connection to Spring Boot /api/products
   const { data: productData, isLoading } = useQuery({
@@ -35,510 +151,409 @@ export const HomePage: React.FC = () => {
 
   const bestSellerProducts = productData?.content || []
 
-  // 4 Signature Flavors (Section 2)
-  const signatureFlavors = [
-    {
-      title: 'FRUITY GRAINS',
-      subtitle: 'Hạt & quả mọng',
-      description: 'Cranberry dâu rừng & yến mạch',
-      image:
-        'https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?q=80&w=800&auto=format&fit=crop',
-      tag: 'Eat Clean',
-      query: 'granola',
-    },
-    {
-      title: 'DARK CHOCO',
-      subtitle: 'Cacao nguyên chất',
-      description: 'Cacao Đắk Lắk đậm vị 0g đường',
-      image:
-        'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?q=80&w=800&auto=format&fit=crop',
-      tag: 'Sugar-Free',
-      query: 'cacao',
-    },
-    {
-      title: 'PURE MATCHA',
-      subtitle: 'Trà xanh Uji',
-      description: 'Matcha Nhật Bản hữu cơ thanh tao',
-      image:
-        'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?q=80&w=800&auto=format&fit=crop',
-      tag: 'Antioxidant',
-      query: 'matcha',
-    },
-    {
-      title: 'SALTY CHEESE',
-      subtitle: 'Phô mai ít béo',
-      description: 'Parmesan thơm bùi chuẩn Keto',
-      image:
-        'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=800&auto=format&fit=crop',
-      tag: 'Keto Friendly',
-      query: 'phô mai',
-    },
-  ]
-
-  // 4 Certifications & Commitments (Section 3)
-  const commitments = [
-    {
-      icon: ShieldCheck,
-      code: 'ISO 22000:2018',
-      title: 'An toàn thực phẩm quốc tế',
-      subtitle: 'Kiểm soát nghiêm ngặt từng mẻ bánh',
-    },
-    {
-      icon: Award,
-      code: 'HACCP Codex',
-      title: 'Kiểm soát chất lượng',
-      subtitle: 'Phân tích mối nguy chuẩn khoa học',
-    },
-    {
-      icon: Leaf,
-      code: '100% Nguyên liệu sạch',
-      title: '0g đường tinh luyện',
-      subtitle: 'Bột nguyên cám & mật ngọt tự nhiên',
-    },
-    {
-      icon: Truck,
-      code: 'Giao hàng toàn quốc',
-      title: 'Freeship từ 299k',
-      subtitle: 'Giao nhanh 2h TP.HCM & Hà Nội',
-    },
-  ]
-
-  // 6 Category Pills (Section 4)
-  const categoryPills = [
-    {
-      name: 'Granola',
-      query: 'granola',
-      image:
-        'https://images.unsplash.com/photo-1517093157656-b9ec84eb09d2?q=80&w=300&auto=format&fit=crop',
-      badge: 'Bestseller',
-    },
-    {
-      name: 'Biscotti',
-      query: 'biscotti',
-      image:
-        'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=300&auto=format&fit=crop',
-      badge: 'Giòn rụm',
-    },
-    {
-      name: 'Thanh hạt',
-      query: 'bar',
-      image:
-        'https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?q=80&w=300&auto=format&fit=crop',
-      badge: 'Protein',
-    },
-    {
-      name: 'Bánh ngói',
-      query: 'keto',
-      image:
-        'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?q=80&w=300&auto=format&fit=crop',
-      badge: 'Keto 100%',
-    },
-    {
-      name: 'Cookies',
-      query: 'cookies',
-      image:
-        'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?q=80&w=300&auto=format&fit=crop',
-      badge: 'Nguyên cám',
-    },
-    {
-      name: 'Mix Nuts',
-      query: 'nuts',
-      image:
-        'https://images.unsplash.com/photo-1536599018102-9f803c140fc1?q=80&w=300&auto=format&fit=crop',
-      badge: 'Sấy lạnh',
-    },
-  ]
-
-  // 3 Health Tools (Section 6)
-  const healthTools = [
-    {
-      title: 'TÍNH TDEE',
-      badge: 'Năng lượng tiêu hao',
-      desc: 'Tổng năng lượng tiêu hao mỗi ngày theo cường độ tập luyện và thói quen sinh hoạt.',
-      highlight: 'Calo thâm hụt / Calo duy trì',
-      icon: Activity,
-    },
-    {
-      title: 'TÍNH BMI',
-      badge: 'Chỉ số khối cơ thể',
-      desc: 'Đánh giá tỷ lệ thể trạng chuẩn theo thang chuẩn WHO và Viện Dinh Dưỡng Quốc Gia.',
-      highlight: '18.5 – 22.9 Lý tưởng',
-      icon: Scale,
-    },
-    {
-      title: 'TÍNH BMR',
-      badge: 'Trao đổi chất cơ bản',
-      desc: 'Mức năng lượng tối thiểu cơ thể cần để duy trì sự sống ở trạng thái nghỉ ngơi hoàn toàn.',
-      highlight: 'Công thức Mifflin-St Jeor',
-      icon: HeartPulse,
-    },
-  ]
-
   return (
-    <div className="space-y-16 sm:space-y-24 pb-12">
-      {/* ================= SECTION 1: mew_mobile_slide (Hero Banner) ================= */}
-      <section className="relative pt-2 sm:pt-4 md:pt-6">
-        <div className="rounded-3xl bg-[#FEFBF4] border border-[#E5E2DF] overflow-hidden p-6 sm:p-10 lg:p-14 tactile-card">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-            {/* Left Column: Minimal Text */}
-            <div className="lg:col-span-7 space-y-6">
-              {/* Category Badge */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#E5E2DF] text-[#006561] text-xs font-semibold select-none shadow-xs"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-[#C9785C]" />
-                <span className="tracking-wide">TIỆM BÁNH DINH DƯỠNG &amp; ĂN KIÊNG HEALTHY</span>
-              </motion.div>
-
-              {/* Title in Wix Madefor Display */}
-              <motion.h1
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.08 }}
-                className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-[46px] font-bold text-[#2A2725] leading-[1.14] tracking-tight"
-              >
-                BÁNH TƯƠI MỖI NGÀY, TỐT CHO VÓC DÁNG &amp; SỨC KHỎE
-              </motion.h1>
-
-              {/* Subtitle: Minimal punchy tags */}
-              <motion.div
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.16 }}
-                className="flex items-center flex-wrap gap-2 text-xs sm:text-sm font-medium text-[#6B6661]"
-              >
-                <span className="bg-[#006561]/8 text-[#006561] px-3 py-1 rounded-full font-semibold">
-                  100% bột nguyên cám
-                </span>
-                <span>•</span>
-                <span className="bg-[#C9785C]/15 text-[#B23A2A] px-3 py-1 rounded-full font-semibold">
-                  Không đường tinh luyện
-                </span>
-                <span>•</span>
-                <span className="bg-[#2A2725]/6 text-[#2A2725] px-3 py-1 rounded-full font-semibold">
-                  Nướng tươi mỗi sáng
-                </span>
-              </motion.div>
-
-              {/* CTAs */}
-              <motion.div
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.24 }}
-                className="flex items-center gap-3 pt-2"
-              >
-                {/* Primary CTA */}
-                <button
-                  type="button"
-                  onClick={() => navigate('/products')}
-                  className="bg-[#006561] hover:bg-[#1a9a9b] text-[#FEFBF4] font-semibold px-7 py-3 rounded-full text-xs sm:text-sm transition-all shadow-sm hover:shadow-md cursor-pointer flex items-center gap-2"
-                >
-                  <span>Khám phá thực đơn</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-
-                {/* Secondary CTA */}
-                <button
-                  type="button"
-                  onClick={() => navigate('/about')}
-                  className="border border-[#2A2725] bg-transparent hover:bg-[#2A2725] hover:text-[#FEFBF4] text-[#2A2725] font-semibold px-7 py-3 rounded-full text-xs sm:text-sm transition-all cursor-pointer"
-                >
-                  Về HeBekery
-                </button>
-              </motion.div>
-
-              {/* Quick Trust Badges */}
-              <div className="pt-4 border-t border-[#E5E2DF] flex items-center gap-5 sm:gap-7 text-xs font-semibold text-[#2A2725]">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-[#006561]" />
-                  <span>&gt;15.000 Khách hàng</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-[#7B9461]" />
-                  <span>Eat Clean &amp; Keto</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-[#C9785C]" />
-                  <span>Giao 2H TP.HCM &amp; HN</span>
-                </div>
-              </div>
+    <div className="w-full space-y-16 sm:space-y-24 pb-16">
+      {/* ================= SECTION 1: mew_mobile_slide (HERO CAROUSEL) ================= */}
+      <section className="relative w-full pt-4 sm:pt-6 md:pt-10 overflow-hidden">
+        <div className="max-w-[1240px] mx-auto px-4">
+          <div className="relative min-h-[420px] sm:min-h-[520px] md:min-h-[580px] flex items-center justify-center">
+            {/* Background Organic Ambient Circles */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-[300px] h-[300px] sm:w-[460px] sm:h-[460px] rounded-full bg-[#E0CDBE]/25 blur-2xl transform -rotate-12 transition-all duration-700" />
+              <div className="absolute w-[200px] h-[200px] sm:w-[320px] sm:h-[320px] rounded-full border-[18px] border-[#E2F4E0]/60 transition-all duration-700" />
             </div>
 
-            {/* Right Column: Aesthetic Visual Showcase */}
-            <div className="lg:col-span-5 relative">
-              <div className="relative rounded-2xl overflow-hidden p-2.5 bg-white border border-[#E5E2DF] shadow-md group">
-                <img
-                  src={heroStitchImg}
-                  alt="HeBekery bánh tươi nướng mộc mạc tốt cho vóc dáng"
-                  className="w-full h-[320px] sm:h-[380px] lg:h-[420px] object-cover rounded-xl group-hover:scale-102 transition-transform duration-700 ease-out"
-                />
-
-                {/* Floating Micro-Badge */}
-                <div className="absolute bottom-5 left-5 right-5 p-3.5 rounded-xl bg-white/95 backdrop-blur-md border border-[#E5E2DF] flex items-center justify-between shadow-lg">
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-[#6B6661] tracking-wider block">
-                      Signature Hebekery
-                    </span>
-                    <h4 className="font-display text-xs sm:text-sm font-bold text-[#2A2725]">
-                      Granola Siêu Hạt Mật Hoa
-                    </h4>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-mono text-xs sm:text-sm font-bold text-[#006561] block">
-                      112 kcal <span className="text-[10px] font-sans text-[#6B6661]">/ 30g</span>
-                    </span>
-                    <span className="text-[10px] font-bold text-[#7B9461]">0g Đường Cát</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ================= SECTION 2: mew_about (Triết lý & 4 hương vị Signature) ================= */}
-      <section className="space-y-8">
-        {/* Cormorant Garamond Serif Quote */}
-        <div className="text-center max-w-3xl mx-auto px-4 space-y-2">
-          <p className="font-serif text-2xl sm:text-3xl md:text-4xl italic text-[#2A2725] leading-relaxed">
-            &ldquo;Chọn nguyên liệu kỹ, làm chỉn chu — HeBekery đồng hành cùng lối sống lành mạnh của bạn.&rdquo;
-          </p>
-          <span className="block text-xs font-semibold uppercase tracking-widest text-[#006561]">
-            — 4 Hương Vị Signature HeBekery —
-          </span>
-        </div>
-
-        {/* 4 Vertical Aesthetic Image Columns (aspect 3:4) */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-          {signatureFlavors.map((flavor, idx) => (
-            <motion.div
-              key={flavor.title}
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.3, delay: idx * 0.08 }}
-              onClick={() => navigate(`/products?search=${encodeURIComponent(flavor.query)}`)}
-              className="group relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer border border-[#E5E2DF] shadow-xs hover:shadow-lg transition-all"
-            >
-              {/* Background Photo */}
+            {/* Decorative Floating Leaves */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
               <img
-                src={flavor.image}
-                alt={flavor.title}
-                className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
+                src="https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/flo_1_sl_1.png?1790765513162"
+                alt="leaf"
+                className="absolute top-12 left-6 sm:left-24 w-12 sm:w-16 opacity-80 animate-pulse"
               />
-
-              {/* Gradient Scrim */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#2A2725]/90 via-[#2A2725]/30 to-transparent" />
-
-              {/* Top Tag Badge */}
-              <div className="absolute top-3 left-3">
-                <span className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-full bg-white/90 text-[#2A2725] backdrop-blur-xs shadow-xs">
-                  {flavor.tag}
-                </span>
-              </div>
-
-              {/* Bottom Content */}
-              <div className="absolute bottom-4 left-4 right-4 text-white space-y-1">
-                <h3 className="font-display text-base sm:text-lg font-bold tracking-wide">
-                  {flavor.title}
-                </h3>
-                <p className="text-xs text-[#f6e9df] font-medium">{flavor.subtitle}</p>
-                <div className="pt-1 flex items-center text-[11px] text-[#FEFBF4]/80 group-hover:text-white transition-colors">
-                  <span>Khám phá</span>
-                  <ChevronRight className="w-3.5 h-3.5 ml-0.5 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* ================= SECTION 3: m_policy (4 Chứng nhận & Cam kết) ================= */}
-      <section className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {commitments.map((item, idx) => {
-            const Icon = item.icon
-            return (
-              <div
-                key={idx}
-                className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E5E2DF] tactile-card flex items-start gap-4"
-              >
-                <div className="w-11 h-11 rounded-xl bg-[#006561]/8 text-[#006561] flex items-center justify-center shrink-0">
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div className="space-y-1">
-                  <span className="font-mono text-[11px] font-bold text-[#C9785C] tracking-wide block">
-                    {item.code}
-                  </span>
-                  <h4 className="font-display text-sm font-bold text-[#2A2725]">
-                    {item.title}
-                  </h4>
-                  <p className="text-[11px] text-[#6B6661] leading-snug">
-                    {item.subtitle}
-                  </p>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </section>
-
-      {/* ================= SECTION 4: mew_cate (6 Thẻ Danh Mục) ================= */}
-      <section className="space-y-6">
-        <div className="text-center space-y-1.5">
-          <h2 className="font-display text-2xl sm:text-3xl font-bold text-[#2A2725]">
-            Mời bạn sống lành cùng Hebekery
-          </h2>
-          <p className="text-xs text-[#6B6661] font-medium">
-            Chọn món dinh dưỡng phù hợp với nhu cầu cơ thể bạn hôm nay
-          </p>
-        </div>
-
-        {/* 6 Pill Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-          {categoryPills.map((cate) => (
-            <motion.div
-              key={cate.name}
-              whileHover={{ y: -3 }}
-              transition={{ duration: 0.18 }}
-              onClick={() => navigate(`/products?search=${encodeURIComponent(cate.query)}`)}
-              className="group p-3 rounded-2xl bg-white border border-[#E5E2DF] tactile-card hover:border-[#006561] cursor-pointer flex flex-col items-center text-center space-y-2.5 transition-all"
-            >
-              <div className="w-16 h-16 rounded-full overflow-hidden border border-[#E5E2DF] bg-[#F8F6F5] relative">
-                <img
-                  src={cate.image}
-                  alt={cate.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-              </div>
-              <div>
-                <h3 className="font-display text-xs sm:text-sm font-bold text-[#2A2725] group-hover:text-[#006561] transition-colors">
-                  {cate.name}
-                </h3>
-                <span className="inline-block mt-0.5 text-[9px] font-semibold text-[#006561] bg-[#006561]/8 px-2 py-0.5 rounded-full">
-                  {cate.badge}
-                </span>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* ================= SECTION 5: mew_bestseller (Mua Nhiều Nhất) ================= */}
-      <section className="space-y-6">
-        {/* Section Header */}
-        <div className="flex items-end justify-between border-b border-[#E5E2DF] pb-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#B23A2A] bg-[#FFE6DC] px-2 py-0.5 rounded-sm">
-                TOP YÊU THÍCH
-              </span>
+              <img
+                src="https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/flo_2_sl_1.png?1790765513162"
+                alt="leaf"
+                className="absolute bottom-16 right-6 sm:right-28 w-14 sm:w-20 opacity-80"
+              />
             </div>
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-[#2A2725]">
-              MUA NHIỀU NHẤT
-            </h2>
+
+            {/* Active Slide Display */}
+            <div className="relative z-10 text-center max-w-xl mx-auto flex flex-col items-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentSlide}
+                  initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: -15 }}
+                  transition={{ duration: 0.45 }}
+                  className="flex flex-col items-center"
+                >
+                  <Link
+                    to={HERO_SLIDES[currentSlide].link}
+                    className="block group relative cursor-pointer"
+                  >
+                    <div className="relative w-64 h-64 sm:w-84 sm:h-84 md:w-96 md:h-96 mx-auto">
+                      <img
+                        src={HERO_SLIDES[currentSlide].image}
+                        alt={HERO_SLIDES[currentSlide].title}
+                        className="w-full h-full object-contain drop-shadow-xl group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                  </Link>
+
+                  <h2 className="title_slide mt-4 sm:mt-6 mb-2 text-xl sm:text-2xl md:text-3xl font-bold font-display uppercase tracking-tight text-[#2A2725]">
+                    {HERO_SLIDES[currentSlide].title}
+                  </h2>
+
+                  <Link
+                    to={HERO_SLIDES[currentSlide].link}
+                    className="sup_slide inline-flex items-center gap-1.5 text-sm sm:text-base font-semibold text-[#c8983d] hover:text-[#91350a] transition-all group mt-1"
+                  >
+                    <span>Mua ngay</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+                  </Link>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* Carousel Navigation Arrows */}
+            <button
+              type="button"
+              onClick={prevSlide}
+              aria-label="Slide trước"
+              className="absolute left-2 sm:left-6 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/90 border border-[#E5E2DF] shadow-md flex items-center justify-center text-[#2A2725] hover:text-[#006561] hover:scale-105 transition-all cursor-pointer"
+            >
+              <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+            </button>
+            <button
+              type="button"
+              onClick={nextSlide}
+              aria-label="Slide tiếp theo"
+              className="absolute right-2 sm:right-6 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/90 border border-[#E5E2DF] shadow-md flex items-center justify-center text-[#2A2725] hover:text-[#006561] hover:scale-105 transition-all cursor-pointer"
+            >
+              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+            </button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => navigate('/products')}
-            className="text-xs font-semibold text-[#006561] hover:text-[#1a9a9b] flex items-center gap-1 cursor-pointer transition-colors"
-          >
-            <span>Xem tất cả</span>
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* 4-column product grid with live data from backend */}
-        {isLoading ? (
-          <div className="py-20 text-center text-xs text-[#6B6661]">
-            Đang tải sản phẩm bán chạy...
-          </div>
-        ) : bestSellerProducts.length === 0 ? (
-          <div className="py-16 text-center border border-dashed border-[#E5E2DF] rounded-2xl bg-white p-6 space-y-2">
-            <p className="text-sm font-semibold text-[#2A2725]">Chưa có sản phẩm nào</p>
-            <p className="text-xs text-[#6B6661]">Mời bạn ghé lại sau hoặc khám phá thực đơn chung.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {bestSellerProducts.slice(0, 8).map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onSelect={(p) => setSelectedProduct(p)}
+          {/* Dots Indicator */}
+          <div className="flex items-center justify-center gap-2 pt-4">
+            {HERO_SLIDES.map((slide, idx) => (
+              <button
+                key={slide.id}
+                type="button"
+                onClick={() => setCurrentSlide(idx)}
+                aria-label={`Chuyển tới slide ${idx + 1}`}
+                className={`transition-all duration-300 rounded-full cursor-pointer ${
+                  currentSlide === idx
+                    ? 'w-8 h-2.5 bg-[#006561]'
+                    : 'w-2.5 h-2.5 bg-[#E5E2DF] hover:bg-[#9A938C]'
+                }`}
               />
             ))}
           </div>
-        )}
+        </div>
       </section>
 
-      {/* ================= SECTION 6: mew_tool (Bộ Công Cụ Sức Khỏe) ================= */}
-      <section className="bg-white rounded-3xl border border-[#E5E2DF] p-6 sm:p-10 lg:p-12 tactile-card space-y-8">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#006561]/8 text-[#006561] text-xs font-semibold">
-            <Calculator className="w-3.5 h-3.5" />
-            <span>Khoa Học Dinh Dưỡng Thực Chứng</span>
-          </div>
-          <h2 className="font-display text-2xl sm:text-3xl font-bold text-[#2A2725]">
-            Hiểu cơ thể để ăn đúng nhu cầu
-          </h2>
-          <p className="text-xs text-[#6B6661] leading-relaxed">
-            Chỉ số cơ thể chuẩn xác là kim chỉ nam để lựa chọn khẩu phần bánh healthy phù hợp với mục tiêu vóc dáng của bạn.
-          </p>
-        </div>
+      {/* ================= SECTION 2: mew_about (VỀ HEBEKERY STORY) ================= */}
+      <section className="relative w-full">
+        <div className="max-w-[1240px] mx-auto px-4">
+          <div className="rounded-3xl bg-white border border-[#E5E2DF] overflow-hidden shadow-xs">
+            {/* Top Wide Banner Photo */}
+            <div className="relative w-full aspect-[21/9] sm:aspect-[24/9] md:aspect-[3/1] overflow-hidden">
+              <img
+                src="https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/about_img_pc.jpg?1790765513162"
+                alt="Về HeBekery"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src =
+                    'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200&auto=format&fit=crop'
+                }}
+              />
+            </div>
 
-        {/* 3 Interactive Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-          {healthTools.map((tool) => {
-            const ToolIcon = tool.icon
-            return (
-              <div
-                key={tool.title}
-                className="rounded-2xl p-6 bg-[#FEFBF4] border border-[#E5E2DF] flex flex-col justify-between space-y-4 hover:border-[#006561] transition-colors"
+            {/* Story Content Block */}
+            <div className="about_story max-w-2xl mx-auto py-12 px-6 sm:py-16 text-center flex flex-col items-center gap-4">
+              <span className="eyebrow text-xs sm:text-sm font-bold uppercase tracking-widest text-[#C9785C]">
+                Về Hebekery
+              </span>
+
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-medium text-[#2A2725] leading-tight">
+                Chọn nguyên liệu kỹ, <b className="font-bold">làm chỉn chu</b>
+              </h2>
+
+              <span className="w-10 h-0.5 bg-[#B23A2A] my-1" aria-hidden="true" />
+
+              <p className="text-xs sm:text-sm md:text-base text-[#6B6661] leading-relaxed max-w-xl font-text">
+                Chúng tôi là những bạn trẻ yêu lối sống lành mạnh và đam mê tạo nên những sản phẩm
+                ngon thật, lành thật, dễ dùng cho người Việt Nam. Để không phải ăn ít hơn, mà là ăn đúng
+                hơn — chính là kim chỉ nam Hebekery luôn nỗ lực hướng đến.
+              </p>
+
+              <Link
+                to="/about"
+                className="mt-3 inline-flex items-center justify-center bg-[#B23A2A] hover:bg-[#9A2F20] text-[#FEFBF4] text-xs sm:text-sm font-bold uppercase tracking-wider px-8 py-3.5 rounded-full transition-all shadow-sm hover:shadow-md cursor-pointer"
               >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-[#006561] text-white flex items-center justify-center">
-                      <ToolIcon className="w-5 h-5" />
-                    </div>
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#006561] bg-[#006561]/10 px-2.5 py-0.5 rounded-full">
-                      {tool.badge}
-                    </span>
-                  </div>
+                Tìm hiểu HeBekery
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
 
-                  <h3 className="font-display text-lg font-bold text-[#2A2725]">
-                    {tool.title}
-                  </h3>
-
-                  <p className="text-xs text-[#6B6661] leading-relaxed">
-                    {tool.desc}
-                  </p>
-
-                  <div className="pt-1 text-[11px] font-mono font-semibold text-[#7B9461]">
-                    ✓ {tool.highlight}
-                  </div>
+      {/* ================= SECTION 3: m_policy (4 CAM KẾT TIÊU CHUẨN) ================= */}
+      <section className="relative w-full">
+        <div className="max-w-[1240px] mx-auto px-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {POLICIES.map((p, idx) => (
+              <div
+                key={p.title}
+                className="bg-white rounded-2xl border border-[#E5E2DF] p-5 sm:p-6 text-center flex flex-col items-center gap-3.5 hover:border-[#006561]/40 transition-colors shadow-xs"
+              >
+                <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center">
+                  <img
+                    src={p.icon}
+                    alt={p.title}
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      // Fallback icon style
+                      e.currentTarget.style.display = 'none'
+                    }}
+                  />
                 </div>
-
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    onClick={() => navigate('/bmi-tdee')}
-                    className="w-full text-center text-xs font-semibold text-[#006561] hover:text-[#1a9a9b] py-2.5 rounded-full border border-[#006561] hover:bg-[#006561]/5 transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                  >
-                    <span>Tính ngay</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
+                <div className="space-y-1">
+                  <h3 className="font-display font-bold text-sm sm:text-base text-[#2A2725] uppercase tracking-tight">
+                    {p.title}
+                  </h3>
+                  <p className="text-xs text-[#6B6661] font-text leading-snug">{p.desc}</p>
                 </div>
               </div>
-            )
-          })}
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Product Detail Modal */}
+      {/* ================= SECTION 4: mew_cate (DÒNG SẢN PHẨM SỐNG LÀNH) ================= */}
+      <section className="relative w-full">
+        <div className="max-w-[1240px] mx-auto px-4 space-y-8 sm:space-y-10">
+          <div className="text-center space-y-2 max-w-md mx-auto">
+            <span className="eyebrow text-xs sm:text-sm font-bold uppercase tracking-widest text-[#C9785C]">
+              Dòng sản phẩm
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-display font-medium text-[#2A2725]">
+              Mời bạn <b className="font-bold">sống lành</b> cùng Hebekery
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5">
+            {PRODUCT_LINES.map((item) => (
+              <Link
+                key={item.id}
+                to={item.link}
+                className="group flex flex-col bg-white rounded-2xl border border-[#E5E2DF] overflow-hidden hover:shadow-md transition-all cursor-pointer"
+              >
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#FEFBF4]">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      e.currentTarget.src =
+                        'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&auto=format&fit=crop'
+                    }}
+                  />
+                </div>
+                <div className="p-3.5 sm:p-4 flex flex-col flex-1 justify-between gap-2">
+                  <div>
+                    <h3 className="font-display font-bold text-sm sm:text-base text-[#2A2725] group-hover:text-[#006561] transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-[11px] text-[#6B6661] mt-1 line-clamp-2 leading-snug font-text">
+                      {item.desc}
+                    </p>
+                  </div>
+                  <span className="text-[11px] font-bold text-[#006561] flex items-center gap-1 group-hover:gap-1.5 transition-all mt-1">
+                    <span>Khám phá</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ================= SECTION 5: mew_bestseller (MUA NHIỀU NHẤT) ================= */}
+      <section className="relative w-full">
+        <div className="max-w-[1240px] mx-auto px-4 space-y-8 sm:space-y-10">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <div>
+              <span className="eyebrow text-xs sm:text-sm font-bold uppercase tracking-widest text-[#C9785C]">
+                Best-seller tháng này
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-display font-bold text-[#2A2725] tracking-tight mt-1">
+                MUA NHIỀU NHẤT
+              </h2>
+              <p className="text-xs sm:text-sm text-[#6B6661] mt-1 font-text">
+                8 sản phẩm dinh dưỡng được khách hàng Hebekery tin chọn nhiều nhất
+              </p>
+            </div>
+
+            <Link
+              to="/products"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#006561] hover:text-[#1a9a9b] hover:gap-2.5 transition-all"
+            >
+              <span>Xem tất cả sản phẩm</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          {/* Product Grid from Backend */}
+          {isLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-white rounded-2xl border border-[#E5E2DF] p-4 h-80 animate-pulse flex flex-col justify-between"
+                >
+                  <div className="w-full aspect-square bg-[#FEFBF4] rounded-xl" />
+                  <div className="space-y-2 mt-3">
+                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                    <div className="h-4 bg-gray-200 rounded w-1/2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : bestSellerProducts.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              {bestSellerProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onSelect={(p: Product) => setSelectedProduct(p)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-2xl border border-[#E5E2DF]">
+              <p className="text-sm text-[#6B6661]">Đang tải dữ liệu sản phẩm từ bếp HeBekery...</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ================= SECTION 6: mew_tool (BỘ CÔNG CỤ SỨC KHỎE HEBEKERY) ================= */}
+      <section className="relative w-full">
+        <div className="max-w-[1240px] mx-auto px-4 space-y-8">
+          <div className="text-center space-y-2 max-w-md mx-auto">
+            <span className="eyebrow text-xs sm:text-sm font-bold uppercase tracking-widest text-[#C9785C]">
+              Công cụ Hebekery
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-display font-medium text-[#2A2725]">
+              Hiểu cơ thể để <b className="font-bold">ăn đúng nhu cầu</b>
+            </h2>
+            <p className="text-xs sm:text-sm text-[#6B6661] font-text">
+              3 phép tính nhanh — biết cơ thể bạn cần gì trước khi chọn bữa
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Tool 1: TDEE */}
+            <Link
+              to="/bmi-tdee"
+              className="bg-white rounded-2xl border border-[#E5E2DF] p-6 sm:p-7 flex flex-col justify-between hover:shadow-md hover:border-[#c9785c] transition-all group cursor-pointer"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#c9785c]" />
+                  <span className="font-mono text-xs font-semibold text-[#6B6661]">kcal · ngày</span>
+                </div>
+                <div className="font-display text-3xl font-extrabold text-[#2A2725] tracking-tight">
+                  TDEE
+                </div>
+                <h3 className="font-display font-bold text-base text-[#2A2725]">
+                  Tổng năng lượng tiêu hao mỗi ngày
+                </h3>
+                <p className="text-xs text-[#6B6661] leading-relaxed font-text">
+                  Tính tổng calo cơ thể đốt trong 24h dựa trên cường độ hoạt động — biết nên ăn bao
+                  nhiêu để giữ, giảm mỡ hay tăng cân.
+                </p>
+              </div>
+
+              <div className="pt-5 border-t border-[#E5E2DF]/60 mt-4 flex items-center justify-between">
+                <span className="text-xs font-bold text-[#c9785c] group-hover:text-[#91350a] flex items-center gap-1.5 transition-colors">
+                  <span>Tính ngay</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </span>
+                <Activity className="w-5 h-5 text-[#c9785c]/40" />
+              </div>
+            </Link>
+
+            {/* Tool 2: BMI */}
+            <Link
+              to="/bmi-tdee"
+              className="bg-white rounded-2xl border border-[#E5E2DF] p-6 sm:p-7 flex flex-col justify-between hover:shadow-md hover:border-[#006561] transition-all group cursor-pointer"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#006561]" />
+                  <span className="font-mono text-xs font-semibold text-[#6B6661]">kg / m²</span>
+                </div>
+                <div className="font-display text-3xl font-extrabold text-[#2A2725] tracking-tight">
+                  BMI
+                </div>
+                <h3 className="font-display font-bold text-base text-[#2A2725]">
+                  Chỉ số khối cơ thể &amp; Vóc dáng
+                </h3>
+                <p className="text-xs text-[#6B6661] leading-relaxed font-text">
+                  Đánh giá tỷ lệ thể trạng chuẩn (18.5 – 22.9 lý tưởng theo WHO) và biết ngay mình
+                  đang thừa cân, thiếu cân hay cân đối.
+                </p>
+              </div>
+
+              <div className="pt-5 border-t border-[#E5E2DF]/60 mt-4 flex items-center justify-between">
+                <span className="text-xs font-bold text-[#006561] group-hover:text-[#1a9a9b] flex items-center gap-1.5 transition-colors">
+                  <span>Tính ngay</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </span>
+                <Scale className="w-5 h-5 text-[#006561]/40" />
+              </div>
+            </Link>
+
+            {/* Tool 3: BMR */}
+            <Link
+              to="/bmi-tdee"
+              className="bg-white rounded-2xl border border-[#E5E2DF] p-6 sm:p-7 flex flex-col justify-between hover:shadow-md hover:border-[#7B9461] transition-all group cursor-pointer"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#7B9461]" />
+                  <span className="font-mono text-xs font-semibold text-[#6B6661]">kcal baseline</span>
+                </div>
+                <div className="font-display text-3xl font-extrabold text-[#2A2725] tracking-tight">
+                  BMR
+                </div>
+                <h3 className="font-display font-bold text-base text-[#2A2725]">
+                  Tỷ lệ trao đổi chất cơ bản
+                </h3>
+                <p className="text-xs text-[#6B6661] leading-relaxed font-text">
+                  Mức năng lượng tối thiểu cơ thể cần đốt cháy để duy trì các cơ quan hoạt động ngay cả
+                  khi bạn nghỉ ngơi hoàn toàn.
+                </p>
+              </div>
+
+              <div className="pt-5 border-t border-[#E5E2DF]/60 mt-4 flex items-center justify-between">
+                <span className="text-xs font-bold text-[#7B9461] group-hover:text-[#006561] flex items-center gap-1.5 transition-colors">
+                  <span>Tính ngay</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </span>
+                <HeartPulse className="w-5 h-5 text-[#7B9461]/40" />
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Modal Quick View Product */}
       <ProductDetailModal
         product={selectedProduct}
         open={!!selectedProduct}

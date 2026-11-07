@@ -213,7 +213,7 @@ export const ProductCatalogPage: React.FC = () => {
     selectedPrice !== 'all'
 
   return (
-    <div className="space-y-8 pb-14">
+    <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 pb-16">
       {/* ================= Minimal Top Header Banner ================= */}
       <div className="bg-white rounded-3xl border border-[#E5E2DF] p-6 sm:p-8 tactile-card space-y-3">
         <div className="flex items-center gap-2 text-xs text-[#6B6661]">
