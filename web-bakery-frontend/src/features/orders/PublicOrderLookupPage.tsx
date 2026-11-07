@@ -1,13 +1,24 @@
 import React, { useState } from 'react'
-import { Search, Package, Clock, Truck, CheckCircle2, AlertCircle, ArrowRight, ShieldCheck, MapPin } from 'lucide-react'
+import {
+  Search,
+  Package,
+  Clock,
+  Truck,
+  CheckCircle2,
+  AlertCircle,
+  ArrowRight,
+  ShieldCheck,
+  MapPin,
+  Sparkles,
+  Phone,
+  Flame,
+} from 'lucide-react'
 import { orderApi } from '@/api'
 import type { Order } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { formatCurrency, formatDate, optimizeCloudinaryUrl } from '@/utils/format'
 import { toast } from 'sonner'
-import { cn } from '@/utils/cn'
 
 export const PublicOrderLookupPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -51,61 +62,68 @@ export const PublicOrderLookupPage: React.FC = () => {
       case 'PROCESSING':
         return 2
       case 'SHIPPING':
-        return 3
       case 'DELIVERED':
+        return 3
       case 'RECEIVED':
         return 4
       case 'CANCELLED':
-      case 'RETURN_REQUESTED':
-      case 'RETURNED':
-        return 0
+        return -1
       default:
         return 1
     }
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 py-4">
-      {/* Page Header */}
-      <div className="text-center space-y-2 border-b border-[#e7e5e4] pb-6">
-        <h1 className="text-2xl sm:text-3xl font-extrabold uppercase tracking-tight text-[#1c1917]">
+    <div className="max-w-4xl mx-auto space-y-10 py-6 pb-16">
+      {/* ================= Hero Search Banner ================= */}
+      <div className="bg-white rounded-3xl border border-[#eadbce] p-8 sm:p-10 tactile-card text-center space-y-4">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#47654c]/10 text-[#47654c] text-xs font-semibold">
+          <Sparkles className="w-3.5 h-3.5 text-[#d97724]" />
+          <span>Theo Dõi Hành Trình Mẻ Bánh Tươi</span>
+        </div>
+        <h1 className="font-headline text-3xl sm:text-4xl font-bold text-[#4a3728]">
           Tra Cứu Đơn Hàng Công Khai
         </h1>
-        <p className="text-xs text-[#78716c] max-w-lg mx-auto">
-          Nhập mã đơn hàng (ví dụ: HBK...) hoặc số điện thoại đặt hàng để theo dõi tiến độ nướng bánh và vận chuyển tức thì.
+        <p className="text-xs sm:text-sm text-[#78716c] max-w-xl mx-auto leading-relaxed">
+          Theo dõi hành trình mẻ bánh từ lúc nhào bột, nướng mới tại lò đến khi shipper giao tận tay bạn còn thơm nóng.
         </p>
+
+        {/* Quick Search Form */}
+        <div className="max-w-lg mx-auto pt-2">
+          <form onSubmit={handleSearch} className="flex gap-2.5">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#78716c]" />
+              <Input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Nhập mã đơn hàng hoặc SĐT đặt hàng..."
+                className="pl-10 h-11 bg-[#faf8f5] border-[#eadbce] rounded-full text-xs placeholder:text-[#a8a29e] focus-visible:ring-[#4a3728]"
+              />
+            </div>
+            <Button
+              type="submit"
+              size="default"
+              disabled={isSearching}
+              className="h-11 px-6 bg-[#4a3728] hover:bg-[#2e1e12] text-[#faf8f5] font-semibold text-xs rounded-full shrink-0 flex items-center gap-1.5 cursor-pointer shadow-sm btn-tactile"
+            >
+              <Search className="w-4 h-4 text-[#d97724]" />
+              <span>{isSearching ? 'Đang tìm...' : 'Tra cứu'}</span>
+            </Button>
+          </form>
+        </div>
       </div>
 
-      {/* Search Input Box */}
-      <div className="max-w-xl mx-auto">
-        <form onSubmit={handleSearch} className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#78716c]" />
-            <Input
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Nhập mã đơn hàng hoặc SĐT đặt hàng..."
-              className="pl-9 text-xs"
-            />
-          </div>
-          <Button type="submit" size="default" disabled={isSearching} className="shrink-0 flex items-center gap-1.5">
-            <Search className="w-4 h-4" />
-            <span>{isSearching ? 'Đang tìm...' : 'Tra cứu'}</span>
-          </Button>
-        </form>
-      </div>
-
-      {/* Results Section */}
+      {/* ================= Results Section ================= */}
       {searchedOrders !== null && (
-        <div className="space-y-6 pt-4">
+        <div className="space-y-8">
           {searchedOrders.length === 0 ? (
-            <div className="text-center py-12 border border-dashed border-[#e7e5e4] bg-white p-6 space-y-2">
+            <div className="text-center py-12 rounded-3xl border border-dashed border-[#eadbce] bg-white p-8 space-y-2">
               <Package className="w-10 h-10 text-[#a8a29e] mx-auto" />
-              <p className="font-semibold text-sm text-[#1c1917]">
-                Không tìm thấy đơn hàng nào với thông tin "{searchTerm}"
+              <p className="font-headline text-base font-bold text-[#4a3728]">
+                Không tìm thấy đơn hàng nào với thông tin &ldquo;{searchTerm}&rdquo;
               </p>
               <p className="text-xs text-[#78716c]">
-                Vui lòng kiểm tra lại mã đơn hàng hoặc số điện thoại đã sử dụng khi thanh toán.
+                Vui lòng kiểm tra lại mã đơn hàng hoặc số điện thoại đã sử dụng khi đặt bánh.
               </p>
             </div>
           ) : (
@@ -114,84 +132,93 @@ export const PublicOrderLookupPage: React.FC = () => {
               const isCancelled = order.orderStatus === 'CANCELLED'
 
               const steps = [
-                { step: 1, label: 'Chờ tiếp nhận', icon: Clock },
-                { step: 2, label: 'Đang làm bánh', icon: Package },
-                { step: 3, label: 'Đang giao hàng', icon: Truck },
-                { step: 4, label: 'Đã nhận bánh', icon: CheckCircle2 },
+                { step: 1, label: 'Đã tiếp nhận', icon: Clock },
+                { step: 2, label: 'Đang làm bánh', icon: Flame },
+                { step: 3, label: 'Đang giao hỏa tốc', icon: Truck },
+                { step: 4, label: 'Giao thành công', icon: CheckCircle2 },
               ]
 
               return (
                 <div
                   key={order.id}
-                  className="border border-[#e7e5e4] bg-white p-6 space-y-6 shadow-xs"
+                  className="bg-white rounded-3xl border border-[#eadbce] p-6 sm:p-8 space-y-6 tactile-card"
                 >
                   {/* Order Top Bar */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#f5f5f4] pb-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#eadbce] pb-4">
                     <div>
                       <div className="flex items-center gap-2">
-                        <h2 className="font-extrabold text-base text-[#1c1917]">
+                        <h2 className="font-headline text-xl font-bold text-[#4a3728]">
                           #{order.orderCode}
                         </h2>
-                        <Badge
-                          variant={
-                            order.paymentStatus === 'PAID' ? 'success' : 'secondary'
-                          }
+                        <span
+                          className={`text-xs font-semibold px-3 py-0.5 rounded-full ${
+                            order.paymentStatus === 'PAID'
+                              ? 'bg-[#47654c]/10 text-[#47654c]'
+                              : 'bg-[#d97724]/10 text-[#d97724]'
+                          }`}
                         >
                           {order.paymentStatus === 'PAID'
-                            ? 'Đã thanh toán'
-                            : 'Thanh toán COD'}
-                        </Badge>
+                            ? 'Đã thanh toán (VietQR)'
+                            : 'Thanh toán COD khi nhận bánh'}
+                        </span>
                       </div>
-                      <p className="text-xs text-[#78716c] mt-0.5">
-                        Ngày đặt: {formatDate(order.createdAt)} • Người nhận:{' '}
+                      <p className="text-xs text-[#78716c] mt-1">
+                        Ngày đặt bánh: {formatDate(order.createdAt)} • Người nhận:{' '}
                         <strong>{order.customerName}</strong>
                       </p>
                     </div>
 
                     <div className="text-right">
-                      <span className="text-[11px] text-[#78716c] block">Tổng tiền đơn</span>
-                      <span className="text-base font-black text-[#47654c]">
+                      <span className="text-xs text-[#78716c]">Tổng thanh toán:</span>
+                      <p className="font-headline text-2xl font-bold text-[#4a3728]">
                         {formatCurrency(order.total)}
-                      </span>
+                      </p>
                     </div>
                   </div>
 
-                  {/* Delivery Timeline / Stepper */}
+                  {/* Visual 4-Step Bakery Progress Timeline */}
                   {!isCancelled ? (
-                    <div className="py-2">
-                      <div className="grid grid-cols-4 relative">
+                    <div className="py-4">
+                      <div className="relative flex items-center justify-between">
                         {/* Connecting Line */}
-                        <div className="absolute top-4 left-6 right-6 h-0.5 bg-[#e7e5e4] -z-0" />
+                        <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-1 bg-[#eadbce] -z-0" />
                         <div
-                          className="absolute top-4 left-6 h-0.5 bg-[#47654c] -z-0 transition-all duration-500"
+                          className="absolute left-6 top-1/2 -translate-y-1/2 h-1 bg-[#47654c] -z-0 transition-all duration-500"
                           style={{
-                            width: `${Math.max(0, (currentStep - 1) / 3) * 100}%`,
+                            width: `${((Math.max(currentStep, 1) - 1) / (steps.length - 1)) * 90}%`,
                           }}
                         />
 
+                        {/* Step Nodes */}
                         {steps.map((st) => {
-                          const Icon = st.icon
                           const isDone = currentStep >= st.step
                           const isCurrent = currentStep === st.step
+                          const IconComp = st.icon
 
                           return (
-                            <div key={st.step} className="flex flex-col items-center text-center relative z-10">
+                            <div
+                              key={st.step}
+                              className="relative z-10 flex flex-col items-center gap-2 bg-white px-2"
+                            >
                               <div
-                                className={cn(
-                                  'w-8 h-8 rounded-none flex items-center justify-center transition-colors',
-                                  isDone
+                                className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 ${
+                                  isCurrent
+                                    ? 'bg-[#4a3728] text-white ring-4 ring-[#eadbce] scale-110 shadow-sm'
+                                    : isDone
                                     ? 'bg-[#47654c] text-white'
-                                    : 'bg-[#f5f5f4] text-[#a8a29e] border border-[#e7e5e4]',
-                                  isCurrent && 'ring-2 ring-[#47654c] ring-offset-2'
-                                )}
+                                    : 'bg-[#faf8f5] text-[#a8a29e] border border-[#eadbce]'
+                                }`}
                               >
-                                <Icon className="w-4 h-4" />
+                                <IconComp className="w-5 h-5" />
                               </div>
                               <span
-                                className={cn(
-                                  'text-[11px] mt-2 font-medium',
-                                  isDone ? 'text-[#1c1917] font-semibold' : 'text-[#78716c]'
-                                )}
+                                className={`text-xs font-medium text-center whitespace-nowrap ${
+                                  isCurrent
+                                    ? 'text-[#4a3728] font-bold'
+                                    : isDone
+                                    ? 'text-[#47654c]'
+                                    : 'text-[#a8a29e]'
+                                }`}
                               >
                                 {st.label}
                               </span>
@@ -201,65 +228,81 @@ export const PublicOrderLookupPage: React.FC = () => {
                       </div>
                     </div>
                   ) : (
-                    <div className="p-3 bg-[#fef2f2] border border-[#fecaca] text-[#dc2626] flex items-center gap-2 text-xs">
-                      <AlertCircle className="w-4 h-4 shrink-0" />
-                      <span>Đơn hàng này đã bị hủy.</span>
+                    <div className="flex items-center gap-3 p-4 rounded-2xl bg-[#fef2f2] border border-[#fecaca] text-[#dc2626] text-xs">
+                      <AlertCircle className="w-5 h-5 shrink-0" />
+                      <div>
+                        <p className="font-bold">Đơn hàng này đã bị hủy</p>
+                        <p className="text-[11px] text-[#991b1b]">
+                          Nếu quý khách có bất kỳ thắc mắc nào, vui lòng liên hệ hotline 1900 6828 để
+                          được hỗ trợ hoàn tiền hoặc đặt lại bánh mới.
+                        </p>
+                      </div>
                     </div>
                   )}
 
-                  {/* Shipping & Carrier Info */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[#faf8f5] p-4 border border-[#e7e5e4] text-xs">
-                    <div className="space-y-1">
-                      <span className="font-semibold text-[#1c1917] flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-[#47654c]" />
-                        <span>Địa chỉ nhận bánh:</span>
-                      </span>
-                      <p className="text-[#57534e] pl-5 leading-relaxed">{order.address}</p>
-                    </div>
-
-                    <div className="space-y-1">
-                      <span className="font-semibold text-[#1c1917] flex items-center gap-1.5">
-                        <Truck className="w-3.5 h-3.5 text-[#47654c]" />
-                        <span>Thông tin vận chuyển:</span>
-                      </span>
-                      <p className="text-[#57534e] pl-5">
-                        Đơn vị vận chuyển:{' '}
-                        <strong>{order.shippingCarrier || 'Đang điều phối shipper'}</strong>
-                      </p>
-                      {order.trackingCode && (
-                        <p className="text-[#57534e] pl-5">
-                          Mã vận đơn: <strong className="font-mono text-[#d97724]">{order.trackingCode}</strong>
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Items List */}
-                  <div className="space-y-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-[#1c1917]">
-                      Danh Sách Bánh Trong Đơn:
-                    </span>
-                    <div className="divide-y divide-[#f5f5f4] border border-[#f5f5f4]">
-                      {order.items?.map((it) => (
-                        <div key={it.id || it.productId} className="p-3 flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-3">
-                            <img
-                              src={optimizeCloudinaryUrl(it.imageUrl, 100)}
-                              alt={it.productName}
-                              className="w-10 h-10 object-cover border border-[#e7e5e4]"
-                            />
-                            <div>
-                              <p className="font-semibold text-[#1c1917]">{it.productName}</p>
-                              <p className="text-[#78716c]">
-                                {formatCurrency(it.price)} x {it.quantity}
-                              </p>
+                  {/* 2-Column Details Breakdown */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-[#eadbce]">
+                    {/* Items List */}
+                    <div className="space-y-3">
+                      <h3 className="font-headline text-sm font-bold text-[#4a3728]">
+                        Chi Tiết Món Bánh Trong Kiện
+                      </h3>
+                      <div className="space-y-2">
+                        {order.items?.map((item, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center justify-between p-3 rounded-xl bg-[#faf8f5] border border-[#eadbce] text-xs"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              {item.imageUrl && (
+                                <img
+                                  src={optimizeCloudinaryUrl(item.imageUrl, 100)}
+                                  alt={item.productName}
+                                  className="w-10 h-10 object-cover rounded-lg border border-[#eadbce]"
+                                />
+                              )}
+                              <div>
+                                <span className="font-semibold text-[#4a3728] block">
+                                  {item.productName}
+                                </span>
+                                <span className="text-[11px] text-[#78716c]">
+                                  Số lượng: x{item.quantity}
+                                </span>
+                              </div>
                             </div>
+                            <span className="font-bold text-[#4a3728]">
+                              {formatCurrency(item.price * item.quantity)}
+                            </span>
                           </div>
-                          <span className="font-bold text-[#1c1917]">
-                            {formatCurrency(it.total)}
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Delivery & Reassurance */}
+                    <div className="space-y-3">
+                      <h3 className="font-headline text-sm font-bold text-[#4a3728]">
+                        Thông Tin Giao Nhận &amp; Bếp Nướng
+                      </h3>
+                      <div className="p-4 rounded-2xl bg-[#faf8f5] border border-[#eadbce] space-y-2.5 text-xs text-[#78716c]">
+                        <div className="flex items-start gap-2">
+                          <MapPin className="w-4 h-4 text-[#4a3728] shrink-0 mt-0.5" />
+                          <span>
+                            Địa chỉ: <strong>{order.address}</strong>
                           </span>
                         </div>
-                      ))}
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-4 h-4 text-[#4a3728] shrink-0" />
+                          <span>
+                            Số điện thoại: <strong>{order.phone}</strong>
+                          </span>
+                        </div>
+                        <div className="pt-2 border-t border-[#eadbce] flex items-center justify-between">
+                          <span className="text-[#47654c] font-semibold flex items-center gap-1">
+                            <ShieldCheck className="w-4 h-4" /> Đổi trả 1-1 trong 24h
+                          </span>
+                          <span className="text-[11px] text-[#78716c]">Hotline: 1900 6828</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
