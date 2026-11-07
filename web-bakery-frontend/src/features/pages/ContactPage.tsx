@@ -62,7 +62,7 @@ export const ContactPage: React.FC = () => {
           Liên Hệ Hebekery
         </h1>
         <p className="text-xs sm:text-sm text-[#7c6856] mt-1.5">
-          Gửi phản hồi, tư vấn chế độ ăn hoặc liên hệ đặt bánh số lượng lớn cho sự kiện, tiệc trà teabreak
+          Tư vấn thực đơn dinh dưỡng & liên hệ đặt bánh teabreak
         </p>
       </div>
 

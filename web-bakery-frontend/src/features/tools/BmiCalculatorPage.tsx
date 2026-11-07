@@ -310,10 +310,10 @@ export const BmiCalculatorPage: React.FC = () => {
           <span>Công Thức Harris-Benedict Chuẩn Khoa Học</span>
         </div>
         <h1 className="font-headline text-3xl sm:text-4xl font-bold text-[#4a3728]">
-          Hiểu Rõ Chỉ Số Cơ Thể – Ăn Bánh Ngon Vẫn Giữ Dáng Thon
+          Tính Toán Chỉ Số BMI & TDEE
         </h1>
         <p className="text-xs sm:text-sm text-[#78716c] max-w-2xl leading-relaxed">
-          Tính toán nhu cầu năng lượng hàng ngày (TDEE) và tự động nhận gợi ý combo bánh ngũ cốc Hebekery 7 ngày phù hợp với mục tiêu giảm mỡ hoặc tăng cơ của riêng bạn.
+          Cá nhân hóa năng lượng • Gợi ý combo thực đơn 7 ngày • Chuẩn Calo & Macro
         </p>
       </div>
 

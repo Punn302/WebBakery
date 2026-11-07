@@ -21,6 +21,15 @@ export const Header: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-[#eadbce] bg-[#faf8f5]/95 backdrop-blur-md">
+      {/* Top Brand Notification Bar */}
+      <div className="bg-[#4a3728] text-[#faf8f5] text-[11px] py-1 px-4 text-center font-medium tracking-wide border-b border-[#eadbce]/20 select-none hidden sm:block">
+        <span>Freeship đơn từ 299k</span>
+        <span className="mx-2 opacity-50">•</span>
+        <span>Giao nhanh 2H nội thành</span>
+        <span className="mx-2 opacity-50">•</span>
+        <span>100% Không đường tinh luyện</span>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Brand Logo Cluster */}
         <Link to="/" className="flex flex-col items-start group select-none">
@@ -128,7 +137,7 @@ export const Header: React.FC = () => {
             <Button
               size="sm"
               onClick={() => navigate('/login')}
-              className="bg-[#4a3728] hover:bg-[#2e1e12] text-[#faf8f5] font-semibold text-xs px-5 py-2 rounded-full shadow-sm cursor-pointer transition-colors"
+              className="bg-[#4a3728] hover:bg-[#2e1e12] text-[#faf8f5] font-semibold text-xs px-5 py-2 rounded-full shadow-sm cursor-pointer transition-colors btn-tactile"
             >
               {t('nav.login', 'Đăng nhập')}
             </Button>

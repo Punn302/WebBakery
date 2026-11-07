@@ -85,7 +85,7 @@ export const PublicOrderLookupPage: React.FC = () => {
           Tra Cứu Đơn Hàng Công Khai
         </h1>
         <p className="text-xs sm:text-sm text-[#78716c] max-w-xl mx-auto leading-relaxed">
-          Theo dõi hành trình mẻ bánh từ lúc nhào bột, nướng mới tại lò đến khi shipper giao tận tay bạn còn thơm nóng.
+          Theo dõi tiến độ nướng bánh và giao nhận theo thời gian thực.
         </p>
 
         {/* Quick Search Form */}
