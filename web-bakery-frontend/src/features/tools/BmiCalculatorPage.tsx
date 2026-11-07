@@ -2,13 +2,14 @@ import React, { useState } from 'react'
 import {
   Activity,
   Flame,
-  Dumbbell,
   Sparkles,
   ShoppingBag,
-  CheckCircle2,
   Calendar,
   Percent,
   Check,
+  CheckCircle2,
+  Wheat,
+  Scale,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -50,7 +51,7 @@ export const BmiCalculatorPage: React.FC = () => {
   const heightInMeters = height / 100
   const bmi = +(weight / (heightInMeters * heightInMeters)).toFixed(1)
 
-  let bmiCategory = 'Bình thường'
+  let bmiCategory = 'Cân Đối Lý Tưởng'
   if (bmi < 18.5) bmiCategory = 'Hơi gầy'
   else if (bmi >= 23 && bmi < 25) bmiCategory = 'Thừa cân nhẹ'
   else if (bmi >= 25) bmiCategory = 'Thừa cân'
@@ -159,45 +160,45 @@ export const BmiCalculatorPage: React.FC = () => {
                 carbs: 34,
               },
               quantity: 2,
-              benefit: 'Dồi dào Kẽm và Magie hỗ trợ tối ưu phục hồi cơ bắp',
+              benefit: 'Hạt bí xanh và hướng dương giàu Magie, Kẽm và Protein',
             },
             {
               product: {
                 id: 'P005',
-                description: 'Granola siêu hạt protein và bơ hạt phỉ',
-                name: 'Granola Siêu Hạt Protein & Bơ Hạt Phỉ',
+                description: 'Granola Chocolate Bỉ thượng hạng',
+                name: 'Granola Chocolate Cacao 85% Đậm Vị Bỉ',
                 price: 145000,
                 stock: 20,
                 imageUrl:
                   'https://images.unsplash.com/photo-1517673132405-a56a62b18caf?w=600&auto=format&fit=crop',
                 active: true,
-                lowStockThreshold: 5,
-                calories: 290,
-                protein: 14,
-                fat: 14,
-                carbs: 26,
+                lowStockThreshold: 4,
+                calories: 260,
+                protein: 9,
+                fat: 12,
+                carbs: 28,
               },
               quantity: 2,
-              benefit: 'Đậm đặc protein từ hạt thực vật và bột whey cô lập',
+              benefit: 'Flavonoid từ cacao đen nguyên chất giúp thư giãn cơ bắp sau tập',
             },
             {
               product: {
                 id: 'P006',
-                description: 'Bánh quy yến mạch chuối và hạt óc chó',
-                name: 'Bánh Quy Yến Mạch Chuối & Hạt Óc Chó',
-                price: 85000,
-                stock: 15,
+                description: 'Biscotti hạt điều và hạnh nhân đúp đạm',
+                name: 'Biscotti Đúp Đạm Hạnh Nhân & Hạt Điều Bình Phước',
+                price: 110000,
+                stock: 12,
                 imageUrl:
                   'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&auto=format&fit=crop',
                 active: true,
-                lowStockThreshold: 4,
-                calories: 180,
+                lowStockThreshold: 2,
+                calories: 145,
                 protein: 6,
-                fat: 6,
-                carbs: 25,
+                fat: 5,
+                carbs: 16,
               },
               quantity: 1,
-              benefit: 'Nạp glycogen nhanh trước và sau các buổi tập tạ',
+              benefit: 'Tỷ lệ hạt dinh dưỡng đạt 60%, cung cấp axit amin thiết yếu',
             },
           ],
         }
@@ -205,25 +206,25 @@ export const BmiCalculatorPage: React.FC = () => {
       case 'maintain':
       default:
         return {
-          title: 'Gói Bánh Dinh Dưỡng 7 Ngày - Cân Bằng Năng Lượng & Giữ Dáng',
+          title: 'Gói Bánh Dinh Dưỡng 7 Ngày - Duy Trì Vóc Dáng & Trẻ Hóa',
           description:
-            'Tỷ lệ vàng giữa carb chuyển hóa chậm, men tự nhiên và chất béo tốt giúp cơ thể nhẹ nhàng, thanh lọc và tràn đầy sinh khí.',
-          avgCaloriesPerMeal: 360,
+            'Cân bằng dinh dưỡng vi lượng và chất chống oxy hóa tự nhiên giúp cơ thể thanh nhẹ, tràn đầy sức sống mỗi ngày.',
+          avgCaloriesPerMeal: 350,
           items: [
             {
               product: {
                 id: 'P007',
-                description: 'Bánh mì sourdough men tự nhiên hạt chia',
-                name: 'Bánh Mì Men Tự Nhiên Sourdough Hạt Chia',
+                description: 'Bánh mì Sourdough men tự nhiên',
+                name: 'Bánh Mì Sourdough Lúa Mạch Men Tự Nhiên Hebekery',
                 price: 65000,
-                stock: 16,
+                stock: 15,
                 imageUrl:
                   'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop',
                 active: true,
                 lowStockThreshold: 3,
-                calories: 195,
-                protein: 8,
-                fat: 3,
+                calories: 175,
+                protein: 6,
+                fat: 1,
                 carbs: 35,
               },
               quantity: 2,
@@ -301,225 +302,245 @@ export const BmiCalculatorPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-10 py-4">
-      {/* Page Header */}
-      <div className="border-b border-[#e7e5e4] pb-6">
-        <h1 className="text-2xl sm:text-3xl font-extrabold uppercase tracking-tight text-[#1c1917]">
-          Công Cụ Tính Chỉ Số BMI, TDEE & Gợi Ý Thực Đơn Tuần
+    <div className="max-w-5xl mx-auto space-y-10 py-6 pb-16">
+      {/* ================= Hero Header Banner ================= */}
+      <div className="bg-white rounded-3xl border border-[#eadbce] p-8 sm:p-10 tactile-card space-y-3">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#47654c]/10 text-[#47654c] text-xs font-semibold">
+          <Sparkles className="w-3.5 h-3.5 text-[#d97724]" />
+          <span>Công Thức Harris-Benedict Chuẩn Khoa Học</span>
+        </div>
+        <h1 className="font-headline text-3xl sm:text-4xl font-bold text-[#4a3728]">
+          Hiểu Rõ Chỉ Số Cơ Thể – Ăn Bánh Ngon Vẫn Giữ Dáng Thon
         </h1>
-        <p className="text-xs text-[#78716c] mt-1">
-          Dành riêng cho khách hàng của Hebekery để xây dựng thực đơn ăn kiêng lành mạnh, chính xác theo từng thể trạng.
+        <p className="text-xs sm:text-sm text-[#78716c] max-w-2xl leading-relaxed">
+          Tính toán nhu cầu năng lượng hàng ngày (TDEE) và tự động nhận gợi ý combo bánh ngũ cốc Hebekery 7 ngày phù hợp với mục tiêu giảm mỡ hoặc tăng cơ của riêng bạn.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Form Input */}
-        <div className="border border-[#e7e5e4] bg-white p-6 space-y-5">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-[#1c1917] flex items-center gap-2">
-            <Activity className="w-4 h-4 text-[#47654c]" />
-            <span>Thông Số Cơ Thể Của Bạn</span>
+      {/* ================= 2-Column Calculator & Results Board ================= */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+        {/* Left Column: Form Input Card */}
+        <div className="md:col-span-6 bg-white rounded-3xl border border-[#eadbce] p-7 tactile-card space-y-6">
+          <h2 className="font-headline text-lg font-bold text-[#4a3728] flex items-center gap-2">
+            <Activity className="w-5 h-5 text-[#47654c]" />
+            <span>Nhập Thông Số Cơ Thể</span>
           </h2>
 
           <div className="space-y-4">
+            {/* Gender Toggle */}
             <div>
-              <label className="block text-xs font-semibold text-[#1c1917] mb-1">Giới tính</label>
+              <label className="block text-xs font-semibold text-[#4a3728] mb-1.5">Giới tính</label>
               <div className="grid grid-cols-2 gap-2">
-                <Button
+                <button
                   type="button"
-                  variant={gender === 'female' ? 'default' : 'secondary'}
-                  size="sm"
                   onClick={() => setGender('female')}
+                  className={`py-2.5 px-4 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                    gender === 'female'
+                      ? 'bg-[#4a3728] text-[#faf8f5] shadow-xs'
+                      : 'bg-[#faf8f5] text-[#78716c] border border-[#eadbce] hover:bg-[#f4efea]'
+                  }`}
                 >
                   Nữ
-                </Button>
-                <Button
+                </button>
+                <button
                   type="button"
-                  variant={gender === 'male' ? 'default' : 'secondary'}
-                  size="sm"
                   onClick={() => setGender('male')}
+                  className={`py-2.5 px-4 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                    gender === 'male'
+                      ? 'bg-[#4a3728] text-[#faf8f5] shadow-xs'
+                      : 'bg-[#faf8f5] text-[#78716c] border border-[#eadbce] hover:bg-[#f4efea]'
+                  }`}
                 >
                   Nam
-                </Button>
+                </button>
               </div>
             </div>
 
+            {/* Age, Height, Weight Steppers */}
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-[#1c1917] mb-1">Tuổi</label>
+                <label className="block text-xs font-semibold text-[#4a3728] mb-1">Tuổi</label>
                 <Input
                   type="number"
                   value={age}
                   onChange={(e) => setAge(+e.target.value)}
                   min={10}
                   max={100}
+                  className="bg-[#faf8f5] border-[#eadbce] rounded-xl text-xs font-semibold text-center"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-[#1c1917] mb-1">Chiều cao (cm)</label>
+                <label className="block text-xs font-semibold text-[#4a3728] mb-1">Chiều cao (cm)</label>
                 <Input
                   type="number"
                   value={height}
                   onChange={(e) => setHeight(+e.target.value)}
                   min={100}
                   max={230}
+                  className="bg-[#faf8f5] border-[#eadbce] rounded-xl text-xs font-semibold text-center"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-[#1c1917] mb-1">Cân nặng (kg)</label>
+                <label className="block text-xs font-semibold text-[#4a3728] mb-1">Cân nặng (kg)</label>
                 <Input
                   type="number"
                   value={weight}
                   onChange={(e) => setWeight(+e.target.value)}
                   min={30}
                   max={180}
+                  className="bg-[#faf8f5] border-[#eadbce] rounded-xl text-xs font-semibold text-center"
                 />
               </div>
             </div>
 
+            {/* Activity Level Selector */}
             <div>
-              <label className="block text-xs font-semibold text-[#1c1917] mb-1">
+              <label className="block text-xs font-semibold text-[#4a3728] mb-1.5">
                 Tần suất vận động trong tuần
               </label>
               <select
                 value={activity}
                 onChange={(e) => setActivity(+e.target.value)}
-                className="w-full h-10 border border-[#d6d3d1] bg-white px-3 text-xs text-[#1c1917] focus:outline-none focus:border-[#47654c]"
+                className="w-full h-11 border border-[#eadbce] rounded-xl bg-[#faf8f5] px-3 text-xs text-[#4a3728] font-medium focus:outline-none focus:border-[#4a3728] cursor-pointer"
               >
                 <option value={1.2}>Ít vận động (Nhân viên văn phòng, ngồi nhiều)</option>
-                <option value={1.375}>Vận động nhẹ (Tập luyện 1 - 3 buổi/tuần)</option>
-                <option value={1.55}>Vận động vừa (Tập luyện 3 - 5 buổi/tuần)</option>
-                <option value={1.725}>Vận động nhiều (Tập luyện 6 - 7 buổi/tuần)</option>
+                <option value={1.375}>Vận động nhẹ (Tập luyện 1 - 3 buổi/tuần: Yoga, đi bộ)</option>
+                <option value={1.55}>Vận động vừa (Tập luyện 3 - 5 buổi/tuần: Gym, Chạy bộ)</option>
+                <option value={1.725}>Vận động nhiều (Tập luyện 6 - 7 buổi/tuần, VĐV)</option>
               </select>
             </div>
 
+            {/* Goal Selector */}
             <div>
-              <label className="block text-xs font-semibold text-[#1c1917] mb-1">Mục tiêu hiện tại</label>
+              <label className="block text-xs font-semibold text-[#4a3728] mb-1.5">Mục tiêu của bạn</label>
               <div className="grid grid-cols-3 gap-2">
-                <Button
-                  type="button"
-                  variant={goal === 'lose' ? 'default' : 'secondary'}
-                  size="sm"
-                  onClick={() => setGoal('lose')}
-                >
-                  Giảm mỡ
-                </Button>
-                <Button
-                  type="button"
-                  variant={goal === 'maintain' ? 'default' : 'secondary'}
-                  size="sm"
-                  onClick={() => setGoal('maintain')}
-                >
-                  Giữ dáng
-                </Button>
-                <Button
-                  type="button"
-                  variant={goal === 'gain' ? 'default' : 'secondary'}
-                  size="sm"
-                  onClick={() => setGoal('gain')}
-                >
-                  Tăng cơ
-                </Button>
+                {[
+                  { id: 'lose', label: 'Giảm mỡ' },
+                  { id: 'maintain', label: 'Giữ dáng' },
+                  { id: 'gain', label: 'Tăng cơ' },
+                ].map((g) => (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => setGoal(g.id as any)}
+                    className={`py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                      goal === g.id
+                        ? 'bg-[#47654c] text-white shadow-xs'
+                        : 'bg-[#faf8f5] text-[#78716c] border border-[#eadbce] hover:bg-[#f4efea]'
+                    }`}
+                  >
+                    {g.label}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Results Panel */}
-        <div className="space-y-4">
-          <div className="border border-[#47654c] bg-[#f4efe6] p-6 space-y-4">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-[#1c1917] flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#47654c]" />
-              <span>Chỉ Số Khuyến Nghị Hàng Ngày</span>
+        {/* Right Column: Live Results & Macro Board */}
+        <div className="md:col-span-6 bg-[#faf8f5] rounded-3xl border border-[#eadbce] p-7 tactile-card space-y-6">
+          <div className="flex items-center justify-between border-b border-[#eadbce] pb-4">
+            <h2 className="font-headline text-lg font-bold text-[#4a3728] flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-[#d97724]" />
+              <span>Chỉ Số Năng Lượng Đề Xuất</span>
             </h2>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white p-4 border border-[#e7e5e4]">
-                <span className="text-[10px] text-[#78716c] uppercase tracking-wider block">
-                  Chỉ số BMI
-                </span>
-                <span className="text-2xl font-black text-[#1c1917]">{bmi}</span>
-                <span className="block text-xs text-[#47654c] font-semibold mt-0.5">
-                  {bmiCategory}
-                </span>
-              </div>
-
-              <div className="bg-white p-4 border border-[#e7e5e4]">
-                <span className="text-[10px] text-[#78716c] uppercase tracking-wider block">
-                  Calo Mục Tiêu
-                </span>
-                <span className="text-2xl font-black text-[#d97724]">{targetCalories}</span>
-                <span className="block text-xs text-[#78716c] mt-0.5">kcal / ngày</span>
-              </div>
-            </div>
-
-            {/* Macro Breakdown */}
-            <div className="space-y-2 pt-2 border-t border-[#e7e5e4]">
-              <span className="text-xs font-bold text-[#1c1917] block">
-                Phân Bổ Dinh Dưỡng Đa Lượng (Macro):
-              </span>
-              <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                <div className="bg-white p-2 border border-[#e7e5e4]">
-                  <span className="text-[10px] text-[#78716c] block">Chất đạm</span>
-                  <strong className="text-[#1c1917]">{protein}g</strong>
-                </div>
-                <div className="bg-white p-2 border border-[#e7e5e4]">
-                  <span className="text-[10px] text-[#78716c] block">Tinh bột tốt</span>
-                  <strong className="text-[#1c1917]">{carbs}g</strong>
-                </div>
-                <div className="bg-white p-2 border border-[#e7e5e4]">
-                  <span className="text-[10px] text-[#78716c] block">Chất béo lành</span>
-                  <strong className="text-[#1c1917]">{fat}g</strong>
-                </div>
-              </div>
-            </div>
-
-            <p className="text-[11px] text-[#78716c] leading-relaxed italic">
-              * Lời khuyên từ Hebekery: Hãy chọn các loại bánh ngũ cốc nguyên cám hoặc thanh hạt năng lượng cho bữa phụ để duy trì mức năng lượng ổn định mà không lo tích mỡ thừa!
-            </p>
+            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#47654c]/10 text-[#47654c]">
+              BMI: {bmi} ({bmiCategory})
+            </span>
           </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white p-4 rounded-2xl border border-[#eadbce]">
+              <span className="text-[10px] text-[#78716c] uppercase tracking-wider block font-semibold">
+                BMR Cơ Bản
+              </span>
+              <span className="font-headline text-2xl font-bold text-[#4a3728]">{Math.round(bmr)}</span>
+              <span className="block text-[11px] text-[#78716c] mt-0.5">kcal / ngày</span>
+            </div>
+
+            <div className="bg-white p-4 rounded-2xl border border-[#eadbce] ring-2 ring-[#47654c]/30">
+              <span className="text-[10px] text-[#47654c] uppercase tracking-wider block font-bold">
+                Calo Mục Tiêu (Hebekery)
+              </span>
+              <span className="font-headline text-2xl font-bold text-[#47654c]">{targetCalories}</span>
+              <span className="block text-[11px] text-[#47654c] font-semibold mt-0.5">kcal / ngày</span>
+            </div>
+          </div>
+
+          {/* Macro Breakdown */}
+          <div className="space-y-3 pt-2">
+            <span className="text-xs font-bold text-[#4a3728] block">
+              Phân Bổ Macro Chuẩn Eat Clean:
+            </span>
+            <div className="grid grid-cols-3 gap-2.5 text-center text-xs">
+              <div className="bg-white p-3 rounded-xl border border-[#eadbce]">
+                <span className="text-[10px] text-[#78716c] block">30% Đạm</span>
+                <strong className="text-base text-[#47654c] font-headline">{protein}g</strong>
+              </div>
+              <div className="bg-white p-3 rounded-xl border border-[#eadbce]">
+                <span className="text-[10px] text-[#78716c] block">45% Tinh bột tốt</span>
+                <strong className="text-base text-[#d97724] font-headline">{carbs}g</strong>
+              </div>
+              <div className="bg-white p-3 rounded-xl border border-[#eadbce]">
+                <span className="text-[10px] text-[#78716c] block">25% Béo lành</span>
+                <strong className="text-base text-[#4a3728] font-headline">{fat}g</strong>
+              </div>
+            </div>
+
+            {/* Visual Colored Ratio Bar */}
+            <div className="h-3 w-full rounded-full overflow-hidden flex bg-stone-200 mt-2">
+              <div className="h-full bg-[#47654c]" style={{ width: '30%' }} title="30% Protein" />
+              <div className="h-full bg-[#d97724]" style={{ width: '45%' }} title="45% Good Carbs" />
+              <div className="h-full bg-[#4a3728]" style={{ width: '25%' }} title="25% Healthy Fat" />
+            </div>
+          </div>
+
+          <p className="text-[11px] text-[#78716c] leading-relaxed italic border-t border-[#eadbce] pt-3">
+            * Lời khuyên từ chuyên gia dinh dưỡng Hebekery: Sử dụng bánh ngũ cốc lên men tự nhiên và hạt nướng mật ong vào bữa sáng &amp; bữa phụ 15h giúp no lâu, giảm cảm giác thèm đường công nghiệp.
+          </p>
         </div>
       </div>
 
-      {/* 1-Click Upsell Section: Curated 7-Day Nutrition Pack */}
-      <div className="border-2 border-[#47654c] bg-white p-6 sm:p-8 space-y-6">
-        <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#e7e5e4] pb-4">
-          <div className="space-y-1 max-w-xl">
+      {/* ================= Curated 7-Day Nutrition Pack (Stitch Screen 3 Upsell) ================= */}
+      <div className="bg-white rounded-3xl border-2 border-[#4a3728] p-7 sm:p-9 tactile-card space-y-6">
+        <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#eadbce] pb-5">
+          <div className="space-y-1.5 max-w-xl">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#d97724] text-white">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#d97724] text-white rounded-full">
                 <Calendar className="w-3 h-3" /> Gợi Ý 7 Ngày
               </span>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#15803d] text-white">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#47654c] text-white rounded-full">
                 <Percent className="w-3 h-3" /> Tiết kiệm 10%
               </span>
             </div>
-            <h3 className="text-base sm:text-lg font-extrabold text-[#1c1917] uppercase tracking-wide">
+            <h3 className="font-headline text-lg sm:text-xl font-bold text-[#4a3728]">
               {combo.title}
             </h3>
-            <p className="text-xs text-[#57534e] leading-relaxed">{combo.description}</p>
+            <p className="text-xs text-[#78716c] leading-relaxed">{combo.description}</p>
           </div>
 
           <div className="text-right">
-            <span className="text-[11px] text-[#78716c] line-through block">
+            <span className="text-xs text-[#78716c] line-through block">
               {formatCurrency(originalTotal)}
             </span>
-            <span className="text-xl sm:text-2xl font-black text-[#47654c]">
+            <span className="font-headline text-2xl font-bold text-[#4a3728]">
               {formatCurrency(discountTotal)}
             </span>
-            <span className="text-[10px] text-[#15803d] font-bold block">
-              Tiết kiệm {formatCurrency(savedAmount)} khi mua trọn bộ
+            <span className="text-xs text-[#47654c] font-semibold block">
+              Tiết kiệm {formatCurrency(savedAmount)} khi mua combo trọn bộ
             </span>
           </div>
         </div>
 
         {/* Combo Items Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           {combo.items.map((it) => (
             <div
               key={it.product.id}
-              className="p-4 border border-[#e7e5e4] bg-[#faf8f5] flex flex-col justify-between space-y-3"
+              className="p-4 rounded-2xl border border-[#eadbce] bg-[#faf8f5] flex flex-col justify-between space-y-3"
             >
-              <div className="space-y-2">
-                <div className="aspect-video w-full overflow-hidden border border-[#e7e5e4]">
+              <div className="space-y-2.5">
+                <div className="aspect-video w-full overflow-hidden rounded-xl border border-[#eadbce]">
                   <img
                     src={it.product.imageUrl}
                     alt={it.product.name}
@@ -527,19 +548,19 @@ export const BmiCalculatorPage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <h4 className="font-bold text-xs text-[#1c1917] leading-snug">
+                  <h4 className="font-headline text-sm font-bold text-[#4a3728] leading-snug">
                     {it.product.name}
                   </h4>
                   <span className="text-[11px] font-semibold text-[#d97724] block mt-0.5">
-                    Số lượng: x{it.quantity} khẩu phần
+                    Số lượng: x{it.quantity} phần trong tuần
                   </span>
                 </div>
-                <p className="text-[11px] text-[#78716c] leading-relaxed">{it.benefit}</p>
+                <p className="text-xs text-[#78716c] leading-relaxed">{it.benefit}</p>
               </div>
 
-              <div className="pt-2 border-t border-[#e7e5e4] flex items-center justify-between text-xs">
+              <div className="pt-2 border-t border-[#eadbce] flex items-center justify-between text-xs">
                 <span className="text-[#78716c]">{it.product.calories} kcal/phần</span>
-                <span className="font-bold text-[#1c1917]">
+                <span className="font-bold text-[#4a3728]">
                   {formatCurrency(it.product.price * it.quantity)}
                 </span>
               </div>
@@ -548,11 +569,11 @@ export const BmiCalculatorPage: React.FC = () => {
         </div>
 
         {/* Action Button */}
-        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[#e7e5e4]">
-          <div className="text-xs text-[#57534e] flex items-center gap-2">
-            <Check className="w-4 h-4 text-[#15803d] shrink-0" />
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[#eadbce]">
+          <div className="text-xs text-[#78716c] flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-[#47654c] shrink-0" />
             <span>
-              Bánh nướng mới mỗi sáng, đóng gói chân không bảo quản tươi ngon suốt cả tuần.
+              Bánh nướng mẻ nhỏ mỗi sáng, đóng gói giữ trọn độ thơm giòn suốt 7 ngày.
             </span>
           </div>
 
@@ -560,10 +581,10 @@ export const BmiCalculatorPage: React.FC = () => {
             size="lg"
             disabled={isAddingCombo}
             onClick={handleAddWeeklyComboToCart}
-            className="w-full sm:w-auto px-8 flex items-center justify-center gap-2 bg-[#47654c] hover:bg-[#38513c] text-white shrink-0 cursor-pointer shadow-sm"
+            className="w-full sm:w-auto px-8 py-3 rounded-full flex items-center justify-center gap-2 bg-[#4a3728] hover:bg-[#2e1e12] text-[#faf8f5] font-semibold shrink-0 cursor-pointer shadow-md"
           >
-            <ShoppingBag className="w-4 h-4" />
-            <span>{isAddingCombo ? 'Đang thêm vào giỏ...' : '1-Click: Thêm Trọn Bộ Vào Giỏ Hàng'}</span>
+            <ShoppingBag className="w-4 h-4 text-[#d97724]" />
+            <span>{isAddingCombo ? 'Đang thêm vào giỏ...' : '1-Chạm: Đặt Mua Trọn Bộ Combo 7 Ngày'}</span>
           </Button>
         </div>
       </div>
