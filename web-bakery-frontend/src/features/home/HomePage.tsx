@@ -4,10 +4,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowRight,
-  Flame,
-  Zap,
   Check,
-  Heart,
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { productApi } from '@/api'
@@ -16,21 +13,22 @@ import { useCart } from '@/hooks/useCart'
 import { formatCurrency, optimizeCloudinaryUrl } from '@/utils/format'
 import type { Product } from '@/types'
 
-// Real Hebekery Hero Slides with authentic assets
+// Authentic Hebekery Hero Slides matching exact proportions & leaves
 const HERO_SLIDES = [
   {
     id: 1,
     title: 'NGŨ CỐC GRANOLA DINH DƯỠNG',
     link: '/products?category=Granola',
     image: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/slide-img1.png?1790765513162',
+    isOdd: true,
     leaves: [
       {
         src: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/flo_1_sl_1.png?1790765513162',
-        className: 'top-8 left-8 sm:left-24 w-12 sm:w-16',
+        className: 'bottom-[22%] right-[10%] sm:right-[14%] w-16 sm:w-22 md:w-26',
       },
       {
         src: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/flo_2_sl_1.png?1790765513162',
-        className: 'bottom-16 right-8 sm:right-28 w-14 sm:w-20',
+        className: 'top-[20%] left-[10%] sm:left-[14%] w-16 sm:w-22 md:w-26',
       },
     ],
   },
@@ -39,14 +37,15 @@ const HERO_SLIDES = [
     title: 'BÁNH BISCOTTI ĂN KIÊNG',
     link: '/products?category=Biscotti',
     image: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/slide-img2.png?1790765513162',
+    isOdd: false,
     leaves: [
       {
         src: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/flo_1_sl_2.png?1790765513162',
-        className: 'top-10 left-12 sm:left-28 w-14 sm:w-18',
+        className: 'top-[22%] left-[8%] sm:left-[12%] md:left-[14%] w-16 sm:w-22 md:w-26',
       },
       {
         src: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/flo_2_sl_2.png?1790765513162',
-        className: 'bottom-14 right-10 sm:right-32 w-14 sm:w-20',
+        className: 'bottom-[22%] right-[8%] sm:right-[12%] md:right-[14%] w-16 sm:w-22 md:w-28',
       },
     ],
   },
@@ -55,14 +54,15 @@ const HERO_SLIDES = [
     title: 'BÁNH NGÓI HẠNH NHÂN KETO',
     link: '/products?category=B%C3%A1nh+ng%C3%B3i',
     image: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/slide-img3.png?1790765513162',
+    isOdd: true,
     leaves: [
       {
         src: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/flo_1_sl_3.png?1790765513162',
-        className: 'top-12 left-10 sm:left-24 w-12 sm:w-16',
+        className: 'bottom-[24%] right-[10%] sm:right-[14%] w-16 sm:w-22 md:w-26',
       },
       {
         src: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/flo_2_sl_3.png?1790765513162',
-        className: 'bottom-16 right-12 sm:right-28 w-14 sm:w-18',
+        className: 'left-[10%] sm:left-[14%] bottom-[20%] w-16 sm:w-20 md:w-24',
       },
     ],
   },
@@ -71,14 +71,15 @@ const HERO_SLIDES = [
     title: 'TRÁI CÂY SẤY NHẬP KHẨU',
     link: '/products?category=H%E1%BA%A1t',
     image: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/slide-img4.png?1790765513162',
+    isOdd: false,
     leaves: [
       {
         src: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/flo_1_sl_4.png?1790765513162',
-        className: 'top-10 left-12 sm:left-24 w-12 sm:w-16',
+        className: 'bottom-[22%] left-[10%] sm:left-[14%] w-16 sm:w-22 md:w-26',
       },
       {
         src: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/flo_2_sl_4.png?1790765513162',
-        className: 'bottom-12 right-12 sm:right-28 w-14 sm:w-20',
+        className: 'right-[10%] sm:right-[14%] top-[18%] w-16 sm:w-22 md:w-26',
       },
     ],
   },
@@ -87,6 +88,7 @@ const HERO_SLIDES = [
     title: 'COOKIES HẠNH NHÂN',
     link: '/products?category=Cookies',
     image: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/slide-img5.png?1790765513162',
+    isOdd: true,
     leaves: [],
   },
 ]
@@ -162,7 +164,9 @@ const PRODUCT_LINES = [
 ]
 
 export const HomePage: React.FC = () => {
-  const [currentSlide, setCurrentSlide] = useState(0)
+  // Start on index 1 (Bánh Biscotti Ăn Kiêng) matching the user's reference
+  const [currentSlide, setCurrentSlide] = useState(1)
+  const [direction, setDirection] = useState<'next' | 'prev'>('next')
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const { addItem } = useCart()
   const [addedIds, setAddedIds] = useState<Record<string, boolean>>({})
@@ -170,13 +174,21 @@ export const HomePage: React.FC = () => {
   // Auto-play hero slider
   useEffect(() => {
     const timer = setInterval(() => {
+      setDirection('next')
       setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length)
     }, 6000)
     return () => clearInterval(timer)
   }, [])
 
-  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length)
-  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)
+  const nextSlide = () => {
+    setDirection('next')
+    setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length)
+  }
+
+  const prevSlide = () => {
+    setDirection('prev')
+    setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)
+  }
 
   // Live backend connection to Spring Boot /api/products
   const { data: productData, isLoading } = useQuery({
@@ -201,52 +213,72 @@ export const HomePage: React.FC = () => {
   return (
     <div className="w-full pb-16 font-text bg-[#FAF7F2] text-[#2A2725]">
       {/* ================= SECTION 1: mew_mobile_slide (HERO CAROUSEL) ================= */}
-      <section className="mew_mobile_slide relative w-full pt-4 sm:pt-6 md:pt-8 pb-12 sm:pb-16 overflow-hidden">
+      <section className="mew_slide relative w-full pt-6 sm:pt-8 md:pt-12 pb-12 sm:pb-16 overflow-hidden select-none">
         <div className="max-w-[1240px] mx-auto px-4 relative">
-          <div className="relative min-h-[460px] sm:min-h-[540px] md:min-h-[600px] flex items-center justify-center">
-            {/* Background Organic Ambient Concentric Circles */}
+          <div className="relative min-h-[460px] sm:min-h-[520px] md:min-h-[580px] flex items-center justify-center">
+            
+            {/* Ambient Concentric Circle Animation */}
             <div className="circle_animation absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span className="absolute w-[280px] h-[280px] sm:w-[420px] sm:h-[420px] rounded-full bg-[#E0CDBE]/30 blur-xs transform -rotate-12" />
-              <span className="absolute w-[200px] h-[200px] sm:w-[320px] sm:h-[320px] rounded-full border-[18px] border-[#E2F4E0]/70" />
-              <span className="absolute w-[140px] h-[140px] sm:w-[220px] sm:h-[220px] rounded-full border-[10px] border-[#FAF5EC]/90" />
+              {/* Soft warm shadow disc directly behind bowl */}
+              <span className="absolute w-[280px] h-[280px] sm:w-[360px] sm:h-[360px] rounded-full bg-[#E0CDBE]/25 blur-md" />
+
+              {/* Floating ambient rings */}
+              {slide.isOdd ? (
+                <>
+                  <span className="absolute -left-4 sm:left-12 bottom-12 w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] rounded-full bg-gradient-to-b from-[#E0CDBE]/30 to-transparent -rotate-12 transition-all duration-700" />
+                  <span className="absolute left-16 sm:left-28 bottom-20 w-[110px] h-[110px] sm:w-[130px] sm:h-[130px] rounded-full border-[18px] border-[#E2F4E0]/70 transition-all duration-700" />
+                  <span className="absolute right-16 sm:right-28 top-12 w-[70px] h-[70px] sm:w-[85px] sm:h-[85px] rounded-full border border-[#E0CDBE]/60 transition-all duration-700" />
+                  <span className="absolute -right-4 sm:right-8 top-8 w-[140px] h-[140px] sm:w-[170px] sm:h-[170px] rounded-full bg-gradient-to-b from-[#EDCA82]/25 to-transparent rotate-45 transition-all duration-700" />
+                </>
+              ) : (
+                <>
+                  <span className="absolute -left-4 sm:left-8 bottom-16 w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] rounded-full bg-gradient-to-b from-[#EDCA82]/25 to-transparent -rotate-45 transition-all duration-700" />
+                  <span className="absolute left-12 sm:left-24 bottom-28 w-[110px] h-[110px] sm:w-[130px] sm:h-[130px] rounded-full border-[18px] border-[#E2F4E0]/70 transition-all duration-700" />
+                  <span className="absolute right-12 sm:right-24 top-20 w-[70px] h-[70px] sm:w-[85px] sm:h-[85px] rounded-full border border-[#E0CDBE]/60 transition-all duration-700" />
+                  <span className="absolute -right-4 sm:right-12 top-12 w-[140px] h-[140px] sm:w-[170px] sm:h-[170px] rounded-full bg-gradient-to-b from-[#E0CDBE]/30 to-transparent rotate-12 transition-all duration-700" />
+                </>
+              )}
             </div>
 
-            {/* Decorative Floating Leaves */}
+            {/* Decorative Floating Leaves with organic scale & fade */}
             <div className="leaf_animation absolute inset-0 pointer-events-none overflow-hidden">
               {slide.leaves.map((leaf, i) => (
                 <img
-                  key={i}
+                  key={`${slide.id}-leaf-${i}`}
                   src={leaf.src}
                   alt="leaf"
-                  className={`absolute pointer-events-none transition-all duration-700 opacity-85 ${leaf.className}`}
+                  className={`absolute pointer-events-none hebe-leaf-active ${leaf.className}`}
                 />
               ))}
             </div>
 
-            {/* Active Slide Display */}
+            {/* Active Slide Bowl & Typography */}
             <div className="relative z-10 text-center max-w-lg mx-auto flex flex-col items-center">
               <Link
                 to={slide.link}
                 className="block group relative cursor-pointer"
                 title={slide.title}
               >
-                <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-92 md:h-92 mx-auto flex items-center justify-center">
+                <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-[350px] md:h-[350px] mx-auto flex items-center justify-center">
                   <img
+                    key={`${slide.id}-${direction}`}
                     src={slide.image}
                     alt={slide.title}
-                    className="w-full h-full object-contain drop-shadow-xl group-hover:scale-105 transition-transform duration-500"
+                    className={`slide_bowl_img w-full h-full object-contain ${
+                      direction === 'next' ? 'hebe-slide-in-next' : 'hebe-slide-in-prev'
+                    }`}
                   />
                 </div>
               </Link>
 
-              {/* Slide Title & Mua ngay Link */}
-              <div className="ani_text text-center mt-4 sm:mt-6">
-                <h2 className="title_slide text-xl sm:text-2xl md:text-3xl font-display font-bold uppercase tracking-tight text-[#2A2725]">
+              {/* Slide Title & "Mua ngay >" Action */}
+              <div className="ani_text text-center mt-3 sm:mt-5">
+                <h2 className="title_slide text-xl sm:text-2xl md:text-[28px] font-display font-bold uppercase tracking-tight text-[#2A2725]">
                   {slide.title}
                 </h2>
                 <Link
                   to={slide.link}
-                  className="sup_slide inline-flex items-center gap-1.5 text-sm sm:text-base font-semibold text-[#c8983d] hover:text-[#91350a] mt-1.5 transition-colors group"
+                  className="sup_slide inline-flex items-center gap-1.5 text-sm sm:text-base font-semibold text-[#c8983d] hover:text-[#91350a] mt-1 transition-colors group"
                 >
                   <span>Mua ngay</span>
                   <span className="text-sm font-bold group-hover:translate-x-1 transition-transform">
@@ -256,37 +288,40 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Carousel Navigation Arrows */}
+            {/* Carousel Navigation Arrows - Positioned inward ~18-20% framing the bowl */}
             <button
               type="button"
               onClick={prevSlide}
               aria-label="Slide trước"
-              className="mcate_prev absolute left-2 sm:left-6 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/95 border border-[#E5E2DF] shadow-md flex items-center justify-center text-[#2A2725] hover:text-[#006561] hover:scale-105 transition-all cursor-pointer"
+              className="absolute left-[5%] sm:left-[12%] md:left-[18%] lg:left-[20%] z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/95 border border-[#E5E2DF]/60 shadow-[0_4px_16px_rgba(0,80,76,0.12)] flex items-center justify-center text-[#2A2725] hover:text-[#006561] hover:scale-105 active:scale-95 transition-all cursor-pointer"
             >
-              <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+              <ChevronLeft className="w-5 h-5 text-[#2A2725]" />
             </button>
             <button
               type="button"
               onClick={nextSlide}
               aria-label="Slide tiếp theo"
-              className="mcate_next absolute right-2 sm:right-6 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/95 border border-[#E5E2DF] shadow-md flex items-center justify-center text-[#2A2725] hover:text-[#006561] hover:scale-105 transition-all cursor-pointer"
+              className="absolute right-[5%] sm:right-[12%] md:right-[18%] lg:right-[20%] z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/95 border border-[#E5E2DF]/60 shadow-[0_4px_16px_rgba(0,80,76,0.12)] flex items-center justify-center text-[#2A2725] hover:text-[#006561] hover:scale-105 active:scale-95 transition-all cursor-pointer"
             >
-              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+              <ChevronRight className="w-5 h-5 text-[#2A2725]" />
             </button>
           </div>
 
           {/* 5 Dots Indicator */}
-          <div className="swiper-pagination flex items-center justify-center gap-2 pt-6">
+          <div className="flex items-center justify-center gap-2 pt-6">
             {HERO_SLIDES.map((s, idx) => (
               <button
                 key={s.id}
                 type="button"
-                onClick={() => setCurrentSlide(idx)}
+                onClick={() => {
+                  setDirection(idx > currentSlide ? 'next' : 'prev')
+                  setCurrentSlide(idx)
+                }}
                 aria-label={`Chuyển tới slide ${idx + 1}`}
                 className={`transition-all duration-300 rounded-full cursor-pointer ${
                   currentSlide === idx
-                    ? 'w-8 h-2.5 bg-[#006561]'
-                    : 'w-2.5 h-2.5 bg-[#E5E2DF] hover:bg-[#9A938C]'
+                    ? 'w-7 h-2 bg-[#006561]'
+                    : 'w-2 h-2 bg-[#E5E2DF] hover:bg-[#9A938C]'
                 }`}
               />
             ))}
