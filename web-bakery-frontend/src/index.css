@@ -1,63 +1,196 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --background: #faf8f5;
-    --foreground: #1c1917;
-    --primary: #4a3728;
-    --primary-foreground: #faf8f5;
-    --primary-hover: #2e1e12;
-    --secondary: #47654c;
-    --secondary-foreground: #ffffff;
-    --accent: #d97724;
-    --accent-foreground: #ffffff;
-    --muted: #f4efea;
-    --muted-foreground: #78716c;
-    --border: #eadbce;
-    --ring: #4a3728;
-    --card: #ffffff;
-    --card-foreground: #1c1917;
-    --destructive: #dc2626;
-    --destructive-foreground: #ffffff;
-  }
+@theme {
+  --color-mainColor: #006561;
+  --color-mainColor2: #1a9a9b;
+  --color-bgTopbar: #91350a;
+  --color-textTopbar: #f6e9df;
+  --color-terracotta: #C9785C;
+  --color-terracotta-700: #B23A2A;
+  --color-terracottaHover700: #9A2F20;
+  --color-terracotta-100: #FFE6DC;
+  --color-bg-body: #FEFBF4;
+  --color-sand-canvas: #F8F6F5;
+  --color-oat-cream: #F4EFE6;
+  --color-warm-cream: #F2EAD8;
+  --color-bg-footer: #FBF6EA;
+  --color-mustard: #c8983d;
+  --color-sage: #7B9461;
+  --color-ink-primary: #2A2725;
+  --color-ink-secondary: #6B6661;
+  --color-ink-tertiary: #9A938C;
+  --color-border-subtle: #E5E2DF;
 
-  * {
-    border-color: var(--border);
-  }
+  --font-display: 'Wix Madefor Display', 'Wix Madefor Text', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-text: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
 
-  body {
-    background-color: var(--background);
-    color: var(--foreground);
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    margin: 0;
-    padding: 0;
-  }
+:root {
+  /* Brand Primary Colors */
+  --mainColor: #006561;
+  --mainColor2: #1a9a9b;
+
+  /* Topbar & Heritage Accents */
+  --bgTopbar: #91350a;
+  --textTopbar: #f6e9df;
+  --terracotta: #C9785C;
+  --terracotta-700: #B23A2A;
+  --terracottaHover700: #9A2F20;
+  --terracotta-100: #FFE6DC;
+
+  /* Canvas & Warm Backgrounds */
+  --bg-body: #FEFBF4;
+  --sand-canvas: #F8F6F5;
+  --oat-cream: #F4EFE6;
+  --warm-cream: #F2EAD8;
+  --bg-footer: #FBF6EA;
+
+  /* Nature Accents */
+  --mustard: #c8983d;
+  --sage: #7B9461;
+
+  /* Inks & Text Colors */
+  --ink-primary: #2A2725;
+  --ink-secondary: #6B6661;
+  --ink-tertiary: #9A938C;
+
+  /* Borders & Shadows */
+  --border-subtle: #E5E2DF;
+  --shadow-sm: 0 2px 4px rgba(36, 30, 14, 0.06);
+  --shadow-md: 0 8px 20px -8px rgba(36, 30, 14, 0.16);
+  --shadow-lg: 0 16px 36px -12px rgba(36, 30, 14, 0.22);
+
+  /* Animation Easings */
+  --hebekery-easing-default: cubic-bezier(0.32, 0.72, 0, 1);
+  --hebekery-easing-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --hebekery-easing-warmth: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  /* Fonts */
+  --font-display: 'Wix Madefor Display', 'Wix Madefor Text', system-ui, sans-serif;
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-text: 'Montserrat', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* UI Framework compatibility tokens */
+  --background: #FEFBF4;
+  --foreground: #2A2725;
+  --primary: #006561;
+  --primary-foreground: #FEFBF4;
+  --primary-hover: #1a9a9b;
+  --secondary: #7B9461;
+  --secondary-foreground: #ffffff;
+  --accent: #C9785C;
+  --accent-foreground: #ffffff;
+  --muted: #F4EFE6;
+  --muted-foreground: #6B6661;
+  --border: #E5E2DF;
+  --ring: #006561;
+  --card: #ffffff;
+  --card-foreground: #2A2725;
+  --destructive: #B23A2A;
+  --destructive-foreground: #ffffff;
+}
+
+* {
+  border-color: var(--border-subtle);
+}
+
+body {
+  background-color: var(--bg-body);
+  color: var(--ink-primary);
+  font-family: var(--font-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
 }
 
 /* Typography Utility Classes */
+.font-display {
+  font-family: 'Wix Madefor Display', 'Wix Madefor Text', system-ui, sans-serif;
+}
+
+.font-serif {
+  font-family: 'Cormorant Garamond', serif;
+}
+
+.font-text {
+  font-family: 'Montserrat', system-ui, sans-serif;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Backward-compatible aliases */
 .font-headline {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Wix Madefor Display', 'Wix Madefor Text', Georgia, serif;
 }
 
 .font-body {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Montserrat', system-ui, sans-serif;
 }
 
-/* Warm Tactile Card Shadow from Stitch Design System */
+/* HeBekery Button Styles */
+.btn-act {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ink-primary);
+  background-color: transparent;
+  color: var(--ink-primary);
+  font-family: var(--font-text);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+  border-radius: 9999px;
+  cursor: pointer;
+  padding: 0.5rem 1.25rem;
+}
+
+.btn-act:hover {
+  background-color: var(--ink-primary);
+  color: #ffffff;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--mainColor);
+  color: var(--bg-body);
+  font-family: var(--font-text);
+  font-weight: 600;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+  cursor: pointer;
+  padding: 0.625rem 1.5rem;
+}
+
+.btn-primary:hover {
+  background-color: var(--mainColor2);
+  color: #ffffff;
+}
+
+/* Tactile Card Shadow */
 .tactile-card {
-  box-shadow: 0 4px 16px -2px rgba(74, 55, 40, 0.04), 0 2px 6px -1px rgba(74, 55, 40, 0.02);
+  box-shadow: 0 4px 16px -2px rgba(42, 39, 37, 0.05), 0 2px 6px -1px rgba(42, 39, 37, 0.03);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .tactile-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 32px -4px rgba(74, 55, 40, 0.08), 0 4px 12px -2px rgba(74, 55, 40, 0.03);
+  box-shadow: 0 12px 32px -4px rgba(42, 39, 37, 0.1), 0 4px 12px -2px rgba(42, 39, 37, 0.04);
 }
 
 /* Tactile Raised Button Style */
 .btn-tactile {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 4px rgba(74, 55, 40, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 4px rgba(42, 39, 37, 0.12);
   transition: all 0.12s ease-in-out;
 }
 

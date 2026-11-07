@@ -1,14 +1,14 @@
 import React from 'react'
 import { Outlet } from 'react-router-dom'
-import { Header } from '@/components/common/Header'
-import { Footer } from '@/components/common/Footer'
+import { Header } from '@/components/layout/Header'
+import { Footer } from '@/components/layout/Footer'
 import { CartDrawer } from '@/components/common/CartDrawer'
 
 export const MainLayout: React.FC = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-[#faf8f5] text-[#1c1917]">
+    <div className="min-h-screen flex flex-col bg-[#FEFBF4] text-[#2A2725] font-text antialiased selection:bg-[#006561]/20 selection:text-[#006561]">
       <Header />
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 w-full">
         <Outlet />
       </main>
       <Footer />
