@@ -4,179 +4,293 @@ import { motion } from 'motion/react'
 import {
   ArrowRight,
   Sparkles,
-  Wheat,
-  Leaf,
-  Clock,
-  Activity,
-  CheckCircle2,
-  Calculator,
-  Star,
   ShieldCheck,
+  Award,
+  Leaf,
+  Truck,
+  Calculator,
+  Flame,
+  Activity,
+  HeartPulse,
+  Scale,
+  ChevronRight,
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { productApi } from '@/api'
 import { ProductCard } from '@/features/products/ProductCard'
 import { ProductDetailModal } from '@/features/products/ProductDetailModal'
-import { Button } from '@/components/ui/button'
 import type { Product } from '@/types'
 import heroStitchImg from '@/assets/hero_stitch.jpg'
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate()
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-  const [selectedCategoryTab, setSelectedCategoryTab] = useState<string>('all')
 
-  // Real backend API connection: Fetching products from Spring Boot / MySQL
+  // Live backend connection to Spring Boot /api/products
   const { data: productData, isLoading } = useQuery({
-    queryKey: ['products-featured'],
+    queryKey: ['products-bestseller'],
     queryFn: () => productApi.getProducts({ page: 0, size: 8, activeOnly: true }),
     staleTime: 5 * 60 * 1000,
   })
 
-  const featuredProducts = productData?.content || []
+  const bestSellerProducts = productData?.content || []
 
-  // Filter products by tab keyword
-  const filteredProducts = featuredProducts.filter((product) => {
-    if (selectedCategoryTab === 'all') return true
-    if (selectedCategoryTab === 'granola') {
-      return product.name.toLowerCase().includes('granola')
-    }
-    if (selectedCategoryTab === 'biscotti') {
-      return product.name.toLowerCase().includes('biscotti')
-    }
-    if (selectedCategoryTab === 'sourdough') {
-      return (
-        product.name.toLowerCase().includes('sourdough') ||
-        product.name.toLowerCase().includes('bánh mì')
-      )
-    }
-    if (selectedCategoryTab === 'bar') {
-      return (
-        product.name.toLowerCase().includes('bar') ||
-        product.name.toLowerCase().includes('thanh')
-      )
-    }
-    return true
-  })
+  // 4 Signature Flavors (Section 2)
+  const signatureFlavors = [
+    {
+      title: 'FRUITY GRAINS',
+      subtitle: 'Hạt & quả mọng',
+      description: 'Cranberry dâu rừng & yến mạch',
+      image:
+        'https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?q=80&w=800&auto=format&fit=crop',
+      tag: 'Eat Clean',
+      query: 'granola',
+    },
+    {
+      title: 'DARK CHOCO',
+      subtitle: 'Cacao nguyên chất',
+      description: 'Cacao Đắk Lắk đậm vị 0g đường',
+      image:
+        'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?q=80&w=800&auto=format&fit=crop',
+      tag: 'Sugar-Free',
+      query: 'cacao',
+    },
+    {
+      title: 'PURE MATCHA',
+      subtitle: 'Trà xanh Uji',
+      description: 'Matcha Nhật Bản hữu cơ thanh tao',
+      image:
+        'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?q=80&w=800&auto=format&fit=crop',
+      tag: 'Antioxidant',
+      query: 'matcha',
+    },
+    {
+      title: 'SALTY CHEESE',
+      subtitle: 'Phô mai ít béo',
+      description: 'Parmesan thơm bùi chuẩn Keto',
+      image:
+        'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=800&auto=format&fit=crop',
+      tag: 'Keto Friendly',
+      query: 'phô mai',
+    },
+  ]
+
+  // 4 Certifications & Commitments (Section 3)
+  const commitments = [
+    {
+      icon: ShieldCheck,
+      code: 'ISO 22000:2018',
+      title: 'An toàn thực phẩm quốc tế',
+      subtitle: 'Kiểm soát nghiêm ngặt từng mẻ bánh',
+    },
+    {
+      icon: Award,
+      code: 'HACCP Codex',
+      title: 'Kiểm soát chất lượng',
+      subtitle: 'Phân tích mối nguy chuẩn khoa học',
+    },
+    {
+      icon: Leaf,
+      code: '100% Nguyên liệu sạch',
+      title: '0g đường tinh luyện',
+      subtitle: 'Bột nguyên cám & mật ngọt tự nhiên',
+    },
+    {
+      icon: Truck,
+      code: 'Giao hàng toàn quốc',
+      title: 'Freeship từ 299k',
+      subtitle: 'Giao nhanh 2h TP.HCM & Hà Nội',
+    },
+  ]
+
+  // 6 Category Pills (Section 4)
+  const categoryPills = [
+    {
+      name: 'Granola',
+      query: 'granola',
+      image:
+        'https://images.unsplash.com/photo-1517093157656-b9ec84eb09d2?q=80&w=300&auto=format&fit=crop',
+      badge: 'Bestseller',
+    },
+    {
+      name: 'Biscotti',
+      query: 'biscotti',
+      image:
+        'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=300&auto=format&fit=crop',
+      badge: 'Giòn rụm',
+    },
+    {
+      name: 'Thanh hạt',
+      query: 'bar',
+      image:
+        'https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?q=80&w=300&auto=format&fit=crop',
+      badge: 'Protein',
+    },
+    {
+      name: 'Bánh ngói',
+      query: 'keto',
+      image:
+        'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?q=80&w=300&auto=format&fit=crop',
+      badge: 'Keto 100%',
+    },
+    {
+      name: 'Cookies',
+      query: 'cookies',
+      image:
+        'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?q=80&w=300&auto=format&fit=crop',
+      badge: 'Nguyên cám',
+    },
+    {
+      name: 'Mix Nuts',
+      query: 'nuts',
+      image:
+        'https://images.unsplash.com/photo-1536599018102-9f803c140fc1?q=80&w=300&auto=format&fit=crop',
+      badge: 'Sấy lạnh',
+    },
+  ]
+
+  // 3 Health Tools (Section 6)
+  const healthTools = [
+    {
+      title: 'TÍNH TDEE',
+      badge: 'Năng lượng tiêu hao',
+      desc: 'Tổng năng lượng tiêu hao mỗi ngày theo cường độ tập luyện và thói quen sinh hoạt.',
+      highlight: 'Calo thâm hụt / Calo duy trì',
+      icon: Activity,
+    },
+    {
+      title: 'TÍNH BMI',
+      badge: 'Chỉ số khối cơ thể',
+      desc: 'Đánh giá tỷ lệ thể trạng chuẩn theo thang chuẩn WHO và Viện Dinh Dưỡng Quốc Gia.',
+      highlight: '18.5 – 22.9 Lý tưởng',
+      icon: Scale,
+    },
+    {
+      title: 'TÍNH BMR',
+      badge: 'Trao đổi chất cơ bản',
+      desc: 'Mức năng lượng tối thiểu cơ thể cần để duy trì sự sống ở trạng thái nghỉ ngơi hoàn toàn.',
+      highlight: 'Công thức Mifflin-St Jeor',
+      icon: HeartPulse,
+    },
+  ]
 
   return (
-    <div className="space-y-16 pb-8">
-      {/* ================= 1. HERO SECTION (Minimalist, Visual-First) ================= */}
-      <section className="relative pt-4 sm:pt-6 md:pt-8 pb-8 border-b border-[#eadbce]/70">
-        <div className="max-w-7xl mx-auto">
+    <div className="space-y-16 sm:space-y-24 pb-12">
+      {/* ================= SECTION 1: mew_mobile_slide (Hero Banner) ================= */}
+      <section className="relative pt-2 sm:pt-4 md:pt-6">
+        <div className="rounded-3xl bg-[#FEFBF4] border border-[#E5E2DF] overflow-hidden p-6 sm:p-10 lg:p-14 tactile-card">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-            {/* Left Editorial - Clean & Punchy */}
-            <div className="lg:col-span-6 space-y-5">
-              {/* Badge */}
+            {/* Left Column: Minimal Text */}
+            <div className="lg:col-span-7 space-y-6">
+              {/* Category Badge */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#eadbce] text-[#47654c] text-xs font-semibold select-none"
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#E5E2DF] text-[#006561] text-xs font-semibold select-none shadow-xs"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#d97724]" />
-                <span>Nướng Mới Mỗi Sáng 06:30 • 100% Tự Nhiên</span>
+                <Sparkles className="w-3.5 h-3.5 text-[#C9785C]" />
+                <span className="tracking-wide">TIỆM BÁNH DINH DƯỠNG &amp; ĂN KIÊNG HEALTHY</span>
               </motion.div>
 
-              {/* Main Headline */}
+              {/* Title in Wix Madefor Display */}
               <motion.h1
-                initial={{ opacity: 0, y: 15 }}
+                initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.1 }}
-                className="font-headline text-3xl sm:text-4xl md:text-5xl lg:text-[44px] font-bold text-[#4a3728] leading-[1.18] tracking-tight"
+                transition={{ duration: 0.4, delay: 0.08 }}
+                className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-[46px] font-bold text-[#2A2725] leading-[1.14] tracking-tight"
               >
-                BÁNH TƯƠI MỖI NGÀY, TỐT CHO VÓC DÁNG
+                BÁNH TƯƠI MỖI NGÀY, TỐT CHO VÓC DÁNG &amp; SỨC KHỎE
               </motion.h1>
 
-              {/* Minimal 1-line tag instead of long paragraph */}
-              <motion.p
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.2 }}
-                className="font-body text-xs sm:text-sm text-[#78716c] font-medium flex items-center flex-wrap gap-2"
-              >
-                <span className="bg-[#47654c]/10 text-[#47654c] px-2.5 py-0.5 rounded-full font-semibold">
-                  Ngũ cốc nguyên cám
-                </span>
-                <span>•</span>
-                <span className="bg-[#d97724]/10 text-[#d97724] px-2.5 py-0.5 rounded-full font-semibold">
-                  0g Đường tinh luyện
-                </span>
-                <span>•</span>
-                <span className="bg-[#4a3728]/10 text-[#4a3728] px-2.5 py-0.5 rounded-full font-semibold">
-                  Chuẩn Macro &amp; Calo
-                </span>
-              </motion.p>
-
-              {/* Concise CTAs */}
+              {/* Subtitle: Minimal punchy tags */}
               <motion.div
-                initial={{ opacity: 0, y: 15 }}
+                initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 }}
-                className="flex items-center gap-3 pt-1"
+                transition={{ duration: 0.4, delay: 0.16 }}
+                className="flex items-center flex-wrap gap-2 text-xs sm:text-sm font-medium text-[#6B6661]"
               >
-                <Button
-                  size="lg"
+                <span className="bg-[#006561]/8 text-[#006561] px-3 py-1 rounded-full font-semibold">
+                  100% bột nguyên cám
+                </span>
+                <span>•</span>
+                <span className="bg-[#C9785C]/15 text-[#B23A2A] px-3 py-1 rounded-full font-semibold">
+                  Không đường tinh luyện
+                </span>
+                <span>•</span>
+                <span className="bg-[#2A2725]/6 text-[#2A2725] px-3 py-1 rounded-full font-semibold">
+                  Nướng tươi mỗi sáng
+                </span>
+              </motion.div>
+
+              {/* CTAs */}
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.24 }}
+                className="flex items-center gap-3 pt-2"
+              >
+                {/* Primary CTA */}
+                <button
+                  type="button"
                   onClick={() => navigate('/products')}
-                  className="bg-[#4a3728] hover:bg-[#2e1e12] text-[#faf8f5] font-semibold px-6 py-2.5 rounded-full flex items-center gap-2 shadow-sm text-xs cursor-pointer btn-tactile"
+                  className="bg-[#006561] hover:bg-[#1a9a9b] text-[#FEFBF4] font-semibold px-7 py-3 rounded-full text-xs sm:text-sm transition-all shadow-sm hover:shadow-md cursor-pointer flex items-center gap-2"
                 >
                   <span>Khám phá thực đơn</span>
                   <ArrowRight className="w-4 h-4" />
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={() => navigate('/bmi-tdee')}
-                  className="border-[#eadbce] bg-white hover:bg-[#faf8f5] text-[#4a3728] font-semibold px-6 py-2.5 rounded-full text-xs cursor-pointer"
+                </button>
+
+                {/* Secondary CTA */}
+                <button
+                  type="button"
+                  onClick={() => navigate('/about')}
+                  className="border border-[#2A2725] bg-transparent hover:bg-[#2A2725] hover:text-[#FEFBF4] text-[#2A2725] font-semibold px-7 py-3 rounded-full text-xs sm:text-sm transition-all cursor-pointer"
                 >
-                  Tính BMI &amp; TDEE
-                </Button>
+                  Về HeBekery
+                </button>
               </motion.div>
 
-              {/* Trust Metrics */}
-              <div className="pt-4 border-t border-[#eadbce]/70 flex items-center gap-6 text-xs font-semibold text-[#4a3728]">
+              {/* Quick Trust Badges */}
+              <div className="pt-4 border-t border-[#E5E2DF] flex items-center gap-5 sm:gap-7 text-xs font-semibold text-[#2A2725]">
                 <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-[#47654c] shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-[#006561]" />
                   <span>&gt;15.000 Khách hàng</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-[#47654c] shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-[#7B9461]" />
                   <span>Eat Clean &amp; Keto</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-[#47654c] shrink-0" />
-                  <span>Giao nhanh 2H</span>
+                  <div className="w-2 h-2 rounded-full bg-[#C9785C]" />
+                  <span>Giao 2H TP.HCM &amp; HN</span>
                 </div>
               </div>
             </div>
 
-            {/* Right Hero Visual Card */}
-            <div className="lg:col-span-6 relative">
-              <div className="relative rounded-3xl overflow-hidden p-2.5 bg-white border border-[#eadbce] tactile-card">
+            {/* Right Column: Aesthetic Visual Showcase */}
+            <div className="lg:col-span-5 relative">
+              <div className="relative rounded-2xl overflow-hidden p-2.5 bg-white border border-[#E5E2DF] shadow-md group">
                 <img
                   src={heroStitchImg}
-                  alt="Mẻ bánh mì sourdough nướng mộc mạc và lọ granola Hebekery"
-                  className="w-full h-[340px] sm:h-[380px] md:h-[420px] object-cover rounded-2xl"
+                  alt="HeBekery bánh tươi nướng mộc mạc tốt cho vóc dáng"
+                  className="w-full h-[320px] sm:h-[380px] lg:h-[420px] object-cover rounded-xl group-hover:scale-102 transition-transform duration-700 ease-out"
                 />
 
-                {/* Compact Nutrient Tag Overlay */}
-                <div className="absolute bottom-5 left-5 right-5 p-3.5 rounded-2xl bg-white/95 backdrop-blur-md border border-[#eadbce] flex items-center justify-between shadow-md">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-[#47654c]/10 flex items-center justify-center text-[#47654c]">
-                      <Wheat className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="font-headline text-xs font-bold text-[#4a3728]">
-                        Sourdough Lúa Mạch Mộc
-                      </h4>
-                      <p className="text-[10px] text-[#78716c]">Men tự nhiên 36h • Giàu lợi khuẩn</p>
-                    </div>
+                {/* Floating Micro-Badge */}
+                <div className="absolute bottom-5 left-5 right-5 p-3.5 rounded-xl bg-white/95 backdrop-blur-md border border-[#E5E2DF] flex items-center justify-between shadow-lg">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-[#6B6661] tracking-wider block">
+                      Signature Hebekery
+                    </span>
+                    <h4 className="font-display text-xs sm:text-sm font-bold text-[#2A2725]">
+                      Granola Siêu Hạt Mật Hoa
+                    </h4>
                   </div>
                   <div className="text-right">
-                    <span className="font-headline text-sm font-bold text-[#4a3728]">
-                      142 <span className="text-[10px] font-sans text-[#78716c]">kcal/lát</span>
+                    <span className="font-mono text-xs sm:text-sm font-bold text-[#006561] block">
+                      112 kcal <span className="text-[10px] font-sans text-[#6B6661]">/ 30g</span>
                     </span>
-                    <span className="text-[10px] font-semibold text-[#47654c] block">Low-GI</span>
+                    <span className="text-[10px] font-bold text-[#7B9461]">0g Đường Cát</span>
                   </div>
                 </div>
               </div>
@@ -185,107 +299,172 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* ================= 2. 4 KEY PILLARS (Clean, Zero Redundant Text) ================= */}
-      <section className="space-y-6">
-        <div className="text-center space-y-1">
-          <span className="text-[11px] font-semibold uppercase tracking-widest text-[#47654c]">
-            Cam Kết Từ Bếp Bánh
+      {/* ================= SECTION 2: mew_about (Triết lý & 4 hương vị Signature) ================= */}
+      <section className="space-y-8">
+        {/* Cormorant Garamond Serif Quote */}
+        <div className="text-center max-w-3xl mx-auto px-4 space-y-2">
+          <p className="font-serif text-2xl sm:text-3xl md:text-4xl italic text-[#2A2725] leading-relaxed">
+            &ldquo;Chọn nguyên liệu kỹ, làm chỉn chu — HeBekery đồng hành cùng lối sống lành mạnh của bạn.&rdquo;
+          </p>
+          <span className="block text-xs font-semibold uppercase tracking-widest text-[#006561]">
+            — 4 Hương Vị Signature HeBekery —
           </span>
-          <h2 className="font-headline text-2xl font-bold text-[#4a3728]">
-            TRIẾT LÝ DINH DƯỠNG LÀNH MẠNH
-          </h2>
         </div>
 
-        {/* 4 Cards - No redundant paragraphs, pure visual badges */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-          {/* Card 1 */}
-          <div className="bg-white p-5 rounded-2xl border border-[#eadbce] tactile-card text-center space-y-3">
-            <div className="w-11 h-11 rounded-full bg-[#4a3728]/10 text-[#4a3728] flex items-center justify-center mx-auto">
-              <Wheat className="w-5 h-5" />
-            </div>
-            <h3 className="font-headline text-sm font-bold text-[#4a3728]">100% Nguyên Cám</h3>
-            <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#faf8f5] border border-[#eadbce] text-[11px] font-medium text-[#78716c]">
-              Hạt &amp; yến mạch hữu cơ
-            </span>
-          </div>
+        {/* 4 Vertical Aesthetic Image Columns (aspect 3:4) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+          {signatureFlavors.map((flavor, idx) => (
+            <motion.div
+              key={flavor.title}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, delay: idx * 0.08 }}
+              onClick={() => navigate(`/products?search=${encodeURIComponent(flavor.query)}`)}
+              className="group relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer border border-[#E5E2DF] shadow-xs hover:shadow-lg transition-all"
+            >
+              {/* Background Photo */}
+              <img
+                src={flavor.image}
+                alt={flavor.title}
+                className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
+              />
 
-          {/* Card 2 */}
-          <div className="bg-white p-5 rounded-2xl border border-[#eadbce] tactile-card text-center space-y-3">
-            <div className="w-11 h-11 rounded-full bg-[#47654c]/10 text-[#47654c] flex items-center justify-center mx-auto">
-              <Leaf className="w-5 h-5" />
-            </div>
-            <h3 className="font-headline text-sm font-bold text-[#4a3728]">0g Đường Tinh Luyện</h3>
-            <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#faf8f5] border border-[#eadbce] text-[11px] font-medium text-[#78716c]">
-              Vị ngọt mật hoa tự nhiên
-            </span>
-          </div>
+              {/* Gradient Scrim */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#2A2725]/90 via-[#2A2725]/30 to-transparent" />
 
-          {/* Card 3 */}
-          <div className="bg-white p-5 rounded-2xl border border-[#eadbce] tactile-card text-center space-y-3">
-            <div className="w-11 h-11 rounded-full bg-[#d97724]/10 text-[#d97724] flex items-center justify-center mx-auto">
-              <Clock className="w-5 h-5" />
-            </div>
-            <h3 className="font-headline text-sm font-bold text-[#4a3728]">Nướng Mới Mỗi Sáng</h3>
-            <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#faf8f5] border border-[#eadbce] text-[11px] font-medium text-[#78716c]">
-              Lên men chậm 24h - 36h
-            </span>
-          </div>
+              {/* Top Tag Badge */}
+              <div className="absolute top-3 left-3">
+                <span className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-full bg-white/90 text-[#2A2725] backdrop-blur-xs shadow-xs">
+                  {flavor.tag}
+                </span>
+              </div>
 
-          {/* Card 4 */}
-          <div className="bg-white p-5 rounded-2xl border border-[#eadbce] tactile-card text-center space-y-3">
-            <div className="w-11 h-11 rounded-full bg-[#47654c]/10 text-[#47654c] flex items-center justify-center mx-auto">
-              <Activity className="w-5 h-5" />
-            </div>
-            <h3 className="font-headline text-sm font-bold text-[#4a3728]">Chuẩn Calo &amp; Macro</h3>
-            <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#faf8f5] border border-[#eadbce] text-[11px] font-medium text-[#78716c]">
-              Minh bạch trên bao bì
-            </span>
-          </div>
+              {/* Bottom Content */}
+              <div className="absolute bottom-4 left-4 right-4 text-white space-y-1">
+                <h3 className="font-display text-base sm:text-lg font-bold tracking-wide">
+                  {flavor.title}
+                </h3>
+                <p className="text-xs text-[#f6e9df] font-medium">{flavor.subtitle}</p>
+                <div className="pt-1 flex items-center text-[11px] text-[#FEFBF4]/80 group-hover:text-white transition-colors">
+                  <span>Khám phá</span>
+                  <ChevronRight className="w-3.5 h-3.5 ml-0.5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </section>
 
-      {/* ================= 3. FEATURED PRODUCTS (Connected to Spring Boot API) ================= */}
+      {/* ================= SECTION 3: m_policy (4 Chứng nhận & Cam kết) ================= */}
+      <section className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {commitments.map((item, idx) => {
+            const Icon = item.icon
+            return (
+              <div
+                key={idx}
+                className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E5E2DF] tactile-card flex items-start gap-4"
+              >
+                <div className="w-11 h-11 rounded-xl bg-[#006561]/8 text-[#006561] flex items-center justify-center shrink-0">
+                  <Icon className="w-5 h-5" />
+                </div>
+                <div className="space-y-1">
+                  <span className="font-mono text-[11px] font-bold text-[#C9785C] tracking-wide block">
+                    {item.code}
+                  </span>
+                  <h4 className="font-display text-sm font-bold text-[#2A2725]">
+                    {item.title}
+                  </h4>
+                  <p className="text-[11px] text-[#6B6661] leading-snug">
+                    {item.subtitle}
+                  </p>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* ================= SECTION 4: mew_cate (6 Thẻ Danh Mục) ================= */}
       <section className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#eadbce] pb-4">
+        <div className="text-center space-y-1.5">
+          <h2 className="font-display text-2xl sm:text-3xl font-bold text-[#2A2725]">
+            Mời bạn sống lành cùng Hebekery
+          </h2>
+          <p className="text-xs text-[#6B6661] font-medium">
+            Chọn món dinh dưỡng phù hợp với nhu cầu cơ thể bạn hôm nay
+          </p>
+        </div>
+
+        {/* 6 Pill Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+          {categoryPills.map((cate) => (
+            <motion.div
+              key={cate.name}
+              whileHover={{ y: -3 }}
+              transition={{ duration: 0.18 }}
+              onClick={() => navigate(`/products?search=${encodeURIComponent(cate.query)}`)}
+              className="group p-3 rounded-2xl bg-white border border-[#E5E2DF] tactile-card hover:border-[#006561] cursor-pointer flex flex-col items-center text-center space-y-2.5 transition-all"
+            >
+              <div className="w-16 h-16 rounded-full overflow-hidden border border-[#E5E2DF] bg-[#F8F6F5] relative">
+                <img
+                  src={cate.image}
+                  alt={cate.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+              </div>
+              <div>
+                <h3 className="font-display text-xs sm:text-sm font-bold text-[#2A2725] group-hover:text-[#006561] transition-colors">
+                  {cate.name}
+                </h3>
+                <span className="inline-block mt-0.5 text-[9px] font-semibold text-[#006561] bg-[#006561]/8 px-2 py-0.5 rounded-full">
+                  {cate.badge}
+                </span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* ================= SECTION 5: mew_bestseller (Mua Nhiều Nhất) ================= */}
+      <section className="space-y-6">
+        {/* Section Header */}
+        <div className="flex items-end justify-between border-b border-[#E5E2DF] pb-4">
           <div>
-            <span className="text-[11px] font-semibold uppercase tracking-widest text-[#47654c]">
-              Món Bánh Nướng
-            </span>
-            <h2 className="font-headline text-2xl font-bold text-[#4a3728]">
-              Sản Phẩm Bán Chạy Nhất
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#B23A2A] bg-[#FFE6DC] px-2 py-0.5 rounded-sm">
+                TOP YÊU THÍCH
+              </span>
+            </div>
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-[#2A2725]">
+              MUA NHIỀU NHẤT
             </h2>
           </div>
 
-          {/* Minimal Category Tabs */}
-          <div className="flex items-center flex-wrap gap-1.5">
-            {[
-              { id: 'all', label: 'Tất cả' },
-              { id: 'granola', label: 'Granola' },
-              { id: 'biscotti', label: 'Biscotti' },
-              { id: 'sourdough', label: 'Sourdough' },
-              { id: 'bar', label: 'Thanh Hạt' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setSelectedCategoryTab(tab.id)}
-                className={`text-xs font-semibold px-3.5 py-1.5 rounded-full transition-colors cursor-pointer ${
-                  selectedCategoryTab === tab.id
-                    ? 'bg-[#4a3728] text-[#faf8f5]'
-                    : 'bg-white hover:bg-[#faf8f5] text-[#78716c] border border-[#eadbce]'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/products')}
+            className="text-xs font-semibold text-[#006561] hover:text-[#1a9a9b] flex items-center gap-1 cursor-pointer transition-colors"
+          >
+            <span>Xem tất cả</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* Product Cards Grid */}
+        {/* 4-column product grid with live data from backend */}
         {isLoading ? (
-          <div className="py-16 text-center text-xs text-[#78716c]">Đang nạp thực đơn bánh...</div>
+          <div className="py-20 text-center text-xs text-[#6B6661]">
+            Đang tải sản phẩm bán chạy...
+          </div>
+        ) : bestSellerProducts.length === 0 ? (
+          <div className="py-16 text-center border border-dashed border-[#E5E2DF] rounded-2xl bg-white p-6 space-y-2">
+            <p className="text-sm font-semibold text-[#2A2725]">Chưa có sản phẩm nào</p>
+            <p className="text-xs text-[#6B6661]">Mời bạn ghé lại sau hoặc khám phá thực đơn chung.</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
-            {filteredProducts.map((product) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {bestSellerProducts.slice(0, 8).map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
@@ -294,147 +473,68 @@ export const HomePage: React.FC = () => {
             ))}
           </div>
         )}
-
-        <div className="text-center pt-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => navigate('/products')}
-            className="border-[#eadbce] bg-white hover:bg-[#faf8f5] text-[#4a3728] font-semibold px-6 py-2 rounded-full text-xs transition-all cursor-pointer inline-flex items-center gap-1.5"
-          >
-            <span>Xem tất cả thực đơn</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Button>
-        </div>
       </section>
 
-      {/* ================= 4. BMI & TDEE HEALTH TOOL (Minimal & Direct) ================= */}
-      <section className="bg-white rounded-3xl border border-[#eadbce] p-6 sm:p-10 tactile-card">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          {/* Tool Left Description - Ultra Concise */}
-          <div className="lg:col-span-6 space-y-3.5">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#47654c]/10 text-[#47654c] text-xs font-semibold">
-              <Calculator className="w-3.5 h-3.5" />
-              <span>Tiện ích sức khỏe</span>
-            </div>
-            <h2 className="font-headline text-2xl sm:text-3xl font-bold text-[#4a3728] leading-tight">
-              Cá Nhân Hóa Năng Lượng &amp; Thực Đơn 7 Ngày
-            </h2>
-            <p className="text-xs text-[#78716c] leading-relaxed">
-              Tính toán TDEE chính xác theo thể trạng để nhận gợi ý combo bánh nướng đạt mục tiêu vóc dáng mà không lo thiếu chất.
-            </p>
-            <div className="pt-2">
-              <Button
-                onClick={() => navigate('/bmi-tdee')}
-                className="bg-[#4a3728] hover:bg-[#2e1e12] text-[#faf8f5] font-semibold px-6 py-2.5 rounded-full text-xs flex items-center gap-2 shadow-sm cursor-pointer btn-tactile"
-              >
-                <span>Tính BMI &amp; Nhận Thực Đơn Ngay</span>
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </div>
+      {/* ================= SECTION 6: mew_tool (Bộ Công Cụ Sức Khỏe) ================= */}
+      <section className="bg-white rounded-3xl border border-[#E5E2DF] p-6 sm:p-10 lg:p-12 tactile-card space-y-8">
+        <div className="text-center max-w-2xl mx-auto space-y-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#006561]/8 text-[#006561] text-xs font-semibold">
+            <Calculator className="w-3.5 h-3.5" />
+            <span>Khoa Học Dinh Dưỡng Thực Chứng</span>
           </div>
-
-          {/* Right Visual Calculator Teaser Preview */}
-          <div className="lg:col-span-6 bg-[#faf8f5] p-5 sm:p-6 rounded-2xl border border-[#eadbce] space-y-4">
-            <div className="flex items-center justify-between border-b border-[#eadbce] pb-2.5">
-              <h3 className="font-headline text-sm font-semibold text-[#4a3728]">
-                Bảng Phân Tích Thể Trạng Mẫu
-              </h3>
-              <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#47654c]/10 text-[#47654c]">
-                BMI 21.4 • Cân Đối
-              </span>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2.5 text-center">
-              <div className="bg-white p-2.5 rounded-xl border border-[#eadbce]">
-                <span className="text-[10px] text-[#78716c] block">BMR Cơ Bản</span>
-                <span className="font-headline text-sm font-bold text-[#4a3728]">1.340</span>
-                <span className="text-[9px] text-[#78716c] block">kcal</span>
-              </div>
-              <div className="bg-white p-2.5 rounded-xl border border-[#eadbce]">
-                <span className="text-[10px] text-[#78716c] block">TDEE Tiêu Hao</span>
-                <span className="font-headline text-sm font-bold text-[#4a3728]">1.820</span>
-                <span className="text-[9px] text-[#78716c] block">kcal</span>
-              </div>
-              <div className="bg-white p-2.5 rounded-xl border border-[#eadbce] ring-2 ring-[#47654c]/30">
-                <span className="text-[10px] text-[#47654c] font-semibold block">Mục Tiêu Giảm Mỡ</span>
-                <span className="font-headline text-sm font-bold text-[#47654c]">1.470</span>
-                <span className="text-[9px] text-[#47654c] block">kcal</span>
-              </div>
-            </div>
-
-            {/* Macro Ratio Bar */}
-            <div className="space-y-1.5 pt-1">
-              <div className="flex justify-between text-[11px] text-[#78716c]">
-                <span>Phân bổ Macro:</span>
-                <span className="font-medium text-[#4a3728]">30% Đạm • 45% Carb • 25% Béo</span>
-              </div>
-              <div className="h-2.5 w-full rounded-full overflow-hidden flex bg-stone-200">
-                <div className="h-full bg-[#47654c]" style={{ width: '30%' }} />
-                <div className="h-full bg-[#d97724]" style={{ width: '45%' }} />
-                <div className="h-full bg-[#4a3728]" style={{ width: '25%' }} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ================= 5. REVIEWS (Short & Crisp) ================= */}
-      <section className="space-y-6">
-        <div className="text-center space-y-1">
-          <span className="text-[11px] font-semibold uppercase tracking-widest text-[#47654c]">
-            Đánh Giá Khách Hàng
-          </span>
-          <h2 className="font-headline text-2xl font-bold text-[#4a3728]">
-            Được Tin Chọn Bởi Người Yêu Ăn Sạch
+          <h2 className="font-display text-2xl sm:text-3xl font-bold text-[#2A2725]">
+            Hiểu cơ thể để ăn đúng nhu cầu
           </h2>
+          <p className="text-xs text-[#6B6661] leading-relaxed">
+            Chỉ số cơ thể chuẩn xác là kim chỉ nam để lựa chọn khẩu phần bánh healthy phù hợp với mục tiêu vóc dáng của bạn.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
-          {/* Review 1 */}
-          <div className="bg-white p-5 rounded-2xl border border-[#eadbce] tactile-card space-y-3">
-            <div className="flex text-[#d97724] gap-0.5">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-3.5 h-3.5 fill-[#d97724]" />
-              ))}
-            </div>
-            <p className="text-xs text-[#5c4a3a] leading-relaxed">
-              &ldquo;Biscotti thơm bùi, vị ngọt mật ong tự nhiên chuẩn calo trước mỗi buổi tập.&rdquo;
-            </p>
-            <div className="pt-2.5 border-t border-[#eadbce]/60 text-xs font-bold text-[#4a3728]">
-              Trần Linh <span className="font-normal text-[10px] text-[#78716c] block">HLV Thể Hình</span>
-            </div>
-          </div>
+        {/* 3 Interactive Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+          {healthTools.map((tool) => {
+            const ToolIcon = tool.icon
+            return (
+              <div
+                key={tool.title}
+                className="rounded-2xl p-6 bg-[#FEFBF4] border border-[#E5E2DF] flex flex-col justify-between space-y-4 hover:border-[#006561] transition-colors"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl bg-[#006561] text-white flex items-center justify-center">
+                      <ToolIcon className="w-5 h-5" />
+                    </div>
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#006561] bg-[#006561]/10 px-2.5 py-0.5 rounded-full">
+                      {tool.badge}
+                    </span>
+                  </div>
 
-          {/* Review 2 */}
-          <div className="bg-white p-5 rounded-2xl border border-[#eadbce] tactile-card space-y-3">
-            <div className="flex text-[#d97724] gap-0.5">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-3.5 h-3.5 fill-[#d97724]" />
-              ))}
-            </div>
-            <p className="text-xs text-[#5c4a3a] leading-relaxed">
-              &ldquo;Bột lên men tự nhiên 36h ăn êm bụng, rất tốt cho tiêu hóa và tim mạch.&rdquo;
-            </p>
-            <div className="pt-2.5 border-t border-[#eadbce]/60 text-xs font-bold text-[#4a3728]">
-              Bác sĩ Mai Anh <span className="font-normal text-[10px] text-[#78716c] block">Chuyên gia dinh dưỡng</span>
-            </div>
-          </div>
+                  <h3 className="font-display text-lg font-bold text-[#2A2725]">
+                    {tool.title}
+                  </h3>
 
-          {/* Review 3 */}
-          <div className="bg-white p-5 rounded-2xl border border-[#eadbce] tactile-card space-y-3">
-            <div className="flex text-[#d97724] gap-0.5">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-3.5 h-3.5 fill-[#d97724]" />
-              ))}
-            </div>
-            <p className="text-xs text-[#5c4a3a] leading-relaxed">
-              &ldquo;Granola giòn rụm không gắt dầu, đóng hộp mộc mạc tinh tế.&rdquo;
-            </p>
-            <div className="pt-2.5 border-t border-[#eadbce]/60 text-xs font-bold text-[#4a3728]">
-              Minh Hằng <span className="font-normal text-[10px] text-[#78716c] block">Eat-cleaner 3 năm</span>
-            </div>
-          </div>
+                  <p className="text-xs text-[#6B6661] leading-relaxed">
+                    {tool.desc}
+                  </p>
+
+                  <div className="pt-1 text-[11px] font-mono font-semibold text-[#7B9461]">
+                    ✓ {tool.highlight}
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/bmi-tdee')}
+                    className="w-full text-center text-xs font-semibold text-[#006561] hover:text-[#1a9a9b] py-2.5 rounded-full border border-[#006561] hover:bg-[#006561]/5 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    <span>Tính ngay</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )
+          })}
         </div>
       </section>
 

@@ -1,9 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from 'motion/react'
-import { Plus, Flame, Check, Sparkles } from 'lucide-react'
+import { Heart, Zap, Check } from 'lucide-react'
 import type { Product } from '@/types'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { useCart } from '@/hooks/useCart'
 import { formatCurrency, optimizeCloudinaryUrl } from '@/utils/format'
 
@@ -14,119 +12,131 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) => {
   const { addItem } = useCart()
-  const [isAdded, setIsAdded] = React.useState(false)
+  const [isAdded, setIsAdded] = useState(false)
+  const [isFavorite, setIsFavorite] = useState(false)
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation()
+    if (product.stock <= 0) return
     await addItem(product, 1)
     setIsAdded(true)
-    setTimeout(() => setIsAdded(false), 1200)
+    setTimeout(() => setIsAdded(false), 1400)
+  }
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsFavorite(!isFavorite)
   }
 
   const isOutOfStock = product.stock <= 0
+  const originalPrice = Math.round((product.price * 1.18) / 1000) * 1000
+  const displayCalories = product.calories && product.calories > 0 ? product.calories : 112
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       whileHover={{ y: -3 }}
       transition={{ duration: 0.2 }}
       onClick={() => onSelect?.(product)}
-      className="group relative border border-[#eadbce] bg-white rounded-2xl overflow-hidden flex flex-col justify-between tactile-card hover:border-[#4a3728] transition-all cursor-pointer select-none"
+      className="group relative border border-[#E5E2DF] bg-white rounded-2xl overflow-hidden flex flex-col justify-between tactile-card hover:border-[#006561] transition-all cursor-pointer select-none"
     >
       <div>
-        {/* Product Image */}
-        <div className="relative aspect-square w-full overflow-hidden bg-[#faf8f5] border-b border-[#eadbce]/60">
+        {/* Product Image (1:1 Ratio with smooth hover zoom) */}
+        <div className="relative aspect-square w-full overflow-hidden bg-[#F8F6F5]">
           <img
             src={optimizeCloudinaryUrl(product.imageUrl, 500)}
             alt={product.name}
             loading="lazy"
-            className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+            className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
           />
-          {product.category && (
-            <div className="absolute top-2.5 left-2.5">
-              <span className="text-[10px] font-semibold tracking-wide bg-white/95 text-[#4a3728] border border-[#eadbce] px-2 py-0.5 rounded-full backdrop-blur-xs shadow-xs">
-                {product.category.name}
-              </span>
-            </div>
-          )}
-          {product.calories && product.calories > 0 && (
-            <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-[#4a3728]/90 text-[#faf8f5] text-[10px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-xs shadow-xs">
-              <Flame className="w-3 h-3 text-[#d97724]" />
-              <span>{product.calories} kcal</span>
-            </div>
-          )}
+
+          {/* Sale Badge */}
+          <div className="absolute top-2.5 left-2.5 z-10">
+            <span className="bg-[#FFE6DC] text-[#B23A2A] font-mono text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider shadow-xs">
+              -15%
+            </span>
+          </div>
+
+          {/* Favorite Heart Button */}
+          <button
+            type="button"
+            aria-label="Yêu thích"
+            onClick={handleToggleFavorite}
+            className="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-white/90 backdrop-blur-xs border border-[#E5E2DF] flex items-center justify-center text-[#2A2725] hover:text-[#B23A2A] transition-colors shadow-xs"
+          >
+            <Heart
+              className={`w-4 h-4 transition-transform active:scale-125 ${
+                isFavorite ? 'fill-[#B23A2A] text-[#B23A2A]' : 'text-[#6B6661]'
+              }`}
+            />
+          </button>
+
+          {/* Out of stock overlay */}
           {isOutOfStock && (
-            <div className="absolute inset-0 bg-white/85 backdrop-blur-xs flex items-center justify-center">
-              <span className="bg-[#dc2626] text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-sm">
+            <div className="absolute inset-0 bg-[#FEFBF4]/90 backdrop-blur-xs flex items-center justify-center z-20">
+              <span className="bg-[#B23A2A] text-white text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-sm">
                 Tạm hết hàng
               </span>
             </div>
           )}
         </div>
 
-        {/* Info */}
-        <div className="p-4 space-y-1.5">
-          <h3 className="font-headline text-base font-semibold text-[#4a3728] group-hover:text-[#2e1e12] transition-colors line-clamp-1">
+        {/* Info Section */}
+        <div className="p-3.5 sm:p-4 space-y-2">
+          {/* Category Tag & Calo Badge Row */}
+          <div className="flex items-center justify-between gap-1 text-[11px]">
+            <span className="text-[10px] font-bold tracking-wider uppercase text-[#6B6661] truncate max-w-[60%]">
+              {product.category?.name || 'BÁNH HEALTHY'}
+            </span>
+            <div className="flex items-center gap-1 font-mono text-[10px] font-semibold text-[#006561] bg-[#006561]/8 px-2 py-0.5 rounded-full shrink-0">
+              <Zap className="w-3 h-3 text-[#C9785C]" />
+              <span>{displayCalories} kcal</span>
+            </div>
+          </div>
+
+          {/* Product Title */}
+          <h3 className="font-display text-sm sm:text-[15px] font-bold text-[#2A2725] group-hover:text-[#006561] transition-colors line-clamp-1 leading-snug">
             {product.name}
           </h3>
-          <p className="text-xs text-[#78716c] line-clamp-2 leading-relaxed">
-            {product.description || 'Bánh nướng ngũ cốc nguyên cám lên men tự nhiên, không đường tinh luyện.'}
-          </p>
 
-          {/* Nutritional Macro mini-chips if available */}
-          {(product.protein || product.carbs || product.fat) && (
-            <div className="flex items-center gap-1.5 pt-1 text-[10px] text-[#47654c] font-medium flex-wrap">
-              {product.protein ? (
-                <span className="bg-[#47654c]/10 px-2 py-0.5 rounded-full">
-                  Protein: {product.protein}g
-                </span>
-              ) : null}
-              {product.carbs ? (
-                <span className="bg-[#d97724]/10 text-[#d97724] px-2 py-0.5 rounded-full">
-                  Carbs: {product.carbs}g
-                </span>
-              ) : null}
-            </div>
-          )}
+          {/* Price Block: Current price in #006561 + strike-through old price in #9A938C */}
+          <div className="flex items-baseline gap-2 pt-0.5">
+            <span className="font-display text-base font-bold text-[#006561]">
+              {formatCurrency(product.price)}
+            </span>
+            <span className="font-mono text-xs text-[#9A938C] line-through">
+              {formatCurrency(originalPrice)}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Footer / Price & Action */}
-      <div className="p-4 pt-0 flex items-center justify-between border-t border-[#f4efea] mt-2">
-        <div>
-          <span className="text-sm font-bold text-[#4a3728]">
-            {formatCurrency(product.price)}
-          </span>
-          <span className="block text-[10px] text-[#a8a29e]">
-            {product.stock > 0 ? `Còn ${product.stock} phần` : 'Hết hàng'}
-          </span>
-        </div>
-
-        <Button
-          size="sm"
-          variant={isAdded ? 'secondary' : 'default'}
+      {/* Button: .btn-act outline MUA NGAY button */}
+      <div className="p-3.5 sm:p-4 pt-0">
+        <button
+          type="button"
+          aria-label={isAdded ? 'Đã thêm vào giỏ hàng' : 'Thêm vào giỏ hàng - MUA NGAY'}
           disabled={isOutOfStock}
           onClick={handleAddToCart}
-          className={`h-8 px-3 text-xs rounded-full flex items-center gap-1 transition-all cursor-pointer ${
+          className={`btn-act w-full py-2 px-3 text-xs font-semibold uppercase tracking-wider rounded-full transition-all flex items-center justify-center gap-1.5 cursor-pointer select-none ${
             isAdded
-              ? 'bg-[#47654c]/20 text-[#47654c]'
-              : 'bg-[#d97724] hover:bg-[#c2651b] text-white shadow-xs'
-          }`}
+              ? 'bg-[#006561] text-[#FEFBF4] border-[#006561]'
+              : 'border-[#2A2725] text-[#2A2725] hover:bg-[#2A2725] hover:text-white'
+          } ${isOutOfStock ? 'opacity-40 cursor-not-allowed hover:bg-transparent hover:text-[#2A2725]' : ''}`}
         >
           {isAdded ? (
             <>
-              <Check className="w-3.5 h-3.5 text-[#47654c]" />
-              <span>Đã thêm</span>
+              <Check className="w-3.5 h-3.5 text-white" />
+              <span>ĐÃ THÊM</span>
             </>
+          ) : isOutOfStock ? (
+            <span>HẾT HÀNG</span>
           ) : (
-            <>
-              <Plus className="w-3.5 h-3.5" />
-              <span>Thêm</span>
-            </>
+            <span>MUA NGAY</span>
           )}
-        </Button>
+        </button>
       </div>
     </motion.div>
   )
