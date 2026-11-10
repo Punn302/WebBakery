@@ -118,7 +118,11 @@ public class UserService {
         if (userRepository.existsByEmailIgnoreCase(email)) {
             return false;
         }
-        User user = new User(String.valueOf(System.currentTimeMillis()), email, passwordEncoder.encode(password), name, phone, "ROLE_USER");
+        String cleanPhone = phone != null ? phone.replaceAll("[^0-9]", "") : "";
+        if (cleanPhone.startsWith("84") && cleanPhone.length() == 11) {
+            cleanPhone = "0" + cleanPhone.substring(2);
+        }
+        User user = new User(String.valueOf(System.currentTimeMillis()), email.trim().toLowerCase(), passwordEncoder.encode(password), name.trim(), cleanPhone, "ROLE_USER");
         userRepository.save(user);
         return true;
     }
@@ -140,13 +144,13 @@ public class UserService {
     }
 
     public User updateUserRole(String id, String role) {
-        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy user"));
+        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("KhÃ´ng tÃ¬m tháº¥y user"));
         user.setRole(role);
         return userRepository.save(user);
     }
 
     public User setUserActive(String id, boolean active) {
-        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy user"));
+        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("KhÃ´ng tÃ¬m tháº¥y user"));
         user.setActive(active);
         if (!active) {
             user.setLoggedIn(false);
@@ -155,15 +159,15 @@ public class UserService {
     }
 
     public User resetPassword(String id, String newPassword) {
-        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy user"));
+        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("KhÃ´ng tÃ¬m tháº¥y user"));
         user.setPassword(passwordEncoder.encode(newPassword));
         return userRepository.save(user);
     }
 
     public User resetCustomerPasswordToDefault(String id) {
-        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy user"));
+        User user = findById(id).orElseThrow(() -> new IllegalArgumentException("KhÃ´ng tÃ¬m tháº¥y user"));
         if (!"USER".equalsIgnoreCase(user.getRole()) && !"ROLE_USER".equalsIgnoreCase(user.getRole())) {
-            throw new IllegalArgumentException("Chỉ reset mật khẩu mặc định cho tài khoản khách");
+            throw new IllegalArgumentException("Chá»‰ reset máº­t kháº©u máº·c Ä‘á»‹nh cho tÃ i khoáº£n khÃ¡ch");
         }
         user.setPassword(passwordEncoder.encode(DEFAULT_CUSTOMER_PASSWORD));
         user.setForcePasswordChange(true);
@@ -173,7 +177,7 @@ public class UserService {
     public User updateCurrentUser(String name, String phone) {
         User currentUser = getCurrentUser();
         if (currentUser == null) {
-            throw new IllegalStateException("Vui lòng đăng nhập");
+            throw new IllegalStateException("Vui lÃ²ng Ä‘Äƒng nháº­p");
         }
 
         currentUser.setName(name);
@@ -190,7 +194,7 @@ public class UserService {
     public boolean changePassword(String currentPassword, String newPassword) {
         User currentUser = getCurrentUser();
         if (currentUser == null) {
-            throw new IllegalStateException("Vui lòng đăng nhập");
+            throw new IllegalStateException("Vui lÃ²ng Ä‘Äƒng nháº­p");
         }
 
         if (!passwordMatches(currentPassword, currentUser.getPassword())) {

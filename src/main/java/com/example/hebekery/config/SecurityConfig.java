@@ -87,6 +87,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/contact/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/orders/track").permitAll()
                         .requestMatchers("/api/payment/**").permitAll()
+                        .requestMatchers("/api/vouchers/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/blogs/**").permitAll()
                         // Staff & Warehouse APIs
                         .requestMatchers("/api/warehouse/**").hasAnyRole("ADMIN", "STAFF_WAREHOUSE")
                         .requestMatchers("/api/upload/**").hasAnyRole("ADMIN", "STAFF_WAREHOUSE")

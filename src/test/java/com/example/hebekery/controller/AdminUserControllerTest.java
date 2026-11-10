@@ -61,7 +61,7 @@ class AdminUserControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertTrue(response.getBody().isSuccess());
-        assertEquals("ROLE_STAFF_WAREHOUSE", response.getBody().getData().getRole());
+        assertEquals("STAFF_WAREHOUSE", response.getBody().getData().getRole());
     }
 
     @Test

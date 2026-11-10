@@ -13,6 +13,7 @@ import {
   UserCheck,
   Truck,
   Sparkles,
+  Ticket,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { cn } from '@/utils/cn'
@@ -50,6 +51,12 @@ export const AdminLayout: React.FC = () => {
       label: 'Quản lý tài khoản',
       path: '/admin/users',
       icon: Users,
+      roles: ['ADMIN'],
+    },
+    {
+      label: 'Mã giảm giá & Voucher',
+      path: '/admin/vouchers',
+      icon: Ticket,
       roles: ['ADMIN'],
     },
     {

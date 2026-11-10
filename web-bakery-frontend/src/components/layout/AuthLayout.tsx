@@ -4,10 +4,12 @@ import { Sparkles, CheckCircle2 } from 'lucide-react'
 import heroStitch from '@/assets/hero_stitch.jpg'
 
 export const AuthLayout: React.FC = () => {
+  const fallbackLogo = 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/logo.png?1790765513162'
+
   return (
-    <div className="min-h-screen bg-[#faf8f5] flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-[#faf8f5] flex items-center justify-center p-4 sm:p-6 lg:p-8 font-text">
       <div className="w-full max-w-4xl bg-white border border-[#eadbce] rounded-3xl overflow-hidden shadow-sm grid grid-cols-1 md:grid-cols-12 min-h-[580px]">
-        {/* Left Side: Bakery Atmosphere Branding (Stitch Screen 7) */}
+        {/* Left Side: Bakery Atmosphere Branding */}
         <div className="hidden md:flex md:col-span-5 relative bg-[#2e1e12] text-white p-8 flex-col justify-between overflow-hidden">
           {/* Background Image with Warm Overlay */}
           <img
@@ -21,15 +23,15 @@ export const AuthLayout: React.FC = () => {
           <div className="relative z-10">
             <Link to="/" className="inline-flex items-center gap-2.5">
               <img
-                src="/logo.webp"
+                src="/logo.png"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = fallbackLogo
+                }}
                 alt="Hebekery"
-                className="h-9 w-auto object-contain brightness-0 invert"
+                className="h-10 w-auto object-contain brightness-0 invert"
               />
-              <span className="font-headline text-xl font-bold tracking-tight text-[#faf8f5]">
-                Hebekery
-              </span>
             </Link>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 text-white/90 text-[10px] font-semibold tracking-wider uppercase mt-4">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 text-white/90 text-[10px] font-semibold tracking-wider uppercase mt-3">
               <Sparkles className="w-3 h-3 text-[#d97724]" />
               <span>Tiệm Bánh Dinh Dưỡng</span>
             </div>
@@ -37,7 +39,7 @@ export const AuthLayout: React.FC = () => {
 
           {/* Middle Quote & Atmosphere */}
           <div className="relative z-10 space-y-4 my-auto">
-            <p className="font-headline text-lg sm:text-xl font-medium leading-relaxed italic text-[#faf8f5]">
+            <p className="font-serif text-xl sm:text-2xl font-normal leading-relaxed italic text-[#faf8f5]">
               “Bánh tươi nướng mới mỗi sáng sớm, giữ trọn vị thơm bùi từ lúa mì nguyên cám và mật ong hoa rừng.”
             </p>
             <div className="space-y-2 text-xs text-white/80">
@@ -66,9 +68,15 @@ export const AuthLayout: React.FC = () => {
         <div className="md:col-span-7 p-6 sm:p-10 flex flex-col justify-center">
           {/* Mobile Logo Header */}
           <div className="md:hidden text-center mb-6">
-            <Link to="/" className="inline-flex items-center gap-2">
-              <img src="/logo.webp" alt="Hebekery" className="h-8 w-auto object-contain" />
-              <span className="font-headline text-xl font-bold text-[#2e1e12]">Hebekery</span>
+            <Link to="/" className="inline-flex items-center justify-center">
+              <img
+                src="/logo.png"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = fallbackLogo
+                }}
+                alt="Hebekery"
+                className="h-9 w-auto object-contain mx-auto"
+              />
             </Link>
           </div>
 

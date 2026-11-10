@@ -135,6 +135,15 @@ public class OrderService {
         return createPaidOrder(user, cartItems, subtotal, request);
     }
 
+    public List<Order> getRawOrdersByUser(String userId) {
+        return orderRepository.findByUserId(userId).stream()
+                .sorted((a, b) -> {
+                    if (a.getCreatedAt() == null || b.getCreatedAt() == null) return 0;
+                    return b.getCreatedAt().compareTo(a.getCreatedAt());
+                })
+                .collect(Collectors.toList());
+    }
+
     public List<OrderResponse> getOrdersByUser(String userId) {
         return orderRepository.findByUserId(userId).stream().map(this::toResponse).collect(Collectors.toList());
     }

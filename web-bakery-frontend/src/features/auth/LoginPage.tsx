@@ -1,32 +1,44 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ArrowRight, Lock, Mail } from 'lucide-react'
+import { ArrowRight, Lock, Mail, ShieldCheck, User as UserIcon } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 
 const loginSchema = z.object({
-  email: z.string().email('Địa chỉ email không hợp lệ'),
+  email: z.string().trim().email('Địa chỉ email không hợp lệ'),
   password: z.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
 })
 
 type LoginFormData = z.infer<typeof loginSchema>
 
 export const LoginPage: React.FC = () => {
-  const { login } = useAuth()
+  const { login, isAuthenticated, isAdmin, user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [isLoading, setIsLoading] = useState(false)
 
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/'
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (isAdmin) {
+        navigate('/admin/dashboard', { replace: true })
+      } else {
+        navigate(from !== '/login' ? from : '/', { replace: true })
+      }
+    }
+  }, [isAuthenticated, isAdmin, user, navigate, from])
+
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -35,17 +47,38 @@ export const LoginPage: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setIsLoading(true)
-      await login(data)
+      const loggedUser = await login({
+        email: data.email.trim().toLowerCase(),
+        password: data.password,
+      })
       toast.success('Đăng nhập thành công!')
-      navigate(from, { replace: true })
+
+      // Smart navigation
+      if (from && from !== '/' && from !== '/login') {
+        navigate(from, { replace: true })
+      } else if (loggedUser.role === 'ADMIN' || (loggedUser.role as string) === 'ROLE_ADMIN') {
+        navigate('/admin/dashboard', { replace: true })
+      } else if (loggedUser.role === 'STAFF_WAREHOUSE') {
+        navigate('/admin/inventory', { replace: true })
+      } else if (loggedUser.role === 'STAFF_SALES') {
+        navigate('/admin/orders', { replace: true })
+      } else {
+        navigate('/', { replace: true })
+      }
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        (err as Error)?.message ||
         'Email hoặc mật khẩu không chính xác'
       toast.error(msg)
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const fillDemoAccount = (email: string, pass: string) => {
+    setValue('email', email, { shouldValidate: true })
+    setValue('password', pass, { shouldValidate: true })
   }
 
   return (
@@ -57,6 +90,37 @@ export const LoginPage: React.FC = () => {
         <p className="text-xs text-[#7c6856]">
           Chào mừng bạn quay lại thưởng thức những mẻ bánh lành mạnh
         </p>
+      </div>
+
+      {/* Quick Demo Fill Buttons */}
+      <div className="p-3 bg-[#f7f3ee] border border-[#eadbce] rounded-xl space-y-1.5">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] font-semibold text-[#4a3728]">Tài khoản thử nghiệm nhanh:</span>
+        </div>
+        <div className="grid grid-cols-2 gap-2 pt-1">
+          <button
+            type="button"
+            onClick={() => fillDemoAccount('user@hebekery.vn', '123456')}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-[#eadbce] rounded-lg text-[11px] text-[#2e1e12] hover:border-[#47654c] hover:bg-[#eef3ee] transition-all text-left"
+          >
+            <UserIcon className="w-3.5 h-3.5 text-[#47654c] shrink-0" />
+            <div className="truncate">
+              <div className="font-medium truncate">Khách hàng</div>
+              <div className="text-[10px] text-[#7c6856] truncate">user@hebekery.vn</div>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => fillDemoAccount('admin@hebekery.vn', 'admin123')}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-[#eadbce] rounded-lg text-[11px] text-[#2e1e12] hover:border-[#47654c] hover:bg-[#eef3ee] transition-all text-left"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-[#b47243] shrink-0" />
+            <div className="truncate">
+              <div className="font-medium truncate">Quản trị viên</div>
+              <div className="text-[10px] text-[#7c6856] truncate">admin@hebekery.vn</div>
+            </div>
+          </button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

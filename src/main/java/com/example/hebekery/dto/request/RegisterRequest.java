@@ -24,7 +24,7 @@ public class RegisterRequest {
     private String name;
 
     @Schema(description = "Số điện thoại liên lạc", example = "0912345678")
-    @Pattern(regexp = "^$|^[0-9]{10,11}$", message = "Số điện thoại không hợp lệ")
+    @Pattern(regexp = "^$|^(\\+84|0)?[0-9]{9,10}$|^[0-9]{10,11}$", message = "Số điện thoại không hợp lệ")
     private String phone;
 
     public String getEmail() {

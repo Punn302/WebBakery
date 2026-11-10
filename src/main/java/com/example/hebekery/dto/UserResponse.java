@@ -44,7 +44,11 @@ public class UserResponse {
         if (user == null) {
             return null;
         }
-        return new UserResponse(user.getId(), user.getEmail(), user.getName(), user.getPhone(), user.getRole(), user.isActive(), user.isForcePasswordChange());
+        String cleanRole = user.getRole();
+        if (cleanRole != null && cleanRole.startsWith("ROLE_")) {
+            cleanRole = cleanRole.substring(5);
+        }
+        return new UserResponse(user.getId(), user.getEmail(), user.getName(), user.getPhone(), cleanRole, user.isActive(), user.isForcePasswordChange());
     }
 
     public String getId() {

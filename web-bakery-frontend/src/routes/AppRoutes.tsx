@@ -37,6 +37,8 @@ import { AdminUsersPage } from '@/features/admin/AdminUsersPage'
 import { AdminInventoryPage } from '@/features/admin/AdminInventoryPage'
 import { AdminReportsPage } from '@/features/admin/AdminReportsPage'
 import { AdminContactPage } from '@/features/admin/AdminContactPage'
+import { AdminVoucherPage } from '@/features/admin/AdminVoucherPage'
+
 
 const queryClient = new QueryClient({
   defaultOptions: {

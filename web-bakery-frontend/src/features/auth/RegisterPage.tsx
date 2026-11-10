@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -10,18 +10,34 @@ import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 
 const registerSchema = z.object({
-  name: z.string().min(2, 'Họ và tên phải có ít nhất 2 ký tự'),
-  email: z.string().email('Địa chỉ email không hợp lệ'),
-  phone: z.string().regex(/^(0|\+84)[3|5|7|8|9][0-9]{8}$/, 'Số điện thoại không hợp lệ'),
+  name: z.string().trim().min(2, 'Họ và tên phải có ít nhất 2 ký tự'),
+  email: z.string().trim().email('Địa chỉ email không hợp lệ'),
+  phone: z
+    .string()
+    .trim()
+    .refine(
+      (val) => {
+        const cleaned = val.replace(/[\s.-]/g, '')
+        return /^(0|\+84)[3|5|7|8|9][0-9]{8}$/.test(cleaned)
+      },
+      { message: 'Số điện thoại không hợp lệ (ví dụ: 0912345678)' }
+    ),
   password: z.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
 })
 
 type RegisterFormData = z.infer<typeof registerSchema>
 
 export const RegisterPage: React.FC = () => {
-  const { register: registerUser } = useAuth()
+  const { register: registerUser, isAuthenticated } = useAuth()
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/', { replace: true })
+    }
+  }, [isAuthenticated, navigate])
 
   const {
     register,
@@ -34,13 +50,34 @@ export const RegisterPage: React.FC = () => {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setIsLoading(true)
-      await registerUser(data)
-      toast.success('Đăng ký tài khoản thành công!')
-      navigate('/')
+
+      // Clean phone number: remove spaces/dots/dashes and convert +84 to 0
+      let cleanPhone = data.phone.replace(/[\s.-]/g, '')
+      if (cleanPhone.startsWith('+84')) {
+        cleanPhone = '0' + cleanPhone.slice(3)
+      }
+
+      await registerUser({
+        name: data.name.trim(),
+        email: data.email.trim().toLowerCase(),
+        phone: cleanPhone,
+        password: data.password,
+      })
+
+      toast.success('Đăng ký tài khoản thành công! Bạn đã được tự động đăng nhập.')
+      navigate('/', { replace: true })
     } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        'Đăng ký thất bại, email có thể đã tồn tại'
+      const respData = (err as { response?: { data?: { message?: string; errors?: Record<string, string> } } })?.response?.data
+      let msg = respData?.message
+
+      if (!msg && respData?.errors) {
+        msg = Object.values(respData.errors).join(', ')
+      }
+
+      if (!msg) {
+        msg = (err as Error)?.message || 'Đăng ký thất bại, email có thể đã tồn tại'
+      }
+
       toast.error(msg)
     } finally {
       setIsLoading(false)
@@ -112,7 +149,7 @@ export const RegisterPage: React.FC = () => {
           </label>
           <Input
             type="password"
-            placeholder="••••••••"
+            placeholder="•••••••• (tối thiểu 6 ký tự)"
             className="rounded-xl border-[#eadbce] focus:border-[#47654c] focus:ring-[#47654c] text-xs h-9"
             {...register('password')}
           />

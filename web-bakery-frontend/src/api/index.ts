@@ -26,6 +26,8 @@ import type {
   ProductReviewSummary,
   ContactSubmitRequest,
   ProductReviewRequest,
+  Voucher,
+  VoucherCalculation,
 } from '@/types'
 
 // Auth APIs
@@ -134,8 +136,16 @@ export const orderApi = {
     return unwrap(res)
   },
   getMyOrders: async (): Promise<Order[]> => {
-    const res = await axiosClient.get<Order[]>('/orders/my-orders')
-    return unwrap(res)
+    try {
+      const res = await axiosClient.get<Order[]>('/orders/my-orders')
+      return unwrap(res)
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status
+      if (status === 400 || status === 404) {
+        return []
+      }
+      throw err
+    }
   },
   getOrderById: async (id: string): Promise<Order> => {
     const res = await axiosClient.get<Order>(`/orders/${id}`)
@@ -381,6 +391,56 @@ export const uploadApi = {
 export const contactApi = {
   submitContact: async (data: ContactSubmitRequest): Promise<ContactMessage> => {
     const res = await axiosClient.post<{ success: boolean; data: ContactMessage }>('/contact', data)
+    return unwrap(res)
+  },
+}
+
+// Voucher APIs
+export const voucherApi = {
+  getAvailable: async (): Promise<Voucher[]> => {
+    const res = await axiosClient.get<{ success: boolean; data: Voucher[] }>('/vouchers/available')
+    return unwrap(res)
+  },
+  applyVoucher: async (data: { code: string; orderAmount: number }): Promise<VoucherCalculation> => {
+    const res = await axiosClient.post<{ success: boolean; data: VoucherCalculation }>('/vouchers/apply', data)
+    return unwrap(res)
+  },
+}
+
+// Admin Voucher Management APIs
+export const adminVoucherApi = {
+  getAll: async (): Promise<Voucher[]> => {
+    const res = await axiosClient.get<{ success: boolean; data: Voucher[] }>('/admin/vouchers')
+    return unwrap(res)
+  },
+  create: async (data: Partial<Voucher>): Promise<Voucher> => {
+    const res = await axiosClient.post<{ success: boolean; data: Voucher }>('/admin/vouchers', data)
+    return unwrap(res)
+  },
+  update: async (id: number | string, data: Partial<Voucher>): Promise<Voucher> => {
+    const res = await axiosClient.put<{ success: boolean; data: Voucher }>(`/admin/vouchers/${id}`, data)
+    return unwrap(res)
+  },
+  delete: async (id: number | string): Promise<void> => {
+    await axiosClient.delete(`/admin/vouchers/${id}`)
+  },
+  toggleStatus: async (id: number | string): Promise<Voucher> => {
+    const res = await axiosClient.patch<{ success: boolean; data: Voucher }>(`/admin/vouchers/${id}/toggle`)
+    return unwrap(res)
+  },
+}
+
+// User Account APIs
+export const userApi = {
+  updateProfile: async (data: { name: string; phone?: string }): Promise<User> => {
+    const res = await axiosClient.put<User>('/user/profile', data)
+    return unwrap(res)
+  },
+  changePassword: async (data: { currentPassword: string; newPassword: string }): Promise<void> => {
+    await axiosClient.post('/user/change-password', data)
+  },
+  getStatus: async (): Promise<{ loggedIn: boolean; user?: User }> => {
+    const res = await axiosClient.get<{ loggedIn: boolean; user?: User }>('/user/status')
     return unwrap(res)
   },
 }
