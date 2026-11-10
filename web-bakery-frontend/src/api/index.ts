@@ -134,8 +134,16 @@ export const orderApi = {
     return unwrap(res)
   },
   getMyOrders: async (): Promise<Order[]> => {
-    const res = await axiosClient.get<Order[]>('/orders/my-orders')
-    return unwrap(res)
+    try {
+      const res = await axiosClient.get<Order[]>('/orders/my-orders')
+      return unwrap(res)
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status
+      if (status === 400 || status === 404) {
+        return []
+      }
+      throw err
+    }
   },
   getOrderById: async (id: string): Promise<Order> => {
     const res = await axiosClient.get<Order>(`/orders/${id}`)

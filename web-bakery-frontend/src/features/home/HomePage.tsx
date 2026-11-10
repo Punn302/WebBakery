@@ -244,7 +244,7 @@ export const HomePage: React.FC = () => {
             <div className="leaf_animation absolute inset-0 pointer-events-none overflow-hidden">
               {slide.leaves.map((leaf, i) => (
                 <img
-                  key={`${slide.id}-leaf-${i}`}
+                  key={`${slide.id}-leaf-${i}-${currentSlide}`}
                   src={leaf.src}
                   alt="leaf"
                   className={`absolute pointer-events-none hebe-leaf-active ${leaf.className}`}
@@ -253,18 +253,20 @@ export const HomePage: React.FC = () => {
             </div>
 
             {/* Active Slide Bowl & Typography */}
-            <div className="relative z-10 text-center max-w-lg mx-auto flex flex-col items-center">
+            <div className="relative z-10 text-center max-w-xl mx-auto flex flex-col items-center">
               <Link
                 to={slide.link}
                 className="block group relative cursor-pointer"
                 title={slide.title}
               >
-                <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-[350px] md:h-[350px] mx-auto flex items-center justify-center">
+                {/* Authentic Soft Charger Disc Halo behind Bowl */}
+                <div className="relative w-72 h-72 sm:w-84 sm:h-84 md:w-[380px] md:h-[380px] mx-auto flex items-center justify-center">
+                  <div className="absolute inset-0 m-auto w-[270px] h-[270px] sm:w-[320px] sm:h-[320px] md:w-[360px] md:h-[360px] rounded-full bg-radial from-[#ece5db]/85 via-[#f6f2ec]/45 to-transparent pointer-events-none transition-all duration-700" />
                   <img
-                    key={`${slide.id}-${direction}`}
+                    key={`${slide.id}-${direction}-${currentSlide}`}
                     src={slide.image}
                     alt={slide.title}
-                    className={`slide_bowl_img w-full h-full object-contain ${
+                    className={`slide_bowl_img relative z-10 w-full h-full object-contain ${
                       direction === 'next' ? 'hebe-slide-in-next' : 'hebe-slide-in-prev'
                     }`}
                   />
@@ -272,13 +274,13 @@ export const HomePage: React.FC = () => {
               </Link>
 
               {/* Slide Title & "Mua ngay >" Action */}
-              <div className="ani_text text-center mt-3 sm:mt-5">
-                <h2 className="title_slide text-xl sm:text-2xl md:text-[28px] font-display font-bold uppercase tracking-tight text-[#2A2725]">
+              <div key={`text-${slide.id}-${currentSlide}`} className="ani_text hebe-text-active text-center mt-3 sm:mt-5">
+                <h2 className="title_slide text-xl sm:text-2xl md:text-[30px] font-display font-bold uppercase tracking-tight text-[#2A2725]">
                   {slide.title}
                 </h2>
                 <Link
                   to={slide.link}
-                  className="sup_slide inline-flex items-center gap-1.5 text-sm sm:text-base font-semibold text-[#c8983d] hover:text-[#91350a] mt-1 transition-colors group"
+                  className="sup_slide inline-flex items-center gap-1.5 text-sm sm:text-[15px] font-semibold text-[#a67c52] hover:text-[#91350a] mt-1.5 transition-all group"
                 >
                   <span>Mua ngay</span>
                   <span className="text-sm font-bold group-hover:translate-x-1 transition-transform">
@@ -288,12 +290,12 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Carousel Navigation Arrows - Positioned inward ~18-20% framing the bowl */}
+            {/* Carousel Navigation Arrows - Inward Framed matching real Hebekery */}
             <button
               type="button"
               onClick={prevSlide}
               aria-label="Slide trước"
-              className="absolute left-[5%] sm:left-[12%] md:left-[18%] lg:left-[20%] z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/95 border border-[#E5E2DF]/60 shadow-[0_4px_16px_rgba(0,80,76,0.12)] flex items-center justify-center text-[#2A2725] hover:text-[#006561] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              className="absolute left-[4%] sm:left-[10%] md:left-[18%] lg:left-[22%] z-20 w-11 h-11 rounded-full bg-white/95 border border-[#E5E2DF]/80 shadow-[0_4px_16px_rgba(0,80,76,0.12)] flex items-center justify-center text-[#2A2725] hover:text-[#006561] hover:scale-105 active:scale-95 transition-all cursor-pointer"
             >
               <ChevronLeft className="w-5 h-5 text-[#2A2725]" />
             </button>
@@ -301,7 +303,7 @@ export const HomePage: React.FC = () => {
               type="button"
               onClick={nextSlide}
               aria-label="Slide tiếp theo"
-              className="absolute right-[5%] sm:right-[12%] md:right-[18%] lg:right-[20%] z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/95 border border-[#E5E2DF]/60 shadow-[0_4px_16px_rgba(0,80,76,0.12)] flex items-center justify-center text-[#2A2725] hover:text-[#006561] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              className="absolute right-[4%] sm:right-[10%] md:right-[18%] lg:right-[22%] z-20 w-11 h-11 rounded-full bg-white/95 border border-[#E5E2DF]/80 shadow-[0_4px_16px_rgba(0,80,76,0.12)] flex items-center justify-center text-[#2A2725] hover:text-[#006561] hover:scale-105 active:scale-95 transition-all cursor-pointer"
             >
               <ChevronRight className="w-5 h-5 text-[#2A2725]" />
             </button>
