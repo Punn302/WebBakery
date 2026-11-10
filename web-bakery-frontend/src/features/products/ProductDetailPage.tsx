@@ -26,7 +26,7 @@ import {
   Clock,
   Award,
 } from 'lucide-react'
-import { productApi, reviewApi } from '@/api'
+import { productApi, reviewApi, voucherApi } from '@/api'
 import { useCart } from '@/hooks/useCart'
 import { formatCurrency, optimizeCloudinaryUrl, formatDate } from '@/utils/format'
 import { toast } from 'sonner'
@@ -167,6 +167,24 @@ export const ProductDetailPage: React.FC = () => {
     },
   })
 
+  // Live HeBekery Vouchers from Backend
+  const { data: remoteVouchers } = useQuery({
+    queryKey: ['available-vouchers'],
+    queryFn: () => voucherApi.getAvailable(),
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const activeVouchers = (remoteVouchers && remoteVouchers.length > 0)
+    ? remoteVouchers.map((v) => ({
+        code: v.code,
+        text: (v.discountType as string) === 'FREE_SHIPPING'
+          ? `Freeship ${Math.round((v.discountValue || 0) / 1000)}K · đơn ${Math.round((v.minOrderAmount || 0) / 1000)}K`
+          : `Giảm ${Math.round((v.discountValue || 0) / 1000)}K · đơn ${Math.round((v.minOrderAmount || 0) / 1000)}K`,
+        minOrder: v.minOrderAmount || 0,
+        discount: v.discountValue || 0,
+      }))
+    : VOUCHERS
+
   // 4. Fetch Related Products
   const { data: relatedData } = useQuery({
     queryKey: ['related-products', typeof product?.category === 'object' ? product?.category?.id : product?.category],
@@ -240,7 +258,7 @@ export const ProductDetailPage: React.FC = () => {
       name: `${product.name} (${selectedVariant === 'combo' ? 'Combo 2 Hũ' : selectedVariant.toUpperCase()} - ${selectedFlavor})`,
     }
     await addItem(customProduct, quantity)
-    setIsCartOpen(true)
+    navigate('/checkout')
   }
 
   const handleAddBundleToCart = async (bundle: typeof FREQUENTLY_BOUGHT_TOGETHER[0]) => {
@@ -447,7 +465,7 @@ export const ProductDetailPage: React.FC = () => {
               <span>Mã giảm giá — bấm để sao chép:</span>
             </div>
             <div className="flex flex-wrap gap-2">
-              {VOUCHERS.map((v) => (
+              {activeVouchers.map((v) => (
                 <button
                   key={v.code}
                   type="button"

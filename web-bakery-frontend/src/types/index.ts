@@ -104,6 +104,8 @@ export interface ReturnHistory {
   returnStatus: string
   reason: string
   adminNote?: string
+  status?: string
+  shippingAddress?: { fullName?: string; phone?: string; addressLine?: string }
   changedBy: string
   createdAt: string
 }
@@ -305,4 +307,32 @@ export interface ContactSubmitRequest {
   phone: string
   subject: string
   message: string
+}
+
+
+// Voucher Types
+export interface Voucher {
+  id: number
+  code: string
+  name: string
+  description?: string
+  discountType: 'PERCENTAGE' | 'FIXED_AMOUNT' | 'FREE_SHIPPING'
+  discountValue: number
+  minOrderAmount?: number
+  maxDiscountAmount?: number
+  startDate?: string
+  endDate?: string
+  usageLimit?: number
+  usedCount?: number
+  active: boolean
+  isExpired?: boolean
+}
+
+export interface VoucherCalculation {
+  valid: boolean
+  code: string
+  message: string
+  originalAmount: number
+  discountAmount: number
+  finalAmount: number
 }

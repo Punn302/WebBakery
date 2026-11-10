@@ -333,7 +333,8 @@ export const BmiCalculatorPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8 py-6 pb-16">
+    <div className="w-full bg-[#FAF7F2] min-h-screen py-8 pb-20">
+      <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
       {/* ================= Hero Header Banner ================= */}
       <div className="bg-white rounded-3xl border border-[#E5E2DF] p-6 sm:p-8 shadow-xs space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -844,5 +845,6 @@ export const BmiCalculatorPage: React.FC = () => {
         </div>
       </div>
     </div>
-  )
+  </div>
+)
 }

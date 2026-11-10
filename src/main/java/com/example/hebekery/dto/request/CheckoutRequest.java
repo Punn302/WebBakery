@@ -25,8 +25,11 @@ public class CheckoutRequest {
 
     @Schema(description = "Phương thức thanh toán (COD, MOMO, SEPAY)", example = "COD")
     @NotBlank(message = "Phương thức thanh toán không được để trống")
-    @Pattern(regexp = "COD|MOMO|SEPAY", message = "Phương thức thanh toán không hợp lệ (hỗ trợ: COD, MOMO, SEPAY)")
+    @Pattern(regexp = "COD|MOMO|SEPAY|VIETQR", message = "Phương thức thanh toán không hợp lệ")
     private String paymentMethod;
+
+    @Schema(description = "Mã voucher giảm giá (nếu có)", example = "HB10")
+    private String voucherCode;
 
     public String getCustomerName() {
         return customerName;
@@ -66,5 +69,13 @@ public class CheckoutRequest {
 
     public void setPaymentMethod(String paymentMethod) {
         this.paymentMethod = paymentMethod;
+    }
+
+    public String getVoucherCode() {
+        return voucherCode;
+    }
+
+    public void setVoucherCode(String voucherCode) {
+        this.voucherCode = voucherCode;
     }
 }

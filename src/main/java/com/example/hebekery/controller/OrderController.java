@@ -37,6 +37,19 @@ public class OrderController {
         this.userService = userService;
     }
 
+    @Operation(summary = "Lấy danh sách đơn hàng của người dùng hiện tại", description = "Trả về lịch sử mua sắm của khách hàng đã xác thực", security = @SecurityRequirement(name = "BearerAuth"))
+    @GetMapping({"/api/user/orders", "/api/orders", "/api/orders/my-orders"})
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<List<OrderDetailResponse>>> getMyOrders() {
+        requireLogin();
+        String userId = userService.getCurrentUser().getId();
+        List<Order> orders = orderService.getRawOrdersByUser(userId);
+        List<OrderDetailResponse> dtos = orders.stream()
+                .map(OrderDetailResponse::from)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách đơn hàng thành công", dtos));
+    }
+
     @Operation(summary = "Tra cứu đơn hàng công khai", description = "Khách hàng tra cứu tiến độ giao hàng thông qua Mã đơn hàng hoặc Số điện thoại")
     @GetMapping("/api/orders/track")
     public ResponseEntity<ApiResponse<List<OrderDetailResponse>>> track(

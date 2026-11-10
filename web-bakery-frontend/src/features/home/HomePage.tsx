@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ChevronLeft,
   ChevronRight,
   ArrowRight,
   Check,
+  Flame,
+  Star,
+  Eye,
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { productApi } from '@/api'
@@ -13,7 +16,7 @@ import { useCart } from '@/hooks/useCart'
 import { formatCurrency, optimizeCloudinaryUrl } from '@/utils/format'
 import type { Product } from '@/types'
 
-// Authentic Hebekery Hero Slides matching exact proportions & leaves
+// Authentic Hebekery Hero Slides
 const HERO_SLIDES = [
   {
     id: 1,
@@ -107,7 +110,7 @@ const POLICIES = [
   },
   {
     icon: 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/i_policy_3.png?1790765513162',
-    title: 'NGUYÊN LIỆU THÀNH PHẦN RÕ RÀNG',
+    title: 'NGUYÊN LIỆU MINH BẠCH',
     desc: 'Liệt kê đầy đủ tên + tỷ lệ % nguyên liệu chính trên bao bì',
   },
   {
@@ -171,6 +174,10 @@ export const HomePage: React.FC = () => {
   const { addItem } = useCart()
   const [addedIds, setAddedIds] = useState<Record<string, boolean>>({})
 
+  // Carousel refs for smooth horizontal scrolling
+  const cateScrollRef = useRef<HTMLDivElement>(null)
+  const bestSellerScrollRef = useRef<HTMLDivElement>(null)
+
   // Auto-play hero slider
   useEffect(() => {
     const timer = setInterval(() => {
@@ -188,6 +195,20 @@ export const HomePage: React.FC = () => {
   const prevSlide = () => {
     setDirection('prev')
     setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)
+  }
+
+  const scrollCate = (dir: 'left' | 'right') => {
+    if (cateScrollRef.current) {
+      const scrollAmount = dir === 'left' ? -320 : 320
+      cateScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' })
+    }
+  }
+
+  const scrollBestSeller = (dir: 'left' | 'right') => {
+    if (bestSellerScrollRef.current) {
+      const scrollAmount = dir === 'left' ? -320 : 320
+      bestSellerScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' })
+    }
   }
 
   // Live backend connection to Spring Boot /api/products
@@ -219,10 +240,7 @@ export const HomePage: React.FC = () => {
             
             {/* Ambient Concentric Circle Animation */}
             <div className="circle_animation absolute inset-0 flex items-center justify-center pointer-events-none">
-              {/* Soft warm shadow disc directly behind bowl */}
               <span className="absolute w-[280px] h-[280px] sm:w-[360px] sm:h-[360px] rounded-full bg-[#E0CDBE]/25 blur-md" />
-
-              {/* Floating ambient rings */}
               {slide.isOdd ? (
                 <>
                   <span className="absolute -left-4 sm:left-12 bottom-12 w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] rounded-full bg-gradient-to-b from-[#E0CDBE]/30 to-transparent -rotate-12 transition-all duration-700" />
@@ -240,7 +258,7 @@ export const HomePage: React.FC = () => {
               )}
             </div>
 
-            {/* Decorative Floating Leaves with organic scale & fade */}
+            {/* Decorative Floating Leaves */}
             <div className="leaf_animation absolute inset-0 pointer-events-none overflow-hidden">
               {slide.leaves.map((leaf, i) => (
                 <img
@@ -259,7 +277,6 @@ export const HomePage: React.FC = () => {
                 className="block group relative cursor-pointer"
                 title={slide.title}
               >
-                {/* Authentic Soft Charger Disc Halo behind Bowl */}
                 <div className="relative w-72 h-72 sm:w-84 sm:h-84 md:w-[380px] md:h-[380px] mx-auto flex items-center justify-center">
                   <div className="absolute inset-0 m-auto w-[270px] h-[270px] sm:w-[320px] sm:h-[320px] md:w-[360px] md:h-[360px] rounded-full bg-radial from-[#ece5db]/85 via-[#f6f2ec]/45 to-transparent pointer-events-none transition-all duration-700" />
                   <img
@@ -273,7 +290,7 @@ export const HomePage: React.FC = () => {
                 </div>
               </Link>
 
-              {/* Slide Title & "Mua ngay >" Action */}
+              {/* Slide Title & "Mua ngay >" */}
               <div key={`text-${slide.id}-${currentSlide}`} className="ani_text hebe-text-active text-center mt-3 sm:mt-5">
                 <h2 className="title_slide text-xl sm:text-2xl md:text-[30px] font-display font-bold uppercase tracking-tight text-[#2A2725]">
                   {slide.title}
@@ -290,7 +307,7 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Carousel Navigation Arrows - Inward Framed matching real Hebekery */}
+            {/* Navigation Arrows */}
             <button
               type="button"
               onClick={prevSlide}
@@ -309,7 +326,7 @@ export const HomePage: React.FC = () => {
             </button>
           </div>
 
-          {/* 5 Dots Indicator */}
+          {/* Dots Indicator */}
           <div className="flex items-center justify-center gap-2 pt-6">
             {HERO_SLIDES.map((s, idx) => (
               <button
@@ -331,33 +348,37 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* ================= SECTION 2: mew_about (VỀ HEBEKERY STORY - FULL BLEED) ================= */}
+      {/* ================= SECTION 2: mew_about (4 BISCOTTI JARS PANORAMA - USER ATTACHMENT) ================= */}
       <section className="mew_about module-component w-full">
-        {/* Full-bleed Wide Panorama Image: 4 Biscotti Jars */}
-        <div className="about_media w-full overflow-hidden">
-          <img
-            src="https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/about_img_pc.jpg?1790765513162"
-            alt="Về HeBekery"
-            className="w-full h-auto object-cover aspect-[16/9] sm:aspect-[21/9] md:aspect-[24/9]"
-          />
+        {/* Full-bleed Panorama Image of 4 Biscotti Jars */}
+        <div className="about_media w-full overflow-hidden shadow-xs">
+          <picture className="w-full d-block">
+            <source media="(min-width: 768px)" srcSet="https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/about_img_pc.jpg?1790765513162" />
+            <source media="(max-width: 767px)" srcSet="https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/about_img_mb.jpg?1790765513162" />
+            <img
+              src="https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/about_img_pc.jpg?1790765513162"
+              alt="4 Vị Bánh Biscotti Nguyên Cám HeBekery - Fruity Grains, Dark Choco, Pure Matcha, Salty Cheese"
+              className="w-full h-auto object-cover aspect-[16/9] sm:aspect-[21/9] md:aspect-[24/9]"
+            />
+          </picture>
         </div>
 
-        {/* Story Content Block */}
-        <div className="about_story max-w-[800px] mx-auto px-4 py-12 sm:py-16 text-center flex flex-col items-center gap-4">
-          <span className="eyebrow text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-[#B23A2A]">
+        {/* Story Content Block with Cormorant Garamond */}
+        <div className="about_story max-w-[840px] mx-auto px-4 py-12 sm:py-16 text-center flex flex-col items-center gap-4">
+          <span className="eyebrow text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] text-[#B23A2A]">
             Về Hebekery
           </span>
 
-          <h2 className="text-3xl sm:text-4xl md:text-[42px] font-display font-normal text-[#2A2725] leading-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-[44px] font-serif font-normal text-[#2A2725] leading-tight">
             Chọn nguyên liệu kỹ, <b className="font-bold">làm chỉn chu</b>
           </h2>
 
-          <span className="rule w-10 h-[1.5px] bg-[#B23A2A] mx-auto block my-1" aria-hidden="true" />
+          <span className="rule w-12 h-[2px] bg-[#B23A2A] mx-auto block my-1" aria-hidden="true" />
 
           <p className="summary text-sm sm:text-base text-[#6B6661] leading-relaxed max-w-2xl font-text">
-            Chúng tôi là những bạn trẻ yêu lối sống lành mạnh và đam mê tạo nên những sản phẩm
-            ngon thật, lành thật, dễ dùng cho người Việt Nam. Để không phải ăn ít hơn, mà là ăn đúng
-            hơn — chính là kim chỉ nam Hebekery luôn nỗ lực hướng đến.
+            Chúng tôi là những bạn trẻ yêu lối sống lành mạnh và đam mê tạo nên những sản phẩm ngon thật,
+            lành thật, dễ dùng cho người Việt Nam. Để không phải ăn ít hơn, mà là ăn đúng hơn — chính là kim
+            chỉ nam Hebekery luôn nỗ lực hướng đến.
           </p>
 
           <Link
@@ -370,22 +391,22 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* ================= SECTION 3: m_policy (4 CAM KẾT TIÊU CHUẨN) ================= */}
-      <section className="m_policy w-full py-10 sm:py-14">
+      <section className="m_policy w-full py-10 sm:py-14 bg-white/50 border-y border-[#E5E2DF]/60">
         <div className="max-w-[1240px] mx-auto px-4">
           <div className="policy-wrap grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {POLICIES.map((p) => (
               <div
                 key={p.title}
-                className="align-items-center flex flex-col items-center text-center gap-3.5"
+                className="flex flex-col items-center text-center gap-3.5 group cursor-default"
               >
-                <div className="poli-icon w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center">
+                <div className="poli-icon w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center p-2 rounded-2xl bg-white border border-[#E5E2DF]/70 shadow-xs group-hover:scale-110 transition-transform duration-300">
                   <img
                     src={p.icon}
                     alt={p.title}
                     className="w-full h-full object-contain"
                   />
                 </div>
-                <div className="policy-content flex flex-col items-center gap-1.5 max-w-[220px]">
+                <div className="policy-content flex flex-col items-center gap-1 max-w-[220px]">
                   <h3 className="font-display font-bold text-xs sm:text-sm text-[#2A2725] uppercase tracking-tight">
                     {p.title}
                   </h3>
@@ -399,24 +420,51 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* ================= SECTION 4: mew_cate (DÒNG SẢN PHẨM SỐNG LÀNH) ================= */}
+      {/* ================= SECTION 4: mew_cate (DÒNG SẢN PHẨM - SWIPER SLIDER) ================= */}
       <section className="mew_cate module-component w-full py-12 sm:py-16">
-        <div className="max-w-[1240px] mx-auto px-4 space-y-8 sm:space-y-10">
-          <div className="cate_title text-center space-y-2 max-w-md mx-auto">
-            <span className="eyebrow text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-[#B23A2A]">
-              Dòng sản phẩm
-            </span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-normal text-[#2A2725]">
-              Mời bạn <b className="font-bold">sống lành</b> cùng Hebekery
-            </h2>
+        <div className="max-w-[1240px] mx-auto px-4 space-y-6 sm:space-y-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="cate_title text-center sm:text-left space-y-1.5">
+              <span className="eyebrow text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-[#B23A2A]">
+                Dòng sản phẩm
+              </span>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-normal text-[#2A2725]">
+                Mời bạn <b className="font-bold">sống lành</b> cùng Hebekery
+              </h2>
+            </div>
+
+            {/* Slider Arrow Controls */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => scrollCate('left')}
+                aria-label="Xem dòng sản phẩm trước"
+                className="w-9 h-9 rounded-full bg-white border border-[#E5E2DF] flex items-center justify-center text-[#2A2725] hover:border-[#006561] hover:text-[#006561] transition-all shadow-xs cursor-pointer"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollCate('right')}
+                aria-label="Xem dòng sản phẩm kế tiếp"
+                className="w-9 h-9 rounded-full bg-white border border-[#E5E2DF] flex items-center justify-center text-[#2A2725] hover:border-[#006561] hover:text-[#006561] transition-all shadow-xs cursor-pointer"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5">
+          {/* Horizontal Smooth Scroll Container */}
+          <div
+            ref={cateScrollRef}
+            className="flex gap-4 sm:gap-5 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
             {PRODUCT_LINES.map((item) => (
               <Link
                 key={item.id}
                 to={item.link}
-                className="cate-card group flex flex-col bg-white rounded-xl border border-[#E5E2DF]/70 overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer"
+                className="cate-card shrink-0 w-[240px] sm:w-[270px] md:w-[290px] snap-start group flex flex-col bg-white rounded-xl border border-[#E5E2DF]/80 overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer"
               >
                 <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#FEFBF4]">
                   <img
@@ -425,17 +473,18 @@ export const HomePage: React.FC = () => {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
-                <div className="cate-body p-3.5 sm:p-4 flex flex-col flex-1 justify-between gap-2.5">
+                <div className="cate-body p-4 flex flex-col flex-1 justify-between gap-3">
                   <div>
-                    <h3 className="font-display font-bold text-sm sm:text-base text-[#2A2725] group-hover:text-[#006561] transition-colors">
+                    <h3 className="font-display font-bold text-base text-[#2A2725] group-hover:text-[#006561] transition-colors">
                       {item.title}
                     </h3>
-                    <p className="text-[11px] text-[#6B6661] mt-1 line-clamp-2 leading-relaxed font-text">
+                    <p className="text-xs text-[#6B6661] mt-1.5 line-clamp-2 leading-relaxed font-text">
                       {item.desc}
                     </p>
                   </div>
-                  <span className="text-[11px] font-bold text-[#006561] group-hover:underline transition-all">
-                    Khám phá dòng sản phẩm
+                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#006561] group-hover:underline">
+                    <span>Khám phá dòng sản phẩm</span>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                   </span>
                 </div>
               </Link>
@@ -444,28 +493,50 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* ================= SECTION 5: mew_bestseller (MUA NHIỀU NHẤT) ================= */}
-      <section className="mew_bestseller module-component w-full py-12 sm:py-16">
-        <div className="max-w-[1240px] mx-auto px-4 space-y-8 sm:space-y-10">
-          <div className="cate_title text-center space-y-2 max-w-lg mx-auto">
-            <span className="eyebrow text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-[#B23A2A]">
-              Best-seller tháng này
-            </span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-[#2A2725] uppercase tracking-tight">
-              MUA NHIỀU NHẤT
-            </h2>
-            <p className="summary sub text-xs sm:text-sm text-[#6B6661] font-text">
-              8 sản phẩm được khách Hebekery chọn lại nhiều nhất.
-            </p>
+      {/* ================= SECTION 5: mew_bestseller (MUA NHIỀU NHẤT - PRODUCT SLIDER) ================= */}
+      <section className="mew_bestseller module-component w-full py-12 sm:py-16 bg-[#F6F2EC]/40 border-y border-[#E5E2DF]/60">
+        <div className="max-w-[1240px] mx-auto px-4 space-y-6 sm:space-y-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="cate_title text-center sm:text-left space-y-1">
+              <span className="eyebrow text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-[#B23A2A]">
+                Best-seller tháng này
+              </span>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-[#2A2725] uppercase tracking-tight">
+                MUA NHIỀU NHẤT
+              </h2>
+              <p className="summary sub text-xs sm:text-sm text-[#6B6661] font-text">
+                8 sản phẩm được khách Hebekery chọn lại nhiều nhất.
+              </p>
+            </div>
+
+            {/* Navigation Arrows */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => scrollBestSeller('left')}
+                aria-label="Sản phẩm trước"
+                className="w-9 h-9 rounded-full bg-white border border-[#E5E2DF] flex items-center justify-center text-[#2A2725] hover:border-[#006561] hover:text-[#006561] transition-all shadow-xs cursor-pointer"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollBestSeller('right')}
+                aria-label="Sản phẩm tiếp theo"
+                className="w-9 h-9 rounded-full bg-white border border-[#E5E2DF] flex items-center justify-center text-[#2A2725] hover:border-[#006561] hover:text-[#006561] transition-all shadow-xs cursor-pointer"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
-          {/* Product Grid from Backend */}
+          {/* Product Horizontal Swiper */}
           {isLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-              {[...Array(8)].map((_, i) => (
+            <div className="flex gap-4 overflow-hidden">
+              {[...Array(4)].map((_, i) => (
                 <div
                   key={i}
-                  className="bg-white rounded-xl border border-[#E5E2DF] p-4 h-80 animate-pulse flex flex-col justify-between"
+                  className="w-[260px] sm:w-[280px] shrink-0 bg-white rounded-xl border border-[#E5E2DF] p-4 h-80 animate-pulse flex flex-col justify-between"
                 >
                   <div className="w-full aspect-square bg-[#FEFBF4] rounded-lg" />
                   <div className="space-y-2 mt-3">
@@ -476,7 +547,11 @@ export const HomePage: React.FC = () => {
               ))}
             </div>
           ) : bestSellerProducts.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            <div
+              ref={bestSellerScrollRef}
+              className="flex gap-4 sm:gap-5 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
               {bestSellerProducts.map((product) => {
                 const originalPrice = Math.round((product.price * 1.18) / 1000) * 1000
                 const isAdded = !!addedIds[product.id]
@@ -484,15 +559,15 @@ export const HomePage: React.FC = () => {
                 return (
                   <div
                     key={product.id}
+                    className="w-[260px] sm:w-[280px] shrink-0 snap-start bg-white card-items overflow-hidden rounded-xl border border-[#E5E2DF]/80 hover:border-[#006561] transition-all cursor-pointer flex flex-col justify-between p-3.5 group shadow-xs hover:shadow-md"
                     onClick={() => {
                       if (typeof window !== 'undefined') {
                         window.location.href = `/products/${product.id}`
                       }
                     }}
-                    className="bg-white card-items h-full overflow-hidden position-relative product-item rounded-xl border border-[#E5E2DF]/70 hover:border-[#006561] transition-all cursor-pointer flex flex-col justify-between p-3 sm:p-4 group shadow-xs hover:shadow-md"
                   >
                     <div>
-                      {/* Image & Top Badges */}
+                      {/* Image & Badges */}
                       <div className="relative aspect-square w-full overflow-hidden bg-[#FAF7F2] rounded-lg">
                         <img
                           src={optimizeCloudinaryUrl(product.imageUrl, 500)}
@@ -504,7 +579,7 @@ export const HomePage: React.FC = () => {
                             HOT
                           </span>
                         </div>
-                        <div className="absolute top-2 right-2 z-10 bg-white/90 backdrop-blur-xs text-[#006561] font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full border border-[#E5E2DF]">
+                        <div className="absolute top-2 right-2 z-10 bg-white/95 backdrop-blur-xs text-[#006561] font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full border border-[#E5E2DF]">
                           ★ 4.9+ (1.2k)
                         </div>
                       </div>
@@ -525,13 +600,13 @@ export const HomePage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Action Button: THÊM VÀO GIỎ */}
-                    <div className="mt-4 pt-1">
+                    {/* Action Button */}
+                    <div className="mt-4 pt-1 flex items-center gap-2">
                       <button
                         type="button"
                         aria-label={isAdded ? 'Đã thêm vào giỏ hàng' : 'Thêm vào giỏ hàng'}
                         onClick={(e) => handleQuickAdd(e, product)}
-                        className={`w-full py-2 px-3 text-xs font-bold uppercase tracking-wider rounded-full border transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                        className={`flex-1 py-2 px-3 text-xs font-bold uppercase tracking-wider rounded-full border transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                           isAdded
                             ? 'bg-[#006561] text-white border-[#006561]'
                             : 'border-[#006561] text-[#006561] hover:bg-[#006561] hover:text-white'
@@ -546,6 +621,18 @@ export const HomePage: React.FC = () => {
                           <span>THÊM VÀO GIỎ</span>
                         )}
                       </button>
+
+                      <button
+                        type="button"
+                        title="Xem nhanh"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setSelectedProduct(product)
+                        }}
+                        className="w-9 h-9 rounded-full border border-[#E5E2DF] flex items-center justify-center text-[#6B6661] hover:border-[#006561] hover:text-[#006561] transition-colors cursor-pointer"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 )
@@ -559,14 +646,14 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* ================= SECTION 6: mew_tool (CÔNG CỤ HEBEKERY) ================= */}
+      {/* ================= SECTION 6: mew_tool (CÔNG CỤ HEBEKERY: TDEE, BMI, BMR) ================= */}
       <section className="mew_tool module-component w-full py-12 sm:py-16">
         <div className="max-w-[1240px] mx-auto px-4 space-y-8 sm:space-y-10">
-          <div className="tool_title text-center space-y-2 max-w-md mx-auto">
+          <div className="tool_title text-center space-y-2 max-w-lg mx-auto">
             <span className="eyebrow text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-[#B23A2A]">
               Công cụ Hebekery
             </span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-normal text-[#2A2725]">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-normal text-[#2A2725]">
               Hiểu cơ thể để <b className="font-bold">ăn đúng nhu cầu</b>
             </h2>
             <p className="summary sub text-xs sm:text-sm text-[#6B6661] font-text">
@@ -578,25 +665,24 @@ export const HomePage: React.FC = () => {
             {/* TDEE Card */}
             <Link
               to="/bmi-tdee"
-              className="tool-card bg-white rounded-xl p-7 border border-[#E5E2DF]/70 hover:border-[#c9785c] hover:shadow-lg transition-all flex flex-col justify-between gap-5 group cursor-pointer"
+              className="tool-card bg-white rounded-2xl p-7 border border-[#E5E2DF]/80 hover:border-[#c9785c] hover:shadow-lg transition-all flex flex-col justify-between gap-6 group cursor-pointer relative overflow-hidden"
             >
-              <div>
+              <div className="space-y-3">
                 <div className="tool-head flex items-center justify-between">
-                  <span className="dot w-2.5 h-2.5 rounded-full bg-[#c9785c]" />
+                  <span className="dot w-3 h-3 rounded-full bg-[#c9785c]" />
                   <span className="unit font-mono text-xs text-[#6B6661]">kcal · ngày</span>
                 </div>
-                <div className="tool-acronym text-6xl sm:text-7xl font-display font-bold text-[#2A2725] tracking-tight mt-3">
+                <div className="tool-acronym text-6xl sm:text-7xl font-serif font-bold text-[#2A2725] tracking-tight">
                   TDEE
                 </div>
-                <h3 className="tool-title text-base font-bold font-display text-[#2A2725] mt-2 group-hover:text-[#c9785c] transition-colors">
+                <h3 className="tool-title text-base font-bold font-display text-[#2A2725] group-hover:text-[#c9785c] transition-colors">
                   Tổng năng lượng tiêu hao mỗi ngày
                 </h3>
-                <p className="tool-desc text-xs text-[#6B6661] mt-2 leading-relaxed font-text">
-                  Tính tổng calo cơ thể đốt trong 24h dựa trên hoạt động — biết nên ăn bao nhiêu để
-                  giữ, giảm hay tăng cân.
+                <p className="tool-desc text-xs text-[#6B6661] leading-relaxed font-text">
+                  Tính tổng calo cơ thể đốt trong 24h dựa trên mức độ vận động — biết nên ăn bao nhiêu để giữ, giảm hay tăng cân.
                 </p>
               </div>
-              <span className="tool-cta inline-flex items-center gap-1.5 text-xs font-bold text-[#2A2725] group-hover:text-[#c9785c] transition-colors">
+              <span className="tool-cta inline-flex items-center gap-1.5 text-xs font-bold text-[#2A2725] group-hover:text-[#c9785c] transition-colors pt-2 border-t border-[#E5E2DF]/60">
                 <span>Tính ngay</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </span>
@@ -605,25 +691,24 @@ export const HomePage: React.FC = () => {
             {/* BMI Card */}
             <Link
               to="/bmi-tdee"
-              className="tool-card bg-white rounded-xl p-7 border border-[#E5E2DF]/70 hover:border-[#006561] hover:shadow-lg transition-all flex flex-col justify-between gap-5 group cursor-pointer"
+              className="tool-card bg-white rounded-2xl p-7 border border-[#E5E2DF]/80 hover:border-[#006561] hover:shadow-lg transition-all flex flex-col justify-between gap-6 group cursor-pointer relative overflow-hidden"
             >
-              <div>
+              <div className="space-y-3">
                 <div className="tool-head flex items-center justify-between">
-                  <span className="dot w-2.5 h-2.5 rounded-full bg-[#006561]" />
+                  <span className="dot w-3 h-3 rounded-full bg-[#006561]" />
                   <span className="unit font-mono text-xs text-[#6B6661]">kg ÷ m²</span>
                 </div>
-                <div className="tool-acronym text-6xl sm:text-7xl font-display font-bold text-[#2A2725] tracking-tight mt-3">
+                <div className="tool-acronym text-6xl sm:text-7xl font-serif font-bold text-[#2A2725] tracking-tight">
                   BMI
                 </div>
-                <h3 className="tool-title text-base font-bold font-display text-[#2A2725] mt-2 group-hover:text-[#006561] transition-colors">
+                <h3 className="tool-title text-base font-bold font-display text-[#2A2725] group-hover:text-[#006561] transition-colors">
                   Chỉ số khối cơ thể
                 </h3>
-                <p className="tool-desc text-xs text-[#6B6661] mt-2 leading-relaxed font-text">
-                  Đối chiếu cân nặng với chiều cao — tham khảo nhanh cơ thể bạn đang ở vùng nào:
-                  thiếu, lý tưởng hay dư.
+                <p className="tool-desc text-xs text-[#6B6661] leading-relaxed font-text">
+                  Đối chiếu cân nặng với chiều cao — tham khảo nhanh cơ thể bạn đang ở vùng nào: thiếu cân, cân đối hay thừa cân.
                 </p>
               </div>
-              <span className="tool-cta inline-flex items-center gap-1.5 text-xs font-bold text-[#2A2725] group-hover:text-[#006561] transition-colors">
+              <span className="tool-cta inline-flex items-center gap-1.5 text-xs font-bold text-[#2A2725] group-hover:text-[#006561] transition-colors pt-2 border-t border-[#E5E2DF]/60">
                 <span>Tính ngay</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </span>
@@ -632,25 +717,24 @@ export const HomePage: React.FC = () => {
             {/* BMR Card */}
             <Link
               to="/bmi-tdee"
-              className="tool-card bg-white rounded-xl p-7 border border-[#E5E2DF]/70 hover:border-[#7B9461] hover:shadow-lg transition-all flex flex-col justify-between gap-5 group cursor-pointer"
+              className="tool-card bg-white rounded-2xl p-7 border border-[#E5E2DF]/80 hover:border-[#7B9461] hover:shadow-lg transition-all flex flex-col justify-between gap-6 group cursor-pointer relative overflow-hidden"
             >
-              <div>
+              <div className="space-y-3">
                 <div className="tool-head flex items-center justify-between">
-                  <span className="dot w-2.5 h-2.5 rounded-full bg-[#7B9461]" />
+                  <span className="dot w-3 h-3 rounded-full bg-[#7B9461]" />
                   <span className="unit font-mono text-xs text-[#6B6661]">kcal · nghỉ</span>
                 </div>
-                <div className="tool-acronym text-6xl sm:text-7xl font-display font-bold text-[#2A2725] tracking-tight mt-3">
+                <div className="tool-acronym text-6xl sm:text-7xl font-serif font-bold text-[#2A2725] tracking-tight">
                   BMR
                 </div>
-                <h3 className="tool-title text-base font-bold font-display text-[#2A2725] mt-2 group-hover:text-[#7B9461] transition-colors">
+                <h3 className="tool-title text-base font-bold font-display text-[#2A2725] group-hover:text-[#7B9461] transition-colors">
                   Tỷ lệ trao đổi chất cơ bản
                 </h3>
-                <p className="tool-desc text-xs text-[#6B6661] mt-2 leading-relaxed font-text">
-                  Lượng calo cơ thể đốt khi nghỉ hoàn toàn — nền tảng để hiểu nhu cầu năng lượng
-                  tối thiểu của bạn.
+                <p className="tool-desc text-xs text-[#6B6661] leading-relaxed font-text">
+                  Lượng calo cơ thể đốt khi nghỉ ngơi hoàn toàn — nền tảng để hiểu mức năng lượng tối thiểu cơ thể cần nạp.
                 </p>
               </div>
-              <span className="tool-cta inline-flex items-center gap-1.5 text-xs font-bold text-[#2A2725] group-hover:text-[#7B9461] transition-colors">
+              <span className="tool-cta inline-flex items-center gap-1.5 text-xs font-bold text-[#2A2725] group-hover:text-[#7B9461] transition-colors pt-2 border-t border-[#E5E2DF]/60">
                 <span>Tính ngay</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </span>
