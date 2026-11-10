@@ -13,7 +13,11 @@ export interface User {
 }
 
 export interface AuthResponse {
+  accessToken?: string
   token: string
+  refreshToken?: string
+  tokenType?: string
+  expiresIn?: number
   user: User
 }
 

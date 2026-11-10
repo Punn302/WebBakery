@@ -29,20 +29,25 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
+  const role = user.role?.startsWith('ROLE_') ? user.role.substring(5) : user.role
+
   // Admin has superuser access to all protected modules
-  if (user.role === 'ADMIN') {
+  if (role === 'ADMIN' || user.role === 'ADMIN') {
     return <>{children}</>
   }
 
   // Check against allowed roles list
   if (allowedRoles && allowedRoles.length > 0) {
-    if (!allowedRoles.includes(user.role)) {
+    const hasRole = allowedRoles.some(
+      (r) => r === role || `ROLE_${r}` === user.role || r === user.role
+    )
+    if (!hasRole) {
       return <Navigate to="/" replace />
     }
   }
 
   // Check against single required role
-  if (requiredRole && user.role !== requiredRole) {
+  if (requiredRole && role !== requiredRole && user.role !== requiredRole) {
     return <Navigate to="/" replace />
   }
 

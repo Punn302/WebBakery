@@ -34,6 +34,15 @@ public class AuthResponse {
         return accessToken;
     }
 
+    @Schema(description = "Token alias tương thích ngược với frontend", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
+    public String getToken() {
+        return accessToken;
+    }
+
+    public void setToken(String token) {
+        this.accessToken = token;
+    }
+
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
     }
