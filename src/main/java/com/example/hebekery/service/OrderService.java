@@ -32,17 +32,20 @@ public class OrderService {
     private final ReturnHistoryRepository returnHistoryRepository;
     private final ProductService productService;
     private final SepayConfig sepayConfig;
+    private final VoucherService voucherService;
 
     public OrderService(OrderRepository orderRepository,
                         OrderStatusHistoryRepository orderStatusHistoryRepository,
                         ReturnHistoryRepository returnHistoryRepository,
                         ProductService productService,
-                        SepayConfig sepayConfig) {
+                        SepayConfig sepayConfig,
+                        VoucherService voucherService) {
         this.orderRepository = orderRepository;
         this.orderStatusHistoryRepository = orderStatusHistoryRepository;
         this.returnHistoryRepository = returnHistoryRepository;
         this.productService = productService;
         this.sepayConfig = sepayConfig;
+        this.voucherService = voucherService;
     }
 
     @Transactional
@@ -62,10 +65,43 @@ public class OrderService {
         order.setPaymentMethod(request.getPaymentMethod());
         order.setPaymentStatus("PENDING");
         order.setOrderStatus("PENDING");
-        order.setTotal(subtotal + 30000);
+
+        // Calculate shipping fee: >= 299,000 VND is Free Shipping (0 VND), otherwise 30,000 VND
+        double shippingFee = subtotal >= 299000.0 ? 0.0 : 30000.0;
+        double discountAmount = 0.0;
+        String appliedVoucherCode = null;
+
+        if (request.getVoucherCode() != null && !request.getVoucherCode().trim().isEmpty()) {
+            com.example.hebekery.dto.VoucherCalculationResponse vCalc = voucherService.validateAndCalculate(
+                request.getVoucherCode(),
+                subtotal,
+                user.getId()
+            );
+            if (vCalc != null && vCalc.isValid()) {
+                appliedVoucherCode = vCalc.getCode();
+                if ("FREE_SHIPPING".equalsIgnoreCase(vCalc.getDiscountType())) {
+                    shippingFee = 0.0;
+                } else {
+                    discountAmount = vCalc.getDiscountAmount();
+                }
+            }
+        }
+
+        double total = Math.max(0.0, subtotal + shippingFee - discountAmount);
+        order.setSubtotal(subtotal);
+        order.setShippingFee(shippingFee);
+        order.setDiscountAmount(discountAmount);
+        order.setVoucherCode(appliedVoucherCode);
+        order.setTotal(total);
         order.setCreatedAt(LocalDateTime.now());
         order.setItems(copyItems(order, cartItems));
         orderRepository.save(order);
+
+        // Record voucher usage if successfully applied
+        if (appliedVoucherCode != null) {
+            voucherService.recordUsage(appliedVoucherCode, user.getId(), order.getId());
+        }
+
         addHistory(order, "User tạo đơn hàng", "USER");
 
         if ("VIETQR".equalsIgnoreCase(request.getPaymentMethod()) || "MOMO".equalsIgnoreCase(request.getPaymentMethod())) {

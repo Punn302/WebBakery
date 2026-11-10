@@ -45,6 +45,10 @@ public class Order extends BaseEntity {
     private String adminNote;
 
     private double total;
+    private double subtotal;
+    private double shippingFee;
+    private double discountAmount;
+    private String voucherCode;
     private boolean inventoryDeducted;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -196,5 +200,37 @@ public class Order extends BaseEntity {
 
     public void setItems(List<OrderItem> items) {
         this.items = items;
+    }
+
+    public double getSubtotal() {
+        return subtotal;
+    }
+
+    public void setSubtotal(double subtotal) {
+        this.subtotal = subtotal;
+    }
+
+    public double getShippingFee() {
+        return shippingFee;
+    }
+
+    public void setShippingFee(double shippingFee) {
+        this.shippingFee = shippingFee;
+    }
+
+    public double getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(double discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    public String getVoucherCode() {
+        return voucherCode;
+    }
+
+    public void setVoucherCode(String voucherCode) {
+        this.voucherCode = voucherCode;
     }
 }

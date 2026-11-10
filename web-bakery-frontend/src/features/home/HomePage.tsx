@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   ChevronLeft,
   ChevronRight,
@@ -167,6 +167,7 @@ const PRODUCT_LINES = [
 ]
 
 export const HomePage: React.FC = () => {
+  const navigate = useNavigate()
   // Start on index 1 (Bánh Biscotti Ăn Kiêng) matching the user's reference
   const [currentSlide, setCurrentSlide] = useState(1)
   const [direction, setDirection] = useState<'next' | 'prev'>('next')
@@ -234,28 +235,13 @@ export const HomePage: React.FC = () => {
   return (
     <div className="w-full pb-16 font-text bg-[#FAF7F2] text-[#2A2725]">
       {/* ================= SECTION 1: mew_mobile_slide (HERO CAROUSEL) ================= */}
-      <section className="mew_slide relative w-full pt-6 sm:pt-8 md:pt-12 pb-12 sm:pb-16 overflow-hidden select-none">
+      <section className="mew_slide relative w-full pt-6 sm:pt-8 md:pt-12 pb-12 sm:pb-16 overflow-hidden select-none bg-[#FAF7F2]">
         <div className="max-w-[1240px] mx-auto px-4 relative">
-          <div className="relative min-h-[460px] sm:min-h-[520px] md:min-h-[580px] flex items-center justify-center">
+          <div className="relative min-h-[440px] sm:min-h-[500px] md:min-h-[560px] flex items-center justify-center">
             
-            {/* Ambient Concentric Circle Animation */}
-            <div className="circle_animation absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span className="absolute w-[280px] h-[280px] sm:w-[360px] sm:h-[360px] rounded-full bg-[#E0CDBE]/25 blur-md" />
-              {slide.isOdd ? (
-                <>
-                  <span className="absolute -left-4 sm:left-12 bottom-12 w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] rounded-full bg-gradient-to-b from-[#E0CDBE]/30 to-transparent -rotate-12 transition-all duration-700" />
-                  <span className="absolute left-16 sm:left-28 bottom-20 w-[110px] h-[110px] sm:w-[130px] sm:h-[130px] rounded-full border-[18px] border-[#E2F4E0]/70 transition-all duration-700" />
-                  <span className="absolute right-16 sm:right-28 top-12 w-[70px] h-[70px] sm:w-[85px] sm:h-[85px] rounded-full border border-[#E0CDBE]/60 transition-all duration-700" />
-                  <span className="absolute -right-4 sm:right-8 top-8 w-[140px] h-[140px] sm:w-[170px] sm:h-[170px] rounded-full bg-gradient-to-b from-[#EDCA82]/25 to-transparent rotate-45 transition-all duration-700" />
-                </>
-              ) : (
-                <>
-                  <span className="absolute -left-4 sm:left-8 bottom-16 w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] rounded-full bg-gradient-to-b from-[#EDCA82]/25 to-transparent -rotate-45 transition-all duration-700" />
-                  <span className="absolute left-12 sm:left-24 bottom-28 w-[110px] h-[110px] sm:w-[130px] sm:h-[130px] rounded-full border-[18px] border-[#E2F4E0]/70 transition-all duration-700" />
-                  <span className="absolute right-12 sm:right-24 top-20 w-[70px] h-[70px] sm:w-[85px] sm:h-[85px] rounded-full border border-[#E0CDBE]/60 transition-all duration-700" />
-                  <span className="absolute -right-4 sm:right-12 top-12 w-[140px] h-[140px] sm:w-[170px] sm:h-[170px] rounded-full bg-gradient-to-b from-[#E0CDBE]/30 to-transparent rotate-12 transition-all duration-700" />
-                </>
-              )}
+            {/* Pure and Minimal Natural Drop Shadow under Bowl - No colored rings */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <span className="w-[280px] h-[280px] sm:w-[340px] sm:h-[340px] md:w-[380px] md:h-[380px] rounded-full bg-radial from-[#e5dac8]/45 via-[#f5efe5]/25 to-transparent blur-xs pointer-events-none transition-all duration-700" />
             </div>
 
             {/* Decorative Floating Leaves */}
@@ -265,7 +251,7 @@ export const HomePage: React.FC = () => {
                   key={`${slide.id}-leaf-${i}-${currentSlide}`}
                   src={leaf.src}
                   alt="leaf"
-                  className={`absolute pointer-events-none hebe-leaf-active ${leaf.className}`}
+                  className={`absolute pointer-events-none transition-all duration-700 ease-out transform scale-100 opacity-100 ${leaf.className}`}
                 />
               ))}
             </div>
@@ -278,29 +264,26 @@ export const HomePage: React.FC = () => {
                 title={slide.title}
               >
                 <div className="relative w-72 h-72 sm:w-84 sm:h-84 md:w-[380px] md:h-[380px] mx-auto flex items-center justify-center">
-                  <div className="absolute inset-0 m-auto w-[270px] h-[270px] sm:w-[320px] sm:h-[320px] md:w-[360px] md:h-[360px] rounded-full bg-radial from-[#ece5db]/85 via-[#f6f2ec]/45 to-transparent pointer-events-none transition-all duration-700" />
                   <img
-                    key={`${slide.id}-${direction}-${currentSlide}`}
+                    key={`bowl-${slide.id}-${currentSlide}`}
                     src={slide.image}
                     alt={slide.title}
-                    className={`slide_bowl_img relative z-10 w-full h-full object-contain ${
-                      direction === 'next' ? 'hebe-slide-in-next' : 'hebe-slide-in-prev'
-                    }`}
+                    className="slide_bowl_img relative z-10 w-full h-full object-contain transition-all duration-500 ease-out transform hover:scale-105"
                   />
                 </div>
               </Link>
 
               {/* Slide Title & "Mua ngay >" */}
-              <div key={`text-${slide.id}-${currentSlide}`} className="ani_text hebe-text-active text-center mt-3 sm:mt-5">
-                <h2 className="title_slide text-xl sm:text-2xl md:text-[30px] font-display font-bold uppercase tracking-tight text-[#2A2725]">
+              <div key={`text-${slide.id}-${currentSlide}`} className="ani_text text-center mt-3 sm:mt-5 transition-all duration-500">
+                <h2 className="title_slide text-xl sm:text-2xl md:text-[34px] font-display font-bold uppercase tracking-tight text-[#2A2725] leading-tight">
                   {slide.title}
                 </h2>
                 <Link
                   to={slide.link}
-                  className="sup_slide inline-flex items-center gap-1.5 text-sm sm:text-[15px] font-semibold text-[#a67c52] hover:text-[#91350a] mt-1.5 transition-all group"
+                  className="sup_slide inline-flex items-center gap-1.5 text-sm sm:text-[15px] font-semibold text-[#a67c52] hover:text-[#006561] mt-2 transition-all group"
                 >
                   <span>Mua ngay</span>
-                  <span className="text-sm font-bold group-hover:translate-x-1 transition-transform">
+                  <span className="text-sm font-bold group-hover:translate-x-1.5 transition-transform">
                     &gt;
                   </span>
                 </Link>
@@ -312,7 +295,7 @@ export const HomePage: React.FC = () => {
               type="button"
               onClick={prevSlide}
               aria-label="Slide trước"
-              className="absolute left-[4%] sm:left-[10%] md:left-[18%] lg:left-[22%] z-20 w-11 h-11 rounded-full bg-white/95 border border-[#E5E2DF]/80 shadow-[0_4px_16px_rgba(0,80,76,0.12)] flex items-center justify-center text-[#2A2725] hover:text-[#006561] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              className="absolute left-[2%] sm:left-[6%] md:left-[12%] lg:left-[16%] z-20 w-11 h-11 rounded-full bg-white/95 border border-[#E5E2DF] shadow-[0_4px_16px_rgba(0,80,76,0.12)] flex items-center justify-center text-[#2A2725] hover:text-[#006561] hover:scale-105 active:scale-95 transition-all cursor-pointer"
             >
               <ChevronLeft className="w-5 h-5 text-[#2A2725]" />
             </button>
@@ -320,7 +303,7 @@ export const HomePage: React.FC = () => {
               type="button"
               onClick={nextSlide}
               aria-label="Slide tiếp theo"
-              className="absolute right-[4%] sm:right-[10%] md:right-[18%] lg:right-[22%] z-20 w-11 h-11 rounded-full bg-white/95 border border-[#E5E2DF]/80 shadow-[0_4px_16px_rgba(0,80,76,0.12)] flex items-center justify-center text-[#2A2725] hover:text-[#006561] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              className="absolute right-[2%] sm:right-[6%] md:right-[12%] lg:right-[16%] z-20 w-11 h-11 rounded-full bg-white/95 border border-[#E5E2DF] shadow-[0_4px_16px_rgba(0,80,76,0.12)] flex items-center justify-center text-[#2A2725] hover:text-[#006561] hover:scale-105 active:scale-95 transition-all cursor-pointer"
             >
               <ChevronRight className="w-5 h-5 text-[#2A2725]" />
             </button>
@@ -339,7 +322,7 @@ export const HomePage: React.FC = () => {
                 aria-label={`Chuyển tới slide ${idx + 1}`}
                 className={`transition-all duration-300 rounded-full cursor-pointer ${
                   currentSlide === idx
-                    ? 'w-7 h-2 bg-[#006561]'
+                    ? 'w-8 h-2 bg-[#006561]'
                     : 'w-2 h-2 bg-[#E5E2DF] hover:bg-[#9A938C]'
                 }`}
               />
@@ -561,9 +544,7 @@ export const HomePage: React.FC = () => {
                     key={product.id}
                     className="w-[260px] sm:w-[280px] shrink-0 snap-start bg-white card-items overflow-hidden rounded-xl border border-[#E5E2DF]/80 hover:border-[#006561] transition-all cursor-pointer flex flex-col justify-between p-3.5 group shadow-xs hover:shadow-md"
                     onClick={() => {
-                      if (typeof window !== 'undefined') {
-                        window.location.href = `/products/${product.id}`
-                      }
+                      navigate(`/products/${product.id}`)
                     }}
                   >
                     <div>

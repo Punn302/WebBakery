@@ -47,6 +47,9 @@ class OrderServiceTest {
     @Mock
     private SepayConfig sepayConfig;
 
+    @Mock
+    private VoucherService voucherService;
+
     @InjectMocks
     private OrderService orderService;
 

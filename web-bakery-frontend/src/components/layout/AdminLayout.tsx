@@ -14,6 +14,8 @@ import {
   Truck,
   Sparkles,
   Ticket,
+  Star,
+  FolderTree,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { cn } from '@/utils/cn'
@@ -33,6 +35,12 @@ export const AdminLayout: React.FC = () => {
       label: 'Sản phẩm & Thực đơn',
       path: '/admin/products',
       icon: Package,
+      roles: ['ADMIN'],
+    },
+    {
+      label: 'Danh mục sản phẩm',
+      path: '/admin/categories',
+      icon: FolderTree,
       roles: ['ADMIN'],
     },
     {
@@ -71,6 +79,12 @@ export const AdminLayout: React.FC = () => {
       icon: Mail,
       roles: ['ADMIN', 'STAFF_SALES'],
     },
+    {
+      label: 'Đánh giá & Nhận xét',
+      path: '/admin/reviews',
+      icon: Star,
+      roles: ['ADMIN', 'STAFF_SALES'],
+    },
   ]
 
   const userRole = user?.role || 'ADMIN'
@@ -79,13 +93,13 @@ export const AdminLayout: React.FC = () => {
   const getRoleLabel = () => {
     switch (userRole) {
       case 'ADMIN':
-        return { label: 'Chủ tiệm (Admin)', icon: ShieldCheck, color: 'text-[#47654c]' }
+        return { label: 'Chủ tiệm (Admin)', icon: ShieldCheck, color: 'text-[#006561]' }
       case 'STAFF_SALES':
         return { label: 'Nhân viên Bán hàng & CSKH', icon: UserCheck, color: 'text-[#0284c7]' }
       case 'STAFF_WAREHOUSE':
-        return { label: 'Thủ kho & Bếp bánh', icon: Truck, color: 'text-[#d97724]' }
+        return { label: 'Thủ kho & Bếp bánh', icon: Truck, color: 'text-[#C9785C]' }
       default:
-        return { label: 'Quản trị viên', icon: ShieldCheck, color: 'text-[#47654c]' }
+        return { label: 'Quản trị viên', icon: ShieldCheck, color: 'text-[#006561]' }
     }
   }
 
@@ -93,23 +107,26 @@ export const AdminLayout: React.FC = () => {
   const RoleIcon = roleInfo.icon
 
   return (
-    <div className="min-h-screen flex bg-[#faf8f5] text-[#2e1e12]">
+    <div className="min-h-screen flex bg-[#FAF7F2] text-[#2A2725] font-text">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-[#eadbce] flex flex-col shrink-0">
-        {/* Brand Header */}
-        <div className="p-5 border-b border-[#eadbce] flex items-center justify-between">
+      <aside className="w-64 bg-white border-r border-[#E5E2DF] flex flex-col shrink-0">
+        {/* Brand Header: Clean logo + ADMIN PORTAL badge without redundant text */}
+        <div className="p-4 sm:p-5 border-b border-[#E5E2DF] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img
-              src="/logo.webp"
-              alt="Hebekery"
-              className="h-8 w-auto object-contain"
-            />
-            <div>
-              <h2 className="font-headline font-bold text-base text-[#2e1e12]">
-                Hebekery Admin
-              </h2>
-              <span className={cn('text-[10px] font-semibold flex items-center gap-1', roleInfo.color)}>
-                <RoleIcon className="w-3 h-3" /> {roleInfo.label}
+            <Link to="/" title="Về trang chủ Hebekery" className="shrink-0">
+              <img
+                src="/logo.webp"
+                alt="Hebekery"
+                className="h-8 w-auto object-contain"
+              />
+            </Link>
+            <div className="flex flex-col min-w-0">
+              <span className="text-[10px] font-mono font-bold tracking-widest text-[#006561] uppercase bg-[#006561]/8 px-2 py-0.5 rounded-md w-fit">
+                ADMIN PORTAL
+              </span>
+              <span className={cn('text-[11px] font-medium flex items-center gap-1 mt-1 truncate', roleInfo.color)}>
+                <RoleIcon className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{roleInfo.label}</span>
               </span>
             </div>
           </div>
@@ -125,24 +142,24 @@ export const AdminLayout: React.FC = () => {
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  'flex items-center gap-3 px-3.5 py-2.5 text-xs font-medium rounded-xl transition-all select-none',
+                  'flex items-center gap-3 px-3.5 py-2.5 text-xs rounded-xl transition-all select-none',
                   isActive
-                    ? 'bg-[#4a3728] text-white shadow-xs font-semibold'
-                    : 'text-[#5c4a3a] hover:bg-[#faf8f5] hover:text-[#2e1e12]'
+                    ? 'bg-[#006561] text-white shadow-xs font-semibold'
+                    : 'text-[#6B6661] hover:bg-[#FAF7F2] hover:text-[#006561] font-medium'
                 )}
               >
-                <Icon className={cn('w-4 h-4 shrink-0', isActive ? 'text-[#d97724]' : 'text-[#7c6856]')} />
-                <span>{item.label}</span>
+                <Icon className={cn('w-4 h-4 shrink-0', isActive ? 'text-white' : 'text-[#6B6661]')} />
+                <span className="truncate">{item.label}</span>
               </Link>
             )
           })}
         </nav>
 
         {/* Return to shop */}
-        <div className="p-4 border-t border-[#eadbce]">
+        <div className="p-4 border-t border-[#E5E2DF]">
           <Link
             to="/"
-            className="flex items-center gap-2 text-xs font-medium text-[#7c6856] hover:text-[#2e1e12] transition-colors"
+            className="flex items-center gap-2 text-xs font-medium text-[#6B6661] hover:text-[#006561] transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Về cửa hàng bánh</span>
@@ -152,18 +169,19 @@ export const AdminLayout: React.FC = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        <header className="h-14 border-b border-[#eadbce] bg-white/80 backdrop-blur-md px-8 flex items-center justify-between sticky top-0 z-30">
-          <div className="flex items-center gap-2 text-xs text-[#7c6856]">
-            <Sparkles className="w-3.5 h-3.5 text-[#d97724]" />
-            <span>Hệ thống Quản trị Bếp Bánh & Vận Hành Chuỗi Cung Ứng Hebekery</span>
+        <header className="h-14 border-b border-[#E5E2DF] bg-white/90 backdrop-blur-md px-6 sm:px-8 flex items-center justify-between sticky top-0 z-30">
+          <div className="flex items-center gap-2 text-xs text-[#6B6661]">
+            <Sparkles className="w-3.5 h-3.5 text-[#C9785C]" />
+            <span className="hidden sm:inline font-medium">Hệ thống Quản trị Bếp Bánh &amp; Vận Hành Chuỗi Cung Ứng Hebekery</span>
+            <span className="sm:hidden font-medium">Hebekery Admin</span>
           </div>
-          <div className="text-xs font-semibold text-[#2e1e12] flex items-center gap-2">
+          <div className="text-xs font-semibold text-[#2A2725] flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#16a34a] animate-pulse" />
             <span>{user?.name || user?.email}</span>
           </div>
         </header>
 
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-6 sm:p-8">
           <Outlet />
         </main>
       </div>

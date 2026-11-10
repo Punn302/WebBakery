@@ -26,17 +26,16 @@ public class ProductReviewService {
         return productReviewRepository.findByProductIdOrderByCreatedAtDesc(productId);
     }
 
+    public List<ProductReview> getAllReviews() {
+        return productReviewRepository.findAll();
+    }
+
     public Optional<ProductReview> getUserReview(String productId, String userId) {
         return productReviewRepository.findByProductIdAndUserId(productId, userId);
     }
 
     public boolean canReview(String productId, User user) {
-        if (user == null) {
-            return false;
-        }
-        return orderRepository.findByUserId(user.getId()).stream()
-                .filter(order -> "RECEIVED".equals(order.getOrderStatus()))
-                .anyMatch(order -> containsProduct(order, productId));
+        return user != null;
     }
 
     public ProductReview save(String productId, User user, ProductReviewRequest request) {
@@ -66,9 +65,17 @@ public class ProductReviewService {
         return true;
     }
 
+    public boolean adminDelete(String reviewId) {
+        if (!productReviewRepository.existsById(reviewId)) {
+            return false;
+        }
+        productReviewRepository.deleteById(reviewId);
+        return true;
+    }
+
     private void requireCanReview(String productId, User user) {
         if (!canReview(productId, user)) {
-            throw new IllegalArgumentException("Bạn chỉ được đánh giá sản phẩm sau khi đã nhận hàng");
+            throw new IllegalArgumentException("Vui lòng đăng nhập để gửi đánh giá sản phẩm");
         }
     }
 

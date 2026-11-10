@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -70,6 +70,24 @@ export const ProductCatalogPage: React.FC = () => {
   const [page, setPage] = useState(0)
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+
+  // Sync category and search query from URL query params
+  useEffect(() => {
+    const cat = searchParams.get('category')
+    if (cat) {
+      const lower = cat.toLowerCase()
+      if (lower.includes('biscotti')) setSelectedCategory('biscotti')
+      else if (lower.includes('granola')) setSelectedCategory('granola')
+      else if (lower.includes('ngói') || lower.includes('keto')) setSelectedCategory('keto')
+      else if (lower.includes('thanh') || lower.includes('bar')) setSelectedCategory('bar')
+      else if (lower.includes('gạo lứt') || lower.includes('mì') || lower.includes('bún') || lower.includes('gao_lut')) setSelectedCategory('gao_lut')
+      else setSelectedCategory('all')
+    }
+    const q = searchParams.get('search') || searchParams.get('keyword')
+    if (q !== null && q !== undefined) {
+      setKeyword(q)
+    }
+  }, [searchParams])
 
   // Fetch products from Spring Boot backend (/api/products)
   const { data: productData, isLoading } = useQuery({
@@ -527,7 +545,6 @@ export const ProductCatalogPage: React.FC = () => {
                 <ProductCard
                   key={product.id}
                   product={product}
-                  onSelect={(p) => setSelectedProduct(p)}
                 />
               ))}
             </div>

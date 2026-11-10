@@ -116,14 +116,29 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <a href="#policy" className="hover:text-[#006561] transition-colors">
-                  Chính sách đổi trả 1-1
-                </a>
+                <Link to="/vouchers" className="hover:text-[#006561] transition-colors">
+                  Kho mã giảm giá &amp; Voucher
+                </Link>
               </li>
               <li>
-                <a href="#shipping" className="hover:text-[#006561] transition-colors">
+                <Link to="/policy?tab=return" className="hover:text-[#006561] transition-colors">
+                  Chính sách đổi trả 1-1
+                </Link>
+              </li>
+              <li>
+                <Link to="/policy?tab=shipping" className="hover:text-[#006561] transition-colors">
                   Chính sách giao hỏa tốc 2H
-                </a>
+                </Link>
+              </li>
+              <li>
+                <Link to="/faq" className="hover:text-[#006561] transition-colors">
+                  Câu hỏi thường gặp (FAQ)
+                </Link>
+              </li>
+              <li>
+                <Link to="/policy?tab=privacy" className="hover:text-[#006561] transition-colors">
+                  Chính sách bảo mật
+                </Link>
               </li>
             </ul>
           </div>

@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { Heart, Zap, Check } from 'lucide-react'
 import type { Product } from '@/types'
 import { useCart } from '@/hooks/useCart'
+import { useWishlist } from '@/hooks/useWishlist'
 import { formatCurrency, optimizeCloudinaryUrl } from '@/utils/format'
 
 interface ProductCardProps {
@@ -11,15 +13,17 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) => {
+  const navigate = useNavigate()
   const { addItem } = useCart()
+  const { isInWishlist, toggleWishlist } = useWishlist()
   const [isAdded, setIsAdded] = useState(false)
-  const [isFavorite, setIsFavorite] = useState(false)
+  const isFavorite = isInWishlist(product.id)
 
   const handleCardClick = () => {
     if (onSelect) {
       onSelect(product)
-    } else if (typeof window !== 'undefined') {
-      window.location.href = `/products/${product.id}`
+    } else {
+      navigate(`/products/${product.id}`)
     }
   }
 
@@ -33,7 +37,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation()
-    setIsFavorite(!isFavorite)
+    toggleWishlist(product)
   }
 
   const isOutOfStock = product.stock <= 0

@@ -10,10 +10,13 @@ import {
   ArrowRight,
   LogOut,
   Settings,
+  Heart,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useAuth } from '@/hooks/useAuth'
 import { useCart } from '@/hooks/useCart'
+import { useWishlist } from '@/hooks/useWishlist'
+import { WishlistDrawer } from '@/components/common/WishlistDrawer'
 
 const PRODUCT_CATEGORIES = [
   { name: '· SẢN PHẨM MỚI', link: '/products?tag=new' },
@@ -34,8 +37,8 @@ const BLOG_CATEGORIES = [
 
 const CONTACT_ITEMS = [
   { name: 'Tuyển dụng', link: '/contact' },
-  { name: 'Chương trình thành viên', link: '/contact' },
-  { name: 'Câu hỏi thường gặp', link: '/contact' },
+  { name: 'Chương trình thành viên', link: '/policy' },
+  { name: 'Câu hỏi thường gặp (FAQ)', link: '/faq' },
 ]
 
 const TRENDING_SEARCHES = [
@@ -49,6 +52,8 @@ const TRENDING_SEARCHES = [
 export const Header: React.FC = () => {
   const { user, isAuthenticated, isAdmin, logout } = useAuth()
   const { totalItems, setIsCartOpen } = useCart()
+  const { wishlistCount } = useWishlist()
+  const [isWishlistOpen, setIsWishlistOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [productDropdownOpen, setProductDropdownOpen] = useState(false)
   const [blogDropdownOpen, setBlogDropdownOpen] = useState(false)
@@ -268,6 +273,34 @@ export const Header: React.FC = () => {
               <span>Combo quà</span>
             </Link>
 
+            {/* TỰ PHỐI HỘP BÁNH */}
+            <Link
+              to="/box-builder"
+              className={`px-3 py-2 text-[13px] font-bold uppercase tracking-wider transition-colors flex items-center gap-1.5 ${
+                location.pathname === '/box-builder' || location.pathname === '/tu-phoi-hop-banh'
+                  ? 'text-[#006561] font-black'
+                  : 'text-[#2A2725] hover:text-[#006561]'
+              }`}
+            >
+              <span>Phối Hộp Bánh</span>
+              <span className="px-1.5 py-0.5 text-[9px] font-black uppercase rounded-full bg-[#006561]/10 text-[#006561]">
+                Hot
+              </span>
+            </Link>
+
+            {/* VOUCHERS / ƯU ĐÃI */}
+            <Link
+              to="/vouchers"
+              className={`px-3 py-2 text-[13px] font-bold uppercase tracking-wider transition-colors flex items-center gap-1 ${
+                location.pathname === '/vouchers'
+                  ? 'text-[#006561] font-black'
+                  : 'text-[#C9785C] hover:text-[#006561]'
+              }`}
+            >
+              <span>Ưu đãi</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#B23A2A] animate-pulse" />
+            </Link>
+
             {/* BLOG Dropdown */}
             <div className="relative" ref={blogRef}>
               <button
@@ -424,11 +457,20 @@ export const Header: React.FC = () => {
                           </Link>
                         )}
                         <Link
+                          to="/profile"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-[#2A2725] hover:bg-[#FEFBF4] hover:text-[#006561] transition-colors"
+                        >
+                          <UserIcon className="w-3.5 h-3.5 text-[#006561]" />
+                          <span>Hồ sơ của tôi</span>
+                        </Link>
+                        <Link
                           to="/orders"
                           onClick={() => setUserDropdownOpen(false)}
-                          className="block px-3 py-2 rounded-xl text-xs font-semibold text-[#2A2725] hover:bg-[#FEFBF4] hover:text-[#006561] transition-colors"
+                          className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-[#2A2725] hover:bg-[#FEFBF4] hover:text-[#006561] transition-colors"
                         >
-                          Đơn hàng của tôi
+                          <ShoppingBag className="w-3.5 h-3.5 text-[#C9785C]" />
+                          <span>Đơn hàng của tôi</span>
                         </Link>
                         <button
                           type="button"
@@ -455,6 +497,26 @@ export const Header: React.FC = () => {
                 </Link>
               )}
             </div>
+
+            {/* Wishlist Heart Icon */}
+            <button
+              type="button"
+              onClick={() => setIsWishlistOpen(true)}
+              aria-label="Món bánh yêu thích"
+              className="relative w-10 h-10 rounded-full bg-white border border-[#E5E2DF] flex items-center justify-center text-[#2A2725] hover:text-[#B23A2A] hover:border-[#B23A2A] transition-colors cursor-pointer shadow-xs"
+              title="Danh sách món bánh yêu thích"
+            >
+              <Heart
+                className={`w-4 h-4 transition-transform active:scale-125 ${
+                  wishlistCount > 0 ? 'fill-[#B23A2A] text-[#B23A2A]' : ''
+                }`}
+              />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#B23A2A] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-xs">
+                  {wishlistCount > 99 ? '99+' : wishlistCount}
+                </span>
+              )}
+            </button>
 
             {/* Shopping Bag Icon with Indicator Badge */}
             <button
@@ -529,6 +591,22 @@ export const Header: React.FC = () => {
                 Combo quà
               </Link>
               <Link
+                to="/box-builder"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between py-2 text-sm font-bold uppercase tracking-wider text-[#006561]"
+              >
+                <span>Tự Phối Hộp Bánh</span>
+                <span className="px-2 py-0.5 text-[10px] rounded-full bg-[#006561]/10 text-[#006561]">Hot</span>
+              </Link>
+              <Link
+                to="/vouchers"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between py-2 text-sm font-bold uppercase tracking-wider text-[#C9785C]"
+              >
+                <span>Ưu đãi &amp; Voucher</span>
+                <span className="px-2 py-0.5 text-[10px] rounded-full bg-[#B23A2A]/10 text-[#B23A2A] font-bold">New</span>
+              </Link>
+              <Link
                 to="/blogs"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block py-2 text-sm font-bold uppercase tracking-wider text-[#2A2725] hover:text-[#006561]"
@@ -551,28 +629,51 @@ export const Header: React.FC = () => {
               </Link>
             </div>
 
-            <div className="pt-3 border-t border-[#E5E2DF]/60 flex items-center justify-between">
+            <div className="pt-3 border-t border-[#E5E2DF]/60 space-y-2">
               {isAuthenticated ? (
-                <div className="flex items-center justify-between w-full">
-                  <span className="text-xs font-bold text-[#2A2725]">
-                    {user?.name || 'Khách hàng'}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      logout()
-                      setMobileMenuOpen(false)
-                    }}
-                    className="text-xs font-bold text-[#B23A2A]"
-                  >
-                    Đăng xuất
-                  </button>
-                </div>
+                <>
+                  <div className="flex items-center justify-between w-full">
+                    <Link
+                      to="/profile"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-2 text-xs font-bold text-[#006561] hover:underline"
+                    >
+                      <UserIcon className="w-4 h-4" />
+                      <span>{user?.name || 'Hồ sơ của tôi'}</span>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        logout()
+                        setMobileMenuOpen(false)
+                      }}
+                      className="text-xs font-bold text-[#B23A2A] cursor-pointer"
+                    >
+                      Đăng xuất
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <Link
+                      to="/profile"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="py-1.5 px-3 rounded-lg bg-[#FAF7F2] text-xs font-medium text-[#2A2725] hover:text-[#006561] text-center"
+                    >
+                      Hồ sơ &amp; Địa chỉ
+                    </Link>
+                    <Link
+                      to="/orders"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="py-1.5 px-3 rounded-lg bg-[#FAF7F2] text-xs font-medium text-[#2A2725] hover:text-[#006561] text-center"
+                    >
+                      Đơn hàng của tôi
+                    </Link>
+                  </div>
+                </>
               ) : (
                 <Link
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center py-2.5 rounded-full bg-[#006561] text-white text-xs font-bold uppercase tracking-wider"
+                  className="w-full text-center py-2.5 rounded-full bg-[#006561] text-white text-xs font-bold uppercase tracking-wider block"
                 >
                   Đăng nhập
                 </Link>
@@ -581,6 +682,9 @@ export const Header: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* 5. WISHLIST DRAWER */}
+      <WishlistDrawer isOpen={isWishlistOpen} onClose={() => setIsWishlistOpen(false)} />
     </header>
   )
 }

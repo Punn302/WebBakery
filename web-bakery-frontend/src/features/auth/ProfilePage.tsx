@@ -23,6 +23,7 @@ import {
   Truck,
   Package,
   XCircle,
+  CheckCircle2,
   Clock,
   ChevronRight,
   ShieldCheck,
@@ -87,6 +88,12 @@ export const ProfilePage: React.FC = () => {
   // --- Order Status Filter & Detail Modal ---
   const [orderFilter, setOrderFilter] = useState<string>('ALL')
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+
+  // --- Cancel & Return Order States ---
+  const [cancelOrder, setCancelOrder] = useState<Order | null>(null)
+  const [cancelReason, setCancelReason] = useState('Thay đổi nhu cầu đặt hàng')
+  const [returnOrder, setReturnOrder] = useState<Order | null>(null)
+  const [returnReason, setReturnReason] = useState('')
 
   // --- Copied Voucher State ---
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
@@ -178,6 +185,48 @@ export const ProfilePage: React.FC = () => {
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
       toast.error(msg || 'Không thể xóa địa chỉ')
+    },
+  })
+
+  const cancelOrderMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+      orderApi.cancelOrder(id, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-orders'] })
+      toast.success('Hủy đơn hàng thành công')
+      setCancelOrder(null)
+      setCancelReason('Thay đổi nhu cầu đặt hàng')
+    },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      toast.error(msg || 'Không thể hủy đơn hàng')
+    },
+  })
+
+  const returnOrderMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+      orderApi.requestReturn(id, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-orders'] })
+      toast.success('Đã gửi yêu cầu đổi trả đơn hàng!')
+      setReturnOrder(null)
+      setReturnReason('')
+    },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      toast.error(msg || 'Không thể gửi yêu cầu đổi trả')
+    },
+  })
+
+  const confirmReceivedMutation = useMutation({
+    mutationFn: (id: string) => orderApi.confirmReceived(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-orders'] })
+      toast.success('Xác nhận đã nhận hàng thành công!')
+    },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      toast.error(msg || 'Không thể xác nhận nhận hàng')
     },
   })
 
@@ -728,19 +777,62 @@ export const ProfilePage: React.FC = () => {
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {order.orderStatus === 'PENDING' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setCancelOrder(order)
+                                setCancelReason('Thay đổi nhu cầu đặt hàng')
+                              }}
+                              className="rounded-full border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-semibold cursor-pointer"
+                            >
+                              <XCircle className="w-3.5 h-3.5 mr-1" />
+                              Hủy đơn
+                            </Button>
+                          )}
+
+                          {order.orderStatus === 'SHIPPING' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={confirmReceivedMutation.isPending}
+                              onClick={() => confirmReceivedMutation.mutate(order.id)}
+                              className="rounded-full border-emerald-300 text-emerald-800 hover:bg-emerald-50 text-xs font-semibold cursor-pointer"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+                              Đã nhận hàng
+                            </Button>
+                          )}
+
+                          {(order.orderStatus === 'DELIVERED' || order.orderStatus === 'RECEIVED') && !order.returnStatus && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setReturnOrder(order)
+                                setReturnReason('')
+                              }}
+                              className="rounded-full border-amber-300 text-amber-800 hover:bg-amber-50 text-xs font-semibold cursor-pointer"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5 mr-1" />
+                              Yêu cầu đổi trả
+                            </Button>
+                          )}
+
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => setSelectedOrder(order)}
-                            className="rounded-full border-[#E5E2DF] text-xs font-semibold hover:border-[#006561] text-[#2A2725]"
+                            className="rounded-full border-[#E5E2DF] text-xs font-semibold hover:border-[#006561] text-[#2A2725] cursor-pointer"
                           >
                             Chi tiết hóa đơn
                           </Button>
                           <Button
                             size="sm"
                             onClick={() => handleReorder(order)}
-                            className="btn-act rounded-full text-xs font-bold flex items-center gap-1.5"
+                            className="btn-act rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />
                             <span>Mua lại đơn này</span>
@@ -1080,14 +1172,24 @@ export const ProfilePage: React.FC = () => {
                 </div>
 
                 {/* Pricing Summary */}
-                <div className="space-y-2 pt-2 border-t border-[#E5E2DF]">
-                  <div className="flex justify-between text-stone-600">
+                <div className="space-y-2 pt-2 border-t border-[#E5E2DF] text-xs">
+                  <div className="flex justify-between text-[#6B6661]">
                     <span>Tạm tính</span>
-                    <span className="font-mono">{formatCurrency(selectedOrder.total)}</span>
+                    <span className="font-mono">{formatCurrency(selectedOrder.subtotal || selectedOrder.total)}</span>
                   </div>
-                  <div className="flex justify-between text-stone-600">
+                  {selectedOrder.voucherCode && (
+                    <div className="flex justify-between text-[#006561] font-medium">
+                      <span>Mã giảm giá ({selectedOrder.voucherCode})</span>
+                      <span className="font-mono">-{formatCurrency(selectedOrder.discountAmount || 0)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-[#6B6661]">
                     <span>Phí vận chuyển</span>
-                    <span className="font-mono text-emerald-700">Miễn phí</span>
+                    <span className="font-mono text-[#006561]">
+                      {selectedOrder.shippingFee && selectedOrder.shippingFee > 0
+                        ? formatCurrency(selectedOrder.shippingFee)
+                        : 'Miễn phí'}
+                    </span>
                   </div>
                   <div className="flex justify-between font-bold text-sm text-[#006561] pt-2 border-t border-stone-200">
                     <span>Tổng thanh toán</span>
@@ -1223,6 +1325,118 @@ export const ProfilePage: React.FC = () => {
             </form>
           </DialogContent>
         </Dialog>
+
+        {/* ================= CANCEL ORDER DIALOG ================= */}
+        {cancelOrder && (
+          <Dialog open={!!cancelOrder} onOpenChange={(open) => !open && setCancelOrder(null)}>
+            <DialogContent className="sm:max-w-[450px] rounded-3xl bg-white p-6 sm:p-8">
+              <DialogHeader className="space-y-1">
+                <DialogTitle className="font-display text-xl font-bold text-[#2A2725]">
+                  Xác Nhận Hủy Đơn Hàng #{cancelOrder.id}
+                </DialogTitle>
+                <DialogDescription className="text-xs text-[#6B6661]">
+                  Bạn chỉ có thể hủy đơn khi đơn hàng đang ở trạng thái Chờ xử lý (PENDING).
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 py-3 text-xs">
+                <div>
+                  <label className="block font-bold text-[#2A2725] mb-1.5">Lý do hủy đơn (*)</label>
+                  <select
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    className="w-full text-xs p-2.5 rounded-xl border border-[#E5E2DF] bg-white focus:border-[#006561] focus:outline-none"
+                  >
+                    <option value="Thay đổi nhu cầu đặt hàng">Thay đổi nhu cầu đặt hàng</option>
+                    <option value="Muốn thay đổi địa chỉ nhận hàng">Muốn thay đổi địa chỉ nhận hàng</option>
+                    <option value="Muốn thêm bớt sản phẩm khác">Muốn thêm bớt sản phẩm khác</option>
+                    <option value="Tìm thấy giá tốt hơn">Tìm thấy giá tốt hơn</option>
+                    <option value="Lý do khác">Lý do khác</option>
+                  </select>
+                </div>
+              </div>
+
+              <DialogFooter className="pt-3 border-t border-[#E5E2DF] flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCancelOrder(null)}
+                  className="rounded-full text-xs"
+                >
+                  Đóng
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  disabled={cancelOrderMutation.isPending}
+                  onClick={() =>
+                    cancelOrderMutation.mutate({
+                      id: cancelOrder.id,
+                      reason: cancelReason,
+                    })
+                  }
+                  className="rounded-full text-xs font-bold"
+                >
+                  {cancelOrderMutation.isPending ? 'Đang hủy...' : 'Xác Nhận Hủy Đơn'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* ================= RETURN ORDER DIALOG ================= */}
+        {returnOrder && (
+          <Dialog open={!!returnOrder} onOpenChange={(open) => !open && setReturnOrder(null)}>
+            <DialogContent className="sm:max-w-[480px] rounded-3xl bg-white p-6 sm:p-8">
+              <DialogHeader className="space-y-1">
+                <DialogTitle className="font-display text-xl font-bold text-[#2A2725]">
+                  Yêu Cầu Đổi Trả Đơn Hàng #{returnOrder.id}
+                </DialogTitle>
+                <DialogDescription className="text-xs text-[#6B6661]">
+                  Chính sách Hebekery: Đổi mới 1-1 miễn phí nếu bánh bị lỗi sản xuất, móp méo hoặc không đúng mô tả.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 py-3 text-xs">
+                <div>
+                  <label className="block font-bold text-[#2A2725] mb-1.5">Lý do đổi trả (*)</label>
+                  <textarea
+                    rows={3}
+                    required
+                    value={returnReason}
+                    onChange={(e) => setReturnReason(e.target.value)}
+                    placeholder="Mô tả cụ thể vấn đề bạn gặp phải (ví dụ: hộp bánh bị bung nắp, nhầm hương vị...)"
+                    className="w-full text-xs p-3 rounded-xl border border-[#E5E2DF] focus:border-[#006561] focus:outline-none resize-none leading-relaxed"
+                  />
+                </div>
+              </div>
+
+              <DialogFooter className="pt-3 border-t border-[#E5E2DF] flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setReturnOrder(null)}
+                  className="rounded-full text-xs"
+                >
+                  Đóng
+                </Button>
+                <Button
+                  size="sm"
+                  disabled={returnOrderMutation.isPending || !returnReason.trim()}
+                  onClick={() =>
+                    returnOrderMutation.mutate({
+                      id: returnOrder.id,
+                      reason: returnReason.trim(),
+                    })
+                  }
+                  className="btn-act rounded-full text-xs font-bold"
+                >
+                  {returnOrderMutation.isPending ? 'Đang gửi...' : 'Gửi Yêu Cầu Đổi Trả'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   )

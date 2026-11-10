@@ -135,6 +135,10 @@ export interface Order {
   returnStatus?: 'PENDING' | 'APPROVED' | 'REJECTED'
   adminNote?: string
   total: number
+  subtotal?: number
+  shippingFee?: number
+  discountAmount?: number
+  voucherCode?: string
   inventoryDeducted: boolean
   items: OrderItem[]
   createdAt: string
@@ -149,6 +153,7 @@ export interface CheckoutRequest {
   ward?: string
   note?: string
   paymentMethod: 'COD' | 'VIETQR' | 'MOMO'
+  voucherCode?: string
 }
 
 // Inventory & Purchase Receipt Types
@@ -312,7 +317,7 @@ export interface ContactSubmitRequest {
 
 // Voucher Types
 export interface Voucher {
-  id: number
+  id: number | string
   code: string
   name: string
   description?: string

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Search, Filter, Truck, Check, X, RotateCcw, Loader2 } from 'lucide-react'
+import { Search, Filter, Truck, Check, X, RotateCcw, Loader2, Eye, Package, Ticket } from 'lucide-react'
 import { orderApi } from '@/api'
 import type { Order } from '@/types'
 import { Button } from '@/components/ui/button'
@@ -15,7 +15,7 @@ export const AdminOrdersPage: React.FC = () => {
   const [keyword, setKeyword] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
-  const [modalType, setModalType] = useState<'STATUS' | 'RETURN' | null>(null)
+  const [modalType, setModalType] = useState<'STATUS' | 'RETURN' | 'DETAIL' | null>(null)
 
   // Status Update Form State
   const [targetStatus, setTargetStatus] = useState('SHIPPING')
@@ -188,11 +188,23 @@ export const AdminOrdersPage: React.FC = () => {
                     </span>
                   </td>
                   <td className="py-3 px-4">{getStatusBadge(order.orderStatus)}</td>
-                  <td className="py-3 px-4 font-bold text-[#47654c]">
+                  <td className="py-3 px-4 font-bold text-[#006561]">
                     {formatCurrency(order.total)}
                   </td>
                   <td className="py-3 px-4 text-right">
                     <div className="flex items-center justify-end gap-1.5">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedOrder(order)
+                          setModalType('DETAIL')
+                        }}
+                        className="h-7 px-2 text-[11px] text-[#006561] hover:bg-[#006561]/8"
+                      >
+                        <Eye className="w-3 h-3 mr-1" />
+                        Chi tiết
+                      </Button>
                       {order.orderStatus === 'RETURN_REQUESTED' ? (
                         <Button
                           variant="accent"
@@ -351,6 +363,103 @@ export const AdminOrdersPage: React.FC = () => {
               onClick={() => reviewReturnMutation.mutate()}
             >
               {reviewReturnMutation.isPending ? 'Đang duyệt...' : 'Hoàn Tất Duyệt'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Chi Tiết Đơn Hàng */}
+      <Dialog open={modalType === 'DETAIL'} onOpenChange={() => setModalType(null)}>
+        <DialogContent onClose={() => setModalType(null)} className="sm:max-w-[620px] max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between text-base">
+              <span>Chi Tiết Đơn Hàng #{selectedOrder?.orderCode}</span>
+              {selectedOrder && getStatusBadge(selectedOrder.orderStatus)}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-[#78716c]">
+              Khách hàng: {selectedOrder?.customerName} • SĐT: {selectedOrder?.phone} • Ngày đặt: {selectedOrder && formatDate(selectedOrder.createdAt)}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedOrder && (
+            <div className="space-y-4 py-2 text-xs">
+              {/* Shipping Address */}
+              <div className="bg-[#faf8f5] p-3 rounded-lg border border-[#e7e5e4]">
+                <p className="font-bold text-[#1c1917] mb-1">Địa chỉ giao hàng:</p>
+                <p className="text-[#44403c]">{selectedOrder.address}</p>
+                {selectedOrder.trackingCode && (
+                  <p className="text-[#006561] font-semibold mt-1.5 flex items-center gap-1.5">
+                    <Truck className="w-3.5 h-3.5" />
+                    <span>Đơn vị: {selectedOrder.shippingCarrier || 'GHN'} • Vận đơn: {selectedOrder.trackingCode}</span>
+                  </p>
+                )}
+              </div>
+
+              {/* Items List */}
+              <div>
+                <p className="font-bold text-[#1c1917] uppercase tracking-wider text-[11px] mb-2">
+                  Danh sách sản phẩm ({selectedOrder.items?.length || 0})
+                </p>
+                <div className="divide-y divide-[#f5f5f4] border border-[#e7e5e4] rounded-lg overflow-hidden">
+                  {selectedOrder.items?.map((it, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-2.5 bg-white">
+                      <div className="flex items-center gap-2.5">
+                        <img
+                          src={it.imageUrl || 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/placeholder_1x1.png'}
+                          alt={it.productName}
+                          className="w-10 h-10 rounded-md object-cover border border-[#e7e5e4]"
+                        />
+                        <div>
+                          <p className="font-semibold text-[#1c1917]">{it.productName}</p>
+                          <p className="text-[11px] text-[#78716c]">SL: x{it.quantity} • Đơn giá: {formatCurrency(it.price)}</p>
+                        </div>
+                      </div>
+                      <span className="font-bold text-[#1c1917]">{formatCurrency(it.total)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Pricing & Voucher Summary */}
+              <div className="bg-[#faf8f5] p-3 rounded-lg border border-[#e7e5e4] space-y-1.5">
+                <div className="flex justify-between text-[#78716c]">
+                  <span>Tạm tính (Subtotal):</span>
+                  <span className="font-medium text-[#1c1917]">{formatCurrency(selectedOrder.subtotal || selectedOrder.total)}</span>
+                </div>
+                {selectedOrder.voucherCode && (
+                  <div className="flex justify-between text-[#006561] font-medium">
+                    <span className="flex items-center gap-1">
+                      <Ticket className="w-3.5 h-3.5" />
+                      Mã giảm giá ({selectedOrder.voucherCode}):
+                    </span>
+                    <span>-{formatCurrency(selectedOrder.discountAmount || 0)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-[#78716c]">
+                  <span>Phí vận chuyển (Shipping):</span>
+                  <span className="font-medium text-[#006561]">
+                    {selectedOrder.shippingFee && selectedOrder.shippingFee > 0
+                      ? formatCurrency(selectedOrder.shippingFee)
+                      : 'Miễn phí'}
+                  </span>
+                </div>
+                <div className="flex justify-between font-bold text-sm text-[#006561] pt-2 border-t border-[#e7e5e4]">
+                  <span>Tổng đơn hàng:</span>
+                  <span>{formatCurrency(selectedOrder.total)}</span>
+                </div>
+                <div className="flex justify-between text-[11px] pt-1 text-[#78716c]">
+                  <span>Phương thức thanh toán:</span>
+                  <span className="font-semibold text-[#1c1917]">
+                    {selectedOrder.paymentMethod === 'VIETQR' ? 'Chuyển khoản VietQR' : 'Thanh toán khi nhận hàng (COD)'} ({selectedOrder.paymentStatus === 'PAID' ? 'Đã thanh toán' : 'Chờ thanh toán'})
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="default" size="sm" onClick={() => setModalType(null)}>
+              Đóng
             </Button>
           </DialogFooter>
         </DialogContent>

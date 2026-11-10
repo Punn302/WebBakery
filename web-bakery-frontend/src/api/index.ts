@@ -100,6 +100,38 @@ export const categoryApi = {
     const res = await axiosClient.get<Category[]>('/categories')
     return unwrap(res)
   },
+  adminGetCategories: async (params?: {
+    keyword?: string
+    page?: number
+    size?: number
+  }): Promise<PageResponse<Category>> => {
+    const res = await axiosClient.get<PageResponse<Category>>('/categories/admin', { params })
+    return unwrap(res)
+  },
+  adminCreateCategory: async (data: {
+    name: string
+    slug?: string
+    description?: string
+    active?: boolean
+  }): Promise<Category> => {
+    const res = await axiosClient.post<Category>('/categories/admin', data)
+    return unwrap(res)
+  },
+  adminUpdateCategory: async (
+    id: number,
+    data: {
+      name: string
+      slug?: string
+      description?: string
+      active?: boolean
+    }
+  ): Promise<Category> => {
+    const res = await axiosClient.put<Category>(`/categories/admin/${id}`, data)
+    return unwrap(res)
+  },
+  adminDeleteCategory: async (id: number): Promise<void> => {
+    await axiosClient.delete(`/categories/admin/${id}`)
+  },
 }
 
 // Cart APIs
@@ -360,6 +392,28 @@ export const reviewApi = {
   },
   deleteReview: async (reviewId: string): Promise<void> => {
     await axiosClient.delete(`/products/reviews/${reviewId}`)
+  },
+}
+
+// Admin Reviews Moderation APIs
+export const adminReviewApi = {
+  getAll: async (): Promise<
+    Array<{
+      id: string
+      productId: string
+      productName: string
+      userId: string
+      userName: string
+      rating: number
+      comment: string
+      createdAt: string
+    }>
+  > => {
+    const res = await axiosClient.get('/admin/reviews')
+    return unwrap(res)
+  },
+  delete: async (id: string): Promise<void> => {
+    await axiosClient.delete(`/admin/reviews/${id}`)
   },
 }
 

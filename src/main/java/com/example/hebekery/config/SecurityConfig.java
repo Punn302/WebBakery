@@ -82,6 +82,7 @@ public class SecurityConfig {
                         .requestMatchers("/", "/index.html", "/favicon.ico", "/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
                         // Public APIs
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/categories/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/contact/**").permitAll()
@@ -90,13 +91,15 @@ public class SecurityConfig {
                         .requestMatchers("/api/vouchers/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/blogs/**").permitAll()
                         // Staff & Warehouse APIs
-                        .requestMatchers("/api/warehouse/**").hasAnyRole("ADMIN", "STAFF_WAREHOUSE")
+                        .requestMatchers("/api/warehouse/**", "/api/warehouse").hasAnyRole("ADMIN", "STAFF_WAREHOUSE")
+                        .requestMatchers("/api/admin/inventory/**", "/api/admin/inventory").hasAnyRole("ADMIN", "STAFF_WAREHOUSE")
                         .requestMatchers("/api/upload/**").hasAnyRole("ADMIN", "STAFF_WAREHOUSE")
-                        .requestMatchers("/api/admin/products/**").hasAnyRole("ADMIN", "STAFF_WAREHOUSE")
+                        .requestMatchers("/api/admin/products/**", "/api/admin/products").hasAnyRole("ADMIN", "STAFF_WAREHOUSE")
                         // Staff & Sales APIs
-                        .requestMatchers("/api/sales/**").hasAnyRole("ADMIN", "STAFF_SALES")
-                        .requestMatchers("/api/admin/orders/**").hasAnyRole("ADMIN", "STAFF_SALES")
-                        .requestMatchers("/api/admin/contacts/**").hasAnyRole("ADMIN", "STAFF_SALES")
+                        .requestMatchers("/api/sales/**", "/api/sales").hasAnyRole("ADMIN", "STAFF_SALES")
+                        .requestMatchers("/api/admin/orders/**", "/api/admin/orders").hasAnyRole("ADMIN", "STAFF_SALES")
+                        .requestMatchers("/api/admin/contacts/**", "/api/admin/contacts").hasAnyRole("ADMIN", "STAFF_SALES")
+                        .requestMatchers("/api/admin/reviews/**", "/api/admin/reviews").hasAnyRole("ADMIN", "STAFF_SALES")
                         // General Admin APIs
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // Customer / Authenticated APIs

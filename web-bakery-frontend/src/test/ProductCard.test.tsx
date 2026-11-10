@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { ProductCard } from '@/features/products/ProductCard'
 import type { Product } from '@/types'
 
@@ -31,7 +32,7 @@ describe('ProductCard Component', () => {
   }
 
   it('renders product details correctly (name, price in VND, category, calories)', () => {
-    render(<ProductCard product={dummyProduct} />)
+    render(<MemoryRouter><ProductCard product={dummyProduct} /></MemoryRouter>)
 
     expect(screen.getByText('Bánh Mì Đen Nguyên Cám')).toBeInTheDocument()
     expect(screen.getByText('Bánh ăn kiêng')).toBeInTheDocument()
@@ -41,7 +42,7 @@ describe('ProductCard Component', () => {
   })
 
   it('calls addItem when clicking "Thêm" button', async () => {
-    render(<ProductCard product={dummyProduct} />)
+    render(<MemoryRouter><ProductCard product={dummyProduct} /></MemoryRouter>)
 
     const addButton = screen.getByRole('button', { name: /Thêm/i })
     await act(async () => {
@@ -56,7 +57,7 @@ describe('ProductCard Component', () => {
       ...dummyProduct,
       stock: 0,
     }
-    render(<ProductCard product={outOfStockProduct} />)
+    render(<MemoryRouter><ProductCard product={outOfStockProduct} /></MemoryRouter>)
 
     expect(screen.getByText(/Tạm hết hàng/i)).toBeInTheDocument()
   })
