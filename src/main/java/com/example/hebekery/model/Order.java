@@ -49,6 +49,9 @@ public class Order extends BaseEntity {
     private double shippingFee;
     private double discountAmount;
     private String voucherCode;
+    private int pointsUsed;
+    private double pointsDiscountAmount;
+    private int pointsEarned;
     private boolean inventoryDeducted;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -232,5 +235,29 @@ public class Order extends BaseEntity {
 
     public void setVoucherCode(String voucherCode) {
         this.voucherCode = voucherCode;
+    }
+
+    public int getPointsUsed() {
+        return pointsUsed;
+    }
+
+    public void setPointsUsed(int pointsUsed) {
+        this.pointsUsed = pointsUsed;
+    }
+
+    public double getPointsDiscountAmount() {
+        return pointsDiscountAmount;
+    }
+
+    public void setPointsDiscountAmount(double pointsDiscountAmount) {
+        this.pointsDiscountAmount = pointsDiscountAmount;
+    }
+
+    public int getPointsEarned() {
+        return pointsEarned;
+    }
+
+    public void setPointsEarned(int pointsEarned) {
+        this.pointsEarned = pointsEarned;
     }
 }

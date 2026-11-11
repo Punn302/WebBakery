@@ -14,7 +14,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
-import { productApi } from '@/api'
+import { productApi, batchApi } from '@/api'
 import type { Product } from '@/types'
 import { ProductCard } from './ProductCard'
 import { ProductDetailModal } from './ProductDetailModal'
@@ -100,6 +100,23 @@ export const ProductCatalogPage: React.FC = () => {
       }),
     staleTime: 2 * 60 * 1000,
   })
+
+  const { data: flashSaleDeals = [] } = useQuery({
+    queryKey: ['flash-sale-deals'],
+    queryFn: batchApi.getFlashSaleDeals,
+    staleTime: 60 * 1000,
+  })
+
+  const dealsMap = useMemo(() => {
+    const map = new Map<string, { discountPercent: number; daysRemaining: number }>()
+    flashSaleDeals.forEach((deal) => {
+      map.set(deal.productId, {
+        discountPercent: deal.discountPercent,
+        daysRemaining: deal.daysRemaining,
+      })
+    })
+    return map
+  }, [flashSaleDeals])
 
   const rawProducts = productData?.content || []
   const totalPages = productData?.totalPages || 1
@@ -545,6 +562,7 @@ export const ProductCatalogPage: React.FC = () => {
                 <ProductCard
                   key={product.id}
                   product={product}
+                  dealBadge={dealsMap.get(product.id)}
                 />
               ))}
             </div>

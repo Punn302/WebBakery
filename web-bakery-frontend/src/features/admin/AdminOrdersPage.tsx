@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Search, Filter, Truck, Check, X, RotateCcw, Loader2, Eye, Package, Ticket } from 'lucide-react'
+import { Search, Filter, Truck, Check, X, RotateCcw, Loader2, Eye, Package, Ticket, Printer } from 'lucide-react'
 import { orderApi } from '@/api'
 import type { Order } from '@/types'
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { formatCurrency, formatDate } from '@/utils/format'
 import { toast } from 'sonner'
+import { OrderInvoicePrintModal } from '@/features/orders/OrderInvoicePrintModal'
 
 export const AdminOrdersPage: React.FC = () => {
   const queryClient = useQueryClient()
@@ -16,6 +17,8 @@ export const AdminOrdersPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('')
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [modalType, setModalType] = useState<'STATUS' | 'RETURN' | 'DETAIL' | null>(null)
+  const [printOrder, setPrintOrder] = useState<Order | null>(null)
+  const [isPrintOpen, setIsPrintOpen] = useState(false)
 
   // Status Update Form State
   const [targetStatus, setTargetStatus] = useState('SHIPPING')
@@ -204,6 +207,19 @@ export const AdminOrdersPage: React.FC = () => {
                       >
                         <Eye className="w-3 h-3 mr-1" />
                         Chi tiết
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setPrintOrder(order)
+                          setIsPrintOpen(true)
+                        }}
+                        className="h-7 px-2 text-[11px] text-[#2A2725] hover:text-[#006561] hover:bg-[#006561]/8"
+                        title="In phiếu đóng gói A5"
+                      >
+                        <Printer className="w-3 h-3 mr-1 text-[#006561]" />
+                        In
                       </Button>
                       {order.orderStatus === 'RETURN_REQUESTED' ? (
                         <Button
@@ -457,13 +473,37 @@ export const AdminOrdersPage: React.FC = () => {
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="flex items-center justify-between">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (selectedOrder) {
+                  setPrintOrder(selectedOrder)
+                  setIsPrintOpen(true)
+                }
+              }}
+              className="border-[#006561] text-[#006561] hover:bg-[#006561]/5"
+            >
+              <Printer className="w-3.5 h-3.5 mr-1.5" />
+              <span>In Phiếu Giao Hàng</span>
+            </Button>
             <Button variant="default" size="sm" onClick={() => setModalType(null)}>
               Đóng
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Printable Invoice Modal */}
+      <OrderInvoicePrintModal
+        order={printOrder}
+        isOpen={isPrintOpen}
+        onClose={() => {
+          setIsPrintOpen(false)
+          setPrintOrder(null)
+        }}
+      />
     </div>
   )
 }

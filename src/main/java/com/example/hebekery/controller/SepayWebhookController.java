@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,14 +35,22 @@ public class SepayWebhookController {
         this.orderService = orderService;
     }
 
-    @Operation(summary = "Tiếp nhận thông báo thanh toán SePay", description = "Xác thực API Key, đối soát mã đơn hàng và tự động cập nhật trạng thái đơn sang PAID")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> handleWebhook(String authHeader, SepayWebhookPayload payload) {
+        return handleWebhook(authHeader, payload, null);
+    }
+
+    @Operation(summary = "Tiếp nhận thông báo thanh toán SePay", description = "Xác thực API Key hoặc quyền Admin, đối soát mã đơn hàng và tự động cập nhật trạng thái đơn sang PAID")
     @PostMapping("/webhook")
     public ResponseEntity<ApiResponse<Map<String, Object>>> handleWebhook(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @RequestBody SepayWebhookPayload payload) {
+            @RequestBody SepayWebhookPayload payload,
+            Authentication authentication) {
 
-        // 1. Kiểm tra xác thực Authorization header
-        if (!sepayWebhookService.verifyApiKey(authHeader)) {
+        boolean isAdmin = authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+
+        // 1. Kiểm tra xác thực (SePay API Key hoặc quyền ADMIN)
+        if (!isAdmin && !sepayWebhookService.verifyApiKey(authHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.failure("Unauthorized: Invalid SePay API Key"));
         }

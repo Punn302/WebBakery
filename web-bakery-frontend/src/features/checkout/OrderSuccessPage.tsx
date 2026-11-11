@@ -16,17 +16,23 @@ import {
   Check,
   Heart,
   MessageCircle,
+  Printer,
+  QrCode,
 } from 'lucide-react'
 import { orderApi } from '@/api'
 import { formatCurrency, formatDate, optimizeCloudinaryUrl } from '@/utils/format'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
+import { OrderInvoicePrintModal } from '@/features/orders/OrderInvoicePrintModal'
+import { VietQrPaymentModal } from '@/components/common/VietQrPaymentModal'
 
 export const OrderSuccessPage: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>()
   const navigate = useNavigate()
   const [copied, setCopied] = React.useState(false)
+  const [isPrintOpen, setIsPrintOpen] = React.useState(false)
+  const [isQrOpen, setIsQrOpen] = React.useState(false)
 
   const { data: order, isLoading } = useQuery({
     queryKey: ['order-success', orderId],
@@ -272,8 +278,36 @@ export const OrderSuccessPage: React.FC = () => {
                 </div>
               </div>
 
+              {/* VietQR Quick Payment Notice if unpaid */}
+              {order?.paymentMethod === 'VIETQR' && order?.paymentStatus !== 'PAID' && (
+                <div className="p-4 bg-[#fef9c3]/60 border border-[#fde047] rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2.5">
+                    <QrCode className="w-5 h-5 text-[#854d0e] shrink-0" />
+                    <div>
+                      <span className="font-bold text-[#854d0e] block">Đơn hàng đang chờ chuyển khoản VietQR</span>
+                      <span className="text-[#a16207] text-[11px]">Quét mã QR Napas 247 để hoàn tất thanh toán tự động</span>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => setIsQrOpen(true)}
+                    className="w-full sm:w-auto bg-[#854d0e] hover:bg-[#713f12] text-white text-xs font-bold uppercase tracking-wider h-9 px-4 rounded-xl cursor-pointer shrink-0"
+                  >
+                    <QrCode className="w-3.5 h-3.5 mr-1.5" />
+                    <span>Mở Mã QR Thanh Toán</span>
+                  </Button>
+                </div>
+              )}
+
               {/* Action Buttons */}
               <div className="pt-4 border-t border-[#E5E2DF] flex flex-col sm:flex-row items-center gap-3">
+                <Button
+                  onClick={() => setIsPrintOpen(true)}
+                  variant="outline"
+                  className="w-full sm:w-auto border-[#006561]/40 text-[#006561] hover:bg-[#006561]/5 text-xs font-bold uppercase tracking-wider h-11 px-5 rounded-xl cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>In Hóa Đơn A5</span>
+                </Button>
                 <Button
                   onClick={() => navigate('/orders')}
                   className="w-full sm:flex-1 bg-[#006561] hover:bg-[#004e4a] text-white text-xs font-bold uppercase tracking-wider h-11 rounded-xl cursor-pointer"
@@ -314,6 +348,20 @@ export const OrderSuccessPage: React.FC = () => {
           </a>
         </div>
       </div>
+
+      {/* Printable Invoice Modal */}
+      <OrderInvoicePrintModal
+        order={order || null}
+        isOpen={isPrintOpen}
+        onClose={() => setIsPrintOpen(false)}
+      />
+
+      {/* VietQR Payment Modal */}
+      <VietQrPaymentModal
+        order={order || null}
+        isOpen={isQrOpen}
+        onClose={() => setIsQrOpen(false)}
+      />
     </div>
   )
 }

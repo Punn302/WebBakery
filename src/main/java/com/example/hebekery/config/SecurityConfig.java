@@ -89,6 +89,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/orders/track").permitAll()
                         .requestMatchers("/api/payment/**").permitAll()
                         .requestMatchers("/api/vouchers/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/batches/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/loyalty/tiers").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/blogs/**").permitAll()
                         // Staff & Warehouse APIs
                         .requestMatchers("/api/warehouse/**", "/api/warehouse").hasAnyRole("ADMIN", "STAFF_WAREHOUSE")
@@ -103,7 +105,14 @@ public class SecurityConfig {
                         // General Admin APIs
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // Customer / Authenticated APIs
-                        .requestMatchers("/api/user/**", "/api/cart/**", "/api/checkout/**", "/api/orders/**", "/api/reviews/**", "/api/addresses/**").authenticated()
+                        .requestMatchers(
+                                "/api/user", "/api/user/**",
+                                "/api/cart", "/api/cart/**",
+                                "/api/checkout", "/api/checkout/**",
+                                "/api/orders", "/api/orders/**",
+                                "/api/reviews", "/api/reviews/**",
+                                "/api/addresses", "/api/addresses/**"
+                        ).authenticated()
                         .requestMatchers("/api/**").authenticated()
                         // Any remaining requests (e.g. legacy Thymeleaf views during transition)
                         .anyRequest().permitAll()

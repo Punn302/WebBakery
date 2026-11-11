@@ -57,6 +57,12 @@ vi.mock('@/api', () => ({
     getCart: vi.fn().mockResolvedValue({ items: [], totalItems: 0, totalPrice: 0 }),
     addToCart: vi.fn().mockResolvedValue({ items: [], totalItems: 0, totalPrice: 0 }),
   },
+  voucherApi: {
+    getAvailable: vi.fn().mockResolvedValue([]),
+  },
+  batchApi: {
+    getFlashSaleDeals: vi.fn().mockResolvedValue([]),
+  },
 }))
 
 describe('ProductDetailPage Hebekery Authentic Experience', () => {

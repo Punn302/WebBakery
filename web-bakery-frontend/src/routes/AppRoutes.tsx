@@ -46,6 +46,7 @@ import { AdminReportsPage } from '@/features/admin/AdminReportsPage'
 import { AdminContactPage } from '@/features/admin/AdminContactPage'
 import { AdminVoucherPage } from '@/features/admin/AdminVoucherPage'
 import { AdminReviewPage } from '@/features/admin/AdminReviewPage'
+import { AdminSepaySimulatorPage } from '@/features/admin/AdminSepaySimulatorPage'
 
 
 const queryClient = new QueryClient({
@@ -223,6 +224,14 @@ export const AppRoutes: React.FC = () => {
                   element={
                     <ProtectedRoute allowedRoles={['ADMIN', 'STAFF_SALES']}>
                       <AdminReviewPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="sepay-simulator"
+                  element={
+                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminSepaySimulatorPage />
                     </ProtectedRoute>
                   }
                 />

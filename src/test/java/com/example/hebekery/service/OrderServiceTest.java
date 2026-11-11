@@ -50,6 +50,12 @@ class OrderServiceTest {
     @Mock
     private VoucherService voucherService;
 
+    @Mock
+    private LoyaltyService loyaltyService;
+
+    @Mock
+    private ProductBatchService productBatchService;
+
     @InjectMocks
     private OrderService orderService;
 

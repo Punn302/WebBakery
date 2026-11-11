@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { Heart, Zap, Check } from 'lucide-react'
+import { Heart, Zap, Check, Flame } from 'lucide-react'
 import type { Product } from '@/types'
 import { useCart } from '@/hooks/useCart'
 import { useWishlist } from '@/hooks/useWishlist'
@@ -9,10 +9,11 @@ import { formatCurrency, optimizeCloudinaryUrl } from '@/utils/format'
 
 interface ProductCardProps {
   product: Product
+  dealBadge?: { discountPercent: number; daysRemaining: number }
   onSelect?: (product: Product) => void
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, dealBadge, onSelect }) => {
   const navigate = useNavigate()
   const { addItem } = useCart()
   const { isInWishlist, toggleWishlist } = useWishlist()
@@ -30,7 +31,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation()
     if (product.stock <= 0) return
-    await addItem(product, 1)
+    const productToAdd = hasDeal
+      ? {
+          ...product,
+          price: effectivePrice,
+          name: `${product.name} [Cứu Bánh -${dealBadge.discountPercent}%]`,
+        }
+      : product
+    await addItem(productToAdd, 1)
     setIsAdded(true)
     setTimeout(() => setIsAdded(false), 1400)
   }
@@ -41,7 +49,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
   }
 
   const isOutOfStock = product.stock <= 0
-  const originalPrice = Math.round((product.price * 1.18) / 1000) * 1000
+  const hasDeal = !!dealBadge && dealBadge.discountPercent > 0
+  const effectivePrice = hasDeal
+    ? Math.round((product.price * (1 - dealBadge.discountPercent / 100)) / 1000) * 1000
+    : product.price
+  const originalPrice = hasDeal ? product.price : Math.round((product.price * 1.18) / 1000) * 1000
   const displayCalories = product.calories && product.calories > 0 ? product.calories : 112
   const categoryName =
     typeof product.category === 'object' && product.category !== null
@@ -70,11 +82,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
             className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
           />
 
-          {/* Sale Badge */}
-          <div className="absolute top-2.5 left-2.5 z-10">
-            <span className="bg-[#FFE6DC] text-[#B23A2A] font-mono text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider shadow-xs">
-              -15%
-            </span>
+          {/* Sale or Near-Expiry Deal Badge */}
+          <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1 items-start">
+            {hasDeal ? (
+              <span className="bg-orange-600 text-white font-mono text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider shadow-xs flex items-center gap-1">
+                <Flame className="w-3 h-3 text-amber-200" />
+                <span>Cứu Bánh -{dealBadge?.discountPercent}%</span>
+              </span>
+            ) : (
+              <span className="bg-[#FFE6DC] text-[#B23A2A] font-mono text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider shadow-xs">
+                -15%
+              </span>
+            )}
+            {hasDeal && dealBadge && dealBadge.daysRemaining > 0 && (
+              <span className="bg-black/75 backdrop-blur-xs text-white text-[9px] font-mono px-1.5 py-0.5 rounded-xs font-semibold">
+                HSD: {dealBadge.daysRemaining} ngày
+              </span>
+            )}
           </div>
 
           {/* Favorite Heart Button */}
@@ -122,7 +146,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
           {/* Price Block: Current price in #006561 + strike-through old price in #9A938C */}
           <div className="flex items-baseline gap-2 pt-0.5">
             <span className="font-display text-base font-bold text-[#006561]">
-              {formatCurrency(product.price)}
+              {formatCurrency(effectivePrice)}
             </span>
             <span className="font-mono text-xs text-[#9A938C] line-through">
               {formatCurrency(originalPrice)}

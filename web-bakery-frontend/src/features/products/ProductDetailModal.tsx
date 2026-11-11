@@ -18,9 +18,10 @@ import {
   MessageSquare,
   UserCheck,
   ShieldCheck,
+  Flame,
 } from 'lucide-react'
 import { useCart } from '@/hooks/useCart'
-import { reviewApi } from '@/api'
+import { reviewApi, batchApi } from '@/api'
 import { formatCurrency, formatDate, optimizeCloudinaryUrl } from '@/utils/format'
 import { cn } from '@/utils/cn'
 
@@ -44,10 +45,27 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
     enabled: !!product && open,
   })
 
+  const { data: flashSaleDeals = [] } = useQuery({
+    queryKey: ['flash-sale-deals'],
+    queryFn: batchApi.getFlashSaleDeals,
+    enabled: open,
+    staleTime: 60 * 1000,
+  })
+
   if (!product) return null
 
+  const flashSaleDeal = flashSaleDeals.find((d) => String(d.productId) === String(product.id))
+  const hasDeal = !!flashSaleDeal && flashSaleDeal.discountPercent > 0
+  const effectivePrice = hasDeal
+    ? Math.round((product.price * (1 - flashSaleDeal.discountPercent / 100)) / 1000) * 1000
+    : product.price
+  const originalPrice = hasDeal ? product.price : Math.round((product.price * 1.18) / 1000) * 1000
+
   const handleAddToCart = async () => {
-    await addItem(product, quantity)
+    const productToAdd = hasDeal
+      ? { ...product, price: effectivePrice, name: `${product.name} [Cứu Bánh -${flashSaleDeal.discountPercent}%]` }
+      : product
+    await addItem(productToAdd, quantity)
     setQuantity(1)
     onClose()
   }
@@ -55,7 +73,6 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   const reviews = reviewSummary?.reviews || []
   const avgRating = reviewSummary?.averageRating || 0
   const reviewCount = reviewSummary?.reviewCount || 0
-  const originalPrice = Math.round((product.price * 1.18) / 1000) * 1000
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -77,9 +94,16 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               </div>
             )}
             <div className="absolute top-3.5 right-3.5">
-              <span className="bg-[#FFE6DC] text-[#B23A2A] font-mono text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider shadow-xs">
-                -15%
-              </span>
+              {hasDeal ? (
+                <span className="bg-red-600 text-white font-mono text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider shadow-xs flex items-center gap-1">
+                  <Flame className="w-3 h-3 fill-white text-white" />
+                  -{flashSaleDeal.discountPercent}%
+                </span>
+              ) : (
+                <span className="bg-[#FFE6DC] text-[#B23A2A] font-mono text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider shadow-xs">
+                  -15%
+                </span>
+              )}
             </div>
           </div>
 
@@ -122,9 +146,15 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               </div>
 
               {/* Price Block */}
+              {hasDeal && (
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 text-red-700 text-[11px] font-bold border border-red-200">
+                  <Flame className="w-3.5 h-3.5 fill-red-700 text-red-700" />
+                  Cứu Bánh Lành Cận Date: Giảm {flashSaleDeal.discountPercent}% (còn {flashSaleDeal.daysRemaining} ngày)
+                </div>
+              )}
               <div className="flex items-baseline gap-2.5">
-                <span className="text-2xl font-bold text-[#006561] font-display">
-                  {formatCurrency(product.price)}
+                <span className={`text-2xl font-bold font-display ${hasDeal ? 'text-red-700' : 'text-[#006561]'}`}>
+                  {formatCurrency(effectivePrice)}
                 </span>
                 <span className="text-sm text-[#9A938C] line-through font-mono">
                   {formatCurrency(originalPrice)}

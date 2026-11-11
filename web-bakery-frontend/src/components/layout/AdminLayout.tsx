@@ -16,6 +16,7 @@ import {
   Ticket,
   Star,
   FolderTree,
+  Zap,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { cn } from '@/utils/cn'
@@ -84,6 +85,12 @@ export const AdminLayout: React.FC = () => {
       path: '/admin/reviews',
       icon: Star,
       roles: ['ADMIN', 'STAFF_SALES'],
+    },
+    {
+      label: 'Giả lập SePay (Webhook)',
+      path: '/admin/sepay-simulator',
+      icon: Zap,
+      roles: ['ADMIN'],
     },
   ]
 

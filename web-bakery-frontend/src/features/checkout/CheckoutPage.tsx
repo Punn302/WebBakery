@@ -15,16 +15,18 @@ import {
   ShoppingBag,
   Ticket,
   Truck,
+  Crown,
+  Coins,
 } from 'lucide-react'
 import { useCart } from '@/hooks/useCart'
 import { useAuth } from '@/hooks/useAuth'
-import { orderApi, paymentApi, voucherApi } from '@/api'
+import { orderApi, paymentApi, voucherApi, loyaltyApi } from '@/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { formatCurrency, optimizeCloudinaryUrl } from '@/utils/format'
 import { toast } from 'sonner'
-import type { Order, Address, VoucherCalculation } from '@/types'
+import type { Order, Address, VoucherCalculation, LoyaltySummary } from '@/types'
 import { AddressSelector } from '@/components/common/AddressSelector'
 
 const checkoutSchema = z.object({
@@ -61,6 +63,23 @@ export const CheckoutPage: React.FC = () => {
   const [appliedVoucher, setAppliedVoucher] = useState<VoucherCalculation | null>(null)
   const [isApplyingVoucher, setIsApplyingVoucher] = useState(false)
 
+  // Loyalty Points state
+  const [loyaltyProfile, setLoyaltyProfile] = useState<LoyaltySummary | null>(null)
+  const [isUsingPoints, setIsUsingPoints] = useState(false)
+  const [pointsToUse, setPointsToUse] = useState(0)
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loyaltyApi.getProfile()
+        .then((profile) => {
+          setLoyaltyProfile(profile)
+        })
+        .catch(() => {
+          // Silently ignore if profile not loaded
+        })
+    }
+  }, [isAuthenticated])
+
   // VietQR Countdown & Polling state
   const [timeLeft, setTimeLeft] = useState(QR_COUNTDOWN_SECONDS)
   const [isPaidSuccess, setIsPaidSuccess] = useState(false)
@@ -93,7 +112,12 @@ export const CheckoutPage: React.FC = () => {
   const isFreeShipping = subtotal >= FREESHIP_THRESHOLD || (appliedVoucher?.valid && appliedVoucher.code.toUpperCase().includes('FREESHIP'))
   const shippingFee = isFreeShipping ? 0 : 30000
   const discountAmount = appliedVoucher ? appliedVoucher.discountAmount : 0
-  const finalTotal = Math.max(0, subtotal + shippingFee - discountAmount)
+  const maxPointsForOrder = Math.min(
+    loyaltyProfile?.loyaltyPoints || 0,
+    Math.floor((subtotal * 0.3) / 1000)
+  )
+  const pointsDiscountAmount = isUsingPoints ? Math.min(pointsToUse, maxPointsForOrder) * 1000 : 0
+  const finalTotal = Math.max(0, subtotal + shippingFee - discountAmount - pointsDiscountAmount)
 
   const handleSelectSavedAddress = useCallback((addr: Address) => {
     setSelectedAddressId(addr.id)
@@ -227,6 +251,7 @@ export const CheckoutPage: React.FC = () => {
         paymentMethod: data.paymentMethod,
         note: data.note,
         voucherCode: appliedVoucher?.code,
+        pointsUsed: isUsingPoints ? Math.min(pointsToUse, maxPointsForOrder) : 0,
       })
 
       setCreatedOrder(order)
@@ -521,6 +546,86 @@ export const CheckoutPage: React.FC = () => {
             )}
           </div>
 
+          {/* Loyalty Points Redemption Card */}
+          {loyaltyProfile && loyaltyProfile.loyaltyPoints > 0 && (
+            <div className="rounded-2xl border border-[#E5E2DF] bg-white p-5 space-y-4 shadow-xs">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#2A2725]">
+                  <Crown className="w-4 h-4 text-amber-500" />
+                  <span>Điểm Lành HeBekery</span>
+                </div>
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                  {loyaltyProfile.tierDisplayName}
+                </span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-amber-50/50 border border-amber-200/60 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
+                    <Coins className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-[#2A2725]">
+                      {loyaltyProfile.loyaltyPoints} Điểm Lành
+                    </p>
+                    <p className="text-[11px] text-[#6B6661]">
+                      Tương đương {formatCurrency(loyaltyProfile.pointValueVnd)} (1 điểm = 1.000đ)
+                    </p>
+                  </div>
+                </div>
+
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isUsingPoints}
+                    onChange={(e) => {
+                      const checked = e.target.checked
+                      setIsUsingPoints(checked)
+                      if (checked && pointsToUse === 0) {
+                        setPointsToUse(maxPointsForOrder)
+                      }
+                    }}
+                    className="sr-only peer"
+                  />
+                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#006561]"></div>
+                </label>
+              </div>
+
+              {isUsingPoints && (
+                <div className="space-y-2 pt-1 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#6B6661] text-[11px]">
+                      Số điểm muốn trừ (tối đa {maxPointsForOrder} điểm - 30% đơn):
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setPointsToUse(maxPointsForOrder)}
+                      className="text-[11px] font-bold text-[#006561] hover:underline cursor-pointer"
+                    >
+                      Dùng tối đa
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min={1}
+                      max={maxPointsForOrder}
+                      value={pointsToUse || ''}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 0
+                        setPointsToUse(Math.max(0, Math.min(val, maxPointsForOrder)))
+                      }}
+                      className="h-9 text-xs rounded-xl"
+                    />
+                    <span className="text-xs font-semibold text-[#006561] shrink-0 font-display">
+                      = -{formatCurrency(pointsDiscountAmount)}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Order Summary Card */}
           <div className="rounded-2xl border border-[#E5E2DF] bg-white p-6 space-y-5 sticky top-24 shadow-xs">
             <h2 className="font-display text-base font-bold text-[#2A2725] border-b border-[#E5E2DF] pb-3">
@@ -570,6 +675,16 @@ export const CheckoutPage: React.FC = () => {
                 <div className="flex justify-between text-[#006561] font-semibold">
                   <span>Giảm giá ({appliedVoucher?.code}):</span>
                   <span>-{formatCurrency(discountAmount)}</span>
+                </div>
+              )}
+
+              {pointsDiscountAmount > 0 && (
+                <div className="flex justify-between text-amber-700 font-semibold">
+                  <span className="flex items-center gap-1">
+                    <Coins className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Trừ Điểm Lành ({pointsToUse} điểm):</span>
+                  </span>
+                  <span>-{formatCurrency(pointsDiscountAmount)}</span>
                 </div>
               )}
 
