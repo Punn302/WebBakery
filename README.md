@@ -116,29 +116,6 @@ npm run dev
 
 ---
 
-## 👥 Tài khoản thử nghiệm phân quyền (RBAC)
-
-| Vai trò | Email đăng nhập | Mật khẩu | Phạm vi quyền hạn |
-| :--- | :--- | :--- | :--- |
-| **Quản trị viên (`ADMIN`)** | `admin@hebekery.vn` | `admin123` | Toàn quyền hệ thống: Lô hàng FEFO, SePay Simulator, Người dùng, Đơn hàng, Voucher, Doanh thu |
-| **Nhân viên Sale (`STAFF_SALES`)** | `sales@hebekery.vn` | `123456` | Tiếp nhận đơn hàng, in phiếu xuất kho K80/A5, tạo vận đơn, chăm sóc khách hàng |
-| **Nhân viên Kho (`STAFF_WAREHOUSE`)** | `warehouse@hebekery.vn` | `123456` | Quản lý sản phẩm, danh mục, xuất nhập kho theo hạn sử dụng FEFO |
-| **Khách hàng (`USER`)** | `user@hebekery.vn` | `123456` | Mua hàng, tích & tiêu Điểm Lành, Thẻ VVIP, đánh giá sản phẩm, tra cứu đơn hàng |
-
----
-
-## 💳 Cấu hình SePay Webhook (Thanh toán VietQR)
-
-Khi kết nối với cổng thanh toán SePay:
-- **Tên Webhook**: `Hebekery Webhook Prod`
-- **URL nhận Webhook**:
-  - *Môi trường Local (dùng ngrok/tunnel)*: `https://<subdomain>.ngrok-free.app/api/payment/sepay/webhook`
-  - *Môi trường Production*: `https://your-domain.com/api/payment/sepay/webhook`
-  - *Test nội bộ qua Simulator*: truy cập trực tiếp `/admin/sepay-simulator`
-- **Xác thực API Key**: Điền API Key của SePay vào biến `SEPAY_WEBHOOK_API_KEY` trong file `.env`.
-
----
-
 ## 🛠️ Công nghệ sử dụng
 
 - **Frontend**: React 19, TypeScript, Vite, Tailwind CSS, Lucide Icons, React Query, Motion, Vitest.
