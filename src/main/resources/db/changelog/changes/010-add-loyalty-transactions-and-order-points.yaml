@@ -1,0 +1,103 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-create-loyalty-transactions-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: loyalty_transactions
+            columns:
+              - column:
+                  name: id
+                  type: varchar(64)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_id
+                  type: varchar(64)
+              - column:
+                  name: transaction_type
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: points
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: balance_after
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(255)
+              - column:
+                  name: created_at
+                  type: datetime
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_loyalty_tx_user_id
+            tableName: loyalty_transactions
+            columns:
+              - column:
+                  name: user_id
+        - createIndex:
+            indexName: idx_loyalty_tx_order_id
+            tableName: loyalty_transactions
+            columns:
+              - column:
+                  name: order_id
+
+  - changeSet:
+      id: 010-add-points-columns-to-orders
+      author: hebekery
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - columnExists:
+                tableName: orders
+                columnName: points_used
+      changes:
+        - addColumn:
+            tableName: orders
+            columns:
+              - column:
+                  name: points_used
+                  type: int
+                  defaultValueNumeric: 0
+              - column:
+                  name: points_discount_amount
+                  type: double
+                  defaultValueNumeric: 0
+              - column:
+                  name: points_earned
+                  type: int
+                  defaultValueNumeric: 0
+
+  - changeSet:
+      id: 010-seed-demo-loyalty-profile-and-transactions
+      author: hebekery
+      changes:
+        - sql:
+            comment: Ensure user 1 has initial loyalty profile and points
+            sql: >
+              INSERT INTO customer_profiles (id, user_id, loyalty_points, membership_tier, total_spent, target_calories, created_at, updated_at)
+              VALUES ('PROF-USER-001', '1', 50, 'SILVER', 1450000.0, 2000, NOW(), NOW())
+              ON DUPLICATE KEY UPDATE loyalty_points = 50, membership_tier = 'SILVER', total_spent = 1450000.0;
+        - sql:
+            comment: Seed initial transactions for demo
+            sql: >
+              INSERT INTO loyalty_transactions (id, user_id, order_id, transaction_type, points, balance_after, description, created_at)
+              VALUES 
+              ('LTX-001', '1', NULL, 'EARN_PURCHASE', 30, 30, 'Tích điểm đơn hàng bánh Biscotti & Granola', DATE_SUB(NOW(), INTERVAL 5 DAY)),
+              ('LTX-002', '1', NULL, 'BIRTHDAY_GIFT', 20, 50, 'Quà tặng điểm sinh nhật thành viên Hạt Lành', DATE_SUB(NOW(), INTERVAL 2 DAY))
+              ON DUPLICATE KEY UPDATE points = points;

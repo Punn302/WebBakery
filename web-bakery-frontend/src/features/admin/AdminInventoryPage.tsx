@@ -13,9 +13,15 @@ import {
   TrendingDown,
   Calendar,
   CheckCircle,
+  Clock,
+  Sparkles,
+  Flame,
+  Tag,
+  ShieldCheck,
+  Layers,
 } from 'lucide-react'
-import { adminInventoryApi, productApi } from '@/api'
-import type { Product, PurchaseReceipt, PurchaseReceiptBatchRequest } from '@/types'
+import { adminInventoryApi, productApi, adminBatchApi } from '@/api'
+import type { Product, PurchaseReceipt, PurchaseReceiptBatchRequest, ProductBatch, ProductBatchRequest, BatchFlashSaleRequest, BatchStats } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -38,9 +44,26 @@ interface DynamicReceiptItem {
 
 export const AdminInventoryPage: React.FC = () => {
   const queryClient = useQueryClient()
-  const [activeTab, setActiveTab] = useState<'STOCK' | 'RECEIPTS'>('STOCK')
+  const [activeTab, setActiveTab] = useState<'STOCK' | 'RECEIPTS' | 'BATCHES'>('STOCK')
   const [keyword, setKeyword] = useState('')
   const [page, setPage] = useState(0)
+
+  // Batch & Shelf-Life States
+  const [batchProductId, setBatchProductId] = useState<string>('')
+  const [batchStatus, setBatchStatus] = useState<string>('ALL')
+  const [batchPage, setBatchPage] = useState<number>(0)
+  const [createBatchModalOpen, setCreateBatchModalOpen] = useState(false)
+  const [batchForm, setBatchForm] = useState<ProductBatchRequest>({
+    productId: '',
+    batchCode: '',
+    manufactureDate: new Date().toISOString().split('T')[0],
+    expiryDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    initialQuantity: 50,
+    note: '',
+  })
+  const [flashSaleBatch, setFlashSaleBatch] = useState<ProductBatch | null>(null)
+  const [flashSalePercent, setFlashSalePercent] = useState<number>(30)
+  const [flashSaleNote, setFlashSaleNote] = useState<string>('')
 
   // Threshold Edit Modal
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
@@ -69,6 +92,23 @@ export const AdminInventoryPage: React.FC = () => {
     enabled: activeTab === 'RECEIPTS',
   })
 
+  const { data: batchesData, isLoading: isBatchesLoading } = useQuery({
+    queryKey: ['admin-batches', batchProductId, batchStatus, batchPage],
+    queryFn: () => adminBatchApi.getBatches({
+      productId: batchProductId || undefined,
+      status: batchStatus || undefined,
+      page: batchPage,
+      size: 15,
+    }),
+    enabled: activeTab === 'BATCHES',
+  })
+
+  const { data: batchStats } = useQuery({
+    queryKey: ['admin-batch-stats'],
+    queryFn: adminBatchApi.getStats,
+    enabled: activeTab === 'BATCHES',
+  })
+
   const { data: allProducts = [] } = useQuery({
     queryKey: ['admin-all-products-for-receipt'],
     queryFn: async () => {
@@ -88,10 +128,13 @@ export const AdminInventoryPage: React.FC = () => {
 
   const products = inventoryData?.content || []
   const receipts = receiptsData?.content || []
+  const batches = batchesData?.content || []
   const totalPages =
     activeTab === 'STOCK'
       ? inventoryData?.totalPages || 1
-      : receiptsData?.totalPages || 1
+      : activeTab === 'RECEIPTS'
+      ? receiptsData?.totalPages || 1
+      : batchesData?.totalPages || 1
 
   // Mutations
   const updateThresholdMutation = useMutation({
@@ -124,6 +167,45 @@ export const AdminInventoryPage: React.FC = () => {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
         'Không thể tạo phiếu nhập kho'
+      toast.error(msg)
+    },
+  })
+
+  // Batch Mutations
+  const createBatchMutation = useMutation({
+    mutationFn: (data: ProductBatchRequest) => adminBatchApi.createBatch(data),
+    onSuccess: () => {
+      toast.success('Đã tạo mẻ bánh mới thành công!')
+      queryClient.invalidateQueries({ queryKey: ['admin-batches'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-batch-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-inventory'] })
+      setCreateBatchModalOpen(false)
+      setBatchForm({
+        productId: '',
+        batchCode: '',
+        manufactureDate: new Date().toISOString().split('T')[0],
+        expiryDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        initialQuantity: 50,
+        note: '',
+      })
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || 'Không thể tạo mẻ bánh'
+      toast.error(msg)
+    },
+  })
+
+  const flashSaleMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: BatchFlashSaleRequest }) =>
+      adminBatchApi.updateFlashSale(id, data),
+    onSuccess: () => {
+      toast.success('Cập nhật Flash Sale xả hàng cận date thành công!')
+      queryClient.invalidateQueries({ queryKey: ['admin-batches'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-batch-stats'] })
+      setFlashSaleBatch(null)
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || 'Không thể cập nhật Flash Sale'
       toast.error(msg)
     },
   })
@@ -264,6 +346,18 @@ export const AdminInventoryPage: React.FC = () => {
             className="text-xs"
           >
             Lịch Sử Phiếu Nhập
+          </Button>
+          <Button
+            variant={activeTab === 'BATCHES' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => {
+              setActiveTab('BATCHES')
+              setBatchPage(0)
+            }}
+            className="text-xs flex items-center gap-1.5"
+          >
+            <Layers className="w-3.5 h-3.5 text-[#006561]" />
+            <span>Quản Lý Lô Bánh & HSD (FEFO)</span>
           </Button>
         </div>
 
@@ -438,26 +532,265 @@ export const AdminInventoryPage: React.FC = () => {
         </div>
       )}
 
+      {/* Tab 3: Production Batches & Shelf-Life (FEFO) Table */}
+      {activeTab === 'BATCHES' && (
+        <div className="space-y-4">
+          {/* Batch Metrics Header */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            <div className="border border-[#e7e5e4] bg-white p-3.5 space-y-1">
+              <span className="text-[10px] font-bold text-[#78716c] uppercase tracking-wider block flex items-center gap-1">
+                <Layers className="w-3.5 h-3.5 text-[#006561]" />
+                <span>Tổng Số Lô Bánh</span>
+              </span>
+              <div className="text-xl font-black text-[#1c1917]">{batchStats?.totalBatches || 0}</div>
+            </div>
+
+            <div className="border border-[#e7e5e4] bg-white p-3.5 space-y-1">
+              <span className="text-[10px] font-bold text-[#15803d] uppercase tracking-wider block flex items-center gap-1">
+                <CheckCircle className="w-3.5 h-3.5 text-[#15803d]" />
+                <span>An Toàn (&gt; 60 ngày)</span>
+              </span>
+              <div className="text-xl font-black text-[#15803d]">{batchStats?.activeBatches || 0}</div>
+            </div>
+
+            <div className="border border-[#e7e5e4] bg-white p-3.5 space-y-1">
+              <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider block flex items-center gap-1">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                <span>Cận Date (&le; 30 ngày)</span>
+              </span>
+              <div className="text-xl font-black text-amber-600">{batchStats?.nearExpiryBatches || 0}</div>
+            </div>
+
+            <div className="border border-[#e7e5e4] bg-white p-3.5 space-y-1">
+              <span className="text-[10px] font-bold text-rose-600 uppercase tracking-wider block flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5 text-rose-600" />
+                <span>Hết Hạn (&lt; 15 ngày)</span>
+              </span>
+              <div className="text-xl font-black text-rose-600">{batchStats?.expiredBatches || 0}</div>
+            </div>
+
+            <div className="border border-[#e7e5e4] bg-white p-3.5 space-y-1 col-span-2 sm:col-span-1">
+              <span className="text-[10px] font-bold text-orange-600 uppercase tracking-wider block flex items-center gap-1">
+                <Flame className="w-3.5 h-3.5 text-orange-600" />
+                <span>Flash Sale Cận Date</span>
+              </span>
+              <div className="text-xl font-black text-orange-600">{batchStats?.flashSaleBatches || 0}</div>
+            </div>
+          </div>
+
+          {/* Batch Filters & Add Button */}
+          <div className="border border-[#e7e5e4] bg-white p-3.5 flex flex-col sm:flex-row gap-3 items-center justify-between">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              <select
+                value={batchProductId}
+                onChange={(e) => {
+                  setBatchProductId(e.target.value)
+                  setBatchPage(0)
+                }}
+                className="h-8 border border-[#d6d3d1] bg-white px-2.5 text-xs text-[#1c1917] rounded-md focus:outline-none focus:border-[#006561]"
+              >
+                <option value="">-- Tất cả sản phẩm bánh --</option>
+                {allProducts.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={batchStatus}
+                onChange={(e) => {
+                  setBatchStatus(e.target.value)
+                  setBatchPage(0)
+                }}
+                className="h-8 border border-[#d6d3d1] bg-white px-2.5 text-xs text-[#1c1917] rounded-md focus:outline-none focus:border-[#006561]"
+              >
+                <option value="ALL">-- Tất cả trạng thái --</option>
+                <option value="ACTIVE">Còn hạn an toàn (ACTIVE)</option>
+                <option value="NEAR_EXPIRY">Cận date &le; 30 ngày (NEAR_EXPIRY)</option>
+                <option value="EXPIRED">Hết hạn &lt; 15 ngày (EXPIRED)</option>
+                <option value="SOLD_OUT">Đã xuất bán hết (SOLD_OUT)</option>
+              </select>
+            </div>
+
+            <Button
+              onClick={() => setCreateBatchModalOpen(true)}
+              className="bg-[#006561] hover:bg-[#004e4a] text-white text-xs flex items-center gap-1.5 h-8 px-3 shrink-0 self-end sm:self-auto cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Tạo Lô Sản Xuất Mới</span>
+            </Button>
+          </div>
+
+          {/* Batches Table */}
+          <div className="border border-[#e7e5e4] bg-white overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-[#e7e5e4] bg-[#faf8f5] text-[#57534e] font-bold uppercase tracking-wider text-[11px]">
+                  <th className="py-3 px-4">Mã Lô Nướng</th>
+                  <th className="py-3 px-4">Sản Phẩm Bánh</th>
+                  <th className="py-3 px-4">Ngày Sản Xuất (NSX)</th>
+                  <th className="py-3 px-4">Hạn Sử Dụng (HSD)</th>
+                  <th className="py-3 px-4 text-center">Tồn Kho Lô (FEFO)</th>
+                  <th className="py-3 px-4 text-center">Trạng Thái HSD</th>
+                  <th className="py-3 px-4 text-center">Xả Hàng Cận Date</th>
+                  <th className="py-3 px-4 text-right">Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#f5f5f4]">
+                {isBatchesLoading ? (
+                  <tr>
+                    <td colSpan={8} className="py-8 text-center text-[#78716c]">
+                      Đang tải danh sách lô bánh...
+                    </td>
+                  </tr>
+                ) : batches.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="py-8 text-center text-[#78716c]">
+                      Chưa có lô sản xuất nào phù hợp với bộ lọc
+                    </td>
+                  </tr>
+                ) : (
+                  batches.map((b) => {
+                    const isWarning = b.alertLevel === 'WARNING'
+                    const isDanger = b.alertLevel === 'DANGER'
+                    const percentRemaining = Math.round((b.currentQuantity / Math.max(1, b.initialQuantity)) * 100)
+
+                    return (
+                      <tr key={b.id} className="hover:bg-[#faf8f5]/60 transition-colors">
+                        <td className="py-3 px-4 font-mono font-bold text-[#006561] whitespace-nowrap">
+                          {b.batchCode}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2.5">
+                            {b.productImageUrl ? (
+                              <img
+                                src={b.productImageUrl}
+                                alt={b.productName}
+                                className="w-8 h-8 rounded-lg object-cover border border-[#e7e5e4]"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 rounded-lg bg-stone-100 border border-[#e7e5e4] flex items-center justify-center">
+                                <Package className="w-4 h-4 text-stone-400" />
+                              </div>
+                            )}
+                            <div>
+                              <div className="font-bold text-[#1c1917] max-w-[200px] truncate">{b.productName || b.productId}</div>
+                              <div className="text-[10px] font-mono text-[#78716c]">{b.productId}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 font-mono text-[#57534e] whitespace-nowrap">
+                          {formatDate(b.manufactureDate)}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="font-mono text-[#1c1917] font-semibold">{formatDate(b.expiryDate)}</div>
+                          <div className="text-[10px] text-[#78716c]">
+                            {b.daysRemaining > 0 ? `Còn ${b.daysRemaining} ngày` : 'Đã hết hạn'}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <div className="font-mono font-bold text-xs text-[#1c1917]">
+                            {b.currentQuantity} / {b.initialQuantity}
+                          </div>
+                          <div className="w-20 mx-auto bg-stone-200 h-1.5 rounded-full overflow-hidden mt-1">
+                            <div
+                              className="bg-[#006561] h-full rounded-full"
+                              style={{ width: `${percentRemaining}%` }}
+                            />
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          {isDanger ? (
+                            <Badge variant="destructive" className="text-[10px] font-bold">
+                              Hết hạn / Khóa bán
+                            </Badge>
+                          ) : isWarning ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
+                              <AlertTriangle className="w-3 h-3 text-amber-600" />
+                              <span>Cận Date ({b.daysRemaining}d)</span>
+                            </span>
+                          ) : (
+                            <Badge variant="success" className="text-[10px] font-bold">
+                              An toàn ({b.daysRemaining}d)
+                            </Badge>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          {b.discountPercent > 0 ? (
+                            <div className="space-y-0.5">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-100 text-orange-800 border border-orange-300">
+                                <Flame className="w-3 h-3 text-orange-600" />
+                                <span>Giảm {b.discountPercent}%</span>
+                              </span>
+                              {b.discountedPrice && b.originalPrice && (
+                                <div className="text-[10px]">
+                                  <span className="line-through text-stone-400 mr-1">{formatCurrency(b.originalPrice)}</span>
+                                  <span className="font-bold text-[#006561]">{formatCurrency(b.discountedPrice)}</span>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-[11px] text-[#78716c] italic">Bán giá chuẩn</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-[11px] px-2.5 flex items-center gap-1 ml-auto cursor-pointer"
+                            onClick={() => {
+                              setFlashSaleBatch(b)
+                              setFlashSalePercent(b.discountPercent > 0 ? b.discountPercent : 30)
+                              setFlashSaleNote(b.note || '')
+                            }}
+                          >
+                            <Flame className="w-3 h-3 text-orange-500" />
+                            <span>{b.discountPercent > 0 ? 'Sửa Flash Sale' : 'Xả Cận Date'}</span>
+                          </Button>
+                        </td>
+                      </tr>
+                    )
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* Pagination Bar */}
       {totalPages > 1 && (
         <div className="p-3 border border-[#e7e5e4] bg-white flex items-center justify-between text-xs text-[#78716c]">
           <div>
-            Trang {page + 1} / {totalPages}
+            Trang {(activeTab === 'BATCHES' ? batchPage : page) + 1} / {totalPages}
           </div>
           <div className="flex items-center gap-1.5">
             <Button
               variant="outline"
               size="sm"
-              disabled={page === 0}
-              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={(activeTab === 'BATCHES' ? batchPage : page) === 0}
+              onClick={() => {
+                if (activeTab === 'BATCHES') {
+                  setBatchPage((p) => Math.max(0, p - 1))
+                } else {
+                  setPage((p) => Math.max(0, p - 1))
+                }
+              }}
             >
               Trước
             </Button>
             <Button
               variant="outline"
               size="sm"
-              disabled={page >= totalPages - 1}
-              onClick={() => setPage((p) => p + 1)}
+              disabled={(activeTab === 'BATCHES' ? batchPage : page) >= totalPages - 1}
+              onClick={() => {
+                if (activeTab === 'BATCHES') {
+                  setBatchPage((p) => p + 1)
+                } else {
+                  setPage((p) => p + 1)
+                }
+              }}
             >
               Tiếp theo
             </Button>
@@ -694,6 +1027,288 @@ export const AdminInventoryPage: React.FC = () => {
               Đóng
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal: Create Production Batch */}
+      <Dialog open={createBatchModalOpen} onOpenChange={setCreateBatchModalOpen}>
+        <DialogContent onClose={() => setCreateBatchModalOpen(false)} className="max-w-md p-6 space-y-4">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Layers className="w-5 h-5 text-[#006561]" />
+              <span>Tạo Lô Sản Xuất Bánh Mới</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-[#78716c]">
+              Ghi nhận ngày nướng và hạn sử dụng để kiểm soát xuất kho theo chuẩn FEFO
+            </DialogDescription>
+          </DialogHeader>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              if (!batchForm.productId) {
+                toast.error('Vui lòng chọn sản phẩm bánh')
+                return
+              }
+              createBatchMutation.mutate(batchForm)
+            }}
+            className="space-y-4 text-xs"
+          >
+            <div>
+              <label className="block text-xs font-semibold text-[#1c1917] mb-1">
+                Sản phẩm bánh *
+              </label>
+              <select
+                value={batchForm.productId}
+                onChange={(e) => setBatchForm((prev) => ({ ...prev, productId: e.target.value }))}
+                required
+                className="w-full h-9 border border-[#d6d3d1] bg-white px-3 text-xs rounded-md focus:outline-none focus:border-[#006561]"
+              >
+                <option value="">-- Chọn sản phẩm bánh --</option>
+                {allProducts.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} ({p.id})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#1c1917] mb-1">
+                Mã lô nướng (Batch Code)
+              </label>
+              <Input
+                placeholder="Để trống để hệ thống tự tạo (vd: LOT-202611-...)"
+                value={batchForm.batchCode || ''}
+                onChange={(e) => setBatchForm((prev) => ({ ...prev, batchCode: e.target.value.toUpperCase() }))}
+                className="text-xs font-mono h-9"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-[#1c1917] mb-1">
+                  Ngày sản xuất (NSX) *
+                </label>
+                <Input
+                  type="date"
+                  required
+                  value={batchForm.manufactureDate}
+                  onChange={(e) => setBatchForm((prev) => ({ ...prev, manufactureDate: e.target.value }))}
+                  className="text-xs h-9"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#1c1917] mb-1">
+                  Hạn sử dụng (HSD) *
+                </label>
+                <Input
+                  type="date"
+                  required
+                  value={batchForm.expiryDate}
+                  onChange={(e) => setBatchForm((prev) => ({ ...prev, expiryDate: e.target.value }))}
+                  className="text-xs h-9"
+                />
+              </div>
+            </div>
+
+            {/* Quick Expiry Date Preset Buttons */}
+            <div className="flex items-center gap-1.5 text-[10px]">
+              <span className="text-[#78716c]">Gợi ý HSD:</span>
+              {[
+                { label: '+30 ngày', days: 30 },
+                { label: '+60 ngày', days: 60 },
+                { label: '+90 ngày (3 tháng)', days: 90 },
+                { label: '+180 ngày (6 tháng)', days: 180 },
+              ].map((preset) => (
+                <button
+                  type="button"
+                  key={preset.days}
+                  onClick={() => {
+                    const mDate = batchForm.manufactureDate ? new Date(batchForm.manufactureDate) : new Date()
+                    const exp = new Date(mDate.getTime() + preset.days * 24 * 60 * 60 * 1000)
+                    setBatchForm((prev) => ({ ...prev, expiryDate: exp.toISOString().split('T')[0] }))
+                  }}
+                  className="px-2 py-0.5 rounded-sm bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold cursor-pointer"
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#1c1917] mb-1">
+                Số lượng bánh mẻ này (Hũ/Gói) *
+              </label>
+              <Input
+                type="number"
+                min={1}
+                required
+                value={batchForm.initialQuantity}
+                onChange={(e) => setBatchForm((prev) => ({ ...prev, initialQuantity: Number(e.target.value) }))}
+                className="text-xs h-9"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#1c1917] mb-1">
+                Ghi chú mẻ bánh
+              </label>
+              <Input
+                placeholder="Ví dụ: Nướng mẻ sáng, nhiệt độ 160 độ C, bánh nở đều thơm..."
+                value={batchForm.note || ''}
+                onChange={(e) => setBatchForm((prev) => ({ ...prev, note: e.target.value }))}
+                className="text-xs h-9"
+              />
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button type="button" variant="ghost" size="sm" onClick={() => setCreateBatchModalOpen(false)}>
+                Hủy
+              </Button>
+              <Button
+                type="submit"
+                variant="default"
+                size="sm"
+                disabled={createBatchMutation.isPending}
+                className="bg-[#006561] hover:bg-[#004e4a] text-white"
+              >
+                {createBatchMutation.isPending ? 'Đang tạo...' : 'Tạo Lô Sản Xuất'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal: Flash Sale Near-Expiry */}
+      <Dialog open={!!flashSaleBatch} onOpenChange={() => setFlashSaleBatch(null)}>
+        <DialogContent onClose={() => setFlashSaleBatch(null)} className="max-w-md p-6 space-y-4">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Flame className="w-5 h-5 text-orange-500" />
+              <span>Chiến Dịch "Cứu Bánh Lành" Cận Date</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-[#78716c]">
+              Áp dụng mức giảm giá ưu đãi cho lô bánh sắp hết hạn để đẩy nhanh tốc độ xoay vòng kho
+            </DialogDescription>
+          </DialogHeader>
+
+          {flashSaleBatch && (
+            <div className="space-y-4 text-xs">
+              <div className="p-3.5 rounded-xl bg-orange-50/60 border border-orange-200/80 space-y-1.5">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-[#1c1917]">{flashSaleBatch.productName || flashSaleBatch.productId}</span>
+                  <Badge variant="outline" className="font-mono text-[10px]">
+                    {flashSaleBatch.batchCode}
+                  </Badge>
+                </div>
+                <div className="flex justify-between text-[11px] text-[#78716c]">
+                  <span>HSD: <b>{formatDate(flashSaleBatch.expiryDate)}</b></span>
+                  <span className="font-semibold text-amber-700">
+                    {flashSaleBatch.daysRemaining > 0 ? `Còn ${flashSaleBatch.daysRemaining} ngày` : 'Đã hết hạn'}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-xs font-semibold text-[#1c1917]">
+                    Tỷ lệ giảm giá (%):
+                  </label>
+                  <span className="font-mono font-bold text-base text-orange-600">
+                    {flashSalePercent}%
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="range"
+                    min={0}
+                    max={70}
+                    step={5}
+                    value={flashSalePercent}
+                    onChange={(e) => setFlashSalePercent(Number(e.target.value))}
+                    className="w-full accent-orange-600 cursor-pointer"
+                  />
+                  <Input
+                    type="number"
+                    min={0}
+                    max={70}
+                    value={flashSalePercent}
+                    onChange={(e) => setFlashSalePercent(Number(e.target.value))}
+                    className="w-16 h-8 text-xs text-center font-bold"
+                  />
+                </div>
+              </div>
+
+              {/* Price Preview */}
+              {flashSaleBatch.originalPrice && (
+                <div className="p-3 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-between">
+                  <span className="text-stone-600">Giá bán sau khi giảm:</span>
+                  <div className="text-right">
+                    <span className="line-through text-stone-400 text-[11px] mr-2">
+                      {formatCurrency(flashSaleBatch.originalPrice)}
+                    </span>
+                    <span className="font-bold text-base text-[#006561]">
+                      {formatCurrency(flashSaleBatch.originalPrice * (1 - flashSalePercent / 100))}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-semibold text-[#1c1917] mb-1">
+                  Ghi chú chiến dịch xả hàng
+                </label>
+                <Input
+                  placeholder="Ví dụ: Lô nướng mộc đợt trước - Giảm 35% tiết kiệm"
+                  value={flashSaleNote}
+                  onChange={(e) => setFlashSaleNote(e.target.value)}
+                  className="text-xs h-9"
+                />
+              </div>
+
+              <DialogFooter className="pt-2 flex flex-col sm:flex-row gap-2">
+                {flashSaleBatch.discountPercent > 0 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="text-stone-600 border-stone-300"
+                    disabled={flashSaleMutation.isPending}
+                    onClick={() => {
+                      flashSaleMutation.mutate({
+                        id: flashSaleBatch.id,
+                        data: { discountPercent: 0, note: '' },
+                      })
+                    }}
+                  >
+                    Tắt Flash Sale (0%)
+                  </Button>
+                )}
+                <div className="flex items-center gap-2 ml-auto">
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setFlashSaleBatch(null)}>
+                    Hủy
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={flashSaleMutation.isPending}
+                    onClick={() => {
+                      flashSaleMutation.mutate({
+                        id: flashSaleBatch.id,
+                        data: { discountPercent: flashSalePercent, note: flashSaleNote },
+                      })
+                    }}
+                    className="bg-orange-600 hover:bg-orange-700 text-white"
+                  >
+                    {flashSaleMutation.isPending ? 'Đang lưu...' : 'Áp Dụng Flash Sale'}
+                  </Button>
+                </div>
+              </DialogFooter>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

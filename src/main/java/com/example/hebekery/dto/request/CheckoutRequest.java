@@ -31,6 +31,9 @@ public class CheckoutRequest {
     @Schema(description = "Mã voucher giảm giá (nếu có)", example = "HB10")
     private String voucherCode;
 
+    @Schema(description = "Số Điểm Lành HeBekery muốn dùng để giảm giá (1 điểm = 1.000đ)", example = "20")
+    private Integer pointsUsed;
+
     public String getCustomerName() {
         return customerName;
     }
@@ -77,5 +80,13 @@ public class CheckoutRequest {
 
     public void setVoucherCode(String voucherCode) {
         this.voucherCode = voucherCode;
+    }
+
+    public Integer getPointsUsed() {
+        return pointsUsed;
+    }
+
+    public void setPointsUsed(Integer pointsUsed) {
+        this.pointsUsed = pointsUsed;
     }
 }

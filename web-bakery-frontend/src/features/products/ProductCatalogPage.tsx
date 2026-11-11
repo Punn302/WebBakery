@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -14,7 +14,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
-import { productApi } from '@/api'
+import { productApi, batchApi } from '@/api'
 import type { Product } from '@/types'
 import { ProductCard } from './ProductCard'
 import { ProductDetailModal } from './ProductDetailModal'
@@ -71,6 +71,24 @@ export const ProductCatalogPage: React.FC = () => {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
+  // Sync category and search query from URL query params
+  useEffect(() => {
+    const cat = searchParams.get('category')
+    if (cat) {
+      const lower = cat.toLowerCase()
+      if (lower.includes('biscotti')) setSelectedCategory('biscotti')
+      else if (lower.includes('granola')) setSelectedCategory('granola')
+      else if (lower.includes('ngói') || lower.includes('keto')) setSelectedCategory('keto')
+      else if (lower.includes('thanh') || lower.includes('bar')) setSelectedCategory('bar')
+      else if (lower.includes('gạo lứt') || lower.includes('mì') || lower.includes('bún') || lower.includes('gao_lut')) setSelectedCategory('gao_lut')
+      else setSelectedCategory('all')
+    }
+    const q = searchParams.get('search') || searchParams.get('keyword')
+    if (q !== null && q !== undefined) {
+      setKeyword(q)
+    }
+  }, [searchParams])
+
   // Fetch products from Spring Boot backend (/api/products)
   const { data: productData, isLoading } = useQuery({
     queryKey: ['products-catalog', page],
@@ -82,6 +100,23 @@ export const ProductCatalogPage: React.FC = () => {
       }),
     staleTime: 2 * 60 * 1000,
   })
+
+  const { data: flashSaleDeals = [] } = useQuery({
+    queryKey: ['flash-sale-deals'],
+    queryFn: batchApi.getFlashSaleDeals,
+    staleTime: 60 * 1000,
+  })
+
+  const dealsMap = useMemo(() => {
+    const map = new Map<string, { discountPercent: number; daysRemaining: number }>()
+    flashSaleDeals.forEach((deal) => {
+      map.set(deal.productId, {
+        discountPercent: deal.discountPercent,
+        daysRemaining: deal.daysRemaining,
+      })
+    })
+    return map
+  }, [flashSaleDeals])
 
   const rawProducts = productData?.content || []
   const totalPages = productData?.totalPages || 1
@@ -527,7 +562,7 @@ export const ProductCatalogPage: React.FC = () => {
                 <ProductCard
                   key={product.id}
                   product={product}
-                  onSelect={(p) => setSelectedProduct(p)}
+                  dealBadge={dealsMap.get(product.id)}
                 />
               ))}
             </div>

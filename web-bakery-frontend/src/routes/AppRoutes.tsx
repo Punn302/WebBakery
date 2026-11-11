@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { AuthProvider, useAuth } from '@/hooks/useAuth'
 import { CartProvider } from '@/hooks/useCart'
+import { WishlistProvider } from '@/hooks/useWishlist'
 
 // Layouts
 import { MainLayout } from '@/components/layout/MainLayout'
@@ -23,6 +24,11 @@ import { ContactPage } from '@/features/pages/ContactPage'
 import { CheckoutPage } from '@/features/checkout/CheckoutPage'
 import { OrderTrackingPage } from '@/features/orders/OrderTrackingPage'
 import { PublicOrderLookupPage } from '@/features/orders/PublicOrderLookupPage'
+import { OrderSuccessPage } from '@/features/checkout/OrderSuccessPage'
+import { PolicyPage } from '@/features/pages/PolicyPage'
+import { FaqPage } from '@/features/pages/FaqPage'
+import { VouchersPage } from '@/features/vouchers/VouchersPage'
+import { BoxBuilderPage } from '@/features/tools/BoxBuilderPage'
 
 // Auth Pages
 import { LoginPage } from '@/features/auth/LoginPage'
@@ -32,12 +38,15 @@ import { ProfilePage } from '@/features/auth/ProfilePage'
 // Admin Pages
 import { AdminDashboardPage } from '@/features/admin/AdminDashboardPage'
 import { AdminProductsPage } from '@/features/admin/AdminProductsPage'
+import { AdminCategoriesPage } from '@/features/admin/AdminCategoriesPage'
 import { AdminOrdersPage } from '@/features/admin/AdminOrdersPage'
 import { AdminUsersPage } from '@/features/admin/AdminUsersPage'
 import { AdminInventoryPage } from '@/features/admin/AdminInventoryPage'
 import { AdminReportsPage } from '@/features/admin/AdminReportsPage'
 import { AdminContactPage } from '@/features/admin/AdminContactPage'
 import { AdminVoucherPage } from '@/features/admin/AdminVoucherPage'
+import { AdminReviewPage } from '@/features/admin/AdminReviewPage'
+import { AdminSepaySimulatorPage } from '@/features/admin/AdminSepaySimulatorPage'
 
 
 const queryClient = new QueryClient({
@@ -65,7 +74,8 @@ export const AppRoutes: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <CartProvider>
+        <WishlistProvider>
+          <CartProvider>
           <BrowserRouter>
             <Routes>
               {/* Public Storefront Routes */}
@@ -85,6 +95,14 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/tracking" element={<PublicOrderLookupPage />} />
+                <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
+                <Route path="/policy" element={<PolicyPage />} />
+                <Route path="/chinh-sach" element={<PolicyPage />} />
+                <Route path="/faq" element={<FaqPage />} />
+                <Route path="/vouchers" element={<VouchersPage />} />
+                <Route path="/khuyen-mai" element={<VouchersPage />} />
+                <Route path="/box-builder" element={<BoxBuilderPage />} />
+                <Route path="/tu-phoi-hop-banh" element={<BoxBuilderPage />} />
 
                 {/* User Protected Routes */}
                 <Route
@@ -146,6 +164,14 @@ export const AppRoutes: React.FC = () => {
                   }
                 />
                 <Route
+                  path="categories"
+                  element={
+                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminCategoriesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="orders"
                   element={
                     <ProtectedRoute allowedRoles={['ADMIN', 'STAFF_SALES']}>
@@ -185,6 +211,30 @@ export const AppRoutes: React.FC = () => {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="vouchers"
+                  element={
+                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminVoucherPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="reviews"
+                  element={
+                    <ProtectedRoute allowedRoles={['ADMIN', 'STAFF_SALES']}>
+                      <AdminReviewPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="sepay-simulator"
+                  element={
+                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminSepaySimulatorPage />
+                    </ProtectedRoute>
+                  }
+                />
               </Route>
 
               {/* Fallback 404 */}
@@ -200,6 +250,7 @@ export const AppRoutes: React.FC = () => {
             }}
           />
         </CartProvider>
+        </WishlistProvider>
       </AuthProvider>
     </QueryClientProvider>
   )

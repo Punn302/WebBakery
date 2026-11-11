@@ -23,16 +23,22 @@ import {
   Truck,
   Package,
   XCircle,
+  CheckCircle2,
   Clock,
   ChevronRight,
   ShieldCheck,
   AlertCircle,
   ExternalLink,
+  Coins,
+  CreditCard,
+  Award,
+  ArrowUpRight,
+  ArrowDownLeft,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useCart } from '@/hooks/useCart'
-import { addressApi, orderApi, voucherApi, userApi } from '@/api'
-import type { Address, AddressRequest, Order, Voucher } from '@/types'
+import { addressApi, orderApi, voucherApi, userApi, loyaltyApi } from '@/api'
+import type { Address, AddressRequest, Order, Voucher, LoyaltySummary, LoyaltyTransaction } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -88,6 +94,12 @@ export const ProfilePage: React.FC = () => {
   const [orderFilter, setOrderFilter] = useState<string>('ALL')
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
 
+  // --- Cancel & Return Order States ---
+  const [cancelOrder, setCancelOrder] = useState<Order | null>(null)
+  const [cancelReason, setCancelReason] = useState('Thay đổi nhu cầu đặt hàng')
+  const [returnOrder, setReturnOrder] = useState<Order | null>(null)
+  const [returnReason, setReturnReason] = useState('')
+
   // --- Copied Voucher State ---
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
 
@@ -109,6 +121,24 @@ export const ProfilePage: React.FC = () => {
     queryKey: ['profile-vouchers'],
     queryFn: voucherApi.getAvailable,
     staleTime: 60_000,
+  })
+
+  // Loyalty & VVIP Queries
+  const { data: loyaltyProfile } = useQuery<LoyaltySummary>({
+    queryKey: ['loyalty-profile'],
+    queryFn: loyaltyApi.getProfile,
+    enabled: !!user,
+  })
+
+  const { data: loyaltyTxData } = useQuery({
+    queryKey: ['loyalty-transactions'],
+    queryFn: () => loyaltyApi.getTransactions(0, 20),
+    enabled: !!user,
+  })
+
+  const { data: loyaltyTiers = [] } = useQuery({
+    queryKey: ['loyalty-tiers'],
+    queryFn: loyaltyApi.getTiers,
   })
 
   // ================= MUTATIONS =================
@@ -178,6 +208,48 @@ export const ProfilePage: React.FC = () => {
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
       toast.error(msg || 'Không thể xóa địa chỉ')
+    },
+  })
+
+  const cancelOrderMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+      orderApi.cancelOrder(id, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-orders'] })
+      toast.success('Hủy đơn hàng thành công')
+      setCancelOrder(null)
+      setCancelReason('Thay đổi nhu cầu đặt hàng')
+    },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      toast.error(msg || 'Không thể hủy đơn hàng')
+    },
+  })
+
+  const returnOrderMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+      orderApi.requestReturn(id, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-orders'] })
+      toast.success('Đã gửi yêu cầu đổi trả đơn hàng!')
+      setReturnOrder(null)
+      setReturnReason('')
+    },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      toast.error(msg || 'Không thể gửi yêu cầu đổi trả')
+    },
+  })
+
+  const confirmReceivedMutation = useMutation({
+    mutationFn: (id: string) => orderApi.confirmReceived(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-orders'] })
+      toast.success('Xác nhận đã nhận hàng thành công!')
+    },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      toast.error(msg || 'Không thể xác nhận nhận hàng')
     },
   })
 
@@ -304,34 +376,25 @@ export const ProfilePage: React.FC = () => {
   }
 
   // Calculate Loyalty Tier & Points
-  const totalSpent = myOrders
+  const totalSpent = loyaltyProfile?.totalSpent ?? myOrders
     .filter((o) => o.orderStatus === 'DELIVERED')
     .reduce((sum, o) => sum + (o.total || 0), 0)
-  const loyaltyPoints = Math.floor(totalSpent / 10000)
+  const loyaltyPoints = loyaltyProfile?.loyaltyPoints ?? 0
 
-  let tierName = 'Thành viên Đồng'
-  let nextTierName = 'Thành viên Bạc'
-  let nextTierThreshold = 1000000
-  let badgeColor = 'bg-stone-500'
+  const tierKey = loyaltyProfile?.membershipTier || 'BRONZE'
+  const tierName = loyaltyProfile?.tierDisplayName || 'Mầm Xanh (Bronze)'
+  const nextTierName = loyaltyProfile?.nextTierName || 'Hạt Lành'
+  const nextTierThreshold = loyaltyProfile?.nextTierThreshold || 1000000
+  const tierProgress = loyaltyProfile?.progressPercent || Math.min(100, Math.round((totalSpent / nextTierThreshold) * 100))
 
-  if (totalSpent >= 5000000) {
-    tierName = 'Kim Cương (Diamond VIP)'
-    nextTierName = 'Cấp tối đa'
-    nextTierThreshold = 5000000
-    badgeColor = 'bg-cyan-600'
-  } else if (totalSpent >= 2000000) {
-    tierName = 'Thành viên Vàng (Gold)'
-    nextTierName = 'Kim Cương'
-    nextTierThreshold = 5000000
-    badgeColor = 'bg-amber-500'
-  } else if (totalSpent >= 1000000) {
-    tierName = 'Thành viên Bạc (Silver)'
-    nextTierName = 'Thành viên Vàng'
-    nextTierThreshold = 2000000
-    badgeColor = 'bg-slate-400'
-  }
-
-  const tierProgress = Math.min(100, Math.round((totalSpent / nextTierThreshold) * 100))
+  const badgeColor =
+    tierKey === 'DIAMOND'
+      ? 'bg-neutral-900 border border-amber-400 text-amber-300'
+      : tierKey === 'GOLD'
+      ? 'bg-amber-600 text-white'
+      : tierKey === 'SILVER'
+      ? 'bg-slate-500 text-white'
+      : 'bg-[#006561] text-white'
 
   // Filtered Orders
   const filteredOrders = myOrders.filter((o) => {
@@ -728,19 +791,62 @@ export const ProfilePage: React.FC = () => {
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {order.orderStatus === 'PENDING' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setCancelOrder(order)
+                                setCancelReason('Thay đổi nhu cầu đặt hàng')
+                              }}
+                              className="rounded-full border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-semibold cursor-pointer"
+                            >
+                              <XCircle className="w-3.5 h-3.5 mr-1" />
+                              Hủy đơn
+                            </Button>
+                          )}
+
+                          {order.orderStatus === 'SHIPPING' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={confirmReceivedMutation.isPending}
+                              onClick={() => confirmReceivedMutation.mutate(order.id)}
+                              className="rounded-full border-emerald-300 text-emerald-800 hover:bg-emerald-50 text-xs font-semibold cursor-pointer"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+                              Đã nhận hàng
+                            </Button>
+                          )}
+
+                          {(order.orderStatus === 'DELIVERED' || order.orderStatus === 'RECEIVED') && !order.returnStatus && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setReturnOrder(order)
+                                setReturnReason('')
+                              }}
+                              className="rounded-full border-amber-300 text-amber-800 hover:bg-amber-50 text-xs font-semibold cursor-pointer"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5 mr-1" />
+                              Yêu cầu đổi trả
+                            </Button>
+                          )}
+
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => setSelectedOrder(order)}
-                            className="rounded-full border-[#E5E2DF] text-xs font-semibold hover:border-[#006561] text-[#2A2725]"
+                            className="rounded-full border-[#E5E2DF] text-xs font-semibold hover:border-[#006561] text-[#2A2725] cursor-pointer"
                           >
                             Chi tiết hóa đơn
                           </Button>
                           <Button
                             size="sm"
                             onClick={() => handleReorder(order)}
-                            className="btn-act rounded-full text-xs font-bold flex items-center gap-1.5"
+                            className="btn-act rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />
                             <span>Mua lại đơn này</span>
@@ -941,91 +1047,329 @@ export const ProfilePage: React.FC = () => {
         {/* ================= TAB 5: VVIP LOYALTY ================= */}
         {activeTab === 'loyalty' && (
           <div className="space-y-8">
-            {/* Loyalty Status Card */}
-            <div className="bg-linear-to-br from-[#006561] to-[#124b49] rounded-3xl p-6 sm:p-10 text-white shadow-md relative overflow-hidden space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                <div className="space-y-2">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-[#FEFBF4] text-[11px] font-bold tracking-wider uppercase backdrop-blur-xs">
-                    <Crown className="w-3.5 h-3.5 text-amber-300" />
-                    <span>Chương trình Hebekery VIP Care</span>
+            {/* Digital VVIP Card & Quick Stats Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+              {/* Left: Interactive Digital VVIP Card (5 cols) */}
+              <div className="lg:col-span-5 flex flex-col justify-between">
+                <div
+                  className={`w-full rounded-3xl p-6 sm:p-7 text-white relative overflow-hidden transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl flex flex-col justify-between min-h-[250px] sm:min-h-[270px] ${
+                    tierKey === 'DIAMOND'
+                      ? 'bg-linear-to-br from-[#1F1F1F] via-[#0E0E0E] to-[#2B2B2B] border-2 border-amber-300/80 shadow-2xl'
+                      : tierKey === 'GOLD'
+                      ? 'bg-linear-to-br from-[#A86800] via-[#854E00] to-[#543000] border-2 border-amber-300/60 shadow-xl'
+                      : tierKey === 'SILVER'
+                      ? 'bg-linear-to-br from-[#4A5568] via-[#2D3748] to-[#1A202C] border-2 border-slate-300/60 shadow-xl'
+                      : 'bg-linear-to-br from-[#006561] via-[#004e4a] to-[#00302E] border-2 border-emerald-400/40 shadow-xl'
+                  }`}
+                >
+                  {/* Subtle Background Radial Pattern */}
+                  <div className="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-white/5 blur-2xl pointer-events-none" />
+                  <div className="absolute -left-12 -bottom-12 w-48 h-48 rounded-full bg-amber-400/10 blur-2xl pointer-events-none" />
+
+                  {/* Card Top: Logo & Tier */}
+                  <div className="relative z-10 flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-1.5">
+                        <Sparkles className="w-4 h-4 text-amber-300" />
+                        <span className="font-display font-bold text-sm tracking-wider uppercase text-amber-200">
+                          HeBekery Privilege
+                        </span>
+                      </div>
+                      <p className="text-[10px] tracking-widest uppercase text-white/60 font-mono">
+                        Nutrition & Healthy Bakery
+                      </p>
+                    </div>
+
+                    <span
+                      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider backdrop-blur-md shadow-xs ${
+                        tierKey === 'DIAMOND'
+                          ? 'bg-amber-400/20 text-amber-300 border border-amber-300/40'
+                          : tierKey === 'GOLD'
+                          ? 'bg-amber-400/20 text-amber-200 border border-amber-300/40'
+                          : tierKey === 'SILVER'
+                          ? 'bg-white/20 text-white border border-white/30'
+                          : 'bg-emerald-400/20 text-emerald-200 border border-emerald-300/40'
+                      }`}
+                    >
+                      <Crown className="w-3.5 h-3.5" />
+                      <span>{tierName}</span>
+                    </span>
                   </div>
-                  <h2 className="font-display text-2xl sm:text-3xl font-bold">{tierName}</h2>
-                  <p className="text-xs text-white/80 max-w-md">
-                    Mỗi mẻ bánh bạn thưởng thức đều tích lũy giá trị dinh dưỡng và đặc quyền chăm sóc sức khỏe trọn đời.
-                  </p>
+
+                  {/* Card Middle: EMV Chip & Card Number */}
+                  <div className="relative z-10 my-4 space-y-3">
+                    {/* Metallic EMV Chip */}
+                    <div className="w-11 h-8 rounded-md bg-linear-to-br from-amber-200 via-amber-400 to-amber-600 border border-amber-300/70 shadow-inner flex items-center justify-center relative overflow-hidden">
+                      <div className="w-full h-[1px] bg-amber-800/40 absolute top-2.5" />
+                      <div className="w-full h-[1px] bg-amber-800/40 absolute bottom-2.5" />
+                      <div className="h-full w-[1px] bg-amber-800/40 absolute left-3.5" />
+                      <div className="h-full w-[1px] bg-amber-800/40 absolute right-3.5" />
+                    </div>
+
+                    <div className="font-mono text-sm sm:text-base tracking-[0.22em] text-white/90 drop-shadow-sm font-semibold select-all">
+                      HBK •••• •••• {user.id.padStart(4, '0').slice(-4)}
+                    </div>
+                  </div>
+
+                  {/* Card Bottom: Holder Name, Balance, Valid */}
+                  <div className="relative z-10 pt-2 border-t border-white/15 flex items-end justify-between">
+                    <div>
+                      <p className="text-[9px] uppercase tracking-wider text-white/60">Chủ thẻ thành viên</p>
+                      <p className="font-semibold text-xs sm:text-sm text-white tracking-wide truncate max-w-[170px]">
+                        {user.name.toUpperCase()}
+                      </p>
+                    </div>
+
+                    <div className="text-right">
+                      <p className="text-[9px] uppercase tracking-wider text-white/60">Số dư Điểm Lành</p>
+                      <p className="font-mono font-bold text-base sm:text-lg text-amber-300">
+                        {loyaltyPoints} <span className="text-[10px] font-sans text-white/80">điểm</span>
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 text-center shrink-0">
-                  <p className="text-xs uppercase tracking-wider text-white/70">Điểm thưởng tích lũy</p>
-                  <p className="font-mono text-3xl sm:text-4xl font-bold text-amber-300 mt-1">
-                    {loyaltyPoints} <span className="text-sm font-sans text-white/80">điểm</span>
-                  </p>
-                  <p className="text-[10px] text-white/60 mt-1">10.000đ = 1 điểm</p>
-                </div>
+                <p className="text-center text-[11px] text-[#6B6661] mt-2 italic">
+                  Thẻ điện tử được áp dụng tự động cho mọi đơn hàng HeBekery
+                </p>
               </div>
 
-              {/* Tier Progress Bar */}
-              <div className="space-y-2 pt-2 border-t border-white/15">
-                <div className="flex justify-between text-xs text-white/90">
-                  <span>Tổng chi tiêu: <b>{formatCurrency(totalSpent)}</b></span>
-                  <span>Mục tiêu thăng cấp {nextTierName}: <b>{formatCurrency(nextTierThreshold)}</b></span>
+              {/* Right: Membership Tier Progress & Benefits Card (7 cols) */}
+              <div className="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-[#E5E2DF] shadow-xs flex flex-col justify-between space-y-6">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#6B6661]">
+                      Tiến Trình Thăng Hạng Thành Viên
+                    </span>
+                    <span className="text-xs font-bold font-mono text-[#006561]">
+                      {tierProgress}%
+                    </span>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="w-full bg-[#E5E2DF] rounded-full h-3.5 overflow-hidden p-0.5">
+                    <div
+                      className="bg-linear-to-r from-[#006561] via-[#C9785C] to-amber-500 h-full rounded-full transition-all duration-700 shadow-xs"
+                      style={{ width: `${tierProgress}%` }}
+                    />
+                  </div>
+
+                  <div className="flex justify-between items-center text-xs text-[#6B6661] pt-1">
+                    <span>
+                      Đã chi tiêu: <b className="text-[#2A2725]">{formatCurrency(totalSpent)}</b>
+                    </span>
+                    <span>
+                      Mục tiêu {nextTierName}: <b className="text-[#2A2725]">{formatCurrency(nextTierThreshold)}</b>
+                    </span>
+                  </div>
+
+                  {loyaltyProfile?.amountToNextTier ? (
+                    <div className="p-3.5 rounded-2xl bg-[#006561]/8 border border-[#006561]/20 text-xs text-[#006561] flex items-center gap-2.5">
+                      <Sparkles className="w-4 h-4 shrink-0 text-[#006561]" />
+                      <span>
+                        Chỉ cần tích lũy thêm <b>{formatCurrency(loyaltyProfile.amountToNextTier)}</b> để mở khóa đặc quyền hạng <b>{nextTierName}</b>!
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center gap-2.5">
+                      <Crown className="w-4 h-4 shrink-0 text-amber-600" />
+                      <span>
+                        Chúc mừng bạn đã đạt cấp độ cao nhất <b>Hebe Diamond VIP</b> với đặc quyền Freeship trọn đời!
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <div className="w-full bg-white/20 rounded-full h-3 overflow-hidden">
-                  <div
-                    className="bg-amber-300 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${tierProgress}%` }}
-                  />
+
+                {/* 3 Metric Mini Cards */}
+                <div className="grid grid-cols-3 gap-3 pt-2 border-t border-[#E5E2DF]">
+                  <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#E5E2DF] text-center space-y-1">
+                    <p className="text-[10px] uppercase font-bold text-[#6B6661]">Số Điểm Lành</p>
+                    <p className="font-mono text-lg font-bold text-[#006561]">{loyaltyPoints}</p>
+                    <p className="text-[10px] text-[#6B6661]">1 điểm = 1.000đ</p>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#E5E2DF] text-center space-y-1">
+                    <p className="text-[10px] uppercase font-bold text-[#6B6661]">Giá Trị Quy Đổi</p>
+                    <p className="font-mono text-lg font-bold text-[#C9785C]">
+                      {formatCurrency(loyaltyPoints * 1000)}
+                    </p>
+                    <p className="text-[10px] text-[#6B6661]">Giảm tối đa 30% đơn</p>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#E5E2DF] text-center space-y-1">
+                    <p className="text-[10px] uppercase font-bold text-[#6B6661]">Tỷ Lệ Hoàn Điểm</p>
+                    <p className="font-mono text-lg font-bold text-amber-600">
+                      {loyaltyProfile?.earnPercent || 1}%
+                    </p>
+                    <p className="text-[10px] text-[#6B6661]">Mọi đơn hàng bánh</p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Loyalty Perks Matrix */}
+            {/* Loyalty Transactions History Table */}
+            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E5E2DF] shadow-xs space-y-5">
+              <div className="flex items-center justify-between border-b border-[#E5E2DF] pb-4">
+                <div className="space-y-1">
+                  <h3 className="font-display text-lg font-bold text-[#2A2725] flex items-center gap-2">
+                    <Coins className="w-5 h-5 text-amber-500" />
+                    <span>Lịch Sử Biến Động Điểm Lành</span>
+                  </h3>
+                  <p className="text-xs text-[#6B6661]">
+                    Chi tiết các lượt tích lũy và sử dụng Điểm Lành từ đơn hàng bánh của bạn
+                  </p>
+                </div>
+                <Badge variant="outline" className="font-mono text-xs">
+                  {loyaltyTxData?.totalElements || 0} giao dịch
+                </Badge>
+              </div>
+
+              {loyaltyTxData && loyaltyTxData.content && loyaltyTxData.content.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-[#E5E2DF] text-[#6B6661] uppercase text-[10px] tracking-wider font-semibold">
+                        <th className="py-3 px-3">Thời gian</th>
+                        <th className="py-3 px-3">Loại giao dịch</th>
+                        <th className="py-3 px-3 text-right">Biến động</th>
+                        <th className="py-3 px-3 text-right">Số dư sau</th>
+                        <th className="py-3 px-4">Diễn giải</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#E5E2DF]/60">
+                      {loyaltyTxData.content.map((tx: LoyaltyTransaction) => {
+                        const isPositive = tx.points > 0
+                        return (
+                          <tr key={tx.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
+                            <td className="py-3 px-3 font-mono text-[#6B6661] whitespace-nowrap">
+                              {new Date(tx.createdAt).toLocaleString('vi-VN', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </td>
+                            <td className="py-3 px-3">
+                              <span
+                                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                                  isPositive
+                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                    : 'bg-rose-50 text-rose-700 border border-rose-200'
+                                }`}
+                              >
+                                {isPositive ? (
+                                  <ArrowUpRight className="w-3 h-3" />
+                                ) : (
+                                  <ArrowDownLeft className="w-3 h-3" />
+                                )}
+                                <span>{tx.transactionTypeName || tx.transactionType}</span>
+                              </span>
+                            </td>
+                            <td className={`py-3 px-3 text-right font-mono font-bold whitespace-nowrap ${isPositive ? 'text-[#006561]' : 'text-[#B23A2A]'}`}>
+                              {isPositive ? `+${tx.points}` : `${tx.points}`} điểm
+                            </td>
+                            <td className="py-3 px-3 text-right font-mono font-semibold text-[#2A2725] whitespace-nowrap">
+                              {tx.balanceAfter} điểm
+                            </td>
+                            <td className="py-3 px-4 text-[#6B6661] max-w-xs truncate">
+                              {tx.description}
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="py-10 text-center space-y-2">
+                  <Coins className="w-8 h-8 text-[#6B6661]/40 mx-auto" />
+                  <p className="text-xs font-semibold text-[#2A2725]">Chưa có lịch sử biến động điểm</p>
+                  <p className="text-[11px] text-[#6B6661]">
+                    Điểm Lành sẽ được tự động tích lũy khi bạn hoàn thành các đơn hàng bánh ngon tại HeBekery!
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* 4-Tier Perks Matrix */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E5E2DF] shadow-xs space-y-6">
-              <h3 className="font-display text-lg font-bold text-[#2A2725]">
-                Đặc quyền thành viên Hebekery VVIP
-              </h3>
+              <div className="space-y-1">
+                <h3 className="font-display text-lg font-bold text-[#2A2725]">
+                  Đặc Quyền 4 Hạng Thành Viên HeBekery VVIP
+                </h3>
+                <p className="text-xs text-[#6B6661]">
+                  Nâng hạng chi tiêu tích lũy để tận hưởng dịch vụ chăm sóc thực dưỡng và ưu đãi cao nhất
+                </p>
+              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
                   {
-                    tier: 'Đồng (Member)',
-                    spend: '0đ',
-                    perks: ['Tích 1% điểm cho mọi đơn hàng', 'Nhận ưu đãi vào dịp sinh nhật', 'Hỗ trợ tư vấn dinh dưỡng Eat Clean'],
+                    key: 'BRONZE',
+                    tier: 'Mầm Xanh (Bronze)',
+                    spend: '0đ - Khách Hàng Mới',
+                    earn: 'Tích 1% điểm',
+                    perks: ['Tích 1% điểm cho mọi đơn hàng', 'Voucher chào mừng 10%', 'Hỗ trợ tư vấn dinh dưỡng Eat Clean'],
                   },
                   {
-                    tier: 'Bạc (Silver)',
-                    spend: 'Từ 1.000.000đ',
-                    perks: ['Tích 2% điểm cho mọi đơn hàng', 'Voucher giảm 10% tháng sinh nhật', 'Ưu tiên trải nghiệm mẻ bánh vị mới'],
+                    key: 'SILVER',
+                    tier: 'Hạt Lành (Silver)',
+                    spend: 'Tích lũy từ 1.000.000đ',
+                    earn: 'Tích 2% điểm',
+                    perks: ['Tích 2% điểm cho mọi đơn hàng', 'Voucher sinh nhật 50.000đ', 'Ưu tiên trải nghiệm mẻ bánh mới'],
                   },
                   {
-                    tier: 'Vàng (Gold)',
-                    spend: 'Từ 2.000.000đ',
-                    perks: ['Tích 3% điểm mọi đơn hàng', 'Freeship đơn từ 200.000đ', 'Quà tặng hiện vật hộp bánh Biscotti'],
+                    key: 'GOLD',
+                    tier: 'Bánh Mộc (Gold)',
+                    spend: 'Tích lũy từ 3.000.000đ',
+                    earn: 'Tích 3% điểm',
+                    perks: ['Tích 3% điểm mọi đơn hàng', 'Freeship mọi đơn từ 199.000đ', 'Tặng quà hộp bánh mới dùng thử'],
                   },
                   {
-                    tier: 'Kim Cương (Diamond)',
-                    spend: 'Từ 5.000.000đ',
-                    perks: ['Tích 5% điểm cao nhất', 'Freeship mọi đơn hàng trọn đời', 'Chuyên gia Hebekery thiết kế thực đơn riêng'],
+                    key: 'DIAMOND',
+                    tier: 'Hebe Diamond (VIP)',
+                    spend: 'Tích lũy từ 7.000.000đ',
+                    earn: 'Tích 5% điểm cao nhất',
+                    perks: ['Tích 5% điểm cao nhất', 'Freeship mọi đơn trọn đời', 'Trợ lý dinh dưỡng riêng & Quà Tết độc quyền'],
                   },
-                ].map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="p-5 rounded-2xl border border-[#E5E2DF] bg-[#FAF7F2] space-y-3 flex flex-col justify-between"
-                  >
-                    <div className="space-y-1">
-                      <h4 className="font-display font-bold text-base text-[#2A2725]">{item.tier}</h4>
-                      <p className="text-[11px] font-mono text-[#006561] font-bold">{item.spend}</p>
-                      <ul className="space-y-1.5 pt-2 text-xs text-[#6B6661]">
-                        {item.perks.map((p, pIdx) => (
-                          <li key={pIdx} className="flex items-start gap-1.5">
-                            <Check className="w-3.5 h-3.5 text-[#006561] shrink-0 mt-0.5" />
-                            <span>{p}</span>
-                          </li>
-                        ))}
-                      </ul>
+                ].map((item) => {
+                  const isCurrent = tierKey === item.key
+                  return (
+                    <div
+                      key={item.key}
+                      className={`p-5 rounded-2xl border transition-all duration-200 flex flex-col justify-between space-y-4 ${
+                        isCurrent
+                          ? 'border-[#006561] bg-[#006561]/5 shadow-sm ring-2 ring-[#006561]/30'
+                          : 'border-[#E5E2DF] bg-[#FAF7F2]'
+                      }`}
+                    >
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-display font-bold text-base text-[#2A2725]">{item.tier}</h4>
+                          {isCurrent && (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#006561] text-white uppercase tracking-wider">
+                              Hạng hiện tại
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] font-mono text-[#006561] font-bold">{item.spend}</p>
+                        <span className="inline-block text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                          {item.earn}
+                        </span>
+
+                        <ul className="space-y-1.5 pt-2 text-xs text-[#6B6661]">
+                          {item.perks.map((p, pIdx) => (
+                            <li key={pIdx} className="flex items-start gap-1.5">
+                              <Check className="w-3.5 h-3.5 text-[#006561] shrink-0 mt-0.5" />
+                              <span>{p}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           </div>
@@ -1080,14 +1424,24 @@ export const ProfilePage: React.FC = () => {
                 </div>
 
                 {/* Pricing Summary */}
-                <div className="space-y-2 pt-2 border-t border-[#E5E2DF]">
-                  <div className="flex justify-between text-stone-600">
+                <div className="space-y-2 pt-2 border-t border-[#E5E2DF] text-xs">
+                  <div className="flex justify-between text-[#6B6661]">
                     <span>Tạm tính</span>
-                    <span className="font-mono">{formatCurrency(selectedOrder.total)}</span>
+                    <span className="font-mono">{formatCurrency(selectedOrder.subtotal || selectedOrder.total)}</span>
                   </div>
-                  <div className="flex justify-between text-stone-600">
+                  {selectedOrder.voucherCode && (
+                    <div className="flex justify-between text-[#006561] font-medium">
+                      <span>Mã giảm giá ({selectedOrder.voucherCode})</span>
+                      <span className="font-mono">-{formatCurrency(selectedOrder.discountAmount || 0)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-[#6B6661]">
                     <span>Phí vận chuyển</span>
-                    <span className="font-mono text-emerald-700">Miễn phí</span>
+                    <span className="font-mono text-[#006561]">
+                      {selectedOrder.shippingFee && selectedOrder.shippingFee > 0
+                        ? formatCurrency(selectedOrder.shippingFee)
+                        : 'Miễn phí'}
+                    </span>
                   </div>
                   <div className="flex justify-between font-bold text-sm text-[#006561] pt-2 border-t border-stone-200">
                     <span>Tổng thanh toán</span>
@@ -1223,6 +1577,118 @@ export const ProfilePage: React.FC = () => {
             </form>
           </DialogContent>
         </Dialog>
+
+        {/* ================= CANCEL ORDER DIALOG ================= */}
+        {cancelOrder && (
+          <Dialog open={!!cancelOrder} onOpenChange={(open) => !open && setCancelOrder(null)}>
+            <DialogContent className="sm:max-w-[450px] rounded-3xl bg-white p-6 sm:p-8">
+              <DialogHeader className="space-y-1">
+                <DialogTitle className="font-display text-xl font-bold text-[#2A2725]">
+                  Xác Nhận Hủy Đơn Hàng #{cancelOrder.id}
+                </DialogTitle>
+                <DialogDescription className="text-xs text-[#6B6661]">
+                  Bạn chỉ có thể hủy đơn khi đơn hàng đang ở trạng thái Chờ xử lý (PENDING).
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 py-3 text-xs">
+                <div>
+                  <label className="block font-bold text-[#2A2725] mb-1.5">Lý do hủy đơn (*)</label>
+                  <select
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    className="w-full text-xs p-2.5 rounded-xl border border-[#E5E2DF] bg-white focus:border-[#006561] focus:outline-none"
+                  >
+                    <option value="Thay đổi nhu cầu đặt hàng">Thay đổi nhu cầu đặt hàng</option>
+                    <option value="Muốn thay đổi địa chỉ nhận hàng">Muốn thay đổi địa chỉ nhận hàng</option>
+                    <option value="Muốn thêm bớt sản phẩm khác">Muốn thêm bớt sản phẩm khác</option>
+                    <option value="Tìm thấy giá tốt hơn">Tìm thấy giá tốt hơn</option>
+                    <option value="Lý do khác">Lý do khác</option>
+                  </select>
+                </div>
+              </div>
+
+              <DialogFooter className="pt-3 border-t border-[#E5E2DF] flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCancelOrder(null)}
+                  className="rounded-full text-xs"
+                >
+                  Đóng
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  disabled={cancelOrderMutation.isPending}
+                  onClick={() =>
+                    cancelOrderMutation.mutate({
+                      id: cancelOrder.id,
+                      reason: cancelReason,
+                    })
+                  }
+                  className="rounded-full text-xs font-bold"
+                >
+                  {cancelOrderMutation.isPending ? 'Đang hủy...' : 'Xác Nhận Hủy Đơn'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* ================= RETURN ORDER DIALOG ================= */}
+        {returnOrder && (
+          <Dialog open={!!returnOrder} onOpenChange={(open) => !open && setReturnOrder(null)}>
+            <DialogContent className="sm:max-w-[480px] rounded-3xl bg-white p-6 sm:p-8">
+              <DialogHeader className="space-y-1">
+                <DialogTitle className="font-display text-xl font-bold text-[#2A2725]">
+                  Yêu Cầu Đổi Trả Đơn Hàng #{returnOrder.id}
+                </DialogTitle>
+                <DialogDescription className="text-xs text-[#6B6661]">
+                  Chính sách Hebekery: Đổi mới 1-1 miễn phí nếu bánh bị lỗi sản xuất, móp méo hoặc không đúng mô tả.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 py-3 text-xs">
+                <div>
+                  <label className="block font-bold text-[#2A2725] mb-1.5">Lý do đổi trả (*)</label>
+                  <textarea
+                    rows={3}
+                    required
+                    value={returnReason}
+                    onChange={(e) => setReturnReason(e.target.value)}
+                    placeholder="Mô tả cụ thể vấn đề bạn gặp phải (ví dụ: hộp bánh bị bung nắp, nhầm hương vị...)"
+                    className="w-full text-xs p-3 rounded-xl border border-[#E5E2DF] focus:border-[#006561] focus:outline-none resize-none leading-relaxed"
+                  />
+                </div>
+              </div>
+
+              <DialogFooter className="pt-3 border-t border-[#E5E2DF] flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setReturnOrder(null)}
+                  className="rounded-full text-xs"
+                >
+                  Đóng
+                </Button>
+                <Button
+                  size="sm"
+                  disabled={returnOrderMutation.isPending || !returnReason.trim()}
+                  onClick={() =>
+                    returnOrderMutation.mutate({
+                      id: returnOrder.id,
+                      reason: returnReason.trim(),
+                    })
+                  }
+                  className="btn-act rounded-full text-xs font-bold"
+                >
+                  {returnOrderMutation.isPending ? 'Đang gửi...' : 'Gửi Yêu Cầu Đổi Trả'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   )

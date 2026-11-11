@@ -87,17 +87,66 @@ public class CustomerProfile extends BaseEntity {
         this.targetCalories = targetCalories;
     }
 
+    public double getEarnRate() {
+        return switch (this.membershipTier) {
+            case "DIAMOND" -> 0.05;
+            case "GOLD" -> 0.03;
+            case "SILVER" -> 0.02;
+            default -> 0.01;
+        };
+    }
+
+    public String getTierDisplayName() {
+        return switch (this.membershipTier) {
+            case "DIAMOND" -> "Hebe Diamond";
+            case "GOLD" -> "Bánh Mộc (Gold)";
+            case "SILVER" -> "Hạt Lành (Silver)";
+            default -> "Mầm Xanh (Bronze)";
+        };
+    }
+
+    public double getNextTierThreshold() {
+        return switch (this.membershipTier) {
+            case "DIAMOND" -> 7000000.0;
+            case "GOLD" -> 7000000.0;
+            case "SILVER" -> 3000000.0;
+            default -> 1000000.0;
+        };
+    }
+
+    public String getNextTierName() {
+        return switch (this.membershipTier) {
+            case "DIAMOND" -> "Cấp tối đa";
+            case "GOLD" -> "Hebe Diamond";
+            case "SILVER" -> "Bánh Mộc";
+            default -> "Hạt Lành";
+        };
+    }
+
     public void addSpending(double amount) {
         this.totalSpent += amount;
-        // 10,000 VND = 1 Point
-        int earnedPoints = (int) (amount / 10000);
-        this.loyaltyPoints += earnedPoints;
+        recalculateTier();
+    }
 
-        // Upgrade tier
-        if (this.totalSpent >= 5000000) {
+    public void addSpendingAndPoints(double amount, int points) {
+        this.totalSpent += amount;
+        this.loyaltyPoints += points;
+        recalculateTier();
+    }
+
+    public void deductPoints(int points) {
+        this.loyaltyPoints = Math.max(0, this.loyaltyPoints - points);
+    }
+
+    public void recalculateTier() {
+        if (this.totalSpent >= 7000000) {
+            this.membershipTier = "DIAMOND";
+        } else if (this.totalSpent >= 3000000) {
             this.membershipTier = "GOLD";
-        } else if (this.totalSpent >= 2000000) {
+        } else if (this.totalSpent >= 1000000) {
             this.membershipTier = "SILVER";
+        } else {
+            this.membershipTier = "BRONZE";
         }
     }
 }

@@ -32,17 +32,26 @@ public class OrderService {
     private final ReturnHistoryRepository returnHistoryRepository;
     private final ProductService productService;
     private final SepayConfig sepayConfig;
+    private final VoucherService voucherService;
+    private final LoyaltyService loyaltyService;
+    private final ProductBatchService productBatchService;
 
     public OrderService(OrderRepository orderRepository,
                         OrderStatusHistoryRepository orderStatusHistoryRepository,
                         ReturnHistoryRepository returnHistoryRepository,
                         ProductService productService,
-                        SepayConfig sepayConfig) {
+                        SepayConfig sepayConfig,
+                        VoucherService voucherService,
+                        LoyaltyService loyaltyService,
+                        ProductBatchService productBatchService) {
         this.orderRepository = orderRepository;
         this.orderStatusHistoryRepository = orderStatusHistoryRepository;
         this.returnHistoryRepository = returnHistoryRepository;
         this.productService = productService;
         this.sepayConfig = sepayConfig;
+        this.voucherService = voucherService;
+        this.loyaltyService = loyaltyService;
+        this.productBatchService = productBatchService;
     }
 
     @Transactional
@@ -62,10 +71,57 @@ public class OrderService {
         order.setPaymentMethod(request.getPaymentMethod());
         order.setPaymentStatus("PENDING");
         order.setOrderStatus("PENDING");
-        order.setTotal(subtotal + 30000);
+
+        // Calculate shipping fee: >= 299,000 VND is Free Shipping (0 VND), otherwise 30,000 VND
+        double shippingFee = subtotal >= 299000.0 ? 0.0 : 30000.0;
+        double discountAmount = 0.0;
+        String appliedVoucherCode = null;
+
+        if (request.getVoucherCode() != null && !request.getVoucherCode().trim().isEmpty()) {
+            com.example.hebekery.dto.VoucherCalculationResponse vCalc = voucherService.validateAndCalculate(
+                request.getVoucherCode(),
+                subtotal,
+                user.getId()
+            );
+            if (vCalc != null && vCalc.isValid()) {
+                appliedVoucherCode = vCalc.getCode();
+                if ("FREE_SHIPPING".equalsIgnoreCase(vCalc.getDiscountType())) {
+                    shippingFee = 0.0;
+                } else {
+                    discountAmount = vCalc.getDiscountAmount();
+                }
+            }
+        }
+
+        // Loyalty points discount calculation (max 30% of subtotal)
+        int pointsUsed = 0;
+        double pointsDiscountAmount = 0.0;
+        if (request.getPointsUsed() != null && request.getPointsUsed() > 0) {
+            int maxAllowedPoints = (int) Math.floor((subtotal * 0.3) / 1000.0);
+            pointsUsed = Math.min(request.getPointsUsed(), maxAllowedPoints);
+            if (pointsUsed > 0) {
+                pointsDiscountAmount = pointsUsed * 1000.0;
+                loyaltyService.redeemPointsForOrder(user.getId(), technicalId, pointsUsed);
+            }
+        }
+
+        double total = Math.max(0.0, subtotal + shippingFee - discountAmount - pointsDiscountAmount);
+        order.setPointsUsed(pointsUsed);
+        order.setPointsDiscountAmount(pointsDiscountAmount);
+        order.setSubtotal(subtotal);
+        order.setShippingFee(shippingFee);
+        order.setDiscountAmount(discountAmount);
+        order.setVoucherCode(appliedVoucherCode);
+        order.setTotal(total);
         order.setCreatedAt(LocalDateTime.now());
         order.setItems(copyItems(order, cartItems));
         orderRepository.save(order);
+
+        // Record voucher usage if successfully applied
+        if (appliedVoucherCode != null) {
+            voucherService.recordUsage(appliedVoucherCode, user.getId(), order.getId());
+        }
+
         addHistory(order, "User tạo đơn hàng", "USER");
 
         if ("VIETQR".equalsIgnoreCase(request.getPaymentMethod()) || "MOMO".equalsIgnoreCase(request.getPaymentMethod())) {
@@ -210,6 +266,9 @@ public class OrderService {
             order.setPaymentStatus(paymentStatus);
         }
         deductInventoryIfNeeded(order);
+        if ("DELIVERED".equals(order.getOrderStatus())) {
+            loyaltyService.awardPointsForDeliveredOrder(order);
+        }
         Order saved = orderRepository.save(order);
         addHistory(saved, "Admin cập nhật trạng thái", "ADMIN");
         return saved;
@@ -251,6 +310,9 @@ public class OrderService {
             throw new IllegalArgumentException("Đơn hàng hiện tại không thể hủy");
         }
         order.setOrderStatus("CANCELLED");
+        if (order.getPointsUsed() > 0) {
+            loyaltyService.refundPointsForOrder(order.getUserId(), order.getId(), order.getPointsUsed(), "Hủy đơn hàng");
+        }
         Order saved = orderRepository.save(order);
         addHistory(saved, "User hủy đơn hàng", "USER");
         return saved;
@@ -267,6 +329,7 @@ public class OrderService {
             order.setPaymentStatus("PAID");
         }
         deductInventoryIfNeeded(order);
+        loyaltyService.awardPointsForDeliveredOrder(order);
         Order saved = orderRepository.save(order);
         addHistory(saved, "User xác nhận đã nhận hàng", "USER");
         return saved;
@@ -431,6 +494,7 @@ public class OrderService {
         }
         for (OrderItem item : order.getItems()) {
             productService.decreaseStock(item.getProductId(), item.getQuantity(), "ORDER", order.getId(), "Xuất kho theo đơn " + order.getId());
+            productBatchService.deductBatchStockFEFO(item.getProductId(), item.getQuantity());
         }
         order.setInventoryDeducted(true);
     }

@@ -135,6 +135,13 @@ export interface Order {
   returnStatus?: 'PENDING' | 'APPROVED' | 'REJECTED'
   adminNote?: string
   total: number
+  subtotal?: number
+  shippingFee?: number
+  discountAmount?: number
+  voucherCode?: string
+  pointsUsed?: number
+  pointsDiscountAmount?: number
+  pointsEarned?: number
   inventoryDeducted: boolean
   items: OrderItem[]
   createdAt: string
@@ -149,6 +156,10 @@ export interface CheckoutRequest {
   ward?: string
   note?: string
   paymentMethod: 'COD' | 'VIETQR' | 'MOMO'
+  voucherCode?: string
+  pointsUsed?: number
+  pointsDiscountAmount?: number
+  pointsEarned?: number
 }
 
 // Inventory & Purchase Receipt Types
@@ -312,7 +323,7 @@ export interface ContactSubmitRequest {
 
 // Voucher Types
 export interface Voucher {
-  id: number
+  id: number | string
   code: string
   name: string
   description?: string
@@ -335,4 +346,83 @@ export interface VoucherCalculation {
   originalAmount: number
   discountAmount: number
   finalAmount: number
+}
+
+// Loyalty & VVIP Tier Types
+export interface LoyaltySummary {
+  userId: string
+  loyaltyPoints: number
+  membershipTier: 'BRONZE' | 'SILVER' | 'GOLD' | 'DIAMOND'
+  tierDisplayName: string
+  earnRate: number
+  earnPercent: number
+  totalSpent: number
+  nextTierThreshold: number
+  nextTierName: string
+  amountToNextTier: number
+  progressPercent: number
+  pointValueVnd: number
+}
+
+export interface LoyaltyTransaction {
+  id: string
+  userId: string
+  orderId?: string
+  transactionType: 'EARN_PURCHASE' | 'REDEEM_CHECKOUT' | 'BIRTHDAY_GIFT' | 'CANCEL_REFUND' | 'ADMIN_ADJUST'
+  transactionTypeName: string
+  points: number
+  balanceAfter: number
+  description: string
+  createdAt: string
+}
+
+export interface LoyaltyTierPerk {
+  tier: string
+  name: string
+  spendThreshold: number
+  earnRate: string
+  perks: string[]
+}
+
+// Batch & Shelf-Life Management Types
+export interface ProductBatch {
+  id: string
+  productId: string
+  productName?: string
+  productImageUrl?: string
+  originalPrice?: number
+  discountedPrice?: number
+  batchCode: string
+  manufactureDate: string
+  expiryDate: string
+  initialQuantity: number
+  currentQuantity: number
+  status: 'ACTIVE' | 'NEAR_EXPIRY' | 'EXPIRED' | 'SOLD_OUT'
+  discountPercent: number
+  note?: string
+  daysRemaining: number
+  alertLevel: 'SAFE' | 'WARNING' | 'DANGER'
+  createdAt: string
+}
+
+export interface ProductBatchRequest {
+  productId: string
+  batchCode?: string
+  manufactureDate: string
+  expiryDate: string
+  initialQuantity: number
+  note?: string
+}
+
+export interface BatchFlashSaleRequest {
+  discountPercent: number
+  note?: string
+}
+
+export interface BatchStats {
+  totalBatches: number
+  activeBatches: number
+  nearExpiryBatches: number
+  expiredBatches: number
+  flashSaleBatches: number
 }

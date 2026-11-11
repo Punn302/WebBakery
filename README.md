@@ -12,26 +12,67 @@
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-4479a1?logo=mysql)](https://www.mysql.com/)
 [![Liquibase](https://img.shields.io/badge/Liquibase-Database%20Migration-red?logo=liquibase)](https://www.liquibase.org/)
 
-Website thương mại điện tử chuyên cung cấp các dòng bánh, hạt và ngũ cốc dinh dưỡng lành mạnh (Healthy Bakery, Eat Clean, Granola, Biscotti). Hệ thống bao gồm Frontend React 19 SPA, Backend Spring Boot 3.4 RESTful API, tự động hóa thanh toán VietQR SePay và trọn gói triển khai Docker Compose. Dữ liệu sản phẩm và hình ảnh được lưu trữ trực tiếp trên Cloudinary CDN và tự động nạp qua Liquibase Migration.
+Hệ thống thương mại điện tử chuyên cung cấp các dòng bánh, hạt và ngũ cốc dinh dưỡng lành mạnh (Eat Clean, Healthy Bakery, Granola, Biscotti, Bánh ngói Keto). Ứng dụng xây dựng trên kiến trúc Single Page Application với **React 19**, **Spring Boot 3.4 RESTful API**, quản lý cơ sở dữ liệu qua **Liquibase**, tự động hóa thanh toán **VietQR Napas 247 qua SePay**, hệ thống khách hàng thân thiết **Điểm Lành & Thẻ VVIP 4 Hạng**, quản lý hạn sử dụng & lô sản xuất **FEFO**, cùng trọn bộ đóng gói Docker Compose.
+
+---
+
+## 🌟 Tính năng nổi bật & 3 Hướng phát triển chiến lược
+
+1. **Tự động hóa thanh toán VietQR Napas 247 & Công cụ Giả lập SePay & In Hóa đơn A5 / K80**:
+   - Tự sinh mã VietQR Napas 247 động kèm số tiền và mã đơn hàng định danh `HBK{orderCode}`.
+   - Polling trạng thái thời gian thực và xử lý Webhook SePay bảo mật đa lớp (Idempotent, Signature).
+   - Công cụ mô phỏng Webhook SePay dành riêng cho Admin/Dev để kiểm thử dòng tiền 1-click.
+   - Modal in hóa đơn và phiếu giao hàng hỗ trợ song song chuẩn in nhiệt K80 và khổ A5 văn phòng.
+
+2. **Điểm Lành HeBekery & Thẻ Hội Viên Điện Tử VVIP 4 Hạng**:
+   - 4 hạng hội viên đặc quyền: **Mầm Xanh (1%)**, **Hạt Lành (2%)**, **Bánh Mộc (3%)**, **Hebe Diamond (5%)**.
+   - Tự động tích lũy Điểm Lành khi đơn hàng giao thành công (`DELIVERED` hoặc người dùng xác nhận nhận hàng).
+   - Khấu trừ tiêu điểm trực tiếp tại bước thanh toán: **1 điểm = 1.000đ** (tối đa 30% giá trị đơn hàng).
+   - Thẻ thành viên số phong cách kim loại sang trọng (Digital Luxury Card) với hiệu ứng chip dập nổi, thanh tiến độ nâng hạng và lịch sử giao dịch điểm minh bạch.
+
+3. **Quản Lý Lô Bánh & Hạn Sử Dụng FEFO & Flash Sale "Cứu Bánh Lành Cận Date"**:
+   - Quản lý lô sản xuất bánh (`product_batches`), ngày ra lò, hạn sử dụng và số lượng thực tế.
+   - Cơ chế xuất kho thông minh **FEFO (First-Expired, First-Out)**: tự động ưu tiên xuất lô cận date trước.
+   - Hệ thống cảnh báo hạn dùng 3 mức: 🟢 An toàn (>60 ngày), 🟡 Cần chú ý (15-30 ngày), 🔴 Khẩn cấp (<15 ngày).
+   - Chiến dịch Flash Sale xả nhanh lô bánh cận date với huy hiệu lửa `🔥 Cứu Bánh -X%` đồng bộ từ Trang chủ, Danh mục, Chi tiết sản phẩm đến Giỏ hàng.
 
 ---
 
 ## 📸 Hình ảnh giao diện thực tế (Screenshots)
 
-### 1. Trang chủ (Homepage & Bán chạy nhất)
+### 1. Trang chủ HeBekery (Chuẩn nhận diện thương hiệu Warm Organic & Hero Slider)
 ![Trang chủ Hebekery](docs/screenshots/home.png)
 
-### 2. Thực đơn bánh dinh dưỡng (Đầy đủ ảnh Cloudinary CDN & Bộ lọc)
+### 2. Thực đơn bánh dinh dưỡng & Huy hiệu Flash Sale Cận Date
 ![Thực đơn Bánh Dinh Dưỡng](docs/screenshots/products.png)
 
-### 3. Công cụ tính BMI, TDEE & Gợi ý combo thực đơn 7 ngày
-![Công cụ BMI & Combo 7 ngày](docs/screenshots/bmi.png)
+### 3. Trang chi tiết sản phẩm & Ưu đãi Flash Sale Cận Date
+![Trang chi tiết sản phẩm](docs/screenshots/pdp_flash_sale.png)
 
-### 4. Tra cứu đơn hàng công khai (Không cần đăng nhập)
+### 4. Thẻ Hội Viên Điện Tử VVIP & Hệ thống Điểm Lành HeBekery (Tab 5 Profile)
+![Thẻ Hội Viên VVIP Hebekery](docs/screenshots/profile_vvip_card.png)
+
+### 5. Tiêu Điểm Lành HeBekery tại Checkout & Thanh toán VietQR Napas 247
+![Tiêu Điểm Lành tại Checkout](docs/screenshots/checkout_loyalty_points.png)
+
+### 6. Quản Lý Lô Bánh & Hạn Sử Dụng FEFO (Admin Inventory)
+![Quản Lý Lô Bánh FEFO](docs/screenshots/admin_inventory_fefo.png)
+
+### 7. Công cụ Giả lập Webhook SePay cho Quản trị viên
+![SePay Webhook Simulator](docs/screenshots/admin_sepay_simulator.png)
+
+### 8. Quản trị đơn hàng & In Phiếu Giao Hàng A5 / K80
+![In Phiếu Giao Hàng](docs/screenshots/admin_orders_invoice.png)
+
+### 9. Tự làm Hộp Bánh Mix Vị HeBekery (Custom Box Builder)
+![Tự làm Hộp Bánh](docs/screenshots/box_builder.png)
+
+### 10. Công cụ tính BMI, TDEE & Gợi ý thực đơn Eat Clean
+![Công cụ BMI & TDEE](docs/screenshots/bmi.png)
+
+### 11. Tra cứu đơn hàng công khai & Tài liệu Swagger OpenAPI
 ![Tra cứu đơn hàng](docs/screenshots/order-lookup.png)
-
-### 5. Tài liệu Swagger OpenAPI tương tác trực tiếp
-![Swagger UI Documentation](docs/screenshots/swagger.png)
+![Swagger UI](docs/screenshots/swagger.png)
 
 ---
 
@@ -71,44 +112,47 @@ cd web-bakery-frontend
 npm install
 npm run dev
 ```
-> Frontend chạy tại: `http://localhost:5173`.
+> Frontend chạy tại: `http://localhost:3000` (hoặc `http://localhost:5173`).
 
 ---
 
-## 👥 Phân quyền vai trò hệ thống (RBAC)
+## 👥 Tài khoản thử nghiệm phân quyền (RBAC)
 
-Hệ thống thiết kế và kiểm soát phân quyền dựa trên 4 nhóm vai trò:
-- **Quản trị viên (`ADMIN`)**: Quản trị người dùng, sản phẩm, tồn kho, đơn hàng, báo cáo doanh thu.
-- **Nhân viên Sale (`STAFF_SALES`)**: Xử lý duyệt đơn hàng, cập nhật giao hàng, phản hồi liên hệ khách hàng.
-- **Nhân viên Kho (`STAFF_WAREHOUSE`)**: Quản lý sản phẩm, danh mục, kiểm kê số lượng tồn kho.
-- **Khách hàng (`USER`)**: Mua hàng, tính BMI, thanh toán VietQR / COD, đánh giá sản phẩm (đăng ký thành viên trực tiếp qua `/register`).
+| Vai trò | Email đăng nhập | Mật khẩu | Phạm vi quyền hạn |
+| :--- | :--- | :--- | :--- |
+| **Quản trị viên (`ADMIN`)** | `admin@hebekery.vn` | `admin123` | Toàn quyền hệ thống: Lô hàng FEFO, SePay Simulator, Người dùng, Đơn hàng, Voucher, Doanh thu |
+| **Nhân viên Sale (`STAFF_SALES`)** | `sales@hebekery.vn` | `123456` | Tiếp nhận đơn hàng, in phiếu xuất kho K80/A5, tạo vận đơn, chăm sóc khách hàng |
+| **Nhân viên Kho (`STAFF_WAREHOUSE`)** | `warehouse@hebekery.vn` | `123456` | Quản lý sản phẩm, danh mục, xuất nhập kho theo hạn sử dụng FEFO |
+| **Khách hàng (`USER`)** | `user@hebekery.vn` | `123456` | Mua hàng, tích & tiêu Điểm Lành, Thẻ VVIP, đánh giá sản phẩm, tra cứu đơn hàng |
 
 ---
 
 ## 💳 Cấu hình SePay Webhook (Thanh toán VietQR)
 
-Khi tạo Webhook trong SePay Dashboard:
-- **Tên Webhook**: Đặt tên bất kỳ gợi nhớ (ví dụ: `Hebekery Webhook Dev`).
+Khi kết nối với cổng thanh toán SePay:
+- **Tên Webhook**: `Hebekery Webhook Prod`
 - **URL nhận Webhook**:
   - *Môi trường Local (dùng ngrok/tunnel)*: `https://<subdomain>.ngrok-free.app/api/payment/sepay/webhook`
   - *Môi trường Production*: `https://your-domain.com/api/payment/sepay/webhook`
-  - *Test nội bộ (cURL/Postman)*: `http://localhost:8080/api/payment/sepay/webhook`
+  - *Test nội bộ qua Simulator*: truy cập trực tiếp `/admin/sepay-simulator`
 - **Xác thực API Key**: Điền API Key của SePay vào biến `SEPAY_WEBHOOK_API_KEY` trong file `.env`.
 
 ---
 
 ## 🛠️ Công nghệ sử dụng
 
-- **Frontend**: React 19, TypeScript, Vite, Tailwind CSS, Lucide Icons, Axios, Vitest.
-- **Backend**: Spring Boot 3.4.x (Java 17), Spring Security 6 (JWT & RBAC), Spring Data JPA, Liquibase.
-- **Media CDN**: Cloudinary CDN lưu trữ ảnh sản phẩm trực tuyến.
-- **Thanh toán**: Tự động đối soát giao dịch VietQR ngân hàng qua Webhook SePay (15 phút).
-- **Hạ tầng**: Docker, Docker Compose (4 containers: MySQL, Backend, Frontend, Nginx Reverse Proxy Gateway).
+- **Frontend**: React 19, TypeScript, Vite, Tailwind CSS, Lucide Icons, React Query, Motion, Vitest.
+- **Backend**: Spring Boot 3.4.x (Java 17), Spring Security 6 (JWT & RBAC), Spring Data JPA, Liquibase Database Migration.
+- **Media CDN**: Cloudinary CDN lưu trữ ảnh sản phẩm chất lượng cao.
+- **Thanh toán & Tích điểm**: VietQR Napas 247, SePay Webhook tự động, Điểm Lành HeBekery.
+- **Quản lý kho**: Thuật toán FEFO (First-Expired, First-Out), cảnh báo 3 cấp độ hạn sử dụng.
+- **Hạ tầng**: Docker, Docker Compose (4 containers: MySQL 8, Backend, Frontend, Nginx Reverse Proxy Gateway).
 
 ---
 
 ## 🧪 Kiểm thử tự động (Automated Tests)
 
-- **Backend**: 107/107 JUnit 5 & MockMvc tests Passed (100%).
-- **Frontend**: 12/12 Vitest tests Passed (100%).
+- **Backend**: **119/119** JUnit 5 & MockMvc tests Passed (100% `BUILD SUCCESS`).
+- **Frontend**: **29/29** Vitest tests across 9 test suites Passed (100%).
+- **TypeScript**: `npx tsc -b` kiểm tra biên dịch 0 lỗi.
 - **CI/CD**: Tự động kiểm thử qua GitHub Actions trên mỗi lần đẩy mã nguồn.

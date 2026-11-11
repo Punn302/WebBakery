@@ -28,6 +28,13 @@ import type {
   ProductReviewRequest,
   Voucher,
   VoucherCalculation,
+  LoyaltySummary,
+  LoyaltyTransaction,
+  LoyaltyTierPerk,
+  ProductBatch,
+  ProductBatchRequest,
+  BatchFlashSaleRequest,
+  BatchStats,
 } from '@/types'
 
 // Auth APIs
@@ -99,6 +106,38 @@ export const categoryApi = {
   getCategories: async (): Promise<Category[]> => {
     const res = await axiosClient.get<Category[]>('/categories')
     return unwrap(res)
+  },
+  adminGetCategories: async (params?: {
+    keyword?: string
+    page?: number
+    size?: number
+  }): Promise<PageResponse<Category>> => {
+    const res = await axiosClient.get<PageResponse<Category>>('/categories/admin', { params })
+    return unwrap(res)
+  },
+  adminCreateCategory: async (data: {
+    name: string
+    slug?: string
+    description?: string
+    active?: boolean
+  }): Promise<Category> => {
+    const res = await axiosClient.post<Category>('/categories/admin', data)
+    return unwrap(res)
+  },
+  adminUpdateCategory: async (
+    id: number,
+    data: {
+      name: string
+      slug?: string
+      description?: string
+      active?: boolean
+    }
+  ): Promise<Category> => {
+    const res = await axiosClient.put<Category>(`/categories/admin/${id}`, data)
+    return unwrap(res)
+  },
+  adminDeleteCategory: async (id: number): Promise<void> => {
+    await axiosClient.delete(`/categories/admin/${id}`)
   },
 }
 
@@ -363,11 +402,48 @@ export const reviewApi = {
   },
 }
 
-// Payment Status API (Polling)
+// Admin Reviews Moderation APIs
+export const adminReviewApi = {
+  getAll: async (): Promise<
+    Array<{
+      id: string
+      productId: string
+      productName: string
+      userId: string
+      userName: string
+      rating: number
+      comment: string
+      createdAt: string
+    }>
+  > => {
+    const res = await axiosClient.get('/admin/reviews')
+    return unwrap(res)
+  },
+  delete: async (id: string): Promise<void> => {
+    await axiosClient.delete(`/admin/reviews/${id}`)
+  },
+}
+
+// Payment Status API (Polling & SePay Simulator)
 export const paymentApi = {
   getOrderPaymentStatus: async (orderId: string): Promise<PaymentStatus> => {
     const res = await axiosClient.get<{ success: boolean; data: PaymentStatus }>(
       `/payment/sepay/orders/${orderId}/status`
+    )
+    return unwrap(res)
+  },
+  simulateSepayWebhook: async (payload: {
+    referenceCode?: string
+    gateway?: string
+    accountNumber?: string
+    transferAmount: number
+    content: string
+    transferType?: string
+    transactionDate?: string
+  }): Promise<{ success: boolean; message?: string }> => {
+    const res = await axiosClient.post<{ success: boolean; message?: string }>(
+      '/payment/sepay/webhook',
+      payload
     )
     return unwrap(res)
   },
@@ -441,6 +517,56 @@ export const userApi = {
   },
   getStatus: async (): Promise<{ loggedIn: boolean; user?: User }> => {
     const res = await axiosClient.get<{ loggedIn: boolean; user?: User }>('/user/status')
+    return unwrap(res)
+  },
+}
+
+// Loyalty & VVIP APIs
+export const loyaltyApi = {
+  getProfile: async (): Promise<LoyaltySummary> => {
+    const res = await axiosClient.get<{ success: boolean; data: LoyaltySummary }>('/loyalty/profile')
+    return unwrap(res)
+  },
+  getTransactions: async (page = 0, size = 10): Promise<{ content: LoyaltyTransaction[]; totalPages: number; totalElements: number }> => {
+    const res = await axiosClient.get<{ success: boolean; data: { content: LoyaltyTransaction[]; totalPages: number; totalElements: number } }>(
+      '/loyalty/transactions',
+      { params: { page, size } }
+    )
+    return unwrap(res)
+  },
+  getTiers: async (): Promise<LoyaltyTierPerk[]> => {
+    const res = await axiosClient.get<{ success: boolean; data: LoyaltyTierPerk[] }>('/loyalty/tiers')
+    return unwrap(res)
+  },
+}
+
+// Batch & Shelf-Life Public APIs
+export const batchApi = {
+  getFlashSaleDeals: async (): Promise<ProductBatch[]> => {
+    const res = await axiosClient.get<{ success: boolean; data: ProductBatch[] }>('/batches/flash-sale')
+    return unwrap(res)
+  },
+}
+
+// Warehouse & Admin Batch APIs
+export const adminBatchApi = {
+  getBatches: async (params?: { productId?: string; status?: string; page?: number; size?: number }): Promise<{ content: ProductBatch[]; totalPages: number; totalElements: number }> => {
+    const res = await axiosClient.get<{ success: boolean; data: { content: ProductBatch[]; totalPages: number; totalElements: number } }>(
+      '/warehouse/batches',
+      { params }
+    )
+    return unwrap(res)
+  },
+  getStats: async (): Promise<BatchStats> => {
+    const res = await axiosClient.get<{ success: boolean; data: BatchStats }>('/warehouse/batches/stats')
+    return unwrap(res)
+  },
+  createBatch: async (data: ProductBatchRequest): Promise<ProductBatch> => {
+    const res = await axiosClient.post<{ success: boolean; data: ProductBatch }>('/warehouse/batches', data)
+    return unwrap(res)
+  },
+  updateFlashSale: async (id: string, data: BatchFlashSaleRequest): Promise<ProductBatch> => {
+    const res = await axiosClient.put<{ success: boolean; data: ProductBatch }>(`/warehouse/batches/${id}/flash-sale`, data)
     return unwrap(res)
   },
 }

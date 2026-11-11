@@ -1,0 +1,93 @@
+databaseChangeLog:
+  - changeSet:
+      id: 011-create-product-batches-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: product_batches
+            columns:
+              - column:
+                  name: id
+                  type: varchar(64)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: product_id
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: batch_code
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: manufacture_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: expiry_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: initial_quantity
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: current_quantity
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(32)
+                  defaultValue: "ACTIVE"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: discount_percent
+                  type: double
+                  defaultValueNumeric: 0
+              - column:
+                  name: note
+                  type: varchar(500)
+              - column:
+                  name: created_at
+                  type: datetime
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: datetime
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - createIndex:
+            indexName: idx_batch_product_id
+            tableName: product_batches
+            columns:
+              - column:
+                  name: product_id
+        - createIndex:
+            indexName: idx_batch_expiry_date
+            tableName: product_batches
+            columns:
+              - column:
+                  name: expiry_date
+
+  - changeSet:
+      id: 011-seed-demo-batches
+      author: hebekery
+      changes:
+        - sql:
+            comment: Seed batches for P001 and P002 with fresh and near-expiry statuses
+            sql: >
+              INSERT INTO product_batches (id, product_id, batch_code, manufacture_date, expiry_date, initial_quantity, current_quantity, status, discount_percent, note, created_at, updated_at)
+              VALUES
+              ('BATCH-001', 'P001', 'LOT-202610-BISC-01', DATE_SUB(CURDATE(), INTERVAL 60 DAY), DATE_ADD(CURDATE(), INTERVAL 20 DAY), 50, 18, 'NEAR_EXPIRY', 35.0, 'Mẻ bánh Biscotti nướng mộc đợt trước - Giảm 35% xả kho cận date', NOW(), NOW()),
+              ('BATCH-002', 'P001', 'LOT-202611-BISC-02', DATE_SUB(CURDATE(), INTERVAL 5 DAY), DATE_ADD(CURDATE(), INTERVAL 115 DAY), 80, 80, 'ACTIVE', 0.0, 'Mẻ bánh Biscotti mới nướng đầu tuần tươi giòn', NOW(), NOW()),
+              ('BATCH-003', 'P002', 'LOT-202610-GRAN-01', DATE_SUB(CURDATE(), INTERVAL 70 DAY), DATE_ADD(CURDATE(), INTERVAL 25 DAY), 40, 12, 'NEAR_EXPIRY', 30.0, 'Lô Granola quả mọng cận date thơm ngon - Flash sale 30%', NOW(), NOW()),
+              ('BATCH-004', 'P002', 'LOT-202611-GRAN-02', DATE_SUB(CURDATE(), INTERVAL 3 DAY), DATE_ADD(CURDATE(), INTERVAL 120 DAY), 60, 60, 'ACTIVE', 0.0, 'Lô Granola mới nướng mật ong hoa nhãn', NOW(), NOW())
+              ON DUPLICATE KEY UPDATE current_quantity = current_quantity;

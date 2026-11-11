@@ -26,8 +26,10 @@ import {
   Clock,
   Award,
 } from 'lucide-react'
-import { productApi, reviewApi, voucherApi } from '@/api'
+import { productApi, reviewApi, voucherApi, batchApi } from '@/api'
+import { useAuth } from '@/hooks/useAuth'
 import { useCart } from '@/hooks/useCart'
+import { useWishlist } from '@/hooks/useWishlist'
 import { formatCurrency, optimizeCloudinaryUrl, formatDate } from '@/utils/format'
 import { toast } from 'sonner'
 import type { Product, ProductReview, ProductReviewSummary } from '@/types'
@@ -110,6 +112,8 @@ export const ProductDetailPage: React.FC = () => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { addItem, setIsCartOpen } = useCart()
+  const { isAuthenticated, user } = useAuth()
+  const { isInWishlist, toggleWishlist } = useWishlist()
 
   const [quantity, setQuantity] = useState(1)
   const [selectedVariant, setSelectedVariant] = useState('250g')
@@ -162,6 +166,13 @@ export const ProductDetailPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['product-reviews', id] })
     },
     onError: (err: unknown) => {
+      const status = (err as { response?: { status?: number } })?.response?.status
+      if (status === 401) {
+        toast.error('Vui lòng đăng nhập để gửi đánh giá sản phẩm.')
+        setIsReviewModalOpen(false)
+        navigate('/login', { state: { from: { pathname: `/products/${id}` } } })
+        return
+      }
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
       toast.error(msg || 'Không thể gửi đánh giá. Vui lòng thử lại sau.')
     },
@@ -200,6 +211,15 @@ export const ProductDetailPage: React.FC = () => {
 
   const relatedProducts = relatedData?.content || []
 
+  // Near-expiry flash sale deals from FEFO inventory
+  const { data: flashSaleDeals = [] } = useQuery({
+    queryKey: ['flash-sale-deals'],
+    queryFn: batchApi.getFlashSaleDeals,
+    staleTime: 60 * 1000,
+  })
+
+  const flashSaleDeal = flashSaleDeals.find((d) => String(d.productId) === String(id))
+
   // Sticky Bar Scroll Listener
   useEffect(() => {
     const handleScroll = () => {
@@ -224,8 +244,14 @@ export const ProductDetailPage: React.FC = () => {
   const originalPrice = Math.round((currentPrice * 1.15) / 1000) * 1000
   const discountPercent = Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
 
+  // Near-expiry deal discount
+  const flashDiscountPercent = flashSaleDeal ? flashSaleDeal.discountPercent : 0
+  const effectivePrice = flashDiscountPercent > 0
+    ? Math.round((currentPrice * (1 - flashDiscountPercent / 100)) / 1000) * 1000
+    : currentPrice
+
   // Free Gift Progress calculation (threshold 249.000₫)
-  const currentOrderValue = currentPrice * quantity
+  const currentOrderValue = effectivePrice * quantity
   const giftThreshold = 249000
   const giftProgressPercent = Math.min(100, Math.round((currentOrderValue / giftThreshold) * 100))
   const remainingForGift = Math.max(0, giftThreshold - currentOrderValue)
@@ -241,8 +267,8 @@ export const ProductDetailPage: React.FC = () => {
     if (!product) return
     const customProduct = {
       ...product,
-      price: currentPrice,
-      name: `${product.name} (${selectedVariant === 'combo' ? 'Combo 2 Hũ' : selectedVariant.toUpperCase()} - ${selectedFlavor})`,
+      price: effectivePrice,
+      name: `${product.name} (${selectedVariant === 'combo' ? 'Combo 2 Hũ' : selectedVariant.toUpperCase()} - ${selectedFlavor})${flashSaleDeal ? ` [Cứu Bánh -${flashSaleDeal.discountPercent}%]` : ''}`,
     }
     await addItem(customProduct, quantity)
     setIsAdded(true)
@@ -254,8 +280,8 @@ export const ProductDetailPage: React.FC = () => {
     if (!product) return
     const customProduct = {
       ...product,
-      price: currentPrice,
-      name: `${product.name} (${selectedVariant === 'combo' ? 'Combo 2 Hũ' : selectedVariant.toUpperCase()} - ${selectedFlavor})`,
+      price: effectivePrice,
+      name: `${product.name} (${selectedVariant === 'combo' ? 'Combo 2 Hũ' : selectedVariant.toUpperCase()} - ${selectedFlavor})${flashSaleDeal ? ` [Cứu Bánh -${flashSaleDeal.discountPercent}%]` : ''}`,
     }
     await addItem(customProduct, quantity)
     navigate('/checkout')
@@ -287,11 +313,16 @@ export const ProductDetailPage: React.FC = () => {
       toast.error('Vui lòng nhập nội dung đánh giá của bạn.')
       return
     }
+    const finalName = reviewName.trim() || user?.name || ''
+    if (!isAuthenticated && !finalName) {
+      toast.error('Vui lòng nhập họ tên của bạn hoặc đăng nhập để gửi đánh giá.')
+      return
+    }
     submitReviewMutation.mutate({
       rating: reviewRating,
       comment: reviewComment.trim(),
-      fullName: reviewName.trim() || undefined,
-      phone: reviewPhone.trim() || undefined,
+      fullName: finalName || undefined,
+      phone: reviewPhone.trim() || user?.phone || undefined,
     })
   }
 
@@ -343,6 +374,7 @@ export const ProductDetailPage: React.FC = () => {
     : (DEFAULT_HEBE_REVIEWS as unknown as ProductReview[])
   const averageScore = reviewsData?.averageRating && reviewsData.averageRating > 0 ? reviewsData.averageRating : 5.0
   const totalReviewsCount = reviewsData?.reviewCount && reviewsData.reviewCount > 0 ? reviewsData.reviewCount : 128
+  const isFavorite = product ? isInWishlist(product.id) : false
 
   return (
     <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-10 sm:space-y-14">
@@ -376,9 +408,16 @@ export const ProductDetailPage: React.FC = () => {
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
             {/* Sale Label Badge */}
-            <div className="absolute top-4 left-4 bg-[#FFE6DC] text-[#B23A2A] font-bold text-xs px-3 py-1 rounded-full shadow-xs">
-              -{discountPercent}% GIẢM GIÁ
-            </div>
+            {flashSaleDeal ? (
+              <div className="absolute top-4 left-4 bg-red-600 text-white font-bold text-xs px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5 animate-pulse">
+                <Flame className="w-3.5 h-3.5 fill-white text-white" />
+                CỨU BÁNH -{flashSaleDeal.discountPercent}%
+              </div>
+            ) : (
+              <div className="absolute top-4 left-4 bg-[#FFE6DC] text-[#B23A2A] font-bold text-xs px-3 py-1 rounded-full shadow-xs">
+                -{discountPercent}% GIẢM GIÁ
+              </div>
+            )}
             {/* Low GI Badge */}
             <div className="absolute top-4 right-4 bg-[#006561]/10 text-[#006561] font-bold text-[11px] px-3 py-1 rounded-full border border-[#006561]/20 backdrop-blur-xs">
               Low GI • Chuẩn Eat Clean
@@ -446,16 +485,30 @@ export const ProductDetailPage: React.FC = () => {
           </div>
 
           {/* Price Block */}
-          <div className="p-4 rounded-2xl bg-[#FEFBF4] border border-[#E5E2DF] flex items-baseline gap-3 flex-wrap">
-            <span className="font-display text-2xl sm:text-3xl font-bold text-[#006561]">
-              {formatCurrency(currentPrice)}
-            </span>
-            <del className="text-sm font-mono text-[#9A938C]">
-              {formatCurrency(originalPrice)}
-            </del>
-            <span className="text-xs font-bold text-[#B23A2A] bg-[#FFE6DC] px-2.5 py-0.5 rounded-full">
-              Tiết kiệm {discountPercent}%
-            </span>
+          <div className="p-4 rounded-2xl bg-[#FEFBF4] border border-[#E5E2DF] space-y-2">
+            {flashSaleDeal && (
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-red-600 to-amber-600 text-white text-xs font-bold shadow-xs">
+                <Flame className="w-4 h-4 fill-white text-white shrink-0" />
+                Cứu Bánh Lành Cận Date: Giảm {flashSaleDeal.discountPercent}% (HSD chỉ còn {flashSaleDeal.daysRemaining} ngày)
+              </div>
+            )}
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <span className={`font-display text-2xl sm:text-3xl font-bold ${flashSaleDeal ? 'text-red-700' : 'text-[#006561]'}`}>
+                {formatCurrency(effectivePrice)}
+              </span>
+              {flashSaleDeal ? (
+                <del className="text-sm font-mono text-[#9A938C]">
+                  {formatCurrency(currentPrice)}
+                </del>
+              ) : (
+                <del className="text-sm font-mono text-[#9A938C]">
+                  {formatCurrency(originalPrice)}
+                </del>
+              )}
+              <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${flashSaleDeal ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-[#FFE6DC] text-[#B23A2A]'}`}>
+                Tiết kiệm {flashSaleDeal ? flashSaleDeal.discountPercent : discountPercent}%
+              </span>
+            </div>
           </div>
 
           {/* Authentic Voucher Strip (HB5, HB10, HB20, HB30) */}
@@ -609,11 +662,11 @@ export const ProductDetailPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 pt-2">
+            <div className="flex items-center gap-3 pt-2">
               <button
                 type="button"
                 onClick={handleAddToCart}
-                className="btn-act w-full py-3.5 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                className="btn-act flex-1 py-3.5 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-xs"
               >
                 {isAdded ? (
                   <>
@@ -623,7 +676,7 @@ export const ProductDetailPage: React.FC = () => {
                 ) : (
                   <>
                     <ShoppingBag className="w-4 h-4" />
-                    <span>Thêm vào giỏ hàng</span>
+                    <span>Thêm vào giỏ</span>
                   </>
                 )}
               </button>
@@ -631,10 +684,24 @@ export const ProductDetailPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleBuyNow}
-                className="bg-[#006561] hover:bg-[#1a9a9b] text-[#FEFBF4] w-full py-3.5 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                className="bg-[#006561] hover:bg-[#1a9a9b] text-[#FEFBF4] flex-1 py-3.5 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all cursor-pointer"
               >
                 <span>Mua ngay</span>
                 <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => product && toggleWishlist(product)}
+                aria-label="Yêu thích"
+                className={`w-12 h-12 rounded-full border border-[#E5E2DF] flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-2xs ${
+                  isFavorite
+                    ? 'bg-[#B23A2A]/10 text-[#B23A2A] border-[#B23A2A]/30'
+                    : 'bg-white text-[#6B6661] hover:text-[#B23A2A]'
+                }`}
+                title={isFavorite ? 'Đã lưu yêu thích' : 'Lưu vào yêu thích'}
+              >
+                <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
               </button>
             </div>
           </div>
@@ -995,12 +1062,17 @@ export const ProductDetailPage: React.FC = () => {
                   {product.name}
                 </h4>
                 <div className="flex items-baseline gap-2">
-                  <span className="font-display font-bold text-sm text-[#006561]">
-                    {formatCurrency(currentPrice)}
+                  <span className={`font-display font-bold text-sm ${flashSaleDeal ? 'text-red-700' : 'text-[#006561]'}`}>
+                    {formatCurrency(effectivePrice)}
                   </span>
                   <del className="text-[11px] font-mono text-[#9A938C]">
-                    {formatCurrency(originalPrice)}
+                    {formatCurrency(flashSaleDeal ? currentPrice : originalPrice)}
                   </del>
+                  {flashSaleDeal && (
+                    <span className="text-[10px] font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded">
+                      -{flashSaleDeal.discountPercent}%
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -1059,6 +1131,13 @@ export const ProductDetailPage: React.FC = () => {
           </DialogHeader>
 
           <form onSubmit={handleReviewSubmit} className="space-y-4 pt-2">
+            {isAuthenticated && user && (
+              <div className="p-3 bg-[#006561]/8 border border-[#006561]/20 rounded-xl flex items-center justify-between text-xs">
+                <span className="text-[#6B6661]">Tài khoản đánh giá:</span>
+                <span className="font-bold text-[#006561]">{user.name} ({user.email})</span>
+              </div>
+            )}
+
             <div className="space-y-1.5 text-center py-2">
               <label className="text-xs font-bold text-[#2A2725] block">
                 Mức độ hài lòng của bạn:
