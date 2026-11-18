@@ -5,6 +5,7 @@ import com.example.hebekery.dto.ProductResponse;
 import com.example.hebekery.dto.request.ProductRequest;
 import com.example.hebekery.model.Category;
 import com.example.hebekery.model.Product;
+import com.example.hebekery.service.AuditLogService;
 import com.example.hebekery.service.CategoryService;
 import com.example.hebekery.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,10 +41,12 @@ public class AdminProductController {
 
     private final ProductService productService;
     private final CategoryService categoryService;
+    private final AuditLogService auditLogService;
 
-    public AdminProductController(ProductService productService, CategoryService categoryService) {
+    public AdminProductController(ProductService productService, CategoryService categoryService, AuditLogService auditLogService) {
         this.productService = productService;
         this.categoryService = categoryService;
+        this.auditLogService = auditLogService;
     }
 
     @Operation(summary = "Tìm kiếm sản phẩm quản trị", description = "Lấy danh sách sản phẩm phân trang cho trang quản trị (yêu cầu ADMIN hoặc STAFF_WAREHOUSE)", security = @SecurityRequirement(name = "BearerAuth"))
@@ -91,6 +94,7 @@ public class AdminProductController {
         product.setFeatured(request.getFeatured() != null && request.getFeatured());
 
         Product saved = productService.saveProduct(product);
+        auditLogService.log("CREATE", "PRODUCT", saved.getId(), "Tạo sản phẩm: " + saved.getName());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Tạo sản phẩm mới thành công", ProductResponse.from(saved)));
     }
@@ -129,6 +133,7 @@ public class AdminProductController {
         existing.setFeatured(request.getFeatured() != null && request.getFeatured());
 
         Product updated = productService.saveProduct(existing);
+        auditLogService.log("UPDATE", "PRODUCT", updated.getId(), "Cập nhật sản phẩm: " + updated.getName());
         return ResponseEntity.ok(ApiResponse.success("Cập nhật thông tin sản phẩm thành công", ProductResponse.from(updated)));
     }
 
@@ -141,6 +146,7 @@ public class AdminProductController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ApiResponse.failure("Không tìm thấy sản phẩm để xóa"));
         }
+        auditLogService.log("DELETE", "PRODUCT", id, "Xóa sản phẩm: " + id);
         return ResponseEntity.ok(ApiResponse.success("Xóa sản phẩm thành công", null));
     }
 

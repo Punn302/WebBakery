@@ -2,8 +2,10 @@ package com.example.hebekery.service;
 
 import com.example.hebekery.dto.VoucherCalculationResponse;
 import com.example.hebekery.dto.VoucherResponse;
+import com.example.hebekery.model.TargetSegment;
 import com.example.hebekery.model.Voucher;
 import com.example.hebekery.model.VoucherUsage;
+import com.example.hebekery.repository.UserRepository;
 import com.example.hebekery.repository.VoucherRepository;
 import com.example.hebekery.repository.VoucherUsageRepository;
 import org.slf4j.Logger;
@@ -24,11 +26,13 @@ public class VoucherService {
 
     private final VoucherRepository voucherRepository;
     private final VoucherUsageRepository voucherUsageRepository;
+    private final UserRepository userRepository;
     private final DecimalFormat formatter = new DecimalFormat("#,###");
 
-    public VoucherService(VoucherRepository voucherRepository, VoucherUsageRepository voucherUsageRepository) {
+    public VoucherService(VoucherRepository voucherRepository, VoucherUsageRepository voucherUsageRepository, UserRepository userRepository) {
         this.voucherRepository = voucherRepository;
         this.voucherUsageRepository = voucherUsageRepository;
+        this.userRepository = userRepository;
     }
 
     public List<VoucherResponse> getAvailableVouchers() {
@@ -78,6 +82,13 @@ public class VoucherService {
                     "Đơn hàng cần đạt tối thiểu " + requiredAmount + " để áp dụng mã '" + cleanCode + "'",
                     orderAmount
             );
+        }
+
+        if (voucher.getTargetSegment() != TargetSegment.ALL) {
+            if (userId == null || userId.isBlank()) {
+                return VoucherCalculationResponse.invalid("Mã giảm giá này chỉ dành cho thành viên", orderAmount);
+            }
+            // Logic to check segments (VIP/NEW) would go here
         }
 
         if (userId != null && !userId.isBlank() && voucher.getUserLimit() > 0) {

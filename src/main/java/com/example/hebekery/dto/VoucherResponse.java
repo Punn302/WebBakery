@@ -19,6 +19,7 @@ public class VoucherResponse {
     private int userLimit;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+    private String targetSegment;
     private boolean active;
 
     public VoucherResponse() {
@@ -38,8 +39,18 @@ public class VoucherResponse {
         res.setUserLimit(v.getUserLimit());
         res.setStartDate(v.getStartDate());
         res.setEndDate(v.getEndDate());
+        res.setTargetSegment(v.getTargetSegment() != null ? v.getTargetSegment().name() : "ALL");
         res.setActive(v.isActive());
         return res;
+    }
+
+    // ... getters and setters ...
+    public String getTargetSegment() {
+        return targetSegment;
+    }
+
+    public void setTargetSegment(String targetSegment) {
+        this.targetSegment = targetSegment;
     }
 
     public String getId() {

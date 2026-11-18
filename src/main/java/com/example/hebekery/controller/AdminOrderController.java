@@ -5,6 +5,7 @@ import com.example.hebekery.dto.OrderDetailResponse;
 import com.example.hebekery.dto.OrderResponse;
 import com.example.hebekery.dto.request.AdminOrderUpdateRequest;
 import com.example.hebekery.model.Order;
+import com.example.hebekery.service.AuditLogService;
 import com.example.hebekery.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -37,9 +38,11 @@ import java.util.Map;
 public class AdminOrderController {
 
     private final OrderService orderService;
+    private final AuditLogService auditLogService;
 
-    public AdminOrderController(OrderService orderService) {
+    public AdminOrderController(OrderService orderService, AuditLogService auditLogService) {
         this.orderService = orderService;
+        this.auditLogService = auditLogService;
     }
 
     @Operation(summary = "Tìm kiếm và lọc danh sách đơn hàng quản trị", description = "Lọc đơn hàng theo từ khóa, trạng thái, phương thức thanh toán và khoảng thời gian (yêu cầu ADMIN hoặc STAFF_SALES)", security = @SecurityRequirement(name = "BearerAuth"))

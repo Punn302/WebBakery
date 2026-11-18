@@ -50,6 +50,7 @@ export const AdminVoucherPage: React.FC = () => {
     minOrderAmount: number
     maxDiscountAmount: number
     usageLimit: number
+    targetSegment: 'ALL' | 'NEW' | 'VIP'
     active: boolean
   }>({
     code: '',
@@ -60,6 +61,7 @@ export const AdminVoucherPage: React.FC = () => {
     minOrderAmount: 200000,
     maxDiscountAmount: 0,
     usageLimit: 500,
+    targetSegment: 'ALL',
     active: true,
   })
 
@@ -137,6 +139,7 @@ export const AdminVoucherPage: React.FC = () => {
       minOrderAmount: 200000,
       maxDiscountAmount: 0,
       usageLimit: 500,
+      targetSegment: 'ALL',
       active: true,
     })
     setIsDialogOpen(true)
@@ -153,6 +156,7 @@ export const AdminVoucherPage: React.FC = () => {
       minOrderAmount: v.minOrderAmount || 0,
       maxDiscountAmount: v.maxDiscountAmount || 0,
       usageLimit: v.usageLimit || 500,
+      targetSegment: (v.targetSegment as any) || 'ALL',
       active: v.active,
     })
     setIsDialogOpen(true)
@@ -182,6 +186,7 @@ export const AdminVoucherPage: React.FC = () => {
           ? Number(formData.maxDiscountAmount)
           : undefined,
       usageLimit: Number(formData.usageLimit) || undefined,
+      targetSegment: formData.targetSegment,
       active: formData.active,
     }
 
@@ -534,6 +539,20 @@ export const AdminVoucherPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="text-xs font-bold text-[#2A2725] uppercase tracking-wider">
+                  Đối tượng áp dụng (Target Segment)
+                </label>
+                <select
+                  value={formData.targetSegment || 'ALL'}
+                  onChange={(e) => setFormData({ ...formData, targetSegment: e.target.value as any })}
+                  className="w-full h-9 rounded-xl border border-[#E5E2DF] bg-white px-3 text-xs font-medium focus:border-[#006561]"
+                >
+                  <option value="ALL">Tất cả khách hàng (ALL)</option>
+                  <option value="NEW">Khách hàng mới (NEW)</option>
+                  <option value="VIP">Khách hàng VIP (VIP)</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-[#2A2725] uppercase tracking-wider">
                   {formData.discountType === 'PERCENTAGE' ? 'Tỷ lệ giảm (%)' : 'Giá trị giảm (VNĐ)'} <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -545,6 +564,7 @@ export const AdminVoucherPage: React.FC = () => {
                   className="rounded-xl border-[#E5E2DF] font-mono text-xs"
                 />
               </div>
+            </div>
 
               <div className="space-y-1">
                 <label className="text-xs font-bold text-[#2A2725] uppercase tracking-wider">

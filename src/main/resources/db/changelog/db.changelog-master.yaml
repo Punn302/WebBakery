@@ -23,3 +23,5 @@ databaseChangeLog:
       file: db/changelog/changes/011-add-product-batches.yaml
   - include:
       file: db/changelog/changes/012-seed-admin-user.yaml
+  - include:
+      file: db/changelog/changes/013-add-audit-logs-table.yaml

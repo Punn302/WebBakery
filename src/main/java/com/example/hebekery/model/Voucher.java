@@ -2,6 +2,8 @@ package com.example.hebekery.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -44,10 +46,22 @@ public class Voucher extends BaseEntity {
     @Column(name = "end_date")
     private LocalDateTime endDate;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "target_segment", nullable = false)
+    private TargetSegment targetSegment = TargetSegment.ALL;
+
     @Column(nullable = false)
     private boolean active = true;
 
     public Voucher() {
+    }
+
+    public TargetSegment getTargetSegment() {
+        return targetSegment;
+    }
+
+    public void setTargetSegment(TargetSegment targetSegment) {
+        this.targetSegment = targetSegment;
     }
 
     public String getId() {

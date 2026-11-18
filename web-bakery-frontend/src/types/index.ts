@@ -337,6 +337,7 @@ export interface Voucher {
   endDate?: string
   usageLimit?: number
   usedCount?: number
+  targetSegment?: 'ALL' | 'NEW' | 'VIP'
   active: boolean
   isExpired?: boolean
 }
