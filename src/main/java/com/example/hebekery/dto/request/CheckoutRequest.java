@@ -23,9 +23,9 @@ public class CheckoutRequest {
     @Schema(description = "Ghi chú giao hàng", example = "Giao vào giờ hành chính")
     private String note;
 
-    @Schema(description = "Phương thức thanh toán (COD, MOMO, SEPAY)", example = "COD")
+    @Schema(description = "Phương thức thanh toán (COD, SEPAY, VIETQR)", example = "COD")
     @NotBlank(message = "Phương thức thanh toán không được để trống")
-    @Pattern(regexp = "COD|MOMO|SEPAY|VIETQR", message = "Phương thức thanh toán không hợp lệ")
+    @Pattern(regexp = "COD|SEPAY|VIETQR", message = "Phương thức thanh toán không hợp lệ")
     private String paymentMethod;
 
     @Schema(description = "Mã voucher giảm giá (nếu có)", example = "HB10")

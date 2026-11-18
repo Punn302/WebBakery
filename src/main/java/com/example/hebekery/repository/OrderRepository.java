@@ -31,7 +31,7 @@ public interface OrderRepository extends JpaRepository<Order, String> {
 
     @Query("""
             select o from Order o
-            where (o.paymentMethod in ('VIETQR', 'MOMO'))
+            where (o.paymentMethod in ('VIETQR'))
               and (o.paymentStatus in ('PENDING', 'AWAITING_PAYMENT'))
               and (o.orderStatus in ('PENDING', 'AWAITING_PAYMENT'))
               and (o.createdAt < :cutoff)

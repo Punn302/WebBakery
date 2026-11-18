@@ -8,7 +8,7 @@ public class CheckoutResponse {
     @Schema(description = "Mã định danh đơn hàng", example = "ORD-20261105-001")
     private String orderId;
 
-    @Schema(description = "Phương thức thanh toán đã chọn (COD, SEPAY, MOMO)", example = "COD")
+    @Schema(description = "Phương thức thanh toán đã chọn (COD, SEPAY)", example = "COD")
     private String paymentMethod;
 
     @Schema(description = "Trạng thái thanh toán (UNPAID, PAID, FAILED)", example = "UNPAID")

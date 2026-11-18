@@ -14,8 +14,14 @@ import { toast } from 'sonner'
 export const AdminProductsPage: React.FC = () => {
   const queryClient = useQueryClient()
   const [keyword, setKeyword] = useState('')
+  const [page, setPage] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+
+  // Reset page when keyword changes
+  React.useEffect(() => {
+    setPage(0)
+  }, [keyword])
 
   // Form State
   const [formData, setFormData] = useState({
@@ -34,8 +40,8 @@ export const AdminProductsPage: React.FC = () => {
 
   // Queries
   const { data: productData, isLoading } = useQuery({
-    queryKey: queryKeys.products.admin.list(keyword),
-    queryFn: () => productApi.getProducts({ keyword: keyword.trim() || undefined, size: 50 }),
+    queryKey: ['admin-products', keyword, page],
+    queryFn: () => productApi.getProducts({ keyword: keyword.trim() || undefined, page, size: 20 }),
   })
 
   const { data: categories = [] } = useQuery({
@@ -275,6 +281,31 @@ export const AdminProductsPage: React.FC = () => {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between border border-[#e7e5e4] bg-white px-4 py-3">
+        <div className="text-xs text-[#78716c]">
+          Trang {productData?.number !== undefined ? productData.number + 1 : 1} / {productData?.totalPages || 1}
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page === 0}
+            onClick={() => setPage((p) => p - 1)}
+          >
+            Trước
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={productData ? page >= (productData.totalPages - 1) : true}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Sau
+          </Button>
+        </div>
       </div>
 
       {/* Modal Thêm / Sửa Sản Phẩm */}

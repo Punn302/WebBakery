@@ -1,7 +1,7 @@
 import React from 'react'
 import { Outlet, Link } from 'react-router-dom'
 import { Sparkles, CheckCircle2 } from 'lucide-react'
-import heroStitch from '@/assets/hero_stitch.jpg'
+import authBg from '@/assets/auth-bg.jpg'
 
 export const AuthLayout: React.FC = () => {
   const brandLogo = 'https://bizweb.dktcdn.net/100/415/009/themes/1136612/assets/logo.png?1790765513162'
@@ -13,9 +13,9 @@ export const AuthLayout: React.FC = () => {
         <div className="hidden md:flex md:col-span-5 relative bg-[#004e4a] text-white p-8 flex-col justify-between overflow-hidden">
           {/* Background Image with Warm Overlay */}
           <img
-            src={heroStitch}
+            src={authBg}
             alt="Hebekery Artisan Bakery"
-            className="absolute inset-0 w-full h-full object-cover opacity-25 mix-blend-luminosity scale-105 pointer-events-none"
+            className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-multiply scale-105 pointer-events-none"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#003835] via-[#004e4a]/80 to-[#006561]/50 pointer-events-none" />
 

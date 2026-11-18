@@ -120,7 +120,7 @@ export interface Order {
   phone: string
   address: string
   note?: string
-  paymentMethod: 'COD' | 'VIETQR' | 'MOMO'
+  paymentMethod: 'COD' | 'VIETQR'
   paymentStatus: 'PENDING' | 'PAID'
   orderStatus:
     | 'PENDING'
@@ -157,7 +157,7 @@ export interface CheckoutRequest {
   district?: string
   ward?: string
   note?: string
-  paymentMethod: 'COD' | 'VIETQR' | 'MOMO'
+  paymentMethod: 'COD' | 'VIETQR'
   voucherCode?: string
   pointsUsed?: number
   pointsDiscountAmount?: number

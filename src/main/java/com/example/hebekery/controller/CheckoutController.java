@@ -40,7 +40,7 @@ public class CheckoutController {
         this.userService = userService;
     }
 
-    @Operation(summary = "Tạo đơn hàng thanh toán", description = "Khởi tạo đơn hàng từ giỏ hàng hiện tại với hình thức COD hoặc chuyển khoản SePay/Momo", security = @SecurityRequirement(name = "BearerAuth"))
+    @Operation(summary = "Tạo đơn hàng thanh toán", description = "Khởi tạo đơn hàng từ giỏ hàng hiện tại với hình thức COD hoặc chuyển khoản SePay/VIETQR", security = @SecurityRequirement(name = "BearerAuth"))
     @PostMapping
     public ResponseEntity<ApiResponse<CheckoutResponse>> checkout(@Valid @RequestBody CheckoutRequest request, HttpSession session) {
         if (!userService.isLoggedIn() || userService.getCurrentUser() == null) {

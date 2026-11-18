@@ -153,7 +153,7 @@ const Checkout = (function() {
                 const checkout = data.checkout;
                 showMessage('success', data.message || 'Đặt hàng thành công');
 
-                if (checkout.paymentMethod === 'MOMO' && checkout.payUrl) {
+                if (checkout.payUrl) {
                     window.location.href = checkout.payUrl;
                 } else {
                     window.location.href = '/checkout/success';

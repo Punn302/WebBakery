@@ -36,7 +36,7 @@
 ## 2. QUY TẮC AN TOÀN THÔNG TIN & BẢO MẬT (SECURITY RULES)
 
 ### 2.1. Quản lý Khóa Bí Mật & Môi Trường (Zero Hardcode Secrets)
-* **Tuyệt đối cấm commit thông tin nhạy cảm vào Git**: Không hardcode mật khẩu, private key, secret key, access token (MoMo, JWT Secret, DB Password) trong mã nguồn.
+* **Tuyệt đối cấm commit thông tin nhạy cảm vào Git**: Không hardcode mật khẩu, private key, secret key, access token (JWT Secret, DB Password) trong mã nguồn.
 * Tất cả phải được nạp thông qua **Biến môi trường (Environment Variables)** hoặc file `.env` được bỏ qua bởi `.gitignore`.
 * Luôn cung cấp file cấu hình mẫu `.env.example` hoặc `application-example.properties` với giá trị giả định để team member dễ dàng clone và thiết lập.
 
@@ -171,7 +171,7 @@
 
 ### 6.2. Quy ước đặt tên nhánh (Branch Naming)
 * Tính năng mới: `feature/<tên-tính-năng>` (ví dụ: `feature/jwt-auth`, `feature/product-filter`)
-* Sửa lỗi: `fix/<mã-lỗi-hoặc-mô-tả>` (ví dụ: `fix/momo-signature`, `fix/cart-quantity`)
+* Sửa lỗi: `fix/<mã-lỗi-hoặc-mô-tả>` (ví dụ: `fix/payment-signature`, `fix/cart-quantity`)
 * Tái cấu trúc: `refactor/<tên-module>` (ví dụ: `refactor/order-service`, `refactor/clean-controllers`)
 * Thử nghiệm/Nghiên cứu: `spike/<chủ-đề>` hoặc `test/<chủ-đề>`
 

@@ -15,10 +15,16 @@ export const AdminOrdersPage: React.FC = () => {
   const queryClient = useQueryClient()
   const [keyword, setKeyword] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [page, setPage] = useState(0)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [modalType, setModalType] = useState<'STATUS' | 'RETURN' | 'DETAIL' | null>(null)
   const [printOrder, setPrintOrder] = useState<Order | null>(null)
   const [isPrintOpen, setIsPrintOpen] = useState(false)
+
+  // Reset page when filter changes
+  React.useEffect(() => {
+    setPage(0)
+  }, [keyword, statusFilter])
 
   // Status Update Form State
   const [targetStatus, setTargetStatus] = useState('SHIPPING')
@@ -30,12 +36,13 @@ export const AdminOrdersPage: React.FC = () => {
   const [adminNote, setAdminNote] = useState('')
 
   const { data: orderData, isLoading } = useQuery({
-    queryKey: ['admin-orders', keyword, statusFilter],
+    queryKey: ['admin-orders', keyword, statusFilter, page],
     queryFn: () =>
       orderApi.adminSearchOrders({
         keyword: keyword.trim() || undefined,
         status: statusFilter || undefined,
-        size: 50,
+        page,
+        size: 20,
       }),
   })
 
@@ -258,6 +265,31 @@ export const AdminOrdersPage: React.FC = () => {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between border border-[#e7e5e4] bg-white px-4 py-3">
+        <div className="text-xs text-[#78716c]">
+          Trang {orderData?.number !== undefined ? orderData.number + 1 : 1} / {orderData?.totalPages || 1}
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page === 0}
+            onClick={() => setPage((p) => p - 1)}
+          >
+            Trước
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={orderData ? page >= (orderData.totalPages - 1) : true}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Sau
+          </Button>
+        </div>
       </div>
 
       {/* Modal Chuyển Trạng Thái */}

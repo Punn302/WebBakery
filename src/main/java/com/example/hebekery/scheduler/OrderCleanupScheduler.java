@@ -36,7 +36,7 @@ public class OrderCleanupScheduler {
     }
 
     /**
-     * Tự động quét và hủy các đơn hàng VietQR / MoMo chưa thanh toán quá 15 phút.
+     * Tự động quét và hủy các đơn hàng VietQR chưa thanh toán quá 15 phút.
      * Chạy định kỳ mỗi 5 phút (300.000 ms).
      */
     @Scheduled(fixedRate = 300000)
@@ -74,7 +74,7 @@ public class OrderCleanupScheduler {
                         order.getId(),
                         "CANCELLED",
                         order.getPaymentStatus(),
-                        "Hệ thống tự động hủy đơn do quá hạn 15 phút thanh toán VietQR/MoMo",
+                        "Hệ thống tự động hủy đơn do quá hạn 15 phút thanh toán VietQR",
                         "SYSTEM"
                 ));
 

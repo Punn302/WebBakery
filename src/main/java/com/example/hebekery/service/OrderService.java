@@ -125,7 +125,7 @@ public class OrderService {
 
         addHistory(order, "User tạo đơn hàng", "USER");
 
-        if ("VIETQR".equalsIgnoreCase(request.getPaymentMethod()) || "MOMO".equalsIgnoreCase(request.getPaymentMethod())) {
+        if ("VIETQR".equalsIgnoreCase(request.getPaymentMethod())) {
             String paymentUrl = sepayConfig.generateVietQrUrl(order.getId(), order.getTotal());
             return new CheckoutResponse(
                     order.getId(),
@@ -185,11 +185,6 @@ public class OrderService {
                 null,
                 "Thanh toán thành công. Đơn hàng đã được ghi nhận."
         );
-    }
-
-    @Transactional
-    public CheckoutResponse createPaidMomoOrder(User user, List<CartItem> cartItems, double subtotal, CheckoutRequest request) {
-        return createPaidOrder(user, cartItems, subtotal, request);
     }
 
     public List<Order> getRawOrdersByUser(String userId) {
