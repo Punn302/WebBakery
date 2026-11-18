@@ -25,6 +25,8 @@ class AdminProductControllerTest {
     private ProductService productService;
     @Mock
     private com.example.hebekery.service.CategoryService categoryService;
+    @Mock
+    private com.example.hebekery.service.AuditLogService auditLogService;
 
     @InjectMocks
     private AdminProductController adminProductController;
@@ -42,6 +44,7 @@ class AdminProductControllerTest {
         saved.setStockQuantity(20);
 
         when(productService.saveProduct(any())).thenReturn(saved);
+        doNothing().when(auditLogService).log(anyString(), anyString(), anyString(), anyString());
 
         ResponseEntity<ApiResponse<ProductResponse>> response = adminProductController.createProduct(request);
 
@@ -56,6 +59,7 @@ class AdminProductControllerTest {
     @DisplayName("Xóa mềm sản phẩm thành công")
     void deleteProduct_success() {
         when(productService.deleteProduct("P-100")).thenReturn(true);
+        doNothing().when(auditLogService).log(anyString(), anyString(), anyString(), anyString());
 
         ResponseEntity<ApiResponse<Void>> response = adminProductController.deleteProduct("P-100");
 
