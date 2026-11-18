@@ -80,7 +80,7 @@
   cloudinary.api-secret=${CLOUDINARY_API_SECRET:}
   ```
 - [x] Tạo class `SepayConfig.java` với `@ConfigurationProperties(prefix = "sepay")` hoặc inject thông qua `@Value`.
-- [x] Cập nhật `OrderService.java` để inject cấu hình, xóa hoàn toàn các hằng số MoMo hardcode cũ.
+- [x] Cập nhật `OrderService.java` để inject cấu hình.
 - [x] **Tạo cấu hình và dịch vụ Cloudinary**:
   - Tạo `CloudinaryConfig.java`: Khởi tạo Bean `Cloudinary` nạp từ properties.
   - Tạo Interface `UploadService.java` (Clean Architecture / DIP):

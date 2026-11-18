@@ -203,18 +203,4 @@ public class PageController {
     public String checkoutSuccess() {
         return "checkout-success";
     }
-
-    @GetMapping("/checkout/momo-test")
-    public String momoTest(HttpSession session) {
-        if (session.getAttribute("pendingMomoCheckout") == null) {
-            return "redirect:/checkout";
-        }
-        return "momo-test";
-    }
-
-    @PostMapping("/checkout/momo-test/cancel")
-    public String cancelMomoTest(HttpSession session) {
-        session.removeAttribute("pendingMomoCheckout");
-        return "redirect:/checkout";
-    }
 }

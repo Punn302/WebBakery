@@ -89,11 +89,6 @@ export const LoginPage: React.FC = () => {
     }
   }
 
-  const fillDemoAccount = (email: string, pass: string) => {
-    setValue('email', email, { shouldValidate: true })
-    setValue('password', pass, { shouldValidate: true })
-  }
-
   return (
     <div className="space-y-6 max-w-sm mx-auto w-full font-text">
       <div className="space-y-1">
@@ -103,59 +98,6 @@ export const LoginPage: React.FC = () => {
         <p className="text-xs text-[#6B6661]">
           Chào mừng bạn quay lại thưởng thức những mẻ bánh lành mạnh
         </p>
-      </div>
-
-      {/* Quick Demo Fill Buttons */}
-      <div className="p-3 bg-[#FAF7F2] border border-[#E5E2DF] rounded-xl space-y-1.5">
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold text-[#2A2725]">Tài khoản thử nghiệm nhanh (4 Roles):</span>
-        </div>
-        <div className="grid grid-cols-2 gap-2 pt-1">
-          <button
-            type="button"
-            onClick={() => fillDemoAccount('user@hebekery.vn', '123456')}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-[#E5E2DF] rounded-lg text-[11px] text-[#2A2725] hover:border-[#006561] hover:bg-[#006561]/5 transition-all text-left cursor-pointer"
-          >
-            <UserIcon className="w-3.5 h-3.5 text-[#006561] shrink-0" />
-            <div className="truncate">
-              <div className="font-semibold truncate">1. Khách hàng</div>
-              <div className="text-[10px] text-[#6B6661] truncate">user@hebekery.vn</div>
-            </div>
-          </button>
-          <button
-            type="button"
-            onClick={() => fillDemoAccount('admin@hebekery.vn', 'admin123')}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-[#E5E2DF] rounded-lg text-[11px] text-[#2A2725] hover:border-[#006561] hover:bg-[#006561]/5 transition-all text-left cursor-pointer"
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-[#006561] shrink-0" />
-            <div className="truncate">
-              <div className="font-semibold truncate">2. Quản trị viên</div>
-              <div className="text-[10px] text-[#6B6661] truncate">admin@hebekery.vn</div>
-            </div>
-          </button>
-          <button
-            type="button"
-            onClick={() => fillDemoAccount('warehouse@hebekery.vn', '123456')}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-[#E5E2DF] rounded-lg text-[11px] text-[#2A2725] hover:border-[#C9785C] hover:bg-[#C9785C]/5 transition-all text-left cursor-pointer"
-          >
-            <Warehouse className="w-3.5 h-3.5 text-[#C9785C] shrink-0" />
-            <div className="truncate">
-              <div className="font-semibold truncate">3. Thủ kho (Warehouse)</div>
-              <div className="text-[10px] text-[#6B6661] truncate">warehouse@hebekery.vn</div>
-            </div>
-          </button>
-          <button
-            type="button"
-            onClick={() => fillDemoAccount('sales@hebekery.vn', '123456')}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-[#E5E2DF] rounded-lg text-[11px] text-[#2A2725] hover:border-[#0284c7] hover:bg-[#0284c7]/5 transition-all text-left cursor-pointer"
-          >
-            <ShoppingBag className="w-3.5 h-3.5 text-[#0284c7] shrink-0" />
-            <div className="truncate">
-              <div className="font-semibold truncate">4. Bán hàng (Sales)</div>
-              <div className="text-[10px] text-[#6B6661] truncate">sales@hebekery.vn</div>
-            </div>
-          </button>
-        </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -242,8 +184,7 @@ export const LoginPage: React.FC = () => {
           <div className="space-y-3 text-xs text-[#2A2725] bg-[#FAF7F2] p-4 rounded-2xl border border-[#E5E2DF]">
             <p className="font-semibold text-[#006561]">Hướng dẫn cấp lại / đặt lại mật khẩu:</p>
             <ul className="space-y-1.5 text-[#6B6661] list-disc list-inside">
-              <li>Đối với tài khoản thử nghiệm nhanh, mật khẩu mặc định là: <span className="font-mono font-bold text-[#2A2725]">123456</span> (Khách hàng) hoặc <span className="font-mono font-bold text-[#2A2725]">admin123</span> (Quản trị viên).</li>
-              <li>Nếu bạn đã đăng ký bằng email cá nhân và quên mật khẩu, vui lòng liên hệ ngay với bộ phận hỗ trợ khách hàng:</li>
+              <li>Nếu bạn quên mật khẩu, vui lòng liên hệ ngay với bộ phận hỗ trợ khách hàng:</li>
             </ul>
             <div className="pt-2 border-t border-[#E5E2DF] space-y-1 text-xs">
               <p>📞 Hotline Bếp: <a href="tel:0979764185" className="font-bold text-[#006561]">097 97 64 185</a> (8:00 - 21:00 hàng ngày)</p>

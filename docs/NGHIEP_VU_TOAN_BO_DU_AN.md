@@ -3,7 +3,7 @@
 
 > **Mã dự án**: Hebekery (WebBakery)  
 > **Phiên bản**: 2.0 (Kiến trúc Doanh nghiệp Toàn diện)  
-> **Cổng thanh toán**: Tích hợp mã động **VietQR** & Webhook đối soát tự động qua **SePay** (thay thế hoàn toàn MoMo cũ)  
+> **Cổng thanh toán**: Tích hợp mã động **VietQR** & Webhook đối soát tự động qua **SePay**.
 > **Lưu trữ truyền thông**: Cloudinary CDN  
 > **Công nghệ giao diện**: React 18+, TypeScript, Tailwind CSS, shadcn/ui, animate-ui (Motion), TanStack Query  
 > **Công nghệ lõi Backend**: Spring Boot 3.x, Spring Security, JWT Stateless, Liquibase, MySQL, JUnit 5 & Mockito  
@@ -174,10 +174,10 @@ sequenceDiagram
 
 ## 6. PHÂN HỆ THANH TOÁN TỰ ĐỘNG QUA VIETQR & SEPAY
 
-Thay thế hoàn toàn MoMo cũ bằng phương thức **Chuyển khoản Ngân hàng tự động qua VietQR chuẩn NAPAS 247 và cổng đối soát SePay**.
+Sử dụng phương thức **Chuyển khoản Ngân hàng tự động qua VietQR chuẩn NAPAS 247 và cổng đối soát SePay**
 
 ### 6.1. Ưu điểm thực tế của VietQR + SePay
-* **Tiết kiệm chi phí**: Không mất phí chiết khấu cổng thanh toán 2-3% như MoMo/VNPAY. Tiền về trực tiếp tài khoản ngân hàng của tiệm.
+* **Tiết kiệm chi phí**: Không mất phí chiết khấu cổng thanh toán 2-3%. Tiền về trực tiếp tài khoản ngân hàng của tiệm.
 * **Tiện lợi cho khách**: 100% người dùng Việt Nam đều có app ngân hàng (MB, VCB, Techcombank, ACB, VPBank...), quét mã QR là thông tin ngân hàng, số tiền, nội dung tự động điền sẵn không thể sai sót.
 
 ### 6.2. Cấu trúc Mã VietQR Động

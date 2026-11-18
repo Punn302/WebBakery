@@ -86,9 +86,6 @@ public class UserController {
     @PostMapping("/api/user/logout")
     public ResponseEntity<ApiResponse<Void>> logout(HttpSession session) {
         userService.logoutUser();
-        if (session != null) {
-            session.removeAttribute("pendingMomoCheckout");
-        }
         return ResponseEntity.ok(ApiResponse.success("Đăng xuất thành công", null));
     }
 
@@ -101,9 +98,6 @@ public class UserController {
     @GetMapping("/logout")
     public void logoutPage(HttpSession session, HttpServletResponse response) throws IOException {
         userService.logoutUser();
-        if (session != null) {
-            session.removeAttribute("pendingMomoCheckout");
-        }
         response.sendRedirect("/");
     }
 

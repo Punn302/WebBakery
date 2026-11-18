@@ -47,7 +47,7 @@ public class AdminOrderController {
     public ResponseEntity<ApiResponse<Page<OrderResponse>>> searchOrders(
             @Parameter(description = "Từ khóa tìm kiếm theo mã đơn hoặc người nhận") @RequestParam(defaultValue = "") String keyword,
             @Parameter(description = "Trạng thái đơn hàng (PENDING, CONFIRMED, SHIPPING, DELIVERED, CANCELLED)") @RequestParam(defaultValue = "") String orderStatus,
-            @Parameter(description = "Phương thức thanh toán (COD, MOMO, SEPAY)") @RequestParam(defaultValue = "") String paymentMethod,
+            @Parameter(description = "Phương thức thanh toán (COD, SEPAY)") @RequestParam(defaultValue = "") String paymentMethod,
             @Parameter(description = "Từ ngày (YYYY-MM-DD)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @Parameter(description = "Đến ngày (YYYY-MM-DD)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             @Parameter(description = "Số thứ tự trang") @RequestParam(defaultValue = "0") int page,

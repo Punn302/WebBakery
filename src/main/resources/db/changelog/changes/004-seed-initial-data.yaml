@@ -3,28 +3,6 @@ databaseChangeLog:
       id: 004-seed-users
       author: hebekery
       changes:
-        - insert:
-            tableName: users
-            columns:
-              - column: { name: id, value: "1" }
-              - column: { name: email, value: "user@hebekery.vn" }
-              - column: { name: password, value: "$2a$10$RlU6BD08cNC2xYeP8tCPcez/.AsMLr8ZEvYG7ElLmgJXf/V0RpF/y" }
-              - column: { name: name, value: "Nguyễn Văn A" }
-              - column: { name: phone, value: "0912345678" }
-              - column: { name: role, value: "USER" }
-              - column: { name: active, valueBoolean: true }
-              - column: { name: force_password_change, valueBoolean: false }
-        - insert:
-            tableName: users
-            columns:
-              - column: { name: id, value: "2" }
-              - column: { name: email, value: "admin@hebekery.vn" }
-              - column: { name: password, value: "$2a$10$bzfUhajG9qnA6vKL3VlfFeRbEBhTc93Pb.9Wm1L9GZ2fFkgrxSVOm" }
-              - column: { name: name, value: "Admin Hebekery" }
-              - column: { name: phone, value: "0987654321" }
-              - column: { name: role, value: "ADMIN" }
-              - column: { name: active, valueBoolean: true }
-              - column: { name: force_password_change, valueBoolean: false }
 
   - changeSet:
       id: 004-seed-categories
