@@ -7,12 +7,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "products")
 public class Product extends BaseEntity {
     @Id
     private String id;
+
+    @Version
+    private Long version;
 
     @Column(nullable = false)
     private String name;

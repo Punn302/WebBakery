@@ -4,6 +4,7 @@ import com.example.hebekery.dto.ApiResponse;
 import io.jsonwebtoken.JwtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -37,6 +38,12 @@ public class GlobalExceptionHandler {
 
         String firstMessage = errors.values().stream().findFirst().orElse("Dữ liệu không hợp lệ");
         return ResponseEntity.badRequest().body(ApiResponse.error(firstMessage, errors));
+    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<ApiResponse<Void>> handleOptimisticLocking(OptimisticLockingFailureException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error("Dữ liệu đã bị thay đổi bởi người dùng khác, vui lòng tải lại trang"));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
