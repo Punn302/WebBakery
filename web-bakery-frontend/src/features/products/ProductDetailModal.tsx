@@ -64,7 +64,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
   const handleAddToCart = async () => {
     const productToAdd = hasDeal
-      ? { ...product, price: effectivePrice, name: `${product.name} [Cứu Bánh -${flashSaleDeal.discountPercent}%]` }
+      ? { ...product, price: effectivePrice, name: `${product.name} [Giảm ${flashSaleDeal.discountPercent}%]` }
       : product
     await addItem(productToAdd, quantity)
     setQuantity(1)
@@ -152,7 +152,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               {hasDeal && (
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 text-red-700 text-[11px] font-bold border border-red-200">
                   <Flame className="w-3.5 h-3.5 fill-red-700 text-red-700" />
-                  Cứu Bánh Lành Cận Date: Giảm {flashSaleDeal.discountPercent}% (còn {flashSaleDeal.daysRemaining} ngày)
+                  Giảm {flashSaleDeal.discountPercent}% • HSD: {flashSaleDeal.daysRemaining} ngày
                 </div>
               )}
               <div className="flex items-baseline gap-2.5">

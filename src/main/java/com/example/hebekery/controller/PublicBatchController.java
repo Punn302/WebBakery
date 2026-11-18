@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/batches")
-@Tag(name = "Public Batch & Deals", description = "Các chương trình ưu đãi Cứu Bánh Lành cận date cho khách hàng")
+@Tag(name = "Ưu đãi Lô Bánh", description = "Các chương trình ưu đãi Giảm giá/Flash Sale cho khách hàng")
 public class PublicBatchController {
 
     private final ProductBatchService productBatchService;
@@ -23,10 +23,10 @@ public class PublicBatchController {
         this.productBatchService = productBatchService;
     }
 
-    @Operation(summary = "Danh sách mẻ bánh cận date đang giảm giá Flash Sale", description = "Chương trình Cứu Bánh Lành - Tiết kiệm đến 40% cho bánh date gần")
+    @Operation(summary = "Danh sách bánh ưu đãi Flash Sale", description = "Các lô bánh đang trong chương trình Giảm giá/Flash Sale")
     @GetMapping("/flash-sale")
     public ResponseEntity<ApiResponse<List<ProductBatchResponse>>> getActiveFlashSaleDeals() {
         List<ProductBatchResponse> deals = productBatchService.getActiveFlashSaleBatches();
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách bánh giảm giá cận date thành công", deals));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách bánh giảm giá thành công", deals));
     }
 }

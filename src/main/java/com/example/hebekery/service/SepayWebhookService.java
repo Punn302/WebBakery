@@ -54,7 +54,7 @@ public class SepayWebhookService {
     public boolean verifyApiKey(String authHeader) {
         String expectedKey = sepayConfig.getWebhookApiKey();
         if (expectedKey == null || expectedKey.isBlank()) {
-            log.warn("SePay Webhook: Cấu hình webhook API key trống. Từ chối xác thực (Fail-closed).");
+            log.warn("SePay Webhook: Cấu hình webhook API key chưa được thiết lập.");
             return false;
         }
         if (authHeader == null || authHeader.isBlank()) {
@@ -85,21 +85,21 @@ public class SepayWebhookService {
         String referenceCode = payload.getReferenceCode();
         if (referenceCode != null && !referenceCode.isBlank()) {
             if (paymentTransactionRepository.existsByReferenceCode(referenceCode.trim())) {
-                log.info("SePay Webhook: Giao dịch {} đã được xử lý trước đó (Idempotent)", referenceCode);
+                log.info("SePay Webhook: Giao dịch {} đã được xử lý.", referenceCode);
                 return true;
             }
         }
 
         // 2. Kiểm tra loại giao dịch: chỉ chấp nhận tiền vào ("in")
         if (payload.getTransferType() != null && !"in".equalsIgnoreCase(payload.getTransferType().trim())) {
-            log.info("SePay Webhook: Bỏ qua giao dịch không phải tiền vào: {}", payload.getTransferType());
+            log.info("SePay Webhook: Bỏ qua loại giao dịch: {}", payload.getTransferType());
             return false;
         }
 
         // 3. Trích xuất mã đơn hàng từ nội dung chuyển khoản
         String content = payload.getContent();
         if (content == null || content.isBlank()) {
-            log.warn("SePay Webhook: Nội dung giao dịch trống");
+            log.warn("SePay Webhook: Nội dung giao dịch rỗng");
             return false;
         }
 
@@ -110,7 +110,7 @@ public class SepayWebhookService {
 
         // 4. Nếu đơn hàng đã bị HỦY trước đó: không chuyển sang PAID âm thầm, cắm cờ cho nhân viên xử lý
         if ("CANCELLED".equalsIgnoreCase(order.getOrderStatus())) {
-            log.warn("SePay Webhook: Đơn hàng {} đã bị HỦY nhưng nhận được thanh toán: {}", order.getId(), amount);
+            log.warn("SePay Webhook: Đơn hàng {} đã hủy nhưng nhận thanh toán: {}", order.getId(), amount);
             order.setAdminNote((order.getAdminNote() != null ? order.getAdminNote() + " | " : "")
                     + "CẢNH BÁO: Nhận thanh toán " + (amount != null ? Math.round(amount) : 0) + " VNĐ cho đơn hàng ĐÃ HỦY. Cần nhân viên kiểm tra hoàn tiền.");
             orderRepository.save(order);
@@ -140,7 +140,7 @@ public class SepayWebhookService {
 
         // 5. Kiểm tra số tiền chuyển khoản: xử lý thiếu tiền một cách an toàn không crash
         if (amount == null || amount < (order.getTotal() - 1.0)) {
-            log.warn("SePay Webhook: Số tiền thanh toán không đủ. Nhận: {}, Yêu cầu: {}", amount, order.getTotal());
+            log.warn("SePay Webhook: Thanh toán không đủ. Nhận: {}, Yêu cầu: {}", amount, order.getTotal());
             order.setAdminNote((order.getAdminNote() != null ? order.getAdminNote() + " | " : "")
                     + "CẢNH BÁO: Thanh toán thiếu. Nhận " + (amount != null ? Math.round(amount) : 0) + " / " + Math.round(order.getTotal()) + " VNĐ. Mã GD: " + referenceCode);
             orderRepository.save(order);
@@ -203,7 +203,7 @@ public class SepayWebhookService {
         // Chú ý: Loyalty points được tích khi đơn hoàn tất/giao hàng (OrderService.markReceived),
         // không cộng tại webhook thanh toán để tránh cộng điểm 2 lần.
 
-        log.info("SePay Webhook: Xử lý thành công đơn hàng {} - Số tiền: {}", order.getId(), amount);
+        log.info("SePay Webhook: Xử lý đơn hàng {} thành công.", order.getId());
         return true;
     }
 

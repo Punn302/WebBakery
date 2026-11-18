@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping({"/api/warehouse/batches", "/api/admin/batches"})
 @PreAuthorize("hasAnyRole('ADMIN', 'STAFF_WAREHOUSE')")
-@Tag(name = "Admin Batch & Shelf-Life Management", description = "Quản lý lô sản xuất bánh, theo dõi hạn sử dụng (HSD) và chiến dịch Cứu Bánh Lành cận date")
+@Tag(name = "Quản lý Lô Bánh", description = "Quản lý lô sản xuất và các chương trình Giảm giá/Flash Sale")
 public class AdminBatchController {
 
     private final ProductBatchService productBatchService;
@@ -38,7 +38,7 @@ public class AdminBatchController {
         this.productBatchService = productBatchService;
     }
 
-    @Operation(summary = "Danh sách các lô bánh sản xuất", description = "Lọc theo sản phẩm và trạng thái (ACTIVE, NEAR_EXPIRY, EXPIRED, SOLD_OUT)", security = @SecurityRequirement(name = "BearerAuth"))
+    @Operation(summary = "Danh sách các lô bánh sản xuất", description = "Lọc theo sản phẩm và trạng thái", security = @SecurityRequirement(name = "BearerAuth"))
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ProductBatchResponse>>> getBatches(
             @RequestParam(required = false) String productId,
@@ -50,7 +50,7 @@ public class AdminBatchController {
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách lô bánh thành công", result));
     }
 
-    @Operation(summary = "Thống kê hạn sử dụng các lô bánh", description = "Tổng hợp số lô an toàn, cận date và hết hạn", security = @SecurityRequirement(name = "BearerAuth"))
+    @Operation(summary = "Thống kê hạn sử dụng các lô bánh", description = "Tổng hợp thống kê số lô sản xuất", security = @SecurityRequirement(name = "BearerAuth"))
     @GetMapping("/stats")
     public ResponseEntity<ApiResponse<BatchStatsResponse>> getStats() {
         BatchStatsResponse stats = productBatchService.getBatchStats();
@@ -65,7 +65,7 @@ public class AdminBatchController {
                 .body(ApiResponse.success("Tạo lô sản xuất mới thành công", created));
     }
 
-    @Operation(summary = "Kích hoạt hoặc chỉnh sửa Flash Sale cận date", description = "Bật giảm giá xả hàng cho lô bánh sắp hết hạn (Cứu Bánh Lành)", security = @SecurityRequirement(name = "BearerAuth"))
+    @Operation(summary = "Cập nhật Flash Sale cho lô bánh", description = "Bật giảm giá Flash Sale cho lô bánh", security = @SecurityRequirement(name = "BearerAuth"))
     @PutMapping("/{id}/flash-sale")
     public ResponseEntity<ApiResponse<ProductBatchResponse>> updateFlashSale(
             @PathVariable String id,

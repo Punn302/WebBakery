@@ -576,7 +576,7 @@ export const AdminInventoryPage: React.FC = () => {
             <div className="border border-[#e7e5e4] bg-white p-3.5 space-y-1 col-span-2 sm:col-span-1">
               <span className="text-[10px] font-bold text-orange-600 uppercase tracking-wider block flex items-center gap-1">
                 <Flame className="w-3.5 h-3.5 text-orange-600" />
-                <span>Flash Sale Cận Date</span>
+                <span>Flash Sale</span>
               </span>
               <div className="text-xl font-black text-orange-600">{batchStats?.flashSaleBatches || 0}</div>
             </div>
@@ -611,8 +611,8 @@ export const AdminInventoryPage: React.FC = () => {
               >
                 <option value="ALL">-- Tất cả trạng thái --</option>
                 <option value="ACTIVE">Còn hạn an toàn (ACTIVE)</option>
-                <option value="NEAR_EXPIRY">Cận date &le; 30 ngày (NEAR_EXPIRY)</option>
-                <option value="EXPIRED">Hết hạn &lt; 15 ngày (EXPIRED)</option>
+                <option value="NEAR_EXPIRY">Cận hạn (&lt;= 30 ngày)</option>
+                <option value="EXPIRED">Hết hạn (&lt; 15 ngày)</option>
                 <option value="SOLD_OUT">Đã xuất bán hết (SOLD_OUT)</option>
               </select>
             </div>
@@ -750,7 +750,7 @@ export const AdminInventoryPage: React.FC = () => {
                             }}
                           >
                             <Flame className="w-3 h-3 text-orange-500" />
-                            <span>{b.discountPercent > 0 ? 'Sửa Flash Sale' : 'Xả Cận Date'}</span>
+                            <span>Sửa Flash Sale</span>
                           </Button>
                         </td>
                       </tr>
@@ -1191,7 +1191,7 @@ export const AdminInventoryPage: React.FC = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Flame className="w-5 h-5 text-orange-500" />
-              <span>Chiến Dịch "Cứu Bánh Lành" Cận Date</span>
+              <span>Flash Sale</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-[#78716c]">
               Áp dụng mức giảm giá ưu đãi cho lô bánh sắp hết hạn để đẩy nhanh tốc độ xoay vòng kho

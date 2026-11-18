@@ -37,7 +37,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, dealBadge, on
       ? {
           ...product,
           price: effectivePrice,
-          name: `${product.name} [Cứu Bánh -${dealBadge.discountPercent}%]`,
+          name: `${product.name} [Giảm ${dealBadge.discountPercent}%]`,
         }
       : product
     await addItem(productToAdd, 1)
@@ -89,7 +89,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, dealBadge, on
             {hasDeal ? (
               <span className="bg-orange-600 text-white font-mono text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider shadow-xs flex items-center gap-1">
                 <Flame className="w-3 h-3 text-amber-200" />
-                <span>Cứu Bánh -{dealBadge?.discountPercent}%</span>
+                <span>Giảm {dealBadge?.discountPercent}%</span>
               </span>
             ) : (
               <span className="bg-[#FFE6DC] text-[#B23A2A] font-mono text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider shadow-xs">

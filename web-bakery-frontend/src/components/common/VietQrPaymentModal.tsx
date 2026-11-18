@@ -201,7 +201,7 @@ export const VietQrPaymentModal: React.FC<VietQrPaymentModalProps> = ({
         {isExpired && !isPaid && (
           <div className="p-6 bg-[#fef2f2] border border-[#fecaca] text-[#dc2626] rounded-2xl space-y-3 text-center">
             <AlertTriangle className="w-12 h-12 mx-auto text-[#dc2626]" />
-            <h3 className="font-display text-lg font-bold">Đơn Hàng Đã Hết Hạn Thanh Toán</h3>
+            <h3 className="font-display text-lg font-bold">Đã hết hạn thanh toán</h3>
             <p className="text-xs text-[#991b1b] leading-relaxed">
               Mã QR VietQR đã hết hiệu lực 15 phút. Quý khách vui lòng đặt lại đơn mới hoặc liên hệ hotline HeBekery để được hỗ trợ.
             </p>

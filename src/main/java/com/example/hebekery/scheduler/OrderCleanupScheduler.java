@@ -47,7 +47,7 @@ public class OrderCleanupScheduler {
         List<Order> expiredOrders = orderRepository.findExpiredPaymentOrders(expirationThreshold);
 
         if (!expiredOrders.isEmpty()) {
-            log.info("Phát hiện {} đơn hàng VietQR/MoMo quá hạn 15 phút chưa thanh toán. Đang tiến hành hủy...", expiredOrders.size());
+            log.info("Xử lý {} đơn hàng quá hạn thanh toán.", expiredOrders.size());
             for (Order order : expiredOrders) {
                 order.setOrderStatus("CANCELLED");
                 orderRepository.save(order);
@@ -78,7 +78,7 @@ public class OrderCleanupScheduler {
                         "SYSTEM"
                 ));
 
-                log.info("Đã hủy đơn hàng hết hạn: ID={}, Mã={}", order.getId(), order.getOrderCode());
+                log.info("Đã cập nhật trạng thái đơn hàng hết hạn thanh toán: ID={}, Mã={}", order.getId(), order.getOrderCode());
             }
         }
     }

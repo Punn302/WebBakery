@@ -42,7 +42,7 @@ describe('Hướng 2 & 3: Loyalty & Near-Expiry Flash Sale Components', () => {
     expect(screen.getByText('-15%')).toBeInTheDocument()
   })
 
-  it('renders ProductCard with "Cứu Bánh -35%" badge and remaining days when dealBadge is active', () => {
+  it('renders ProductCard with "Giảm 35%" badge and remaining days when dealBadge is active', () => {
     render(
       <MemoryRouter>
         <ProductCard
@@ -53,7 +53,7 @@ describe('Hướng 2 & 3: Loyalty & Near-Expiry Flash Sale Components', () => {
     )
 
     expect(screen.getByText('Bánh Biscotti Nguyên Cám Hạnh Nhân')).toBeInTheDocument()
-    expect(screen.getByText(/Cứu Bánh -35%/i)).toBeInTheDocument()
+    expect(screen.getByText(/Giảm 35%/i)).toBeInTheDocument()
     expect(screen.getByText(/HSD: 20 ngày/i)).toBeInTheDocument()
     // Discounted price 150,000 * 65% = 97,500đ
     expect(screen.getByText(/98\.000/)).toBeInTheDocument()

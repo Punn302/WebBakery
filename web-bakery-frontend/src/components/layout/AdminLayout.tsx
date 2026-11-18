@@ -95,7 +95,7 @@ export const AdminLayout: React.FC = () => {
       roles: ['ADMIN', 'STAFF_SALES'],
     },
     {
-      label: 'Giả lập SePay (Webhook)',
+      label: 'Kiểm thử thanh toán',
       path: '/admin/sepay-simulator',
       icon: Zap,
       roles: ['ADMIN'],

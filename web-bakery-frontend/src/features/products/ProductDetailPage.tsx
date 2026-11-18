@@ -268,7 +268,7 @@ export const ProductDetailPage: React.FC = () => {
     const customProduct = {
       ...product,
       price: effectivePrice,
-      name: `${product.name} (${selectedVariant === 'combo' ? 'Combo 2 Hũ' : selectedVariant.toUpperCase()} - ${selectedFlavor})${flashSaleDeal ? ` [Cứu Bánh -${flashSaleDeal.discountPercent}%]` : ''}`,
+      name: `${product.name} (${selectedVariant === 'combo' ? 'Combo 2 Hũ' : selectedVariant.toUpperCase()} - ${selectedFlavor})${flashSaleDeal ? ` [Giảm ${flashSaleDeal.discountPercent}%]` : ''}`,
     }
     await addItem(customProduct, quantity)
     setIsAdded(true)
@@ -281,7 +281,7 @@ export const ProductDetailPage: React.FC = () => {
     const customProduct = {
       ...product,
       price: effectivePrice,
-      name: `${product.name} (${selectedVariant === 'combo' ? 'Combo 2 Hũ' : selectedVariant.toUpperCase()} - ${selectedFlavor})${flashSaleDeal ? ` [Cứu Bánh -${flashSaleDeal.discountPercent}%]` : ''}`,
+      name: `${product.name} (${selectedVariant === 'combo' ? 'Combo 2 Hũ' : selectedVariant.toUpperCase()} - ${selectedFlavor})${flashSaleDeal ? ` [Giảm ${flashSaleDeal.discountPercent}%]` : ''}`,
     }
     await addItem(customProduct, quantity)
     navigate('/checkout')
@@ -412,7 +412,7 @@ export const ProductDetailPage: React.FC = () => {
             {flashSaleDeal ? (
               <div className="absolute top-4 left-4 bg-red-600 text-white font-bold text-xs px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5 animate-pulse">
                 <Flame className="w-3.5 h-3.5 fill-white text-white" />
-                CỨU BÁNH -{flashSaleDeal.discountPercent}%
+                Giảm {flashSaleDeal.discountPercent}%
               </div>
             ) : (
               <div className="absolute top-4 left-4 bg-[#FFE6DC] text-[#B23A2A] font-bold text-xs px-3 py-1 rounded-full shadow-xs">
@@ -490,7 +490,7 @@ export const ProductDetailPage: React.FC = () => {
             {flashSaleDeal && (
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-red-600 to-amber-600 text-white text-xs font-bold shadow-xs">
                 <Flame className="w-4 h-4 fill-white text-white shrink-0" />
-                Cứu Bánh Lành Cận Date: Giảm {flashSaleDeal.discountPercent}% (HSD chỉ còn {flashSaleDeal.daysRemaining} ngày)
+                Giảm {flashSaleDeal.discountPercent}% • HSD: {flashSaleDeal.daysRemaining} ngày
               </div>
             )}
             <div className="flex items-baseline gap-3 flex-wrap">
