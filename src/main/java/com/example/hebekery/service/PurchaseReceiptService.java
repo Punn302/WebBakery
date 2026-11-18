@@ -6,6 +6,7 @@ import com.example.hebekery.repository.PurchaseReceiptRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,6 +27,7 @@ public class PurchaseReceiptService {
         return createBatch(List.of(productId), List.of(quantity), List.of(unitCost), supplier, note).get(0);
     }
 
+    @Transactional
     public List<PurchaseReceipt> createBatch(List<String> productIds, List<Integer> quantities, List<Double> unitCosts, String supplier, String note) {
         if (productIds == null || quantities == null || unitCosts == null || productIds.isEmpty()) {
             throw new IllegalArgumentException("Vui long nhap it nhat mot san pham");

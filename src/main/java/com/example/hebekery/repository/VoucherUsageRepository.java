@@ -14,4 +14,8 @@ public interface VoucherUsageRepository extends JpaRepository<VoucherUsage, Stri
     long countByVoucherIdAndUserId(String voucherId, String userId);
 
     boolean existsByVoucherIdAndUserId(String voucherId, String userId);
+
+    void deleteByOrderId(String orderId);
+
+    List<VoucherUsage> findByOrderId(String orderId);
 }

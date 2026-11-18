@@ -11,18 +11,19 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# Stage 2: Production Server with Nginx Alpine
-FROM nginx:alpine
+# Stage 2: Hardened Production Server with Non-Root Nginx
+FROM nginxinc/nginx-unprivileged:alpine
 
 # Remove default nginx html
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copy build artifacts from builder stage
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Copy build artifacts from builder stage with unprivileged ownership
+COPY --from=builder --chown=nginx:nginx /app/dist /usr/share/nginx/html
 
 # Copy custom nginx configuration for SPA client routing
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
+# Default unprivileged port is 8080
+EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]

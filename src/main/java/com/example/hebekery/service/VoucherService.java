@@ -6,6 +6,8 @@ import com.example.hebekery.model.Voucher;
 import com.example.hebekery.model.VoucherUsage;
 import com.example.hebekery.repository.VoucherRepository;
 import com.example.hebekery.repository.VoucherUsageRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class VoucherService {
+
+    private static final Logger log = LoggerFactory.getLogger(VoucherService.class);
 
     private final VoucherRepository voucherRepository;
     private final VoucherUsageRepository voucherUsageRepository;
@@ -121,6 +125,22 @@ public class VoucherService {
                     orderId
             );
             voucherUsageRepository.save(usage);
+        }
+    }
+
+    @Transactional
+    public void restoreVoucherUsage(String voucherCode, String orderId) {
+        if (voucherCode == null || voucherCode.isBlank()) return;
+        Voucher voucher = voucherRepository.findByCodeIgnoreCase(voucherCode.trim()).orElse(null);
+        if (voucher != null) {
+            if (voucher.getUsedCount() > 0) {
+                voucher.setUsedCount(voucher.getUsedCount() - 1);
+                voucherRepository.save(voucher);
+            }
+            if (orderId != null && !orderId.isBlank()) {
+                voucherUsageRepository.deleteByOrderId(orderId);
+            }
+            log.info("Đã phục hồi lượt dùng voucher {} cho đơn hàng {}", voucherCode, orderId);
         }
     }
 

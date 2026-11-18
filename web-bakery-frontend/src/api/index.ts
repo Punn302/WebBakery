@@ -1,4 +1,5 @@
 const unwrap = <T>(res: any): T => res.data?.data ?? res.data;
+export { axiosClient } from './axiosClient'
 import { axiosClient } from './axiosClient'
 import type {
   User,
@@ -570,3 +571,7 @@ export const adminBatchApi = {
     return unwrap(res)
   },
 }
+
+export * from './queryKeys'
+export * from './queryClient'
+

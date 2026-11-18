@@ -34,9 +34,9 @@ if (form) {
 
         const response = await fetch('/api/orders/track?' + params.toString());
         const data = await response.json();
-        const orders = data.orders || [];
+        const orders = data.data ? (Array.isArray(data.data) ? data.data : [data.data]) : (data.orders || []);
         if (orders.length === 0) {
-            results.innerHTML = '<div class="text-gray-400 text-center py-6">Không tìm thấy đơn hàng phù hợp.</div>';
+            results.innerHTML = '<div class="text-gray-400 text-center py-6">' + (data.message || 'Không tìm thấy đơn hàng phù hợp.') + '</div>';
             return;
         }
 
@@ -44,7 +44,7 @@ if (form) {
             <div class="border border-gray-100 rounded-lg p-4">
                 <div class="flex justify-between gap-4">
                     <div>
-                        <p class="font-semibold text-gray-800">${order.id}</p>
+                        <p class="font-semibold text-gray-800">${order.orderCode || order.id}</p>
                         <p class="text-sm text-gray-500">${order.customerName || ''} - ${order.phone || ''}</p>
                         <p class="text-sm text-gray-500">${formatOrderStatus(order.orderStatus, order.paymentStatus)}</p>
                     </div>

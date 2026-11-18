@@ -139,9 +139,12 @@ class AuthControllerTest {
     void refreshToken_success() {
         RefreshTokenRequest request = new RefreshTokenRequest("valid-refresh-token");
         User user = new User("u-1", "user@hebekery.vn", "pass", "User", "0901234567", "ROLE_USER");
+        io.jsonwebtoken.Claims claims = mock(io.jsonwebtoken.Claims.class);
+        when(claims.get("type", String.class)).thenReturn("REFRESH");
+        when(claims.getSubject()).thenReturn("user@hebekery.vn");
 
         when(jwtTokenProvider.validateToken("valid-refresh-token")).thenReturn(true);
-        when(jwtTokenProvider.getUsernameFromToken("valid-refresh-token")).thenReturn("user@hebekery.vn");
+        when(jwtTokenProvider.getClaimsFromToken("valid-refresh-token")).thenReturn(claims);
         when(userRepository.findByEmailIgnoreCase("user@hebekery.vn")).thenReturn(Optional.of(user));
         when(jwtTokenProvider.generateToken(user)).thenReturn("new-access-token");
 
@@ -151,6 +154,22 @@ class AuthControllerTest {
         assertNotNull(response.getBody());
         assertTrue(response.getBody().isSuccess());
         assertEquals("new-access-token", response.getBody().getData().getAccessToken());
+    }
+
+    @Test
+    @DisplayName("Làm mới token thất bại khi token không có claim type REFRESH")
+    void refreshToken_wrongTokenType() {
+        RefreshTokenRequest request = new RefreshTokenRequest("access-token-used-as-refresh");
+        io.jsonwebtoken.Claims claims = mock(io.jsonwebtoken.Claims.class);
+        when(claims.get("type", String.class)).thenReturn(null);
+        when(jwtTokenProvider.validateToken("access-token-used-as-refresh")).thenReturn(true);
+        when(jwtTokenProvider.getClaimsFromToken("access-token-used-as-refresh")).thenReturn(claims);
+
+        ResponseEntity<ApiResponse<TokenRefreshResponse>> response = authController.refreshToken(request);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertFalse(response.getBody().isSuccess());
     }
 
     @Test

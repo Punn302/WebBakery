@@ -128,27 +128,41 @@ export const ProductCatalogPage: React.FC = () => {
     // 1. Keyword search
     if (keyword.trim()) {
       const q = keyword.toLowerCase().trim()
-      result = result.filter(
-        (p) =>
+      result = result.filter((p) => {
+        const catName =
+          typeof p.category === 'object' && p.category !== null
+            ? (p.category.name || '').toLowerCase()
+            : typeof p.category === 'string'
+            ? p.category.toLowerCase()
+            : ''
+        return (
           p.name.toLowerCase().includes(q) ||
           p.description?.toLowerCase().includes(q) ||
-          p.category?.name.toLowerCase().includes(q)
-      )
+          catName.includes(q)
+        )
+      })
     }
 
     // 2. Category filter
     if (selectedCategory !== 'all') {
+      const getCatName = (p: Product) =>
+        typeof p.category === 'object' && p.category !== null
+          ? (p.category.name || '').toLowerCase()
+          : typeof p.category === 'string'
+          ? p.category.toLowerCase()
+          : ''
+
       if (selectedCategory === 'biscotti') {
         result = result.filter(
           (p) =>
             p.name.toLowerCase().includes('biscotti') ||
-            p.category?.name.toLowerCase().includes('biscotti')
+            getCatName(p).includes('biscotti')
         )
       } else if (selectedCategory === 'granola') {
         result = result.filter(
           (p) =>
             p.name.toLowerCase().includes('granola') ||
-            p.category?.name.toLowerCase().includes('granola')
+            getCatName(p).includes('granola')
         )
       } else if (selectedCategory === 'keto') {
         result = result.filter(

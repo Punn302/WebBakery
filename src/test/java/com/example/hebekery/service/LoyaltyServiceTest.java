@@ -66,7 +66,7 @@ class LoyaltyServiceTest {
         CustomerProfile profile = new CustomerProfile("PROF-1", "USR-1");
         profile.setLoyaltyPoints(50);
 
-        when(customerProfileRepository.findByUserId("USR-1")).thenReturn(Optional.of(profile));
+        when(customerProfileRepository.findByUserIdWithLock("USR-1")).thenReturn(Optional.of(profile));
 
         loyaltyService.redeemPointsForOrder("USR-1", "ORD-102", 20);
 
@@ -81,7 +81,7 @@ class LoyaltyServiceTest {
         CustomerProfile profile = new CustomerProfile("PROF-1", "USR-1");
         profile.setLoyaltyPoints(10);
 
-        when(customerProfileRepository.findByUserId("USR-1")).thenReturn(Optional.of(profile));
+        when(customerProfileRepository.findByUserIdWithLock("USR-1")).thenReturn(Optional.of(profile));
 
         assertThrows(IllegalArgumentException.class, () -> {
             loyaltyService.redeemPointsForOrder("USR-1", "ORD-103", 25);

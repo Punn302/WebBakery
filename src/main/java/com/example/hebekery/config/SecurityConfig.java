@@ -78,6 +78,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // OpenAPI / Swagger docs
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        // Health check probe
+                        .requestMatchers("/api/health", "/api/health/**").permitAll()
                         // Public Assets & Static files
                         .requestMatchers("/", "/index.html", "/favicon.ico", "/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
                         // Public APIs

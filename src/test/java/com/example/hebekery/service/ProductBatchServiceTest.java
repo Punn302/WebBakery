@@ -79,7 +79,7 @@ class ProductBatchServiceTest {
         // Batch 2 expires later (in 60 days), has 20 in stock
         ProductBatch b2 = new ProductBatch("B2", "P001", "LOT-02", LocalDate.now().minusDays(10), LocalDate.now().plusDays(60), 30, 20, "ACTIVE", 0.0, null);
 
-        when(productBatchRepository.findAvailableBatchesFEFO("P001")).thenReturn(List.of(b1, b2));
+        when(productBatchRepository.findAvailableBatchesFEFOWithLock("P001")).thenReturn(List.of(b1, b2));
 
         // Deduct 8 items: should take all 5 from B1 (leaving 0, status SOLD_OUT) and 3 from B2 (leaving 17)
         productBatchService.deductBatchStockFEFO("P001", 8);
@@ -90,6 +90,20 @@ class ProductBatchServiceTest {
 
         verify(productBatchRepository, times(1)).save(b1);
         verify(productBatchRepository, times(1)).save(b2);
+    }
+
+    @Test
+    @DisplayName("testExpireOutdatedBatches: Tự động cập nhật EXPIRED cho các lô hết hạn")
+    void testExpireOutdatedBatches() {
+        ProductBatch b1 = new ProductBatch("B1", "P001", "LOT-OLD", LocalDate.now().minusDays(90), LocalDate.now().minusDays(1), 10, 5, "ACTIVE", 0.0, null);
+
+        when(productBatchRepository.findByExpiryDateBeforeAndStatusNot(any(LocalDate.class), eq("EXPIRED")))
+                .thenReturn(List.of(b1));
+
+        productBatchService.expireOutdatedBatches();
+
+        assertEquals("EXPIRED", b1.getStatus());
+        verify(productBatchRepository, times(1)).save(b1);
     }
 
     @Test

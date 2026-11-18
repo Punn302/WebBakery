@@ -295,6 +295,7 @@ export const ProductDetailPage: React.FC = () => {
       imageUrl: bundle.imageUrl,
       active: true,
       stock: 50,
+      stockQuantity: 50,
       lowStockThreshold: 5,
       category: { id: 1, name: 'Bánh dinh dưỡng HeBekery', slug: 'banh-dinh-duong', active: true },
       description: bundle.name,
@@ -641,23 +642,25 @@ export const ProductDetailPage: React.FC = () => {
               <span className="text-xs font-bold text-[#2A2725] uppercase tracking-wide">
                 Số lượng:
               </span>
-              <div className="inline-flex items-center border border-[#E5E2DF] bg-white rounded-full p-1 shadow-2xs">
+              <div className="inline-flex items-center border border-[#E5E2DF] bg-white rounded-full p-0.5 shadow-2xs">
                 <button
                   type="button"
                   onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                  className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5 text-[#2A2725] cursor-pointer"
+                  className="min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center hover:bg-black/5 text-[#2A2725] cursor-pointer touch-manipulation"
+                  aria-label="Giảm số lượng"
                 >
-                  <Minus className="w-3.5 h-3.5" />
+                  <Minus className="w-4 h-4" />
                 </button>
-                <span className="w-10 text-center font-mono font-bold text-xs text-[#2A2725]">
+                <span className="w-10 text-center font-mono font-bold text-sm text-[#2A2725]">
                   {quantity}
                 </span>
                 <button
                   type="button"
                   onClick={() => setQuantity((prev) => prev + 1)}
-                  className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5 text-[#2A2725] cursor-pointer"
+                  className="min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center hover:bg-black/5 text-[#2A2725] cursor-pointer touch-manipulation"
+                  aria-label="Tăng số lượng"
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -1077,14 +1080,15 @@ export const ProductDetailPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
               <div className="inline-flex items-center border border-[#E5E2DF] bg-white rounded-full p-0.5">
                 <button
                   type="button"
                   onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                  className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-black/5 text-[#2A2725] cursor-pointer"
+                  className="min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center hover:bg-black/5 text-[#2A2725] cursor-pointer touch-manipulation"
+                  aria-label="Giảm số lượng"
                 >
-                  <Minus className="w-3 h-3" />
+                  <Minus className="w-3.5 h-3.5" />
                 </button>
                 <span className="w-8 text-center font-mono font-bold text-xs text-[#2A2725]">
                   {quantity}
@@ -1092,16 +1096,17 @@ export const ProductDetailPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setQuantity((prev) => prev + 1)}
-                  className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-black/5 text-[#2A2725] cursor-pointer"
+                  className="min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center hover:bg-black/5 text-[#2A2725] cursor-pointer touch-manipulation"
+                  aria-label="Tăng số lượng"
                 >
-                  <Plus className="w-3 h-3" />
+                  <Plus className="w-3.5 h-3.5" />
                 </button>
               </div>
 
               <button
                 type="button"
                 onClick={handleAddToCart}
-                className="btn-act py-2.5 px-4 rounded-full text-xs font-bold uppercase tracking-wider cursor-pointer"
+                className="btn-act min-h-[44px] py-2 px-3.5 rounded-full text-xs font-bold uppercase tracking-wider cursor-pointer touch-manipulation flex items-center justify-center"
               >
                 {isAdded ? 'Đã thêm' : 'Thêm giỏ'}
               </button>
@@ -1109,7 +1114,7 @@ export const ProductDetailPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleBuyNow}
-                className="bg-[#006561] hover:bg-[#1a9a9b] text-[#FEFBF4] py-2.5 px-5 rounded-full text-xs font-bold uppercase tracking-wider cursor-pointer shadow-xs transition-all"
+                className="bg-[#006561] hover:bg-[#1a9a9b] text-[#FEFBF4] min-h-[44px] py-2 px-4 rounded-full text-xs font-bold uppercase tracking-wider cursor-pointer shadow-xs transition-all touch-manipulation flex items-center justify-center"
               >
                 Mua ngay
               </button>

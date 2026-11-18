@@ -1,9 +1,11 @@
 package com.example.hebekery.repository;
 
 import com.example.hebekery.model.ProductBatch;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -19,8 +21,16 @@ public interface ProductBatchRepository extends JpaRepository<ProductBatch, Stri
 
     List<ProductBatch> findByProductIdOrderByExpiryDateAsc(String productId);
 
-    @Query("SELECT b FROM ProductBatch b WHERE b.productId = :productId AND b.currentQuantity > 0 AND b.status != 'EXPIRED' ORDER BY b.expiryDate ASC")
+    @Query("SELECT b FROM ProductBatch b WHERE b.productId = :productId AND b.currentQuantity > 0 AND b.status = 'ACTIVE' AND b.expiryDate >= CURRENT_DATE ORDER BY b.expiryDate ASC")
     List<ProductBatch> findAvailableBatchesFEFO(@Param("productId") String productId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT b FROM ProductBatch b WHERE b.productId = :productId AND b.currentQuantity > 0 AND b.status = 'ACTIVE' AND b.expiryDate >= CURRENT_DATE ORDER BY b.expiryDate ASC")
+    List<ProductBatch> findAvailableBatchesFEFOWithLock(@Param("productId") String productId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT b FROM ProductBatch b WHERE b.id = :id")
+    Optional<ProductBatch> findByIdWithLock(@Param("id") String id);
 
     @Query("SELECT b FROM ProductBatch b WHERE (:productId IS NULL OR b.productId = :productId) " +
            "AND (:status IS NULL OR b.status = :status) " +

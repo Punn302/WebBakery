@@ -29,7 +29,7 @@ interface VietQrPaymentModalProps {
 const BANK_ID = 'MB' // MBBank (Ngân hàng TMCP Quân Đội)
 const BANK_NAME = 'MBBank (Ngân Hàng Quân Đội)'
 const ACCOUNT_NO = '0979764185'
-const ACCOUNT_NAME = 'TIEM BANH HEBEKERY'
+const ACCOUNT_NAME = 'HeBekery Healthy Bakery'
 const QR_EXPIRE_SECONDS = 900 // 15 minutes = 900 seconds
 
 export const VietQrPaymentModal: React.FC<VietQrPaymentModalProps> = ({
@@ -139,7 +139,7 @@ export const VietQrPaymentModal: React.FC<VietQrPaymentModalProps> = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         onClose={onClose}
-        className="max-w-lg p-6 sm:p-7 space-y-5 rounded-3xl border border-[#E5E2DF] bg-white font-text"
+        className="max-w-lg p-6 sm:p-7 space-y-5 rounded-3xl border border-[#E5E2DF] bg-white font-text max-h-[90vh] overflow-y-auto"
       >
         <DialogHeader>
           <div className="flex items-center justify-between">
@@ -162,7 +162,7 @@ export const VietQrPaymentModal: React.FC<VietQrPaymentModalProps> = ({
           <div className="p-3 bg-[#FAF7F2] border border-[#E5E2DF] rounded-2xl space-y-1.5">
             <div className="flex items-center justify-between text-xs">
               <span className="flex items-center gap-1.5 font-medium text-[#6B6661]">
-                <Clock className="w-3.5 h-3.5 text-[#C9785C] animate-spin" />
+                <Clock className="w-3.5 h-3.5 text-[#C9785C] animate-pulse" />
                 <span>Thời gian giữ đơn bánh:</span>
               </span>
               <span className="font-mono font-bold text-sm text-[#C9785C]">

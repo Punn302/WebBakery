@@ -54,6 +54,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
   if (!product) return null
 
+  const stock = product.stockQuantity ?? product.stock ?? 0
   const flashSaleDeal = flashSaleDeals.find((d) => String(d.productId) === String(product.id))
   const hasDeal = !!flashSaleDeal && flashSaleDeal.discountPercent > 0
   const effectivePrice = hasDeal
@@ -89,7 +90,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             {product.category && (
               <div className="absolute top-3.5 left-3.5">
                 <span className="text-[10px] font-bold tracking-wider uppercase bg-white/95 text-[#2A2725] border border-[#E5E2DF] px-2.5 py-1 rounded-full backdrop-blur-xs shadow-xs">
-                  {product.category.name}
+                  {typeof product.category === 'object' && product.category !== null
+                    ? product.category.name
+                    : String(product.category)}
                 </span>
               </div>
             )}
@@ -116,8 +119,8 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 </DialogTitle>
                 <DialogDescription className="text-xs text-[#6B6661] pt-0.5">
                   Mã SP: <span className="font-mono">{product.id}</span> •{' '}
-                  {product.stock > 0 ? (
-                    <span className="text-[#006561] font-semibold">Còn hàng ({product.stock} phần)</span>
+                  {stock > 0 ? (
+                    <span className="text-[#006561] font-semibold">Còn hàng ({stock} phần)</span>
                   ) : (
                     <span className="text-[#B23A2A] font-semibold">Tạm hết</span>
                   )}
@@ -210,8 +213,8 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   </button>
                   <span className="w-10 text-center text-xs font-bold font-mono text-[#2A2725]">{quantity}</span>
                   <button
-                    disabled={quantity >= product.stock}
-                    onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
+                    disabled={quantity >= stock}
+                    onClick={() => setQuantity((q) => Math.min(stock, q + 1))}
                     className="w-8 h-8 flex items-center justify-center hover:bg-black/5 disabled:opacity-30 cursor-pointer text-[#2A2725]"
                   >
                     <Plus className="w-3 h-3" />
@@ -222,7 +225,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               <Button
                 variant="default"
                 size="lg"
-                disabled={product.stock <= 0}
+                disabled={stock <= 0}
                 onClick={handleAddToCart}
                 className="w-full flex items-center justify-center gap-2 bg-[#006561] hover:bg-[#1a9a9b] text-[#FEFBF4] rounded-full py-3 font-semibold shadow-md cursor-pointer transition-all"
               >

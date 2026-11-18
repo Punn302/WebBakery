@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -52,7 +54,8 @@ public class SepayWebhookService {
     public boolean verifyApiKey(String authHeader) {
         String expectedKey = sepayConfig.getWebhookApiKey();
         if (expectedKey == null || expectedKey.isBlank()) {
-            return true;
+            log.warn("SePay Webhook: Cấu hình webhook API key trống. Từ chối xác thực (Fail-closed).");
+            return false;
         }
         if (authHeader == null || authHeader.isBlank()) {
             return false;
@@ -63,7 +66,9 @@ public class SepayWebhookService {
         } else if (cleanHeader.toLowerCase().startsWith("bearer ")) {
             cleanHeader = cleanHeader.substring(7).trim();
         }
-        return expectedKey.equals(cleanHeader);
+        byte[] expectedBytes = expectedKey.getBytes(StandardCharsets.UTF_8);
+        byte[] actualBytes = cleanHeader.getBytes(StandardCharsets.UTF_8);
+        return MessageDigest.isEqual(expectedBytes, actualBytes);
     }
 
     /**
@@ -101,21 +106,78 @@ public class SepayWebhookService {
         Order order = findOrderByContent(content)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng tương ứng với nội dung: " + content));
 
-        // 4. Kiểm tra số tiền chuyển khoản
         Double amount = payload.getTransferAmount();
-        if (amount == null || amount < (order.getTotal() - 1.0)) {
-            log.error("SePay Webhook: Số tiền thanh toán không đủ. Nhận: {}, Yêu cầu: {}", amount, order.getTotal());
-            throw new IllegalArgumentException("Số tiền thanh toán không khớp với giá trị đơn hàng");
+
+        // 4. Nếu đơn hàng đã bị HỦY trước đó: không chuyển sang PAID âm thầm, cắm cờ cho nhân viên xử lý
+        if ("CANCELLED".equalsIgnoreCase(order.getOrderStatus())) {
+            log.warn("SePay Webhook: Đơn hàng {} đã bị HỦY nhưng nhận được thanh toán: {}", order.getId(), amount);
+            order.setAdminNote((order.getAdminNote() != null ? order.getAdminNote() + " | " : "")
+                    + "CẢNH BÁO: Nhận thanh toán " + (amount != null ? Math.round(amount) : 0) + " VNĐ cho đơn hàng ĐÃ HỦY. Cần nhân viên kiểm tra hoàn tiền.");
+            orderRepository.save(order);
+
+            orderStatusHistoryRepository.save(new OrderStatusHistory(
+                    order.getId(),
+                    order.getOrderStatus(),
+                    "CANCELLED_PAYMENT_RECEIVED",
+                    "Đã nhận chuyển khoản " + (amount != null ? Math.round(amount) : 0) + " VNĐ cho đơn đã hủy. Cần nhân viên đối soát.",
+                    "SEPAY_WEBHOOK"
+            ));
+
+            PaymentTransaction tx = new PaymentTransaction(
+                    "TX-" + UUID.randomUUID(),
+                    order.getId(),
+                    referenceCode != null && !referenceCode.isBlank() ? referenceCode.trim() : "TX-" + UUID.randomUUID(),
+                    payload.getGateway(),
+                    payload.getAccountNumber(),
+                    amount != null ? amount : 0.0,
+                    payload.getTransferType(),
+                    payload.getContent(),
+                    parseTransactionDate(payload.getTransactionDate())
+            );
+            paymentTransactionRepository.save(tx);
+            return true;
         }
 
-        // 5. Cập nhật trạng thái đơn hàng sang PAID và PROCESSING
+        // 5. Kiểm tra số tiền chuyển khoản: xử lý thiếu tiền một cách an toàn không crash
+        if (amount == null || amount < (order.getTotal() - 1.0)) {
+            log.warn("SePay Webhook: Số tiền thanh toán không đủ. Nhận: {}, Yêu cầu: {}", amount, order.getTotal());
+            order.setAdminNote((order.getAdminNote() != null ? order.getAdminNote() + " | " : "")
+                    + "CẢNH BÁO: Thanh toán thiếu. Nhận " + (amount != null ? Math.round(amount) : 0) + " / " + Math.round(order.getTotal()) + " VNĐ. Mã GD: " + referenceCode);
+            orderRepository.save(order);
+
+            orderStatusHistoryRepository.save(new OrderStatusHistory(
+                    order.getId(),
+                    order.getOrderStatus(),
+                    "PARTIAL_PAYMENT",
+                    "Thanh toán thiếu: nhận " + (amount != null ? Math.round(amount) : 0) + " VNĐ / " + Math.round(order.getTotal()) + " VNĐ. Cần kiểm tra.",
+                    "SEPAY_WEBHOOK"
+            ));
+
+            if (referenceCode != null && !referenceCode.isBlank()) {
+                PaymentTransaction tx = new PaymentTransaction(
+                        "TX-" + UUID.randomUUID(),
+                        order.getId(),
+                        referenceCode.trim(),
+                        payload.getGateway(),
+                        payload.getAccountNumber(),
+                        amount != null ? amount : 0.0,
+                        payload.getTransferType(),
+                        payload.getContent(),
+                        parseTransactionDate(payload.getTransactionDate())
+                );
+                paymentTransactionRepository.save(tx);
+            }
+            return false;
+        }
+
+        // 6. Cập nhật trạng thái đơn hàng sang PAID và PROCESSING
         order.setPaymentStatus("PAID");
         if ("PENDING".equals(order.getOrderStatus()) || "AWAITING_PAYMENT".equals(order.getOrderStatus())) {
             order.setOrderStatus("PROCESSING");
         }
         orderRepository.save(order);
 
-        // 6. Ghi log lịch sử trạng thái đơn
+        // 7. Ghi log lịch sử trạng thái đơn
         orderStatusHistoryRepository.save(new OrderStatusHistory(
                 order.getId(),
                 order.getOrderStatus(),
@@ -124,7 +186,7 @@ public class SepayWebhookService {
                 "SEPAY_WEBHOOK"
         ));
 
-        // 7. Lưu bản ghi PaymentTransaction
+        // 8. Lưu bản ghi PaymentTransaction
         PaymentTransaction tx = new PaymentTransaction(
                 "TX-" + UUID.randomUUID(),
                 order.getId(),
@@ -138,19 +200,21 @@ public class SepayWebhookService {
         );
         paymentTransactionRepository.save(tx);
 
-        // 8. Tích điểm thành viên nếu đơn hàng thuộc về một User đã đăng ký
-        if (order.getUserId() != null && !order.getUserId().isBlank()) {
-            awardLoyaltyPoints(order.getUserId(), order.getTotal());
-        }
+        // Chú ý: Loyalty points được tích khi đơn hoàn tất/giao hàng (OrderService.markReceived),
+        // không cộng tại webhook thanh toán để tránh cộng điểm 2 lần.
 
         log.info("SePay Webhook: Xử lý thành công đơn hàng {} - Số tiền: {}", order.getId(), amount);
         return true;
     }
 
     /**
-     * Tìm kiếm đơn hàng qua nội dung chuyển khoản (Regex & String Search)
+     * Tìm kiếm đơn hàng qua nội dung chuyển khoản (Regex & Direct Query, không scan full table)
      */
     public Optional<Order> findOrderByContent(String content) {
+        if (content == null || content.isBlank()) {
+            return Optional.empty();
+        }
+
         // Tìm chuỗi dạng HBK...
         Matcher matcher = HBK_PATTERN.matcher(content);
         if (matcher.find()) {
@@ -176,27 +240,19 @@ public class SepayWebhookService {
             if (byOrdId.isPresent()) return byOrdId;
         }
 
-        // Nếu regex không ra, duyệt qua các đơn chưa thanh toán gần đây
-        return orderRepository.findAll().stream()
-                .filter(o -> "PENDING".equals(o.getPaymentStatus()))
-                .filter(o -> {
-                    boolean codeMatch = o.getOrderCode() != null && content.contains(o.getOrderCode().replaceAll("[^A-Za-z0-9]", ""));
-                    boolean idMatch = o.getId() != null && content.contains(o.getId().replaceAll("[^A-Za-z0-9]", ""));
-                    return codeMatch || idMatch;
-                })
-                .findFirst();
-    }
-
-    private void awardLoyaltyPoints(String userId, double totalSpent) {
-        try {
-            CustomerProfile profile = customerProfileRepository.findByUserId(userId)
-                    .orElseGet(() -> new CustomerProfile("PROF-" + UUID.randomUUID(), userId));
-            profile.addSpending(totalSpent);
-            customerProfileRepository.save(profile);
-            log.info("Cộng điểm thưởng cho User {}: Tổng chi tiêu mới = {}, Điểm = {}", userId, profile.getTotalSpent(), profile.getLoyaltyPoints());
-        } catch (Exception e) {
-            log.error("Lỗi khi cộng điểm thưởng thành viên: {}", e.getMessage());
+        // Trích xuất các chuỗi alphanumeric khác có khả năng là mã đơn hàng để truy vấn trực tiếp
+        Pattern tokenPattern = Pattern.compile("[A-Za-z0-9_-]{4,}");
+        Matcher tokenMatcher = tokenPattern.matcher(content);
+        while (tokenMatcher.find()) {
+            String candidate = tokenMatcher.group().trim();
+            Optional<Order> directMatch = orderRepository.findByOrderCode(candidate)
+                    .or(() -> orderRepository.findById(candidate));
+            if (directMatch.isPresent()) {
+                return directMatch;
+            }
         }
+
+        return Optional.empty();
     }
 
     private LocalDateTime parseTransactionDate(String dateStr) {

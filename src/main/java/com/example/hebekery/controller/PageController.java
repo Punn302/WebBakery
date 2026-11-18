@@ -212,26 +212,6 @@ public class PageController {
         return "momo-test";
     }
 
-    @PostMapping("/checkout/momo-test/pay")
-    public String payMomoTest(HttpSession session) {
-        if (!userService.isLoggedIn()) {
-            return "redirect:/login?redirect=/checkout";
-        }
-        Object pendingCheckout = session.getAttribute("pendingMomoCheckout");
-        if (!(pendingCheckout instanceof CheckoutRequest request)) {
-            return "redirect:/checkout";
-        }
-        orderService.createPaidMomoOrder(
-                userService.getCurrentUser(),
-                cartService.getCartItems(),
-                cartService.getTotalPrice(),
-                request
-        );
-        cartService.clearCart();
-        session.removeAttribute("pendingMomoCheckout");
-        return "redirect:/checkout/success";
-    }
-
     @PostMapping("/checkout/momo-test/cancel")
     public String cancelMomoTest(HttpSession session) {
         session.removeAttribute("pendingMomoCheckout");

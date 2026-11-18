@@ -34,6 +34,9 @@ public class LiquibaseConfig {
     @Bean
     public static BeanFactoryPostProcessor entityManagerFactoryDependsOnLiquibase() {
         return beanFactory -> {
+            if (!beanFactory.containsBeanDefinition("liquibase")) {
+                return;
+            }
             for (String name : beanFactory.getBeanNamesForType(LocalContainerEntityManagerFactoryBean.class, true, false)) {
                 String rawName = name.startsWith("&") ? name.substring(1) : name;
                 if (beanFactory.containsBeanDefinition(rawName)) {

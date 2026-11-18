@@ -16,7 +16,7 @@ import {
   Copy,
   Check,
 } from 'lucide-react'
-import { adminVoucherApi } from '@/api'
+import { adminVoucherApi, queryKeys } from '@/api'
 import type { Voucher } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -65,7 +65,7 @@ export const AdminVoucherPage: React.FC = () => {
 
   // Queries
   const { data: vouchers = [], isLoading } = useQuery({
-    queryKey: ['admin-vouchers'],
+    queryKey: queryKeys.vouchers.admin.all,
     queryFn: adminVoucherApi.getAll,
   })
 
@@ -73,8 +73,8 @@ export const AdminVoucherPage: React.FC = () => {
   const createMutation = useMutation({
     mutationFn: (data: Partial<Voucher>) => adminVoucherApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-vouchers'] })
-      queryClient.invalidateQueries({ queryKey: ['available-vouchers'] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.vouchers.admin.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.vouchers.available() })
       toast.success('Tạo mã giảm giá mới thành công!')
       closeDialog()
     },
@@ -88,8 +88,8 @@ export const AdminVoucherPage: React.FC = () => {
     mutationFn: ({ id, data }: { id: number | string; data: Partial<Voucher> }) =>
       adminVoucherApi.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-vouchers'] })
-      queryClient.invalidateQueries({ queryKey: ['available-vouchers'] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.vouchers.admin.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.vouchers.available() })
       toast.success('Cập nhật mã giảm giá thành công!')
       closeDialog()
     },
@@ -102,8 +102,8 @@ export const AdminVoucherPage: React.FC = () => {
   const deleteMutation = useMutation({
     mutationFn: (id: number | string) => adminVoucherApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-vouchers'] })
-      queryClient.invalidateQueries({ queryKey: ['available-vouchers'] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.vouchers.admin.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.vouchers.available() })
       toast.success('Đã xóa mã giảm giá')
     },
     onError: (err: unknown) => {
@@ -115,8 +115,8 @@ export const AdminVoucherPage: React.FC = () => {
   const toggleMutation = useMutation({
     mutationFn: (id: number | string) => adminVoucherApi.toggleStatus(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-vouchers'] })
-      queryClient.invalidateQueries({ queryKey: ['available-vouchers'] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.vouchers.admin.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.vouchers.available() })
       toast.success('Thay đổi trạng thái voucher thành công')
     },
     onError: (err: unknown) => {

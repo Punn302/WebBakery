@@ -364,6 +364,7 @@ export const ProfilePage: React.FC = () => {
           imageUrl: it.imageUrl,
           active: true,
           stock: 50,
+          stockQuantity: 50,
           lowStockThreshold: 5,
           category: { id: 1, name: 'Bánh HeBekery', slug: 'banh-hebekery', active: true },
           description: it.productName,

@@ -36,15 +36,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jwt = getJwtFromRequest(request);
 
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-                String username = tokenProvider.getUsernameFromToken(jwt);
+                io.jsonwebtoken.Claims claims = tokenProvider.getClaimsFromToken(jwt);
+                String tokenType = claims != null ? claims.get("type", String.class) : null;
+                if ("REFRESH".equalsIgnoreCase(tokenType)) {
+                    log.warn("Rejected authentication attempt using REFRESH token");
+                } else {
+                    String username = claims != null ? claims.getSubject() : null;
+                    if (username != null) {
+                        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                        if (userDetails != null && userDetails.isEnabled()) {
+                            UsernamePasswordAuthenticationToken authentication =
+                                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                if (userDetails != null && userDetails.isEnabled()) {
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                            SecurityContextHolder.getContext().setAuthentication(authentication);
+                        }
+                    }
                 }
             }
         } catch (Exception ex) {

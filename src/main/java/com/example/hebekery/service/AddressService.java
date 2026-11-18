@@ -4,6 +4,7 @@ import com.example.hebekery.dto.request.AddressRequest;
 import com.example.hebekery.model.Address;
 import com.example.hebekery.repository.AddressRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,10 +20,22 @@ public class AddressService {
         return addressRepository.findByUserId(userId);
     }
 
+    @Transactional
     public Address save(String userId, AddressRequest request) {
         return save(userId, null, request);
     }
 
+    @Transactional
+    public Address saveAddress(String userId, AddressRequest request) {
+        return save(userId, null, request);
+    }
+
+    @Transactional
+    public Address updateAddress(String userId, String addressId, AddressRequest request) {
+        return save(userId, addressId, request);
+    }
+
+    @Transactional
     public Address save(String userId, String addressId, AddressRequest request) {
         if (request.isDefaultAddress()) {
             List<Address> userAddresses = getByUser(userId);

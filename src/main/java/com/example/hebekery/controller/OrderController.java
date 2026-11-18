@@ -2,6 +2,7 @@ package com.example.hebekery.controller;
 
 import com.example.hebekery.dto.ApiResponse;
 import com.example.hebekery.dto.OrderDetailResponse;
+import com.example.hebekery.dto.PublicOrderTrackingResponse;
 import com.example.hebekery.model.Order;
 import com.example.hebekery.service.OrderService;
 import com.example.hebekery.service.UserService;
@@ -50,16 +51,23 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách đơn hàng thành công", dtos));
     }
 
-    @Operation(summary = "Tra cứu đơn hàng công khai", description = "Khách hàng tra cứu tiến độ giao hàng thông qua Mã đơn hàng hoặc Số điện thoại")
+    @Operation(summary = "Tra cứu đơn hàng công khai", description = "Khách hàng tra cứu tiến độ giao hàng thông qua Mã đơn hàng và Số điện thoại")
     @GetMapping("/api/orders/track")
-    public ResponseEntity<ApiResponse<List<OrderDetailResponse>>> track(
-            @Parameter(description = "Mã đơn hàng (ID hoặc HBK-Code)") @RequestParam(required = false) String orderId,
-            @Parameter(description = "Số điện thoại đặt hàng") @RequestParam(required = false) String phone) {
-        List<Order> orders = orderService.trackOrders(orderId, phone);
-        List<OrderDetailResponse> dtos = orders.stream()
-                .map(OrderDetailResponse::from)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(ApiResponse.success("Tra cứu đơn hàng thành công", dtos));
+    public ResponseEntity<ApiResponse<PublicOrderTrackingResponse>> track(
+            @Parameter(description = "Mã đơn hàng (HBK-Code hoặc ID)") @RequestParam(value = "orderCode", required = false) String orderCode,
+            @Parameter(description = "Mã đơn hàng (tương thích ngược)") @RequestParam(value = "orderId", required = false) String orderId,
+            @Parameter(description = "Số điện thoại đặt hàng") @RequestParam(value = "phone", required = false) String phone) {
+        String code = (orderCode != null && !orderCode.isBlank()) ? orderCode.trim() : ((orderId != null && !orderId.isBlank()) ? orderId.trim() : null);
+        if (code == null || phone == null || phone.isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.failure("Vui lòng cung cấp đầy đủ cả mã đơn hàng (orderCode) và số điện thoại (phone)"));
+        }
+        PublicOrderTrackingResponse dto = orderService.trackOrder(code, phone.trim());
+        if (dto == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.failure("Không tìm thấy đơn hàng phù hợp với thông tin đã cung cấp"));
+        }
+        return ResponseEntity.ok(ApiResponse.success("Tra cứu đơn hàng thành công", dto));
     }
 
     @Operation(summary = "Xem chi tiết đơn hàng", description = "Lấy thông tin chi tiết một đơn hàng của người dùng", security = @SecurityRequirement(name = "BearerAuth"))

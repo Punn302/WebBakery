@@ -24,6 +24,7 @@ const mockProduct: Product = {
   description: 'Bánh ăn kiêng healthy giòn rụm',
   price: 150000,
   stock: 25,
+  stockQuantity: 25,
   imageUrl: 'https://example.com/biscotti.jpg',
   active: true,
   lowStockThreshold: 5,

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Edit2, Trash2, Search, AlertCircle, Loader2 } from 'lucide-react'
-import { productApi, categoryApi } from '@/api'
+import { productApi, categoryApi, queryKeys } from '@/api'
 import type { Product } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -34,12 +34,12 @@ export const AdminProductsPage: React.FC = () => {
 
   // Queries
   const { data: productData, isLoading } = useQuery({
-    queryKey: ['admin-products', keyword],
+    queryKey: queryKeys.products.admin.list(keyword),
     queryFn: () => productApi.getProducts({ keyword: keyword.trim() || undefined, size: 50 }),
   })
 
   const { data: categories = [] } = useQuery({
-    queryKey: ['categories'],
+    queryKey: queryKeys.products.categories,
     queryFn: categoryApi.getCategories,
   })
 
@@ -48,10 +48,12 @@ export const AdminProductsPage: React.FC = () => {
   // Create / Update Mutation
   const saveMutation = useMutation({
     mutationFn: async () => {
+      const selectedCategory = categories.find((c) => c.id === Number(formData.categoryId))
       const payload: Partial<Product> = {
         name: formData.name,
         price: Number(formData.price),
         stock: Number(formData.stock),
+        stockQuantity: Number(formData.stock),
         lowStockThreshold: Number(formData.lowStockThreshold),
         imageUrl: formData.imageUrl,
         description: formData.description,
@@ -59,7 +61,8 @@ export const AdminProductsPage: React.FC = () => {
         protein: Number(formData.protein),
         fat: Number(formData.fat),
         carbs: Number(formData.carbs),
-        category: categories.find((c) => c.id === Number(formData.categoryId)),
+        category: selectedCategory || (editingProduct ? editingProduct.category : undefined),
+        categoryId: Number(formData.categoryId),
         active: true,
       }
 
@@ -70,8 +73,8 @@ export const AdminProductsPage: React.FC = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-products'] })
-      queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.admin.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.all })
       toast.success(editingProduct ? 'Cập nhật sản phẩm thành công!' : 'Tạo sản phẩm mới thành công!')
       setIsModalOpen(false)
       setEditingProduct(null)
@@ -86,7 +89,8 @@ export const AdminProductsPage: React.FC = () => {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => productApi.deleteProduct(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-products'] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.admin.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.all })
       toast.success('Đã xóa sản phẩm')
     },
     onError: () => {
@@ -114,11 +118,23 @@ export const AdminProductsPage: React.FC = () => {
 
   const openEditModal = (product: Product) => {
     setEditingProduct(product)
+    const currentStock = product.stockQuantity ?? product.stock ?? 0
+    let resolvedCategoryId = product.categoryId
+    if (!resolvedCategoryId) {
+      if (typeof product.category === 'object' && product.category !== null && 'id' in product.category && product.category.id) {
+        resolvedCategoryId = product.category.id
+      } else if (typeof product.category === 'string') {
+        const found = categories.find(
+          (c) => c.name.toLowerCase() === (product.category as string).toLowerCase() || c.slug === product.category
+        )
+        if (found) resolvedCategoryId = found.id
+      }
+    }
     setFormData({
       name: product.name,
-      categoryId: product.category?.id || categories[0]?.id || 1,
+      categoryId: resolvedCategoryId || categories[0]?.id || 1,
       price: product.price,
-      stock: product.stock,
+      stock: currentStock,
       lowStockThreshold: product.lowStockThreshold || 5,
       imageUrl: product.imageUrl,
       description: product.description || '',
@@ -191,7 +207,14 @@ export const AdminProductsPage: React.FC = () => {
               </tr>
             ) : (
               products.map((product) => {
-                const isLowStock = product.stock <= (product.lowStockThreshold || 10)
+                const currentStock = product.stockQuantity ?? product.stock ?? 0
+                const isLowStock = currentStock <= (product.lowStockThreshold || 10)
+                const categoryLabel =
+                  typeof product.category === 'object' && product.category !== null
+                    ? product.category.name
+                    : typeof product.category === 'string'
+                    ? product.category
+                    : 'Chung'
                 return (
                   <tr key={product.id} className="hover:bg-[#faf8f5] transition-colors">
                     <td className="py-3 px-4">
@@ -206,14 +229,14 @@ export const AdminProductsPage: React.FC = () => {
                       <p className="text-[10px] text-[#a8a29e]">#{product.id}</p>
                     </td>
                     <td className="py-3 px-4">
-                      <Badge variant="secondary">{product.category?.name || 'Chung'}</Badge>
+                      <Badge variant="secondary">{categoryLabel}</Badge>
                     </td>
                     <td className="py-3 px-4 font-bold text-[#47654c]">
                       {formatCurrency(product.price)}
                     </td>
                     <td className="py-3 px-4">
                       <span className={`font-semibold ${isLowStock ? 'text-[#dc2626]' : 'text-[#1c1917]'}`}>
-                        {product.stock}
+                        {currentStock}
                       </span>
                       {isLowStock && (
                         <span className="block text-[10px] text-[#dc2626] font-medium">

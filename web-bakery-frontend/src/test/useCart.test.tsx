@@ -32,6 +32,7 @@ describe('useCart Hook', () => {
     description: '',
     price: 50000,
     stock: 10,
+    stockQuantity: 10,
     imageUrl: '',
     active: true,
     lowStockThreshold: 2,
@@ -43,6 +44,7 @@ describe('useCart Hook', () => {
     description: '',
     price: 120000,
     stock: 15,
+    stockQuantity: 15,
     imageUrl: '',
     active: true,
     lowStockThreshold: 3,
@@ -99,5 +101,42 @@ describe('useCart Hook', () => {
     expect(result.current.items.length).toBe(1)
     expect(result.current.items[0].productId).toBe('P002')
     expect(result.current.subtotal).toBe(120000)
+  })
+
+  it('handles corrupt localStorage gracefully without throwing items.reduce is not a function', () => {
+    localStorage.setItem('hebekery_guest_cart', '{"notAnArray": true}')
+    const { result } = renderHook(() => useCart(), { wrapper })
+    expect(result.current.items).toEqual([])
+    expect(result.current.totalItems).toBe(0)
+    expect(result.current.subtotal).toBe(0)
+  })
+
+  it('handles malformed JSON in localStorage gracefully', () => {
+    localStorage.setItem('hebekery_guest_cart', 'corrupted-json-{{{')
+    const { result } = renderHook(() => useCart(), { wrapper })
+    expect(result.current.items).toEqual([])
+    expect(result.current.totalItems).toBe(0)
+    expect(result.current.subtotal).toBe(0)
+  })
+
+  it('respects stockQuantity when stock property is absent or zero', async () => {
+    const { result } = renderHook(() => useCart(), { wrapper })
+    const productWithStockQuantityOnly: Product = {
+      id: 'P003',
+      name: 'Bánh Ngói Hạnh Nhân',
+      description: '',
+      price: 80000,
+      stockQuantity: 5,
+      imageUrl: '',
+      active: true,
+      lowStockThreshold: 1,
+    }
+
+    await act(async () => {
+      await result.current.addItem(productWithStockQuantityOnly, 1)
+    })
+
+    expect(result.current.items.length).toBe(1)
+    expect(result.current.items[0].productId).toBe('P003')
   })
 })

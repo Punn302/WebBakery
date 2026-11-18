@@ -65,7 +65,8 @@ public class LoyaltyService {
     public void redeemPointsForOrder(String userId, String orderId, int pointsToUse) {
         if (pointsToUse <= 0) return;
 
-        CustomerProfile profile = getOrCreateProfile(userId);
+        CustomerProfile profile = customerProfileRepository.findByUserIdWithLock(userId)
+                .orElseGet(() -> getOrCreateProfile(userId));
         if (profile.getLoyaltyPoints() < pointsToUse) {
             throw new IllegalArgumentException("Số điểm hiện tại (" + profile.getLoyaltyPoints() + " điểm) không đủ để trừ " + pointsToUse + " điểm");
         }

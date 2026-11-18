@@ -77,6 +77,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       role: (res.user.role?.startsWith('ROLE_') ? res.user.role.substring(5) : res.user.role) as any,
     }
     localStorage.setItem('token', validToken)
+    if (res.refreshToken) {
+      localStorage.setItem('refreshToken', res.refreshToken)
+    }
     localStorage.setItem('user', JSON.stringify(cleanUser))
     setToken(validToken)
     setUser(cleanUser)
@@ -90,6 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     localStorage.removeItem('token')
+    localStorage.removeItem('refreshToken')
     localStorage.removeItem('user')
     setToken(null)
     setUser(null)

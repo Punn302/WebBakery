@@ -86,5 +86,16 @@ class GlobalExceptionHandlerTest {
         assertTrue(response.getBody().getMessage().contains("Kích thước file"));
     }
 
+    @Test
+    @DisplayName("Bắt lỗi IllegalStateException trả về 400 Bad Request thay vì 401 Unauthorized")
+    void handleIllegalState_shouldReturnBadRequest() {
+        IllegalStateException ex = new IllegalStateException("Trạng thái không hợp lệ");
+        ResponseEntity<ApiResponse<Void>> response = handler.handleIllegalState(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertFalse(response.getBody().isSuccess());
+        assertEquals("Trạng thái không hợp lệ", response.getBody().getMessage());
+    }
+
     private void dummyMethod(String param) {}
 }

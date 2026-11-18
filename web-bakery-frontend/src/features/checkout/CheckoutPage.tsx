@@ -1,15 +1,14 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Banknote,
   QrCode,
   CheckCircle2,
   ArrowRight,
-  Clock,
-  AlertTriangle,
   ShieldCheck,
   Sparkles,
   ShoppingBag,
@@ -20,14 +19,14 @@ import {
 } from 'lucide-react'
 import { useCart } from '@/hooks/useCart'
 import { useAuth } from '@/hooks/useAuth'
-import { orderApi, paymentApi, voucherApi, loyaltyApi } from '@/api'
+import { orderApi, voucherApi, loyaltyApi, queryKeys } from '@/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { formatCurrency, optimizeCloudinaryUrl } from '@/utils/format'
 import { toast } from 'sonner'
-import type { Order, Address, VoucherCalculation, LoyaltySummary } from '@/types'
+import type { Order, Address, VoucherCalculation } from '@/types'
 import { AddressSelector } from '@/components/common/AddressSelector'
+import { VietQrPaymentModal } from '@/components/common/VietQrPaymentModal'
 
 const checkoutSchema = z.object({
   customerName: z.string().min(2, 'Họ tên người nhận phải có ít nhất 2 ký tự'),
@@ -49,6 +48,7 @@ export const CheckoutPage: React.FC = () => {
   const { items, subtotal, clearCart } = useCart()
   const { user, isAuthenticated } = useAuth()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
   const [createdOrder, setCreatedOrder] = useState<Order | null>(null)
   const [showQrModal, setShowQrModal] = useState(false)
@@ -63,28 +63,14 @@ export const CheckoutPage: React.FC = () => {
   const [appliedVoucher, setAppliedVoucher] = useState<VoucherCalculation | null>(null)
   const [isApplyingVoucher, setIsApplyingVoucher] = useState(false)
 
-  // Loyalty Points state
-  const [loyaltyProfile, setLoyaltyProfile] = useState<LoyaltySummary | null>(null)
+  // Loyalty Profile from TanStack Query
+  const { data: loyaltyProfile = null } = useQuery({
+    queryKey: queryKeys.profile.loyalty(),
+    queryFn: loyaltyApi.getProfile,
+    enabled: isAuthenticated,
+  })
   const [isUsingPoints, setIsUsingPoints] = useState(false)
   const [pointsToUse, setPointsToUse] = useState(0)
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      loyaltyApi.getProfile()
-        .then((profile) => {
-          setLoyaltyProfile(profile)
-        })
-        .catch(() => {
-          // Silently ignore if profile not loaded
-        })
-    }
-  }, [isAuthenticated])
-
-  // VietQR Countdown & Polling state
-  const [timeLeft, setTimeLeft] = useState(QR_COUNTDOWN_SECONDS)
-  const [isPaidSuccess, setIsPaidSuccess] = useState(false)
-  const [isExpired, setIsExpired] = useState(false)
-  const pollingRef = useRef<number | null>(null)
 
   const {
     register,
@@ -168,73 +154,6 @@ export const CheckoutPage: React.FC = () => {
     toast.info('Đã gỡ bỏ mã giảm giá')
   }
 
-  // 15-minute Countdown Timer Effect
-  useEffect(() => {
-    if (!showQrModal || isPaidSuccess || isExpired) return
-
-    setTimeLeft(QR_COUNTDOWN_SECONDS)
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer)
-          setIsExpired(true)
-          toast.error('Đơn hàng đã hết hạn thanh toán (quá 15 phút).')
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [showQrModal, isPaidSuccess, isExpired])
-
-  // Polling Payment Status Effect (Every 3 seconds)
-  useEffect(() => {
-    if (!showQrModal || !createdOrder || isPaidSuccess || isExpired) {
-      if (pollingRef.current) {
-        clearInterval(pollingRef.current)
-        pollingRef.current = null
-      }
-      return
-    }
-
-    const checkStatus = async () => {
-      try {
-        const res = await paymentApi.getOrderPaymentStatus(createdOrder.id)
-        if (res?.isPaid || res?.paymentStatus === 'PAID') {
-          setIsPaidSuccess(true)
-          if (pollingRef.current) {
-            clearInterval(pollingRef.current)
-            pollingRef.current = null
-          }
-          toast.success('Ngân hàng đã xác nhận thanh toán thành công!')
-          setTimeout(() => {
-            setShowQrModal(false)
-            navigate(createdOrder ? `/order-success/${createdOrder.id}` : '/orders')
-          }, 1500)
-        }
-      } catch {
-        // Silently continue polling on intermittent network errors
-      }
-    }
-
-    checkStatus()
-    pollingRef.current = window.setInterval(checkStatus, 3000)
-
-    return () => {
-      if (pollingRef.current) {
-        clearInterval(pollingRef.current)
-        pollingRef.current = null
-      }
-    }
-  }, [showQrModal, createdOrder, isPaidSuccess, isExpired, navigate])
-
-  const formatCountdown = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-  }
-
   const onSubmit = async (data: CheckoutFormData) => {
     if (items.length === 0) {
       toast.error('Giỏ hàng trống!')
@@ -257,10 +176,12 @@ export const CheckoutPage: React.FC = () => {
       setCreatedOrder(order)
       await clearCart()
 
+      // Invalidate relevant query caches
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.myOrders() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.profile.loyalty() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.vouchers.available() })
+
       if (data.paymentMethod === 'VIETQR') {
-        setIsPaidSuccess(false)
-        setIsExpired(false)
-        setTimeLeft(QR_COUNTDOWN_SECONDS)
         setShowQrModal(true)
       } else {
         toast.success('Đặt hàng thành công!')
@@ -592,34 +513,59 @@ export const CheckoutPage: React.FC = () => {
               </div>
 
               {isUsingPoints && (
-                <div className="space-y-2 pt-1 text-xs">
+                <div className="space-y-3 pt-1 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-[#6B6661] text-[11px]">
-                      Số điểm muốn trừ (tối đa {maxPointsForOrder} điểm - 30% đơn):
+                      Chọn số điểm muốn trừ (tối đa {maxPointsForOrder} điểm):
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => setPointsToUse(maxPointsForOrder)}
-                      className="text-[11px] font-bold text-[#006561] hover:underline cursor-pointer"
-                    >
-                      Dùng tối đa
-                    </button>
+                    <span className="font-mono font-bold text-xs text-[#006561]">
+                      {pointsToUse} Điểm = -{formatCurrency(pointsDiscountAmount)}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      min={1}
+
+                  {/* Range Slider */}
+                  <div className="px-1 py-1">
+                    <input
+                      type="range"
+                      min={0}
                       max={maxPointsForOrder}
-                      value={pointsToUse || ''}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value) || 0
-                        setPointsToUse(Math.max(0, Math.min(val, maxPointsForOrder)))
-                      }}
-                      className="h-9 text-xs rounded-xl"
+                      step={1}
+                      value={pointsToUse}
+                      onChange={(e) => setPointsToUse(Number(e.target.value))}
+                      className="w-full h-2 bg-[#E5E2DF] rounded-lg appearance-none cursor-pointer accent-[#006561]"
                     />
-                    <span className="text-xs font-semibold text-[#006561] shrink-0 font-display">
-                      = -{formatCurrency(pointsDiscountAmount)}
-                    </span>
+                    <div className="flex justify-between text-[10px] text-[#9A938C] mt-1 font-mono">
+                      <span>0</span>
+                      <span>{Math.round(maxPointsForOrder / 2)}</span>
+                      <span>{maxPointsForOrder}</span>
+                    </div>
+                  </div>
+
+                  {/* Quick Preset Buttons (25%, 50%, 75%, 100% max) */}
+                  <div className="grid grid-cols-4 gap-2 pt-0.5">
+                    {[
+                      { label: '25%', ratio: 0.25 },
+                      { label: '50%', ratio: 0.5 },
+                      { label: '75%', ratio: 0.75 },
+                      { label: 'Tối đa', ratio: 1.0 },
+                    ].map((preset) => {
+                      const presetValue = Math.round(maxPointsForOrder * preset.ratio)
+                      const isSelected = pointsToUse === presetValue
+                      return (
+                        <button
+                          key={preset.label}
+                          type="button"
+                          onClick={() => setPointsToUse(presetValue)}
+                          className={`py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all border cursor-pointer select-none ${
+                            isSelected
+                              ? 'bg-[#006561] text-white border-[#006561] shadow-xs'
+                              : 'bg-[#FAF7F2] text-[#2A2725] border-[#E5E2DF] hover:border-[#006561] hover:text-[#006561]'
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
               )}
@@ -714,113 +660,22 @@ export const CheckoutPage: React.FC = () => {
         </div>
       </form>
 
-      {/* VietQR Dynamic Modal with 15:00 Countdown & Automatic Polling */}
+      {/* Canonical VietQR Modal with SePay Webhook Auto Confirmation */}
       {createdOrder && (
-        <Dialog open={showQrModal} onOpenChange={setShowQrModal}>
-          <DialogContent onClose={() => navigate('/orders')} className="max-w-md text-center p-6 sm:p-7 space-y-5 rounded-2xl border border-[#E5E2DF] bg-white">
-            <DialogHeader>
-              <DialogTitle className="font-display text-xl text-[#2A2725] flex items-center justify-center gap-2">
-                <QrCode className="w-5 h-5 text-[#C9785C]" />
-                <span>Quét Mã VietQR Chuyển Khoản</span>
-              </DialogTitle>
-              <DialogDescription className="text-xs text-[#6B6661]">
-                Đơn hàng #{createdOrder.orderCode} • Tổng tiền: {formatCurrency(createdOrder.total)}
-              </DialogDescription>
-            </DialogHeader>
-
-            {/* Countdown Timer Bar */}
-            {!isPaidSuccess && !isExpired && (
-              <div className="space-y-1.5 p-3 bg-[#FAF7F2] border border-[#E5E2DF] rounded-xl">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="flex items-center gap-1.5 font-medium text-[#6B6661]">
-                    <Clock className="w-3.5 h-3.5 text-[#C9785C] animate-spin" />
-                    <span>Thời gian giữ đơn bánh:</span>
-                  </span>
-                  <span className="font-mono font-bold text-sm text-[#C9785C]">
-                    {formatCountdown(timeLeft)}
-                  </span>
-                </div>
-                <div className="w-full h-1.5 bg-[#E5E2DF] rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-[#C9785C] transition-all duration-1000 rounded-full"
-                    style={{ width: `${(timeLeft / QR_COUNTDOWN_SECONDS) * 100}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Expired State */}
-            {isExpired && (
-              <div className="p-5 bg-[#fef2f2] border border-[#fecaca] text-[#dc2626] rounded-xl space-y-2">
-                <AlertTriangle className="w-8 h-8 mx-auto" />
-                <p className="font-bold text-sm">Đơn hàng đã hết hạn thanh toán (quá 15 phút)</p>
-                <p className="text-xs text-[#991b1b] leading-relaxed">
-                  Mẻ bánh tươi đã được hoàn lại kho. Quý khách vui lòng đặt lại đơn mới.
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setShowQrModal(false)
-                    navigate('/products')
-                  }}
-                  className="mt-2 rounded-full border-[#dc2626] text-[#dc2626] cursor-pointer"
-                >
-                  Về thực đơn bánh
-                </Button>
-              </div>
-            )}
-
-            {/* Success State */}
-            {isPaidSuccess && (
-              <div className="p-6 bg-[#f0fdf4] border border-[#bbf7d0] text-[#15803d] rounded-xl space-y-3 animate-in zoom-in-95 duration-300">
-                <CheckCircle2 className="w-12 h-12 mx-auto text-[#16a34a] animate-bounce" />
-                <p className="font-display text-lg font-bold">Thanh Toán Thành Công!</p>
-                <p className="text-xs text-[#166534] leading-relaxed">
-                  Hệ thống ngân hàng SePay đã đối soát thành công. Bếp bánh Hebekery đang nướng mẻ bánh tươi cho bạn!
-                </p>
-                <p className="text-[11px] text-[#6B6661]">Tự động chuyển trang sau 2 giây...</p>
-              </div>
-            )}
-
-            {/* Normal QR Display */}
-            {!isPaidSuccess && !isExpired && (
-              <>
-                <div className="flex flex-col items-center justify-center p-4 bg-white border border-[#E5E2DF] rounded-xl shadow-xs">
-                  {/* VietQR QuickLink image API */}
-                  <img
-                    src={`https://img.vietqr.io/image/MB-0987654321-compact2.png?amount=${createdOrder.total}&addInfo=${encodeURIComponent(
-                      createdOrder.orderCode
-                    )}&accountName=${encodeURIComponent('TIEM BANH HEBEKERY')}`}
-                    alt="VietQR Payment"
-                    className="w-56 h-56 object-contain"
-                  />
-                  <div className="text-xs text-[#6B6661] space-y-1 mt-3 text-left w-full px-2">
-                    <p>Ngân hàng: <strong className="text-[#2A2725]">MBBank (Quân Đội)</strong></p>
-                    <p>Số tài khoản: <strong className="text-[#2A2725]">0987654321</strong></p>
-                    <p>Chủ TK: <strong className="text-[#2A2725]">TIEM BANH HEBEKERY</strong></p>
-                    <p>Nội dung CK: <strong className="text-[#006561] font-mono text-sm">{createdOrder.orderCode}</strong></p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-center gap-2 text-xs text-[#006561] bg-[#006561]/8 p-2.5 rounded-xl border border-[#006561]/20">
-                  <ShieldCheck className="w-4 h-4 shrink-0" />
-                  <span>Hệ thống tự động nhận diện thanh toán qua SePay Webhook...</span>
-                </div>
-
-                <Button
-                  className="w-full bg-[#006561] hover:bg-[#004e4a] text-white rounded-full py-2.5 text-xs font-bold uppercase tracking-wider cursor-pointer shadow-sm"
-                  onClick={() => {
-                    setShowQrModal(false)
-                    navigate('/orders')
-                  }}
-                >
-                  Tôi Đã Chuyển Khoản • Xem Đơn Hàng
-                </Button>
-              </>
-            )}
-          </DialogContent>
-        </Dialog>
+        <VietQrPaymentModal
+          order={createdOrder}
+          isOpen={showQrModal}
+          onClose={() => {
+            setShowQrModal(false)
+            navigate(`/order-success/${createdOrder.id}`)
+          }}
+          onSuccess={() => {
+            setShowQrModal(false)
+            queryClient.invalidateQueries({ queryKey: queryKeys.orders.myOrders() })
+            queryClient.invalidateQueries({ queryKey: queryKeys.profile.loyalty() })
+            navigate(`/order-success/${createdOrder.id}`)
+          }}
+        />
       )}
     </div>
   )

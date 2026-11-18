@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -152,7 +153,7 @@ public class ProductBatchService {
     public void deductBatchStockFEFO(String productId, int quantityToDeduct) {
         if (quantityToDeduct <= 0) return;
 
-        List<ProductBatch> batches = productBatchRepository.findAvailableBatchesFEFO(productId);
+        List<ProductBatch> batches = productBatchRepository.findAvailableBatchesFEFOWithLock(productId);
         int remaining = quantityToDeduct;
 
         for (ProductBatch batch : batches) {
@@ -174,6 +175,26 @@ public class ProductBatchService {
 
         if (remaining > 0) {
             log.warn("Sản phẩm {} không đủ tồn kho chi tiết theo lô để trừ toàn bộ (thiếu {} cái)", productId, remaining);
+        }
+    }
+
+    /**
+     * Quét định kỳ lúc 01:00 AM mỗi ngày để tự động chuyển các lô bánh có expiryDate < ngày hiện tại và chưa EXPIRED sang EXPIRED.
+     */
+    @Scheduled(cron = "0 0 1 * * ?")
+    @Transactional
+    public void expireOutdatedBatches() {
+        LocalDate today = LocalDate.now();
+        List<ProductBatch> outdatedBatches = productBatchRepository.findByExpiryDateBeforeAndStatusNot(today, "EXPIRED");
+        if (!outdatedBatches.isEmpty()) {
+            log.info("Phát hiện {} lô bánh hết hạn sử dụng. Tiến hành cập nhật trạng thái EXPIRED...", outdatedBatches.size());
+            for (ProductBatch batch : outdatedBatches) {
+                batch.setStatus("EXPIRED");
+                batch.setUpdatedAt(LocalDateTime.now());
+                productBatchRepository.save(batch);
+                log.info("Lô bánh {} (Sản phẩm: {}) đã hết hạn ngày {}, cập nhật trạng thái EXPIRED",
+                        batch.getBatchCode(), batch.getProductId(), batch.getExpiryDate());
+            }
         }
     }
 }

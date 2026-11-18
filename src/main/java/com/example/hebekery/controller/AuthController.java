@@ -132,7 +132,21 @@ public class AuthController {
                     .body(ApiResponse.failure("Refresh token không hợp lệ hoặc đã hết hạn"));
         }
 
-        String username = jwtTokenProvider.getUsernameFromToken(refreshToken);
+        io.jsonwebtoken.Claims claims;
+        try {
+            claims = jwtTokenProvider.getClaimsFromToken(refreshToken);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.failure("Refresh token không hợp lệ hoặc đã hết hạn"));
+        }
+
+        String tokenType = claims != null ? claims.get("type", String.class) : null;
+        if (!"REFRESH".equalsIgnoreCase(tokenType)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.failure("Token cung cấp không phải là Refresh token hợp lệ"));
+        }
+
+        String username = claims.getSubject();
         User user = userRepository.findByEmailIgnoreCase(username).orElse(null);
         if (user == null || !user.isActive()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

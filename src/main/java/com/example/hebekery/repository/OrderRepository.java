@@ -25,6 +25,19 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     @EntityGraph(attributePaths = {"items"})
     Optional<Order> findWithItemsById(String id);
 
+    List<Order> findByPaymentStatusAndCreatedAtBefore(String paymentStatus, LocalDateTime cutoff);
+
+    List<Order> findByOrderStatusAndCreatedAtBefore(String orderStatus, LocalDateTime cutoff);
+
+    @Query("""
+            select o from Order o
+            where (o.paymentMethod in ('VIETQR', 'MOMO'))
+              and (o.paymentStatus in ('PENDING', 'AWAITING_PAYMENT'))
+              and (o.orderStatus in ('PENDING', 'AWAITING_PAYMENT'))
+              and (o.createdAt < :cutoff)
+            """)
+    List<Order> findExpiredPaymentOrders(@Param("cutoff") LocalDateTime cutoff);
+
     @Query("""
             select o from Order o
             where (:keyword is null or :keyword = ''

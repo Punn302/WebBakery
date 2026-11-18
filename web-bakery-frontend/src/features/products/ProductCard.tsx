@@ -28,9 +28,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, dealBadge, on
     }
   }
 
+  const stock = product.stockQuantity ?? product.stock ?? 0
+
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (product.stock <= 0) return
+    if (stock <= 0) return
     const productToAdd = hasDeal
       ? {
           ...product,
@@ -48,7 +50,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, dealBadge, on
     toggleWishlist(product)
   }
 
-  const isOutOfStock = product.stock <= 0
+  const isOutOfStock = stock <= 0
   const hasDeal = !!dealBadge && dealBadge.discountPercent > 0
   const effectivePrice = hasDeal
     ? Math.round((product.price * (1 - dealBadge.discountPercent / 100)) / 1000) * 1000

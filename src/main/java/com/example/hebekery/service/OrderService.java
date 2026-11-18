@@ -3,6 +3,7 @@ package com.example.hebekery.service;
 import com.example.hebekery.config.SepayConfig;
 import com.example.hebekery.dto.CheckoutResponse;
 import com.example.hebekery.dto.OrderResponse;
+import com.example.hebekery.dto.PublicOrderTrackingResponse;
 import com.example.hebekery.dto.request.CheckoutRequest;
 import com.example.hebekery.model.CartItem;
 import com.example.hebekery.model.Order;
@@ -229,11 +230,27 @@ public class OrderService {
         return orderRepository.findWithItemsById(orderId).or(() -> orderRepository.findByOrderCode(orderId)).or(() -> orderRepository.findById(orderId)).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng"));
     }
 
-    public List<Order> trackOrders(String orderId, String phone) {
-        if (orderId != null && !orderId.isBlank()) { return orderRepository.findWithItemsById(orderId.trim()).or(() -> orderRepository.findByOrderCode(orderId.trim())).map(List::of).orElse(List.of()); } if (phone != null && !phone.isBlank()) { return orderRepository.findByPhone(phone.trim()); } return List.of();
+    public PublicOrderTrackingResponse trackOrder(String orderCode, String phone) {
+        if (orderCode == null || phone == null || orderCode.isBlank() || phone.isBlank()) {
+            return null;
+        }
+        String trimmedCode = orderCode.trim();
+        String trimmedPhone = phone.trim();
 
+        Order order = orderRepository.findByOrderCode(trimmedCode)
+                .or(() -> orderRepository.findWithItemsById(trimmedCode))
+                .or(() -> orderRepository.findById(trimmedCode))
+                .orElse(null);
 
+        if (order == null) {
+            return null;
+        }
 
+        if (order.getPhone() == null || !order.getPhone().trim().equals(trimmedPhone)) {
+            return null;
+        }
+
+        return PublicOrderTrackingResponse.from(order);
     }
 
     @Transactional
@@ -312,6 +329,9 @@ public class OrderService {
         order.setOrderStatus("CANCELLED");
         if (order.getPointsUsed() > 0) {
             loyaltyService.refundPointsForOrder(order.getUserId(), order.getId(), order.getPointsUsed(), "Hủy đơn hàng");
+        }
+        if (order.getVoucherCode() != null && !order.getVoucherCode().isBlank()) {
+            voucherService.restoreVoucherUsage(order.getVoucherCode(), order.getId());
         }
         Order saved = orderRepository.save(order);
         addHistory(saved, "User hủy đơn hàng", "USER");

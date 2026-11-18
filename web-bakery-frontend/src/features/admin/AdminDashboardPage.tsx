@@ -44,7 +44,7 @@ export const AdminDashboardPage: React.FC = () => {
     .reduce((sum, o) => sum + o.total, 0)
 
   const pendingOrders = orders.filter((o) => o.orderStatus === 'PENDING').length
-  const lowStockProducts = products.filter((p) => p.stock <= (p.lowStockThreshold || 10)).length
+  const lowStockProducts = products.filter((p) => (p.stockQuantity ?? p.stock ?? 0) <= (p.lowStockThreshold || 10)).length
   const activeVouchers = vouchers.filter((v) => v.active).length
 
   return (

@@ -91,7 +91,6 @@ class SepayWebhookServiceTest {
 
         when(paymentTransactionRepository.existsByReferenceCode("FT999888")).thenReturn(false);
         when(orderRepository.findByOrderCode("HBK-20261105-001")).thenReturn(Optional.of(order));
-        when(customerProfileRepository.findByUserId("USER-1")).thenReturn(Optional.empty());
 
         boolean result = sepayWebhookService.processWebhook(payload);
 
@@ -101,7 +100,17 @@ class SepayWebhookServiceTest {
         verify(orderRepository).save(order);
         verify(orderStatusHistoryRepository).save(any(OrderStatusHistory.class));
         verify(paymentTransactionRepository).save(any(PaymentTransaction.class));
-        verify(customerProfileRepository).save(any(CustomerProfile.class));
+        verify(customerProfileRepository, never()).save(any(CustomerProfile.class));
+    }
+
+    @Test
+    @DisplayName("verifyApiKey: Fail-closed trả về false khi cấu hình webhook API key bị null hoặc blank")
+    void verifyApiKey_failClosedWhenNotConfigured() {
+        when(sepayConfig.getWebhookApiKey()).thenReturn(null);
+        assertFalse(sepayWebhookService.verifyApiKey("secret_key"));
+
+        when(sepayConfig.getWebhookApiKey()).thenReturn("   ");
+        assertFalse(sepayWebhookService.verifyApiKey("secret_key"));
     }
 
     @Test
@@ -136,7 +145,7 @@ class SepayWebhookServiceTest {
     }
 
     @Test
-    @DisplayName("processWebhook: Ném lỗi khi số tiền chuyển khoản không đủ")
+    @DisplayName("processWebhook: Xử lý an toàn khi số tiền chuyển khoản không đủ (không ném lỗi unhandled)")
     void processWebhook_insufficientAmount() {
         SepayWebhookPayload payload = new SepayWebhookPayload();
         payload.setReferenceCode("FT_SHORT");
@@ -148,12 +157,50 @@ class SepayWebhookServiceTest {
         order.setId("ORD-12345");
         order.setOrderCode("HBK-20261105-001");
         order.setTotal(250000.0);
+        order.setPaymentStatus("PENDING");
+        order.setOrderStatus("PENDING");
 
         when(paymentTransactionRepository.existsByReferenceCode("FT_SHORT")).thenReturn(false);
         when(orderRepository.findByOrderCode("HBK-20261105-001")).thenReturn(Optional.of(order));
 
-        assertThrows(IllegalArgumentException.class, () -> sepayWebhookService.processWebhook(payload));
-        verify(orderRepository, never()).save(any());
+        boolean result = sepayWebhookService.processWebhook(payload);
+
+        assertFalse(result);
+        assertEquals("PENDING", order.getPaymentStatus());
+        assertNotNull(order.getAdminNote());
+        assertTrue(order.getAdminNote().contains("CẢNH BÁO: Thanh toán thiếu"));
+        verify(orderRepository).save(order);
+        verify(orderStatusHistoryRepository).save(any(OrderStatusHistory.class));
+        verify(paymentTransactionRepository).save(any(PaymentTransaction.class));
+    }
+
+    @Test
+    @DisplayName("processWebhook: Cắm cờ kiểm tra khi đơn hàng đã bị CANCELLED từ trước")
+    void processWebhook_orderCancelled_flagForReview() {
+        SepayWebhookPayload payload = new SepayWebhookPayload();
+        payload.setReferenceCode("FT_CANCELLED_PAY");
+        payload.setTransferType("in");
+        payload.setTransferAmount(250000.0);
+        payload.setContent("HBK-20261105-001");
+
+        Order order = new Order();
+        order.setId("ORD-12345");
+        order.setOrderCode("HBK-20261105-001");
+        order.setTotal(250000.0);
+        order.setOrderStatus("CANCELLED");
+        order.setPaymentStatus("PENDING");
+
+        when(paymentTransactionRepository.existsByReferenceCode("FT_CANCELLED_PAY")).thenReturn(false);
+        when(orderRepository.findByOrderCode("HBK-20261105-001")).thenReturn(Optional.of(order));
+
+        boolean result = sepayWebhookService.processWebhook(payload);
+
+        assertTrue(result);
+        assertEquals("CANCELLED", order.getOrderStatus()); // Vẫn giữ CANCELLED, không tự ý chuyển PROCESSING
+        assertNotNull(order.getAdminNote());
+        assertTrue(order.getAdminNote().contains("CẢNH BÁO: Nhận thanh toán"));
+        verify(orderRepository).save(order);
+        verify(paymentTransactionRepository).save(any(PaymentTransaction.class));
     }
 
     @Test

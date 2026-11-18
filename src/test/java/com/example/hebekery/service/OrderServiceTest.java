@@ -243,4 +243,50 @@ class OrderServiceTest {
         assertEquals("APPROVED", reviewed.getReturnStatus());
         verify(productService).increaseStock(eq("P001"), eq(3), eq("RETURN"), eq("ORD-1"), anyString());
     }
+
+    @Test
+    @DisplayName("testTrackOrder: Tra cứu thành công khi mã đơn và số điện thoại khớp")
+    void testTrackOrder_Success() {
+        Order order = new Order();
+        order.setId("ORD-TRACK-1");
+        order.setOrderCode("HBK-20261118-001");
+        order.setPhone("0901234567");
+        order.setCustomerName("Lê Văn C");
+        order.setAddress("789 Trần Hưng Đạo, Quận 5, TP.HCM");
+
+        when(orderRepository.findByOrderCode("HBK-20261118-001")).thenReturn(Optional.of(order));
+
+        com.example.hebekery.dto.PublicOrderTrackingResponse res =
+                orderService.trackOrder("HBK-20261118-001", "0901234567");
+
+        assertNotNull(res);
+        assertEquals("HBK-20261118-001", res.getOrderCode());
+        assertEquals("090***4567", res.getPhone());
+        assertEquals("***, Quận 5, TP.HCM", res.getAddress());
+    }
+
+    @Test
+    @DisplayName("testTrackOrder: Trả về null khi số điện thoại không khớp")
+    void testTrackOrder_PhoneMismatch() {
+        Order order = new Order();
+        order.setId("ORD-TRACK-1");
+        order.setOrderCode("HBK-20261118-001");
+        order.setPhone("0901234567");
+
+        when(orderRepository.findByOrderCode("HBK-20261118-001")).thenReturn(Optional.of(order));
+
+        com.example.hebekery.dto.PublicOrderTrackingResponse res =
+                orderService.trackOrder("HBK-20261118-001", "0999999999");
+
+        assertNull(res);
+    }
+
+    @Test
+    @DisplayName("testTrackOrder: Trả về null khi tham số null hoặc rỗng")
+    void testTrackOrder_BlankParams() {
+        assertNull(orderService.trackOrder(null, "0901234567"));
+        assertNull(orderService.trackOrder("HBK-1", null));
+        assertNull(orderService.trackOrder("  ", "0901234567"));
+        assertNull(orderService.trackOrder("HBK-1", "   "));
+    }
 }

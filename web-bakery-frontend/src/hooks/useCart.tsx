@@ -23,10 +23,16 @@ const LOCAL_STORAGE_KEY = 'hebekery_guest_cart'
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth()
+  const wasAuthRef = React.useRef(isAuthenticated)
+
   const [items, setItems] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY)
-      return saved ? JSON.parse(saved) : []
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        return Array.isArray(parsed) ? parsed : []
+      }
+      return []
     } catch {
       return []
     }
@@ -34,17 +40,26 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  // Nạp giỏ hàng từ server khi đăng nhập
+  // Nạp giỏ hàng từ server khi đăng nhập, hoặc xóa giỏ hàng khi đăng xuất
   useEffect(() => {
     if (isAuthenticated) {
       loadServerCart()
+    } else if (wasAuthRef.current && !isAuthenticated) {
+      // User logged out: clear user's cart from state and do not overwrite guest cart
+      setItems([])
+      localStorage.removeItem(LOCAL_STORAGE_KEY)
     }
+    wasAuthRef.current = isAuthenticated
   }, [isAuthenticated])
 
   // Lưu giỏ hàng khách vào localStorage
   useEffect(() => {
-    if (!isAuthenticated) {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items))
+    if (!isAuthenticated && !wasAuthRef.current) {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(Array.isArray(items) ? items : []))
+      } catch {
+        // Ignored
+      }
     }
   }, [items, isAuthenticated])
 
@@ -54,14 +69,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Nếu có giỏ hàng khách trước đó, đồng bộ lên server
       const localGuestCart = localStorage.getItem(LOCAL_STORAGE_KEY)
       if (localGuestCart) {
-        const guestItems: CartItem[] = JSON.parse(localGuestCart)
-        if (guestItems.length > 0) {
-          await cartApi.syncCart(guestItems)
+        try {
+          const guestItems = JSON.parse(localGuestCart)
+          if (Array.isArray(guestItems) && guestItems.length > 0) {
+            await cartApi.syncCart(guestItems)
+            localStorage.removeItem(LOCAL_STORAGE_KEY)
+          }
+        } catch {
           localStorage.removeItem(LOCAL_STORAGE_KEY)
         }
       }
       const res = await cartApi.getCart()
-      setItems(res.items || [])
+      setItems(Array.isArray(res.items) ? res.items : [])
     } catch {
       // Ignored
     } finally {
@@ -70,7 +89,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   const addItem = async (product: Product, quantity = 1) => {
-    if (product.stock <= 0) {
+    const stock = product.stockQuantity ?? product.stock ?? 0
+    if (stock <= 0) {
       toast.error('Sản phẩm hiện đang tạm hết hàng!')
       return
     }
@@ -164,8 +184,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
-  const subtotal = items.reduce((sum, item) => sum + item.total, 0)
+  const safeItems = Array.isArray(items) ? items : []
+  const totalItems = safeItems.reduce((sum, item) => sum + (item.quantity || 0), 0)
+  const subtotal = safeItems.reduce((sum, item) => sum + (item.total || 0), 0)
 
   return (
     <CartContext.Provider

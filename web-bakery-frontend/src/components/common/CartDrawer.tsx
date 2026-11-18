@@ -102,23 +102,23 @@ export const CartDrawer: React.FC = () => {
                     {formatCurrency(item.price)}
                   </p>
                   <div className="flex items-center gap-2 mt-2">
-                    <div className="flex items-center border border-[#E5E2DF] rounded-lg overflow-hidden">
+                    <div className="flex items-center border border-[#E5E2DF] rounded-xl overflow-hidden bg-[#FAF7F2]">
                       <button
                         onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                        className="w-6 h-6 flex items-center justify-center text-[#6B6661] hover:bg-black/5 hover:text-[#2A2725] transition-colors cursor-pointer"
+                        className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[#6B6661] hover:bg-black/5 hover:text-[#2A2725] transition-colors cursor-pointer touch-manipulation"
                         aria-label="Giảm số lượng"
                       >
-                        <Minus className="w-3 h-3" />
+                        <Minus className="w-3.5 h-3.5" />
                       </button>
                       <span className="w-8 text-center text-xs font-mono font-bold text-[#2A2725]">
                         {item.quantity}
                       </span>
                       <button
                         onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                        className="w-6 h-6 flex items-center justify-center text-[#6B6661] hover:bg-black/5 hover:text-[#2A2725] transition-colors cursor-pointer"
+                        className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[#6B6661] hover:bg-black/5 hover:text-[#2A2725] transition-colors cursor-pointer touch-manipulation"
                         aria-label="Tăng số lượng"
                       >
-                        <Plus className="w-3 h-3" />
+                        <Plus className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -129,7 +129,8 @@ export const CartDrawer: React.FC = () => {
                   </span>
                   <button
                     onClick={() => removeItem(item.productId)}
-                    className="text-[#9A938C] hover:text-[#B23A2A] transition-colors p-1 cursor-pointer"
+                    className="text-[#9A938C] hover:text-[#B23A2A] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer touch-manipulation"
+                    aria-label="Xóa khỏi giỏ"
                     title="Xóa khỏi giỏ"
                   >
                     <Trash2 className="w-4 h-4" />

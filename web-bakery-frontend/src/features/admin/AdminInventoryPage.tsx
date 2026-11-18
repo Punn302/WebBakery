@@ -20,7 +20,7 @@ import {
   ShieldCheck,
   Layers,
 } from 'lucide-react'
-import { adminInventoryApi, productApi, adminBatchApi } from '@/api'
+import { adminInventoryApi, productApi, adminBatchApi, queryKeys } from '@/api'
 import type { Product, PurchaseReceipt, PurchaseReceiptBatchRequest, ProductBatch, ProductBatchRequest, BatchFlashSaleRequest, BatchStats } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -82,18 +82,18 @@ export const AdminInventoryPage: React.FC = () => {
 
   // Queries
   const { data: inventoryData, isLoading: isInventoryLoading } = useQuery({
-    queryKey: ['admin-inventory', keyword, page],
+    queryKey: queryKeys.inventory.admin.list(keyword, page),
     queryFn: () => adminInventoryApi.getInventory({ keyword: keyword.trim() || undefined, page, size: 20 }),
   })
 
   const { data: receiptsData, isLoading: isReceiptsLoading } = useQuery({
-    queryKey: ['admin-purchase-receipts', page],
+    queryKey: queryKeys.inventory.admin.receipts(page),
     queryFn: () => adminInventoryApi.getPurchaseReceipts({ page, size: 20 }),
     enabled: activeTab === 'RECEIPTS',
   })
 
   const { data: batchesData, isLoading: isBatchesLoading } = useQuery({
-    queryKey: ['admin-batches', batchProductId, batchStatus, batchPage],
+    queryKey: queryKeys.inventory.admin.batches(batchProductId, batchStatus, batchPage),
     queryFn: () => adminBatchApi.getBatches({
       productId: batchProductId || undefined,
       status: batchStatus || undefined,
@@ -104,13 +104,13 @@ export const AdminInventoryPage: React.FC = () => {
   })
 
   const { data: batchStats } = useQuery({
-    queryKey: ['admin-batch-stats'],
+    queryKey: queryKeys.inventory.admin.batchStats(),
     queryFn: adminBatchApi.getStats,
     enabled: activeTab === 'BATCHES',
   })
 
   const { data: allProducts = [] } = useQuery({
-    queryKey: ['admin-all-products-for-receipt'],
+    queryKey: queryKeys.inventory.admin.productsForReceipt(),
     queryFn: async () => {
       const res = await productApi.getProducts({ size: 100 })
       return res.content
@@ -118,7 +118,7 @@ export const AdminInventoryPage: React.FC = () => {
   })
 
   const { data: receiptDetails = [] } = useQuery({
-    queryKey: ['admin-receipt-details', selectedReceiptCode],
+    queryKey: queryKeys.inventory.admin.receiptDetail(selectedReceiptCode || undefined),
     queryFn: () =>
       selectedReceiptCode
         ? adminInventoryApi.getReceiptDetails(selectedReceiptCode)
@@ -141,7 +141,7 @@ export const AdminInventoryPage: React.FC = () => {
     mutationFn: ({ id, threshold }: { id: string; threshold: number }) =>
       adminInventoryApi.updateThreshold(id, threshold),
     onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: ['admin-inventory'] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.admin.all })
       toast.success(`Đã cập nhật ngưỡng cảnh báo của ${updated.name} thành ${updated.lowStockThreshold}`)
       setEditingProduct(null)
     },
@@ -154,9 +154,9 @@ export const AdminInventoryPage: React.FC = () => {
     mutationFn: (data: PurchaseReceiptBatchRequest) =>
       adminInventoryApi.createPurchaseReceipt(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-inventory'] })
-      queryClient.invalidateQueries({ queryKey: ['admin-purchase-receipts'] })
-      queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.admin.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.admin.receipts() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.all })
       toast.success('Tạo phiếu nhập kho thành công! Đã tự động cập nhật số lượng tồn và giá vốn WAC.')
       setCreateModalOpen(false)
       setSupplier('')
@@ -176,9 +176,9 @@ export const AdminInventoryPage: React.FC = () => {
     mutationFn: (data: ProductBatchRequest) => adminBatchApi.createBatch(data),
     onSuccess: () => {
       toast.success('Đã tạo mẻ bánh mới thành công!')
-      queryClient.invalidateQueries({ queryKey: ['admin-batches'] })
-      queryClient.invalidateQueries({ queryKey: ['admin-batch-stats'] })
-      queryClient.invalidateQueries({ queryKey: ['admin-inventory'] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.admin.batches() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.admin.batchStats() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.admin.all })
       setCreateBatchModalOpen(false)
       setBatchForm({
         productId: '',
@@ -200,8 +200,8 @@ export const AdminInventoryPage: React.FC = () => {
       adminBatchApi.updateFlashSale(id, data),
     onSuccess: () => {
       toast.success('Cập nhật Flash Sale xả hàng cận date thành công!')
-      queryClient.invalidateQueries({ queryKey: ['admin-batches'] })
-      queryClient.invalidateQueries({ queryKey: ['admin-batch-stats'] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.admin.batches() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.admin.batchStats() })
       setFlashSaleBatch(null)
     },
     onError: (err: any) => {
@@ -263,11 +263,14 @@ export const AdminInventoryPage: React.FC = () => {
 
   // Summary counts
   const totalStockCount = products.length
-  const outOfStockCount = products.filter((p) => p.stock <= 0).length
+  const outOfStockCount = products.filter((p) => (p.stockQuantity ?? p.stock ?? 0) <= 0).length
   const lowStockCount = products.filter(
-    (p) => p.stock > 0 && p.stock <= (p.lowStockThreshold || 5)
+    (p) => {
+      const s = p.stockQuantity ?? p.stock ?? 0
+      return s > 0 && s <= (p.lowStockThreshold || 5)
+    }
   ).length
-  const safeStockCount = products.filter((p) => p.stock > (p.lowStockThreshold || 5)).length
+  const safeStockCount = products.filter((p) => (p.stockQuantity ?? p.stock ?? 0) > (p.lowStockThreshold || 5)).length
 
   return (
     <div className="space-y-6">
@@ -407,8 +410,9 @@ export const AdminInventoryPage: React.FC = () => {
                 </tr>
               ) : (
                 products.map((p) => {
-                  const isOut = p.stock <= 0
-                  const isLow = p.stock > 0 && p.stock <= (p.lowStockThreshold || 5)
+                  const currentStock = p.stockQuantity ?? p.stock ?? 0
+                  const isOut = currentStock <= 0
+                  const isLow = currentStock > 0 && currentStock <= (p.lowStockThreshold || 5)
                   return (
                     <tr key={p.id} className="hover:bg-[#faf8f5] transition-colors">
                       <td className="py-3 px-4">
@@ -416,7 +420,7 @@ export const AdminInventoryPage: React.FC = () => {
                         <div className="text-[11px] text-[#78716c]">SKU: {p.id}</div>
                       </td>
                       <td className="py-3 px-4 text-[#57534e]">
-                        {p.category?.name || 'Chung'}
+                        {typeof p.category === 'object' && p.category !== null ? p.category.name : typeof p.category === 'string' ? p.category : 'Chung'}
                       </td>
                       <td className="py-3 px-4 text-center">
                         <span
@@ -428,7 +432,7 @@ export const AdminInventoryPage: React.FC = () => {
                               : 'text-[#1c1917]'
                           }`}
                         >
-                          {p.stock}
+                          {currentStock}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-center text-[#78716c]">
@@ -804,7 +808,7 @@ export const AdminInventoryPage: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Điều Chỉnh Ngưỡng Cảnh Báo Tồn Kho</DialogTitle>
             <DialogDescription className="text-xs text-[#78716c]">
-              Sản phẩm: <strong>{editingProduct?.name}</strong> (Tồn hiện tại: {editingProduct?.stock})
+              Sản phẩm: <strong>{editingProduct?.name}</strong> (Tồn hiện tại: {editingProduct?.stockQuantity ?? editingProduct?.stock ?? 0})
             </DialogDescription>
           </DialogHeader>
 
@@ -923,7 +927,7 @@ export const AdminInventoryPage: React.FC = () => {
                         <option value="">-- Chọn loại bánh --</option>
                         {allProducts.map((p) => (
                           <option key={p.id} value={p.id}>
-                            {p.name} (Hiện tồn: {p.stock})
+                            {p.name} (Hiện tồn: {p.stockQuantity ?? p.stock ?? 0})
                           </option>
                         ))}
                       </select>

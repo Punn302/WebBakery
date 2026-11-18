@@ -19,6 +19,7 @@ describe('ProductCard Component', () => {
     description: 'Bánh mì đen lúa mạch hữu cơ, giàu chất xơ.',
     price: 65000,
     stock: 25,
+    stockQuantity: 25,
     imageUrl: 'https://res.cloudinary.com/demo/image/upload/sample.jpg',
     active: true,
     lowStockThreshold: 5,
@@ -56,6 +57,7 @@ describe('ProductCard Component', () => {
     const outOfStockProduct: Product = {
       ...dummyProduct,
       stock: 0,
+      stockQuantity: 0,
     }
     render(<MemoryRouter><ProductCard product={outOfStockProduct} /></MemoryRouter>)
 

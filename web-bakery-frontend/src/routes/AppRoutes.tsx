@@ -47,16 +47,8 @@ import { AdminContactPage } from '@/features/admin/AdminContactPage'
 import { AdminVoucherPage } from '@/features/admin/AdminVoucherPage'
 import { AdminReviewPage } from '@/features/admin/AdminReviewPage'
 import { AdminSepaySimulatorPage } from '@/features/admin/AdminSepaySimulatorPage'
+import { queryClient } from '@/api'
 
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-    },
-  },
-})
 
 // Dynamic Admin redirect based on user role to eliminate unauthorized bounces
 const AdminIndexRedirect: React.FC = () => {

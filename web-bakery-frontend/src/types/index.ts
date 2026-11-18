@@ -47,11 +47,13 @@ export interface Product {
   name: string
   description: string
   price: number
-  stock: number
+  stockQuantity: number
+  stock?: number
   imageUrl: string
   active: boolean
   lowStockThreshold: number
-  category?: Category
+  category?: Category | string | { id?: number; name?: string; slug?: string }
+  categoryId?: number
   averageCost?: number
   calories?: number
   protein?: number
