@@ -1,0 +1,7 @@
+ALTER TABLE products
+    ADD COLUMN stock_quantity INT NOT NULL DEFAULT 0,
+    ADD COLUMN low_stock_threshold INT NOT NULL DEFAULT 5,
+    ADD COLUMN average_cost DOUBLE NOT NULL DEFAULT 0;
+
+ALTER TABLE orders
+    ADD COLUMN inventory_deducted BOOLEAN NOT NULL DEFAULT FALSE;

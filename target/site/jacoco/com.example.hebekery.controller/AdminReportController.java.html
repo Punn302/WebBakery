@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminReportController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.controller</a> &gt; <span class="el_source">AdminReportController.java</span></div><h1>AdminReportController.java</h1><pre class="source lang-java linenums">package com.example.hebekery.controller;
+
+import com.example.hebekery.dto.ApiResponse;
+import com.example.hebekery.dto.RevenueReportResponse;
+import com.example.hebekery.dto.TopSellingProduct;
+import com.example.hebekery.service.PurchaseReceiptService;
+import com.example.hebekery.service.ReportPdfService;
+import com.example.hebekery.service.ReportService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/api/admin/reports&quot;)
+@PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+@Tag(name = &quot;Admin Reports &amp; Analytics&quot;, description = &quot;Báo cáo doanh thu, lợi nhuận gộp và xuất PDF/CSV thống kê&quot;)
+public class AdminReportController {
+
+    private final ReportService reportService;
+    private final ReportPdfService reportPdfService;
+    private final PurchaseReceiptService purchaseReceiptService;
+
+    public AdminReportController(ReportService reportService,
+                                 ReportPdfService reportPdfService,
+<span class="fc" id="L38">                                 PurchaseReceiptService purchaseReceiptService) {</span>
+<span class="fc" id="L39">        this.reportService = reportService;</span>
+<span class="fc" id="L40">        this.reportPdfService = reportPdfService;</span>
+<span class="fc" id="L41">        this.purchaseReceiptService = purchaseReceiptService;</span>
+<span class="fc" id="L42">    }</span>
+
+    @Operation(summary = &quot;Xem tổng hợp báo cáo doanh thu &amp; lợi nhuận&quot;, description = &quot;Tính toán tổng doanh thu, lợi nhuận, chi phí nhập hàng và biểu đồ tăng trưởng theo khoảng ngày (yêu cầu quyền ADMIN)&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @GetMapping(&quot;/revenue&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;RevenueReportResponse&gt;&gt; getRevenueReport(
+            @Parameter(description = &quot;Từ ngày (YYYY-MM-DD)&quot;) @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = &quot;Đến ngày (YYYY-MM-DD)&quot;) @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        LocalDate reportFrom = from == null ? LocalDate.now().minusDays(29) : from;</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        LocalDate reportTo = to == null ? LocalDate.now() : to;</span>
+
+<span class="nc" id="L52">        RevenueReportResponse report = new RevenueReportResponse();</span>
+<span class="nc" id="L53">        report.setRevenueTotal(reportService.getRevenueTotal(reportFrom, reportTo));</span>
+<span class="nc" id="L54">        report.setRevenueOrderCount(reportService.getRevenueOrderCount(reportFrom, reportTo));</span>
+<span class="nc" id="L55">        report.setCancelledOrderCount(reportService.getCancelledOrderCount(reportFrom, reportTo));</span>
+<span class="nc" id="L56">        report.setImportCostTotal(reportService.getImportCostTotal(reportFrom, reportTo));</span>
+<span class="nc" id="L57">        report.setImportedQuantityTotal(reportService.getImportedQuantityTotal(reportFrom, reportTo));</span>
+<span class="nc" id="L58">        report.setProfitTotal(reportService.getProfitTotal(reportFrom, reportTo));</span>
+<span class="nc" id="L59">        report.setRevenueTrend(reportService.getRevenueTrend(reportFrom, reportTo));</span>
+<span class="nc" id="L60">        report.setTopSellingProducts(reportService.getTopSellingProducts(reportFrom, reportTo));</span>
+
+<span class="nc" id="L62">        return ResponseEntity.ok(ApiResponse.success(&quot;Lấy báo cáo doanh thu thành công&quot;, report));</span>
+    }
+
+    @Operation(summary = &quot;Lấy danh sách sản phẩm bán chạy nhất&quot;, description = &quot;Top các sản phẩm đạt doanh số và sản lượng cao nhất trong kỳ&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @GetMapping(&quot;/top-selling&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;List&lt;TopSellingProduct&gt;&gt;&gt; getTopSelling(
+            @Parameter(description = &quot;Từ ngày (YYYY-MM-DD)&quot;) @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = &quot;Đến ngày (YYYY-MM-DD)&quot;) @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        LocalDate reportFrom = from == null ? LocalDate.now().minusDays(29) : from;</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        LocalDate reportTo = to == null ? LocalDate.now() : to;</span>
+
+<span class="nc" id="L73">        List&lt;TopSellingProduct&gt; products = reportService.getTopSellingProducts(reportFrom, reportTo);</span>
+<span class="nc" id="L74">        return ResponseEntity.ok(ApiResponse.success(&quot;Lấy danh sách sản phẩm bán chạy thành công&quot;, products));</span>
+    }
+
+    @Operation(summary = &quot;Xuất báo cáo PDF doanh thu&quot;, description = &quot;Tải về file tài liệu PDF tổng kết doanh số và biểu đồ thống kê&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @GetMapping(&quot;/export-pdf&quot;)
+    public ResponseEntity&lt;byte[]&gt; exportPdf(
+            @Parameter(description = &quot;Từ ngày (YYYY-MM-DD)&quot;) @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = &quot;Đến ngày (YYYY-MM-DD)&quot;) @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        LocalDate reportFrom = from == null ? LocalDate.now().minusDays(29) : from;</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        LocalDate reportTo = to == null ? LocalDate.now() : to;</span>
+
+<span class="nc" id="L85">        byte[] pdf = reportPdfService.buildReport(reportFrom, reportTo);</span>
+<span class="nc" id="L86">        return ResponseEntity.ok()</span>
+<span class="nc" id="L87">                .header(HttpHeaders.CONTENT_DISPOSITION, &quot;attachment; filename=hebekery-report.pdf&quot;)</span>
+<span class="nc" id="L88">                .contentType(MediaType.APPLICATION_PDF)</span>
+<span class="nc" id="L89">                .body(pdf);</span>
+    }
+
+    @Operation(summary = &quot;Xuất báo cáo CSV số liệu&quot;, description = &quot;Tải file dữ liệu bảng tính CSV để phân tích nâng cao&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @GetMapping(value = &quot;/export-csv&quot;, produces = &quot;text/csv; charset=UTF-8&quot;)
+    public ResponseEntity&lt;String&gt; exportCsv(
+            @Parameter(description = &quot;Từ ngày (YYYY-MM-DD)&quot;) @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = &quot;Đến ngày (YYYY-MM-DD)&quot;) @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        LocalDate reportFrom = from == null ? LocalDate.now().minusDays(29) : from;</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        LocalDate reportTo = to == null ? LocalDate.now() : to;</span>
+
+<span class="nc" id="L100">        StringBuilder csv = new StringBuilder();</span>
+<span class="nc" id="L101">        csv.append('\ufeff');</span>
+<span class="nc" id="L102">        csv.append(&quot;Chỉ tiêu,Giá trị\n&quot;);</span>
+<span class="nc" id="L103">        csv.append(&quot;Từ ngày,&quot;).append(reportFrom).append('\n');</span>
+<span class="nc" id="L104">        csv.append(&quot;Đến ngày,&quot;).append(reportTo).append('\n');</span>
+<span class="nc" id="L105">        csv.append(&quot;Doanh thu,&quot;).append((long) reportService.getRevenueTotal(reportFrom, reportTo)).append('\n');</span>
+<span class="nc" id="L106">        csv.append(&quot;Lợi nhuận ước tính,&quot;).append((long) reportService.getProfitTotal(reportFrom, reportTo)).append('\n');</span>
+<span class="nc" id="L107">        csv.append(&quot;Chi phí nhập,&quot;).append((long) reportService.getImportCostTotal(reportFrom, reportTo)).append('\n');</span>
+<span class="nc" id="L108">        csv.append(&quot;\nTop sản phẩm,Số lượng,Doanh thu\n&quot;);</span>
+<span class="nc" id="L109">        reportService.getTopSellingProducts(reportFrom, reportTo).forEach(item -&gt;</span>
+<span class="nc" id="L110">                csv.append(csvValue(item.getProductName())).append(',')</span>
+<span class="nc" id="L111">                        .append(item.getQuantity()).append(',')</span>
+<span class="nc" id="L112">                        .append((long) item.getRevenue()).append('\n')</span>
+        );
+<span class="nc" id="L114">        csv.append(&quot;\nPhiếu nhập,Sản phẩm,Nhà cung cấp,Số lượng,Tổng nhập,Ngày\n&quot;);</span>
+<span class="nc" id="L115">        purchaseReceiptService.getAll(reportFrom, reportTo).forEach(receipt -&gt;</span>
+<span class="nc" id="L116">                csv.append(csvValue(receipt.getReceiptCode())).append(',')</span>
+<span class="nc" id="L117">                        .append(csvValue(receipt.getProductName())).append(',')</span>
+<span class="nc" id="L118">                        .append(csvValue(receipt.getSupplier())).append(',')</span>
+<span class="nc" id="L119">                        .append(receipt.getQuantity()).append(',')</span>
+<span class="nc" id="L120">                        .append((long) receipt.getTotalCost()).append(',')</span>
+<span class="nc" id="L121">                        .append(receipt.getImportedAt()).append('\n')</span>
+        );
+
+<span class="nc" id="L124">        return ResponseEntity.ok()</span>
+<span class="nc" id="L125">                .header(HttpHeaders.CONTENT_DISPOSITION, &quot;attachment; filename=hebekery-report.csv&quot;)</span>
+<span class="nc" id="L126">                .header(HttpHeaders.CONTENT_TYPE, &quot;text/csv; charset=UTF-8&quot;)</span>
+<span class="nc" id="L127">                .body(csv.toString());</span>
+    }
+
+    private String csvValue(String value) {
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        String safe = value == null ? &quot;&quot; : value.replace(&quot;\&quot;&quot;, &quot;\&quot;\&quot;&quot;);</span>
+<span class="nc" id="L132">        return &quot;\&quot;&quot; + safe + &quot;\&quot;&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,202 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006-update-existing-products-cloudinary-images
+      author: hebekery
+      changes:
+        - update:
+            tableName: products
+            columns:
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892637/hebekery/products/hebekery_granola_traditional.jpg" }
+            where: "id = 'P001'"
+        - update:
+            tableName: products
+            columns:
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892638/hebekery/products/hebekery_granola_choco.jpg" }
+            where: "id = 'P002'"
+        - update:
+            tableName: products
+            columns:
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892639/hebekery/products/hebekery_granola_matcha.jpg" }
+            where: "id = 'P003'"
+        - update:
+            tableName: products
+            columns:
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892640/hebekery/products/hebekery_biscotti_classic.jpg" }
+            where: "id = 'P004'"
+        - update:
+            tableName: products
+            columns:
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892641/hebekery/products/hebekery_keto_cookies.jpg" }
+            where: "id = 'P005'"
+        - update:
+            tableName: products
+            columns:
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892641/hebekery/products/hebekery_oat_bars.jpg" }
+            where: "id = 'P006'"
+        - update:
+            tableName: products
+            columns:
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892642/hebekery/products/hebekery_protein_bar.jpg" }
+            where: "id = 'P007'"
+        - update:
+            tableName: products
+            columns:
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892643/hebekery/products/hebekery_almond_cookies.jpg" }
+            where: "id = 'P008'"
+        - update:
+            tableName: products
+            columns:
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892648/hebekery/products/hebekery_dried_fruit.jpg" }
+            where: "id = 'P009'"
+        - update:
+            tableName: products
+            columns:
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892644/hebekery/products/hebekery_cashew_roasted.jpg" }
+            where: "id = 'P010'"
+        - update:
+            tableName: products
+            columns:
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892645/hebekery/products/hebekery_almond_honey.jpg" }
+            where: "id = 'P011'"
+        - update:
+            tableName: products
+            columns:
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892646/hebekery/products/hebekery_matcha_powder.jpg" }
+            where: "id = 'P012'"
+        - update:
+            tableName: products
+            columns:
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892647/hebekery/products/hebekery_chia_seed.jpg" }
+            where: "id = 'P013'"
+        - update:
+            tableName: products
+            columns:
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892649/hebekery/products/hebekery_matcha_almond.jpg" }
+            where: "id = 'P014'"
+        - update:
+            tableName: products
+            columns:
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892650/hebekery/products/hebekery_breakfast_combo.jpg" }
+            where: "id = 'P015'"
+        - update:
+            tableName: products
+            columns:
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892650/hebekery/products/hebekery_detox_combo.jpg" }
+            where: "id = 'P016'"
+        - update:
+            tableName: products
+            columns:
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892651/hebekery/products/hebekery_lunar_combo.jpg" }
+            where: "id = 'P017'"
+
+  - changeSet:
+      id: 006-insert-rich-healthy-bakery-products
+      author: hebekery
+      changes:
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P018" }
+              - column: { name: name, value: "Bánh Mì Nguyên Cám Men Tự Nhiên Sourdough" }
+              - column: { name: category, value: "Bánh ăn kiêng" }
+              - column: { name: category_id, valueNumeric: 2 }
+              - column: { name: description, value: "Bánh mì sourdough 100% bột lúa mạch đen nguyên cám, lên men tự nhiên 24 giờ. Chỉ số đường huyết GI thấp, giàu chất xơ prebiotic, không phụ gia, phù hợp người tiểu đường và ăn kiêng Eat Clean." }
+              - column: { name: price, valueNumeric: 125000 }
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892652/hebekery/products/hebekery_whole_wheat_sourdough.jpg" }
+              - column: { name: badge, value: "Men tự nhiên" }
+              - column: { name: tag, value: "Eat Clean" }
+              - column: { name: stock_quantity, valueNumeric: 50 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 75000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: true }
+
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P019" }
+              - column: { name: name, value: "Bánh Chuối Yến Mạch Nướng Không Đường" }
+              - column: { name: category, value: "Bánh ăn kiêng" }
+              - column: { name: category_id, valueNumeric: 2 }
+              - column: { name: description, value: "Bánh chuối yến mạch mềm ẩm tự nhiên, vị ngọt thanh từ 100% chuối tiêu chín cây và mật ong rừng. Không đường tinh luyện, không bơ động vật, lý tưởng cho bữa phụ lành mạnh trước và sau tập luyện." }
+              - column: { name: price, valueNumeric: 145000 }
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892653/hebekery/products/hebekery_banana_oat_bread.jpg" }
+              - column: { name: badge, value: "Không đường" }
+              - column: { name: tag, value: "Năng lượng" }
+              - column: { name: stock_quantity, valueNumeric: 60 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 85000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: true }
+
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P020" }
+              - column: { name: name, value: "Bánh Quy Hạt Lanh & Hạnh Nhân Ăn Kiêng" }
+              - column: { name: category, value: "Bánh ăn kiêng" }
+              - column: { name: category_id, valueNumeric: 2 }
+              - column: { name: description, value: "Bánh quy hạt lanh vàng kết hợp bột hạnh nhân Mỹ cao cấp. Hàm lượng tinh bột siêu thấp, giàu axit béo Omega-3 và chất xơ hòa tan. Tuyệt phẩm cho người theo chế độ Keto và Low-Carb." }
+              - column: { name: price, valueNumeric: 165000 }
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892654/hebekery/products/hebekery_flaxseed_almond_cookies.jpg" }
+              - column: { name: badge, value: "Keto Friendly" }
+              - column: { name: tag, value: "Low-Carb" }
+              - column: { name: stock_quantity, valueNumeric: 70 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 105000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: false }
+
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P021" }
+              - column: { name: name, value: "Granola Dâu Tây & Quả Mọng Sấy Giòn" }
+              - column: { name: category, value: "Ngũ cốc & Granola" }
+              - column: { name: category_id, valueNumeric: 1 }
+              - column: { name: description, value: "Granola yến mạch Úc nướng giòn rụm cùng mật hoa dừa hữu cơ, hòa quyện với dâu tây, việt quất và nam việt quất sấy thăng hoa công nghệ cao. Vị chua ngọt cân bằng, giàu chất chống oxy hóa tự nhiên." }
+              - column: { name: price, valueNumeric: 259000 }
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892654/hebekery/products/hebekery_strawberry_berry_granola.jpg" }
+              - column: { name: badge, value: "Best Seller" }
+              - column: { name: tag, value: "Quả mọng" }
+              - column: { name: stock_quantity, valueNumeric: 85 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 175000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: true }
+
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P022" }
+              - column: { name: name, value: "Hạt Bí Xanh Ấn Độ Rang Mộc Không Muối" }
+              - column: { name: category, value: "Snack healthy" }
+              - column: { name: category_id, valueNumeric: 3 }
+              - column: { name: description, value: "Hạt bí xanh nhập khẩu Ấn Độ loại 1, rang chín mộc bằng nhiệt hồng ngoại. Không tẩm ướp gia vị hay muối, bảo toàn trọn vẹn kẽm, magie và axit béo thiết yếu cho tim mạch." }
+              - column: { name: price, valueNumeric: 139000 }
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892655/hebekery/products/hebekery_pumpkin_seed_roasted.jpg" }
+              - column: { name: badge, value: "Thuần chay" }
+              - column: { name: tag, value: "Giàu Kẽm" }
+              - column: { name: stock_quantity, valueNumeric: 95 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 85000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: false }
+
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: id, value: "P023" }
+              - column: { name: name, value: "Bánh Muffin Việt Quất Yến Mạch Eat Clean" }
+              - column: { name: category, value: "Bánh ăn kiêng" }
+              - column: { name: category_id, valueNumeric: 2 }
+              - column: { name: description, value: "Bánh muffin nướng mềm làm từ 100% yến mạch xay mịn và quả việt quất tươi mọng nước. Hoàn toàn không bơ động vật, không bột mì trắng tinh luyện. Thích hợp cho bữa sáng tiện lợi và ăn kiêng giữ dáng." }
+              - column: { name: price, valueNumeric: 155000 }
+              - column: { name: image_url, value: "https://res.cloudinary.com/dw41xzins/image/upload/v1793892660/hebekery/products/hebekery_blueberry_oat_muffin.jpg" }
+              - column: { name: badge, value: "Mới" }
+              - column: { name: tag, value: "Bữa sáng" }
+              - column: { name: stock_quantity, valueNumeric: 45 }
+              - column: { name: low_stock_threshold, valueNumeric: 5 }
+              - column: { name: average_cost, valueNumeric: 95000 }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: is_featured, valueBoolean: true }

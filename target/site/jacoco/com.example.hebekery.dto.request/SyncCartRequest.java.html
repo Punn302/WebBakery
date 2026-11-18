@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SyncCartRequest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.dto.request</a> &gt; <span class="el_source">SyncCartRequest.java</span></div><h1>SyncCartRequest.java</h1><pre class="source lang-java linenums">package com.example.hebekery.dto.request;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Schema(description = &quot;Yêu cầu đồng bộ giỏ hàng từ LocalStorage khi đăng nhập&quot;)
+public class SyncCartRequest {
+
+<span class="pc" id="L13">    @Schema(description = &quot;Danh sách các mặt hàng lưu tạm dưới client&quot;)</span>
+    @NotNull(message = &quot;Danh sách sản phẩm không được null&quot;)
+    @Valid
+    private List&lt;SyncCartItemDto&gt; items = new ArrayList&lt;&gt;();
+
+<span class="nc" id="L18">    public SyncCartRequest() {</span>
+<span class="nc" id="L19">    }</span>
+
+<span class="fc" id="L21">    public SyncCartRequest(List&lt;SyncCartItemDto&gt; items) {</span>
+<span class="fc" id="L22">        this.items = items;</span>
+<span class="fc" id="L23">    }</span>
+
+    public List&lt;SyncCartItemDto&gt; getItems() {
+<span class="fc" id="L26">        return items;</span>
+    }
+
+    public void setItems(List&lt;SyncCartItemDto&gt; items) {
+<span class="nc" id="L30">        this.items = items;</span>
+<span class="nc" id="L31">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

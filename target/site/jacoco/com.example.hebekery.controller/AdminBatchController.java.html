@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminBatchController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.controller</a> &gt; <span class="el_source">AdminBatchController.java</span></div><h1>AdminBatchController.java</h1><pre class="source lang-java linenums">package com.example.hebekery.controller;
+
+import com.example.hebekery.dto.ApiResponse;
+import com.example.hebekery.dto.BatchFlashSaleRequest;
+import com.example.hebekery.dto.BatchStatsResponse;
+import com.example.hebekery.dto.ProductBatchRequest;
+import com.example.hebekery.dto.ProductBatchResponse;
+import com.example.hebekery.service.ProductBatchService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping({&quot;/api/warehouse/batches&quot;, &quot;/api/admin/batches&quot;})
+@PreAuthorize(&quot;hasAnyRole('ADMIN', 'STAFF_WAREHOUSE')&quot;)
+@Tag(name = &quot;Quản lý Lô Bánh&quot;, description = &quot;Quản lý lô sản xuất và các chương trình Giảm giá/Flash Sale&quot;)
+public class AdminBatchController {
+
+    private final ProductBatchService productBatchService;
+
+<span class="fc" id="L37">    public AdminBatchController(ProductBatchService productBatchService) {</span>
+<span class="fc" id="L38">        this.productBatchService = productBatchService;</span>
+<span class="fc" id="L39">    }</span>
+
+    @Operation(summary = &quot;Danh sách các lô bánh sản xuất&quot;, description = &quot;Lọc theo sản phẩm và trạng thái&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @GetMapping
+    public ResponseEntity&lt;ApiResponse&lt;Page&lt;ProductBatchResponse&gt;&gt;&gt; getBatches(
+            @RequestParam(required = false) String productId,
+            @RequestParam(required = false, defaultValue = &quot;ALL&quot;) String status,
+            @RequestParam(defaultValue = &quot;0&quot;) int page,
+            @RequestParam(defaultValue = &quot;10&quot;) int size) {
+<span class="nc" id="L48">        Pageable pageable = PageRequest.of(Math.max(0, page), size, Sort.by(&quot;expiryDate&quot;).ascending());</span>
+<span class="nc" id="L49">        Page&lt;ProductBatchResponse&gt; result = productBatchService.searchBatches(productId, status, pageable);</span>
+<span class="nc" id="L50">        return ResponseEntity.ok(ApiResponse.success(&quot;Lấy danh sách lô bánh thành công&quot;, result));</span>
+    }
+
+    @Operation(summary = &quot;Thống kê hạn sử dụng các lô bánh&quot;, description = &quot;Tổng hợp thống kê số lô sản xuất&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @GetMapping(&quot;/stats&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;BatchStatsResponse&gt;&gt; getStats() {
+<span class="nc" id="L56">        BatchStatsResponse stats = productBatchService.getBatchStats();</span>
+<span class="nc" id="L57">        return ResponseEntity.ok(ApiResponse.success(&quot;Lấy thống kê lô bánh thành công&quot;, stats));</span>
+    }
+
+    @Operation(summary = &quot;Tạo mẻ bánh / lô sản xuất mới&quot;, description = &quot;Ghi nhận NSX, HSD và số lượng bánh nướng mẻ mới&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @PostMapping
+    public ResponseEntity&lt;ApiResponse&lt;ProductBatchResponse&gt;&gt; createBatch(@Valid @RequestBody ProductBatchRequest request) {
+<span class="nc" id="L63">        ProductBatchResponse created = productBatchService.createBatch(request);</span>
+<span class="nc" id="L64">        return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="nc" id="L65">                .body(ApiResponse.success(&quot;Tạo lô sản xuất mới thành công&quot;, created));</span>
+    }
+
+    @Operation(summary = &quot;Cập nhật Flash Sale cho lô bánh&quot;, description = &quot;Bật giảm giá Flash Sale cho lô bánh&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @PutMapping(&quot;/{id}/flash-sale&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;ProductBatchResponse&gt;&gt; updateFlashSale(
+            @PathVariable String id,
+            @Valid @RequestBody BatchFlashSaleRequest request) {
+<span class="nc" id="L73">        ProductBatchResponse updated = productBatchService.updateBatchFlashSale(id, request.getDiscountPercent(), request.getNote());</span>
+<span class="nc" id="L74">        return ResponseEntity.ok(ApiResponse.success(&quot;Cập nhật giảm giá Flash Sale thành công&quot;, updated));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

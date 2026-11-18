@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.exception</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package com.example.hebekery.exception;
+
+import com.example.hebekery.dto.ApiResponse;
+import io.jsonwebtoken.JwtException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestControllerAdvice
+<span class="fc" id="L25">public class GlobalExceptionHandler {</span>
+
+<span class="fc" id="L27">    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);</span>
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; handleValidation(MethodArgumentNotValidException ex) {
+<span class="fc" id="L31">        Map&lt;String, String&gt; errors = ex.getBindingResult().getFieldErrors().stream()</span>
+<span class="fc" id="L32">                .collect(Collectors.toMap(</span>
+<span class="fc" id="L33">                        error -&gt; error.getField(),</span>
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">                        error -&gt; error.getDefaultMessage() == null ? &quot;Dữ liệu không hợp lệ&quot; : error.getDefaultMessage(),</span>
+<span class="nc" id="L35">                        (first, second) -&gt; first,</span>
+                        LinkedHashMap::new
+                ));
+
+<span class="fc" id="L39">        String firstMessage = errors.values().stream().findFirst().orElse(&quot;Dữ liệu không hợp lệ&quot;);</span>
+<span class="fc" id="L40">        return ResponseEntity.badRequest().body(ApiResponse.error(firstMessage, errors));</span>
+    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; handleOptimisticLocking(OptimisticLockingFailureException ex) {
+<span class="nc" id="L45">        return ResponseEntity.status(HttpStatus.CONFLICT)</span>
+<span class="nc" id="L46">                .body(ApiResponse.error(&quot;Dữ liệu đã bị thay đổi bởi người dùng khác, vui lòng tải lại trang&quot;));</span>
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; handleBadCredentials(BadCredentialsException ex) {
+<span class="fc" id="L51">        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)</span>
+<span class="fc" id="L52">                .body(ApiResponse.error(&quot;Email hoặc mật khẩu không chính xác&quot;));</span>
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; handleAccessDenied(AccessDeniedException ex) {
+<span class="fc" id="L57">        return ResponseEntity.status(HttpStatus.FORBIDDEN)</span>
+<span class="fc" id="L58">                .body(ApiResponse.error(&quot;Bạn không có quyền thực hiện thao tác này&quot;));</span>
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; handleJwtException(JwtException ex) {
+<span class="fc" id="L63">        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)</span>
+<span class="fc" id="L64">                .body(ApiResponse.error(&quot;Token xác thực không hợp lệ hoặc đã hết hạn&quot;));</span>
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; handleMaxUploadSize(MaxUploadSizeExceededException ex) {
+<span class="fc" id="L69">        return ResponseEntity.badRequest()</span>
+<span class="fc" id="L70">                .body(ApiResponse.error(&quot;Kích thước file tải lên vượt quá dung lượng cho phép&quot;));</span>
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; handleIllegalState(IllegalStateException ex) {
+<span class="fc" id="L75">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(ex.getMessage()));</span>
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; handleIllegalArgument(IllegalArgumentException ex) {
+<span class="nc" id="L80">        return ResponseEntity.badRequest().body(ApiResponse.error(ex.getMessage()));</span>
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; handleUnreadableBody(HttpMessageNotReadableException ex) {
+<span class="nc" id="L85">        return ResponseEntity.badRequest().body(ApiResponse.error(&quot;Dữ liệu gửi lên không đúng định dạng JSON&quot;));</span>
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+<span class="nc" id="L90">        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)</span>
+<span class="nc" id="L91">                .body(ApiResponse.error(&quot;Phương thức HTTP không được hỗ trợ&quot;));</span>
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; handleNoResourceFound(NoResourceFoundException ex) {
+<span class="nc" id="L96">        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(&quot;Không tìm thấy tài nguyên yêu cầu&quot;));</span>
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; handleUnexpected(Exception ex) {
+<span class="nc" id="L101">        log.error(&quot;Unhandled exception caught in GlobalExceptionHandler&quot;, ex);</span>
+<span class="nc" id="L102">        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="nc" id="L103">                .body(ApiResponse.error(&quot;Có lỗi hệ thống xảy ra, vui lòng thử lại sau&quot;));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,252 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-create-payment-transactions-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: payment_transactions
+            columns:
+              - column:
+                  name: id
+                  type: varchar(64)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: order_id
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: reference_code
+                  type: varchar(128)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: gateway
+                  type: varchar(64)
+              - column:
+                  name: account_number
+                  type: varchar(64)
+              - column:
+                  name: amount
+                  type: double
+                  constraints:
+                    nullable: false
+              - column:
+                  name: transfer_type
+                  type: varchar(32)
+              - column:
+                  name: content
+                  type: varchar(500)
+              - column:
+                  name: transaction_date
+                  type: datetime
+              - column:
+                  name: created_at
+                  type: datetime
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_payment_tx_order_id
+            tableName: payment_transactions
+            columns:
+              - column:
+                  name: order_id
+        - createIndex:
+            indexName: idx_payment_tx_ref_code
+            tableName: payment_transactions
+            columns:
+              - column:
+                  name: reference_code
+
+  - changeSet:
+      id: 005-create-customer-profiles-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: customer_profiles
+            columns:
+              - column:
+                  name: id
+                  type: varchar(64)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: loyalty_points
+                  type: int
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: membership_tier
+                  type: varchar(32)
+                  defaultValue: "BRONZE"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_spent
+                  type: double
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: target_calories
+                  type: int
+                  defaultValueNumeric: 2000
+              - column:
+                  name: created_at
+                  type: datetime
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: datetime
+              - column:
+                  name: created_by
+                  type: varchar(100)
+              - column:
+                  name: updated_by
+                  type: varchar(100)
+        - addForeignKeyConstraint:
+            baseTableName: customer_profiles
+            baseColumnNames: user_id
+            constraintName: fk_customer_profile_user
+            referencedTableName: users
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 005-create-vouchers-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: vouchers
+            columns:
+              - column:
+                  name: id
+                  type: varchar(64)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: code
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: discount_type
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: discount_value
+                  type: double
+                  constraints:
+                    nullable: false
+              - column:
+                  name: max_discount
+                  type: double
+              - column:
+                  name: min_order_amount
+                  type: double
+                  defaultValueNumeric: 0
+              - column:
+                  name: usage_limit
+                  type: int
+                  defaultValueNumeric: 100
+              - column:
+                  name: used_count
+                  type: int
+                  defaultValueNumeric: 0
+              - column:
+                  name: user_limit
+                  type: int
+                  defaultValueNumeric: 1
+              - column:
+                  name: start_date
+                  type: datetime
+              - column:
+                  name: end_date
+                  type: datetime
+              - column:
+                  name: active
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: datetime
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: datetime
+              - column:
+                  name: created_by
+                  type: varchar(100)
+              - column:
+                  name: updated_by
+                  type: varchar(100)
+        - createIndex:
+            indexName: idx_vouchers_code
+            tableName: vouchers
+            columns:
+              - column:
+                  name: code
+
+  - changeSet:
+      id: 005-create-voucher-usages-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: voucher_usages
+            columns:
+              - column:
+                  name: id
+                  type: varchar(64)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: voucher_id
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_id
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: used_at
+                  type: datetime
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_voucher_usage_user_voucher
+            tableName: voucher_usages
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: voucher_id

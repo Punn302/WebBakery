@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 012-seed-admin-user
+      author: hebekery
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: id, value: "1" }
+              - column: { name: email, value: "admin@hebekery.vn" }
+              # Placeholder hash - instructions: Replace with secure hash in production
+              - column: { name: password, value: "$2a$10$RlU6BD08cNC2xYeP8tCPcez/.AsMLr8ZEvYG7ElLmgJXf/V0RpF/y" }
+              - column: { name: name, value: "Quản trị viên Hebekery" }
+              - column: { name: phone, value: "0911223344" }
+              - column: { name: role, value: "ADMIN" }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: force_password_change, valueBoolean: true }

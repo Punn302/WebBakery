@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PageController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.controller</a> &gt; <span class="el_source">PageController.java</span></div><h1>PageController.java</h1><pre class="source lang-java linenums">package com.example.hebekery.controller;
+
+import com.example.hebekery.dto.request.CheckoutRequest;
+import com.example.hebekery.model.Product;
+import com.example.hebekery.service.AddressService;
+import com.example.hebekery.service.CartService;
+import com.example.hebekery.service.OrderService;
+import com.example.hebekery.service.ProductService;
+import com.example.hebekery.service.ProductReviewService;
+import com.example.hebekery.service.UserService;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.UriUtils;
+
+import java.nio.charset.StandardCharsets;
+
+@Controller
+public class PageController {
+
+    private final ProductService productService;
+    private final CartService cartService;
+    private final UserService userService;
+    private final OrderService orderService;
+    private final ProductReviewService productReviewService;
+    private final AddressService addressService;
+
+<span class="fc" id="L34">    public PageController(ProductService productService, CartService cartService, UserService userService, OrderService orderService, ProductReviewService productReviewService, AddressService addressService) {</span>
+<span class="fc" id="L35">        this.productService = productService;</span>
+<span class="fc" id="L36">        this.cartService = cartService;</span>
+<span class="fc" id="L37">        this.userService = userService;</span>
+<span class="fc" id="L38">        this.orderService = orderService;</span>
+<span class="fc" id="L39">        this.productReviewService = productReviewService;</span>
+<span class="fc" id="L40">        this.addressService = addressService;</span>
+<span class="fc" id="L41">    }</span>
+
+    @GetMapping(&quot;/&quot;)
+    public String home(Model model) {
+<span class="nc" id="L45">        model.addAttribute(&quot;products&quot;, productService.getFeaturedProducts());</span>
+<span class="nc" id="L46">        return &quot;index&quot;;</span>
+    }
+
+    @GetMapping(&quot;/about&quot;)
+    public String about() {
+<span class="nc" id="L51">        return &quot;about&quot;;</span>
+    }
+
+    @GetMapping(&quot;/search&quot;)
+    public String searchProducts(@RequestParam(required = false) String keyword) {
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        String encodedKeyword = UriUtils.encodeQueryParam(keyword == null ? &quot;&quot; : keyword, StandardCharsets.UTF_8);</span>
+<span class="nc" id="L57">        return &quot;redirect:/products?keyword=&quot; + encodedKeyword;</span>
+    }
+
+    @GetMapping(&quot;/products&quot;)
+    public String products(@RequestParam(defaultValue = &quot;all&quot;) String category,
+                           @RequestParam(defaultValue = &quot;&quot;) String keyword,
+                           @RequestParam(defaultValue = &quot;0&quot;) int page,
+                           Model model) {
+<span class="nc" id="L65">        var pageable = PageRequest.of(Math.max(page, 0), 8, Sort.by(&quot;id&quot;).ascending());</span>
+<span class="nc bnc" id="L66" title="All 4 branches missed.">        var productsPage = keyword == null || keyword.isBlank()</span>
+<span class="nc" id="L67">                ? productService.getProductsPage(category, pageable)</span>
+<span class="nc" id="L68">                : productService.searchProducts(keyword, pageable);</span>
+<span class="nc" id="L69">        model.addAttribute(&quot;page&quot;, productsPage);</span>
+<span class="nc" id="L70">        model.addAttribute(&quot;products&quot;, productsPage.getContent());</span>
+<span class="nc" id="L71">        model.addAttribute(&quot;categories&quot;, productService.getAllCategories());</span>
+<span class="nc" id="L72">        model.addAttribute(&quot;currentCategory&quot;, category);</span>
+<span class="nc" id="L73">        model.addAttribute(&quot;keyword&quot;, keyword);</span>
+<span class="nc" id="L74">        return &quot;products&quot;;</span>
+    }
+
+    @GetMapping(&quot;/category/{category}&quot;)
+    public String category(@PathVariable String category) {
+<span class="nc" id="L79">        return &quot;redirect:/products?category=&quot; + UriUtils.encodeQueryParam(category, StandardCharsets.UTF_8);</span>
+    }
+
+    @GetMapping(&quot;/product/{id}&quot;)
+    public String productDetail(@PathVariable String id, Model model) {
+<span class="nc" id="L84">        Product product = productService.getProductById(id);</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        if (product == null) {</span>
+<span class="nc" id="L86">            return &quot;redirect:/products&quot;;</span>
+        }
+
+<span class="nc" id="L89">        model.addAttribute(&quot;product&quot;, product);</span>
+<span class="nc" id="L90">        model.addAttribute(&quot;relatedProducts&quot;, productService.getRelatedProducts(id, product.getCategoryName()));</span>
+<span class="nc" id="L91">        model.addAttribute(&quot;reviews&quot;, productReviewService.getReviews(id));</span>
+<span class="nc" id="L92">        model.addAttribute(&quot;canReview&quot;, productReviewService.canReview(id, userService.getCurrentUser()));</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        model.addAttribute(&quot;myReview&quot;, userService.isLoggedIn()</span>
+<span class="nc" id="L94">                ? productReviewService.getUserReview(id, userService.getCurrentUser().getId()).orElse(null)</span>
+<span class="nc" id="L95">                : null);</span>
+<span class="nc" id="L96">        return &quot;product-detail&quot;;</span>
+    }
+
+    @GetMapping(&quot;/bmi&quot;)
+    public String bmi() {
+<span class="nc" id="L101">        return &quot;bmi&quot;;</span>
+    }
+
+    @GetMapping(&quot;/tdee&quot;)
+    public String tdee() {
+<span class="nc" id="L106">        return &quot;tdee&quot;;</span>
+    }
+
+    @GetMapping(&quot;/knowledge&quot;)
+    public String knowledge() {
+<span class="nc" id="L111">        return &quot;knowledge&quot;;</span>
+    }
+
+    @GetMapping(&quot;/contact&quot;)
+    public String contact() {
+<span class="nc" id="L116">        return &quot;contact&quot;;</span>
+    }
+
+    @GetMapping(&quot;/order-tracking&quot;)
+    public String orderTracking() {
+<span class="nc" id="L121">        return &quot;order-tracking&quot;;</span>
+    }
+
+    @GetMapping(&quot;/cart&quot;)
+    public String cart(Model model) {
+<span class="nc" id="L126">        model.addAttribute(&quot;cartItems&quot;, cartService.getCartItems());</span>
+<span class="nc" id="L127">        model.addAttribute(&quot;totalPrice&quot;, cartService.getTotalPrice());</span>
+<span class="nc" id="L128">        return &quot;cart&quot;;</span>
+    }
+
+    @GetMapping(&quot;/login&quot;)
+    public String loginPage(@RequestParam(required = false) String redirect, Model model) {
+<span class="nc bnc" id="L133" title="All 4 branches missed.">        boolean adminRedirect = redirect != null &amp;&amp; redirect.startsWith(&quot;/admin&quot;);</span>
+<span class="nc bnc" id="L134" title="All 4 branches missed.">        if (adminRedirect &amp;&amp; userService.isAdmin()) {</span>
+<span class="nc" id="L135">            return &quot;redirect:/admin&quot;;</span>
+        }
+<span class="nc bnc" id="L137" title="All 4 branches missed.">        if (!adminRedirect &amp;&amp; userService.isLoggedIn()) {</span>
+<span class="nc" id="L138">            return &quot;redirect:/&quot;;</span>
+        }
+<span class="nc" id="L140">        model.addAttribute(&quot;redirect&quot;, redirect);</span>
+<span class="nc" id="L141">        return &quot;login&quot;;</span>
+    }
+
+    @GetMapping(&quot;/register&quot;)
+    public String registerPage() {
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        if (userService.isLoggedIn()) {</span>
+<span class="nc" id="L147">            return &quot;redirect:/&quot;;</span>
+        }
+<span class="nc" id="L149">        return &quot;register&quot;;</span>
+    }
+
+    @GetMapping(&quot;/profile&quot;)
+    public String profile(Model model) {
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        if (!userService.isLoggedIn()) {</span>
+<span class="nc" id="L155">            return &quot;redirect:/login?redirect=/profile&quot;;</span>
+        }
+<span class="nc" id="L157">        model.addAttribute(&quot;user&quot;, userService.getCurrentUser());</span>
+<span class="nc" id="L158">        return &quot;profile&quot;;</span>
+    }
+
+    @GetMapping(&quot;/orders&quot;)
+    public String orders() {
+<span class="nc" id="L163">        return &quot;redirect:/profile&quot;;</span>
+    }
+
+    @GetMapping(&quot;/orders/{id}&quot;)
+    public String orderDetail(@PathVariable String id, Model model) {
+<span class="nc bnc" id="L168" title="All 2 branches missed.">        if (!userService.isLoggedIn()) {</span>
+<span class="nc" id="L169">            return &quot;redirect:/login?redirect=/orders/&quot; + id;</span>
+        }
+<span class="nc" id="L171">        var order = orderService.getOrderById(id);</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">        if (!order.getUserId().equals(userService.getCurrentUser().getId())) {</span>
+<span class="nc" id="L173">            return &quot;redirect:/profile&quot;;</span>
+        }
+<span class="nc" id="L175">        model.addAttribute(&quot;order&quot;, order);</span>
+<span class="nc" id="L176">        model.addAttribute(&quot;returnHistory&quot;, orderService.getReturnHistory(id));</span>
+<span class="nc" id="L177">        return &quot;order-detail&quot;;</span>
+    }
+
+    @GetMapping(&quot;/checkout&quot;)
+    public String checkout(Model model) {
+<span class="nc bnc" id="L182" title="All 2 branches missed.">        if (!userService.isLoggedIn()) {</span>
+<span class="nc" id="L183">            return &quot;redirect:/login?redirect=/checkout&quot;;</span>
+        }
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        if (cartService.getCartItems().isEmpty()) {</span>
+<span class="nc" id="L186">            return &quot;redirect:/cart&quot;;</span>
+        }
+<span class="nc" id="L188">        model.addAttribute(&quot;user&quot;, userService.getCurrentUser());</span>
+<span class="nc" id="L189">        var addresses = addressService.getByUser(userService.getCurrentUser().getId());</span>
+<span class="nc" id="L190">        model.addAttribute(&quot;addresses&quot;, addresses);</span>
+<span class="nc" id="L191">        model.addAttribute(&quot;defaultAddress&quot;, addresses.stream()</span>
+<span class="nc" id="L192">                .filter(address -&gt; address.isDefaultAddress())</span>
+<span class="nc" id="L193">                .findFirst()</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">                .orElse(addresses.isEmpty() ? null : addresses.get(0)));</span>
+<span class="nc" id="L195">        model.addAttribute(&quot;cartItems&quot;, cartService.getCartItems());</span>
+<span class="nc" id="L196">        model.addAttribute(&quot;subtotal&quot;, cartService.getTotalPrice());</span>
+<span class="nc" id="L197">        model.addAttribute(&quot;shippingFee&quot;, 30000);</span>
+<span class="nc" id="L198">        model.addAttribute(&quot;totalPrice&quot;, cartService.getTotalPrice() + 30000);</span>
+<span class="nc" id="L199">        return &quot;checkout&quot;;</span>
+    }
+
+    @GetMapping(&quot;/checkout/success&quot;)
+    public String checkoutSuccess() {
+<span class="nc" id="L204">        return &quot;checkout-success&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

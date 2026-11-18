@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CheckoutController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.controller</a> &gt; <span class="el_source">CheckoutController.java</span></div><h1>CheckoutController.java</h1><pre class="source lang-java linenums">package com.example.hebekery.controller;
+
+import com.example.hebekery.dto.ApiResponse;
+import com.example.hebekery.dto.CheckoutResponse;
+import com.example.hebekery.dto.PaymentStatusResponse;
+import com.example.hebekery.dto.request.CheckoutRequest;
+import com.example.hebekery.model.Order;
+import com.example.hebekery.service.CartService;
+import com.example.hebekery.service.OrderService;
+import com.example.hebekery.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping(&quot;/api/checkout&quot;)
+@PreAuthorize(&quot;isAuthenticated()&quot;)
+@Tag(name = &quot;Checkout &amp; Payment&quot;, description = &quot;Quy trình thanh toán và đặt hàng trực tuyến&quot;)
+public class CheckoutController {
+
+    private final CartService cartService;
+    private final OrderService orderService;
+    private final UserService userService;
+
+<span class="fc" id="L37">    public CheckoutController(CartService cartService, OrderService orderService, UserService userService) {</span>
+<span class="fc" id="L38">        this.cartService = cartService;</span>
+<span class="fc" id="L39">        this.orderService = orderService;</span>
+<span class="fc" id="L40">        this.userService = userService;</span>
+<span class="fc" id="L41">    }</span>
+
+    @Operation(summary = &quot;Tạo đơn hàng thanh toán&quot;, description = &quot;Khởi tạo đơn hàng từ giỏ hàng hiện tại với hình thức COD hoặc chuyển khoản SePay/VIETQR&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @PostMapping
+    public ResponseEntity&lt;ApiResponse&lt;CheckoutResponse&gt;&gt; checkout(@Valid @RequestBody CheckoutRequest request, HttpSession session) {
+<span class="nc bnc" id="L46" title="All 4 branches missed.">        if (!userService.isLoggedIn() || userService.getCurrentUser() == null) {</span>
+<span class="nc" id="L47">            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)</span>
+<span class="nc" id="L48">                    .body(ApiResponse.failure(&quot;Vui lòng đăng nhập để tiến hành đặt hàng&quot;));</span>
+        }
+
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (cartService.getCartItems().isEmpty()) {</span>
+<span class="nc" id="L52">            return ResponseEntity.badRequest().body(ApiResponse.failure(&quot;Giỏ hàng của bạn đang trống&quot;));</span>
+        }
+
+<span class="nc" id="L55">        CheckoutResponse checkout = orderService.createOrder(</span>
+<span class="nc" id="L56">                userService.getCurrentUser(),</span>
+<span class="nc" id="L57">                cartService.getCartItems(),</span>
+<span class="nc" id="L58">                cartService.getTotalPrice(),</span>
+                request
+        );
+
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (&quot;COD&quot;.equalsIgnoreCase(checkout.getPaymentMethod())) {</span>
+<span class="nc" id="L63">            cartService.clearCart();</span>
+        }
+
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        String msg = checkout.getMessage() != null ? checkout.getMessage() : &quot;Đặt hàng thành công&quot;;</span>
+<span class="nc" id="L67">        return ResponseEntity.ok(ApiResponse.success(msg, checkout));</span>
+    }
+
+    @Operation(summary = &quot;Kiểm tra trạng thái thanh toán đơn hàng (Polling)&quot;, description = &quot;Lấy trạng thái thanh toán của đơn hàng sau khi tạo để cập nhật giao diện tự động&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @GetMapping(&quot;/orders/{orderId}/status&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;PaymentStatusResponse&gt;&gt; getOrderStatus(
+            @Parameter(description = &quot;Mã ID đơn hàng hoặc mã orderCode&quot;) @PathVariable String orderId) {
+<span class="nc" id="L74">        Order order = orderService.getOrderById(orderId);</span>
+<span class="nc" id="L75">        boolean isPaid = &quot;PAID&quot;.equalsIgnoreCase(order.getPaymentStatus());</span>
+<span class="nc" id="L76">        PaymentStatusResponse status = new PaymentStatusResponse(</span>
+<span class="nc" id="L77">                order.getId(),</span>
+<span class="nc" id="L78">                order.getOrderCode(),</span>
+<span class="nc" id="L79">                order.getOrderStatus(),</span>
+<span class="nc" id="L80">                order.getPaymentStatus(),</span>
+                isPaid,
+<span class="nc" id="L82">                order.getTotal()</span>
+        );
+<span class="nc" id="L84">        return ResponseEntity.ok(ApiResponse.success(&quot;Lấy trạng thái thanh toán thành công&quot;, status));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

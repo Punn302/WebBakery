@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CategoryService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.service</a> &gt; <span class="el_source">CategoryService.java</span></div><h1>CategoryService.java</h1><pre class="source lang-java linenums">package com.example.hebekery.service;
+
+import com.example.hebekery.dto.CategoryResponse;
+import com.example.hebekery.dto.request.CategoryRequest;
+import com.example.hebekery.model.Category;
+import com.example.hebekery.repository.CategoryRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.text.Normalizer;
+import java.util.List;
+import java.util.regex.Pattern;
+
+@Service
+public class CategoryService {
+
+    private final CategoryRepository categoryRepository;
+
+<span class="fc" id="L21">    public CategoryService(CategoryRepository categoryRepository) {</span>
+<span class="fc" id="L22">        this.categoryRepository = categoryRepository;</span>
+<span class="fc" id="L23">    }</span>
+
+    public List&lt;CategoryResponse&gt; getActiveCategories() {
+<span class="fc" id="L26">        return categoryRepository.findByActiveTrueOrderByNameAsc().stream()</span>
+<span class="fc" id="L27">                .map(CategoryResponse::fromEntity)</span>
+<span class="fc" id="L28">                .toList();</span>
+    }
+
+    public Page&lt;CategoryResponse&gt; getAllCategories(String keyword, Pageable pageable) {
+        Page&lt;Category&gt; page;
+<span class="nc bnc" id="L33" title="All 4 branches missed.">        if (keyword != null &amp;&amp; !keyword.isBlank()) {</span>
+<span class="nc" id="L34">            page = categoryRepository.findByNameContainingIgnoreCase(keyword.trim(), pageable);</span>
+        } else {
+<span class="nc" id="L36">            page = categoryRepository.findAll(pageable);</span>
+        }
+<span class="nc" id="L38">        return page.map(CategoryResponse::fromEntity);</span>
+    }
+
+    public CategoryResponse getCategoryById(Long id) {
+<span class="nc" id="L42">        return categoryRepository.findById(id)</span>
+<span class="nc" id="L43">                .map(CategoryResponse::fromEntity)</span>
+<span class="nc" id="L44">                .orElse(null);</span>
+    }
+
+    public Category getCategoryEntityById(Long id) {
+<span class="nc" id="L48">        return categoryRepository.findById(id).orElse(null);</span>
+    }
+
+    public Category getCategoryEntityByName(String name) {
+<span class="nc bnc" id="L52" title="All 4 branches missed.">        if (name == null || name.isBlank()) {</span>
+<span class="nc" id="L53">            return null;</span>
+        }
+<span class="nc" id="L55">        return categoryRepository.findByNameIgnoreCase(name.trim()).orElse(null);</span>
+    }
+
+    public Category getCategoryEntityBySlug(String slug) {
+<span class="nc bnc" id="L59" title="All 4 branches missed.">        if (slug == null || slug.isBlank()) {</span>
+<span class="nc" id="L60">            return null;</span>
+        }
+<span class="nc" id="L62">        return categoryRepository.findBySlug(slug.trim()).orElse(null);</span>
+    }
+
+    @Transactional
+    public Category getOrCreateCategoryByName(String name) {
+<span class="nc bnc" id="L67" title="All 4 branches missed.">        if (name == null || name.isBlank()) {</span>
+<span class="nc" id="L68">            return null;</span>
+        }
+<span class="nc" id="L70">        String trimmed = name.trim();</span>
+<span class="nc" id="L71">        return categoryRepository.findByNameIgnoreCase(trimmed)</span>
+<span class="nc" id="L72">                .orElseGet(() -&gt; {</span>
+<span class="nc" id="L73">                    String slug = generateSlug(trimmed);</span>
+<span class="nc" id="L74">                    Category newCat = new Category(trimmed, slug, trimmed);</span>
+<span class="nc" id="L75">                    return categoryRepository.save(newCat);</span>
+                });
+    }
+
+    @Transactional
+    public CategoryResponse createCategory(CategoryRequest request) {
+<span class="fc" id="L81">        String name = request.getName().trim();</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        if (categoryRepository.existsByNameIgnoreCase(name)) {</span>
+<span class="fc" id="L83">            throw new IllegalArgumentException(&quot;Tên danh mục đã tồn tại: &quot; + name);</span>
+        }
+
+<span class="pc bpc" id="L86" title="3 of 4 branches missed.">        String slug = (request.getSlug() != null &amp;&amp; !request.getSlug().isBlank())</span>
+<span class="nc" id="L87">                ? generateSlug(request.getSlug().trim())</span>
+<span class="fc" id="L88">                : generateSlug(name);</span>
+
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        if (categoryRepository.existsBySlug(slug)) {</span>
+<span class="nc" id="L91">            slug = slug + &quot;-&quot; + System.currentTimeMillis();</span>
+        }
+
+<span class="fc" id="L94">        Category category = new Category();</span>
+<span class="fc" id="L95">        category.setName(name);</span>
+<span class="fc" id="L96">        category.setSlug(slug);</span>
+<span class="fc" id="L97">        category.setDescription(request.getDescription());</span>
+<span class="pc bpc" id="L98" title="2 of 4 branches missed.">        category.setActive(request.getActive() == null || request.getActive());</span>
+
+<span class="fc" id="L100">        Category saved = categoryRepository.save(category);</span>
+<span class="fc" id="L101">        return CategoryResponse.fromEntity(saved);</span>
+    }
+
+    @Transactional
+    public CategoryResponse updateCategory(Long id, CategoryRequest request) {
+<span class="nc" id="L106">        Category category = categoryRepository.findById(id)</span>
+<span class="nc" id="L107">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Không tìm thấy danh mục với ID: &quot; + id));</span>
+
+<span class="nc" id="L109">        String name = request.getName().trim();</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">        if (categoryRepository.existsByNameIgnoreCaseAndIdNot(name, id)) {</span>
+<span class="nc" id="L111">            throw new IllegalArgumentException(&quot;Tên danh mục đã tồn tại: &quot; + name);</span>
+        }
+
+<span class="nc bnc" id="L114" title="All 4 branches missed.">        String slug = (request.getSlug() != null &amp;&amp; !request.getSlug().isBlank())</span>
+<span class="nc" id="L115">                ? generateSlug(request.getSlug().trim())</span>
+<span class="nc" id="L116">                : generateSlug(name);</span>
+
+<span class="nc bnc" id="L118" title="All 2 branches missed.">        if (categoryRepository.existsBySlugAndIdNot(slug, id)) {</span>
+<span class="nc" id="L119">            slug = slug + &quot;-&quot; + System.currentTimeMillis();</span>
+        }
+
+<span class="nc" id="L122">        category.setName(name);</span>
+<span class="nc" id="L123">        category.setSlug(slug);</span>
+<span class="nc" id="L124">        category.setDescription(request.getDescription());</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        if (request.getActive() != null) {</span>
+<span class="nc" id="L126">            category.setActive(request.getActive());</span>
+        }
+
+<span class="nc" id="L129">        Category updated = categoryRepository.save(category);</span>
+<span class="nc" id="L130">        return CategoryResponse.fromEntity(updated);</span>
+    }
+
+    @Transactional
+    public void deleteCategory(Long id) {
+<span class="nc" id="L135">        Category category = categoryRepository.findById(id)</span>
+<span class="nc" id="L136">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Không tìm thấy danh mục với ID: &quot; + id));</span>
+<span class="nc" id="L137">        categoryRepository.delete(category);</span>
+<span class="nc" id="L138">    }</span>
+
+    public static String generateSlug(String input) {
+<span class="pc bpc" id="L141" title="2 of 4 branches missed.">        if (input == null || input.isBlank()) {</span>
+<span class="nc" id="L142">            return &quot;&quot;;</span>
+        }
+<span class="fc" id="L144">        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);</span>
+<span class="fc" id="L145">        String slug = Pattern.compile(&quot;\\p{InCombiningDiacriticalMarks}+&quot;).matcher(normalized).replaceAll(&quot;&quot;);</span>
+<span class="fc" id="L146">        slug = slug.toLowerCase()</span>
+<span class="fc" id="L147">                .replaceAll(&quot;đ&quot;, &quot;d&quot;)</span>
+<span class="fc" id="L148">                .replaceAll(&quot;[^a-z0-9\\s-]&quot;, &quot;&quot;)</span>
+<span class="fc" id="L149">                .replaceAll(&quot;\\s+&quot;, &quot;-&quot;)</span>
+<span class="fc" id="L150">                .replaceAll(&quot;-+&quot;, &quot;-&quot;);</span>
+<span class="fc" id="L151">        return slug.replaceAll(&quot;^-|-$&quot;, &quot;&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

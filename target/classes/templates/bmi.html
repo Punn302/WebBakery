@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hebekery | Tính BMI Online</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<!-- ========== HEADER ========== -->
+<div th:replace="~{layout/fragments :: header}"></div>
+
+<main class="pt-24 pb-16">
+    <div class="max-w-7xl mx-auto px-4 md:px-8">
+
+        <!-- Hero Title -->
+        <div class="text-center mb-12">
+            <h1 class="text-3xl md:text-4xl font-medium text-gray-800 mb-3">Công Cụ Tính BMI Online</h1>
+            <p class="text-gray-500">Tính chỉ số BMI để biết tình trạng sức khoẻ của bạn</p>
+        </div>
+
+        <!-- Grid Layout: 2 cột -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            <!-- ================= CỘT TRÁI: BMI là gì? + Slider ================= -->
+            <div class="space-y-8">
+                <!-- BMI là gì? -->
+                <div class="bg-white rounded-2xl p-8 shadow-md">
+                    <h2 class="text-2xl font-medium text-gray-800 mb-4">BMI là gì? Cách tính chỉ số BMI</h2>
+                    <div class="text-gray-500 leading-relaxed space-y-3">
+                        <p>BMI là viết tắt của "Body Mass Index" (Chỉ số khối cơ thể), đây là một phép đo tiêu chuẩn được sử dụng để đánh giá mức độ cân đối giữa cân nặng và chiều cao của một người.</p>
+                        <p>Chỉ số BMI giúp bạn phân loại tình trạng sức khỏe của mình. Kết quả tính BMI online giúp bạn biết được cơ thể đang ở tình trạng nào từ đó điều chỉnh để khoẻ mạnh hơn.</p>
+                        <p class="font-semibold text-gray-700 pt-2">BMI được tính bằng công thức sau đây:</p>
+                        <p class="bg-[#f1ede6] p-4 rounded-xl text-center font-mono text-lg">
+                            BMI = Cân nặng (kg) / (Chiều cao (m))²
+                        </p>
+                        <div class="rounded-xl overflow-hidden shadow-lg mt-4">
+                            <img th:src="@{/images/bmi-info.jpg}" alt="BMI là gì?" class="w-full h-auto object-cover">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phân loại BMI - Slider (nằm dưới BMI là gì?) -->
+                <div class="bmi-classify">
+                    <h2>Phân loại BMI - Bảng BMI</h2>
+
+                    <div class="bmi-slider-container">
+                        <div class="bmi-slider-wrapper">
+                            <!-- Slide 1 -->
+                            <div class="bmi-slide">
+                                <div class="img text-center py-6 bg-[#f1ede6]">
+                                    <img th:src="@{/images/bmi-underweight.png}" alt="CÂN NẶNG THẤP" class="w-28 mx-auto">
+                                </div>
+                                <div class="bmi-bg text-center py-3">
+                                    <span class="title text-sm font-semibold uppercase">CÂN NẶNG THẤP</span>
+                                    <h5 class="text-lg font-bold">&lt; 18.5</h5>
+                                </div>
+                                <div class="detail p-4 text-center">
+                                    <p class="mb-2 text-sm">Cân nặng thấp, BMI dưới 18.5</p>
+                                    <p class="text-xs text-gray-500">Cơ thể bạn đang thiếu cân, bạn nên áp dụng các phương pháp ăn uống và luyện tập để tăng trọng lượng cơ thể nhé!</p>
+                                </div>
+                            </div>
+
+                            <!-- Slide 2 -->
+                            <div class="bmi-slide">
+                                <div class="img text-center py-6 bg-[#f1ede6]">
+                                    <img th:src="@{/images/bmi-normal.png}" alt="BÌNH THƯỜNG" class="w-28 mx-auto">
+                                </div>
+                                <div class="bmi-bg text-center py-3">
+                                    <span class="title text-sm font-semibold uppercase">BÌNH THƯỜNG</span>
+                                    <h5 class="text-lg font-bold">18.5 - 24.9</h5>
+                                </div>
+                                <div class="detail p-4 text-center">
+                                    <p class="mb-2 text-sm">Cân nặng bình thường, chỉ số trong ngưỡng 18.5 - 24.9</p>
+                                    <p class="text-xs text-gray-500">Cơ thể bình thường, bạn hãy tiếp tục duy trì quá trình ăn uống và sinh hoạt như thường ngày nhé!</p>
+                                </div>
+                            </div>
+
+                            <!-- Slide 3 -->
+                            <div class="bmi-slide">
+                                <div class="img text-center py-6 bg-[#f1ede6]">
+                                    <img th:src="@{/images/bmi-overweight.png}" alt="TIỀN BÉO PHÌ" class="w-28 mx-auto">
+                                </div>
+                                <div class="bmi-bg text-center py-3">
+                                    <span class="title text-sm font-semibold uppercase">TIỀN BÉO PHÌ</span>
+                                    <h5 class="text-lg font-bold">25 - 29.9</h5>
+                                </div>
+                                <div class="detail p-4 text-center">
+                                    <p class="mb-2 text-sm">Cân nặng cao, chỉ số trong ngưỡng từ 25 - 29.9</p>
+                                    <p class="text-xs text-gray-500">Cơ thể thừa cân, bạn cần áp dụng thực đơn ăn kiêng hợp lý cùng việc luyện tập khoa học để lấy lại vóc dáng chuẩn nhất nhé!</p>
+                                </div>
+                            </div>
+
+                            <!-- Slide 4 -->
+                            <div class="bmi-slide">
+                                <div class="img text-center py-6 bg-[#f1ede6]">
+                                    <img th:src="@{/images/bmi-obese1.png}" alt="BÉO PHÌ CẤP ĐỘ I" class="w-28 mx-auto">
+                                </div>
+                                <div class="bmi-bg text-center py-3">
+                                    <span class="title text-sm font-semibold uppercase">BÉO PHÌ CẤP ĐỘ I</span>
+                                    <h5 class="text-lg font-bold">30 - 34.9</h5>
+                                </div>
+                                <div class="detail p-4 text-center">
+                                    <p class="mb-2 text-sm">Thừa cân, chỉ số trong ngưỡng 30 - 34.9</p>
+                                    <p class="text-xs text-gray-500">Bạn đang ở nhóm béo phì độ I. Béo phì là một tình trạng bạn có một lượng mỡ trong cơ thể cao hơn mức độ an toàn cho sức khỏe.</p>
+                                </div>
+                            </div>
+
+                            <!-- Slide 5 -->
+                            <div class="bmi-slide">
+                                <div class="img text-center py-6 bg-[#f1ede6]">
+                                    <img th:src="@{/images/bmi-obese2.png}" alt="BÉO PHÌ ĐỘ II" class="w-28 mx-auto">
+                                </div>
+                                <div class="bmi-bg text-center py-3">
+                                    <span class="title text-sm font-semibold uppercase">BÉO PHÌ ĐỘ II</span>
+                                    <h5 class="text-lg font-bold">35 - 39.9</h5>
+                                </div>
+                                <div class="detail p-4 text-center">
+                                    <p class="mb-2 text-sm">Thừa cân, chỉ số trong ngưỡng 35 - 39.9</p>
+                                    <p class="text-xs text-gray-500">Bạn đang ở nhóm độ II. Béo phì là một tình trạng bạn có một lượng mỡ trong cơ thể cao hơn mức độ an toàn cho sức khỏe.</p>
+                                </div>
+                            </div>
+
+                            <!-- Slide 6 -->
+                            <div class="bmi-slide">
+                                <div class="img text-center py-6 bg-[#f1ede6]">
+                                    <img th:src="@{/images/bmi-obese3.png}" alt="BÉO PHÌ ĐỘ III" class="w-28 mx-auto">
+                                </div>
+                                <div class="bmi-bg text-center py-3">
+                                    <span class="title text-sm font-semibold uppercase">BÉO PHÌ ĐỘ III</span>
+                                    <h5 class="text-lg font-bold">&gt;= 40</h5>
+                                </div>
+                                <div class="detail p-4 text-center">
+                                    <p class="mb-2 text-sm">Thừa cân nghiêm trọng, chỉ số lớn hơn 40</p>
+                                    <p class="text-xs text-gray-500">Bạn đang ở nhóm béo phì độ III. Béo phì là một tình trạng bạn có một lượng mỡ trong cơ thể cao hơn mức độ an toàn cho sức khỏe.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Navigation Buttons -->
+                        <div class="bmi-slider-prev">
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </div>
+                        <div class="bmi-slider-next">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </div>
+                    </div>
+
+                    <!-- Dots -->
+                    <div class="bmi-slider-dots"></div>
+                </div>
+            </div>
+
+            <!-- ================= CỘT PHẢI: Công cụ tính BMI ================= -->
+            <div>
+                <div class="bmi-calculator">
+                    <h1>Công cụ tính BMI Online</h1>
+                    <div class="sub-heading">Tính chỉ số BMI để biết tình trạng sức khoẻ của bạn</div>
+                    <div class="rte d-block mb-4 text-gray-500">Cho chúng mình xin thông tin chiều cao và cân nặng để tính BMI và cân nặng lý tưởng cho bạn nhé!</div>
+
+                    <div class="flex flex-col md:flex-row gap-5 my-6">
+                        <div class="flex-1">
+                            <div class="bmi-bg">
+                                <span class="title">Chiều cao</span>
+                                <div class="bmi-quantity js-quantity">
+                                    <button class="minus">-</button>
+                                    <input type="number" class="js-bmi-height" placeholder="0" min="100" maxlength="5">
+                                    <button class="plus">+</button>
+                                </div>
+                                <span class="unit">(cm)</span>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bmi-bg">
+                                <span class="title">Cân nặng</span>
+                                <div class="bmi-quantity js-quantity">
+                                    <button class="minus">-</button>
+                                    <input type="number" class="js-bmi-weight" placeholder="0" min="1" maxlength="5">
+                                    <button class="plus">+</button>
+                                </div>
+                                <span class="unit">(kg)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button class="js-bmi bmi-button">Tính BMI ngay</button>
+                        <div class="bmi-notice">
+                            <p>*Lưu ý:<br />Công thức BMI được áp dụng cho cả nam và nữ, áp dụng cho người trưởng thành (trên 18 tuổi).<br />Không áp dụng cho phụ nữ mang thai, vận động viên, người già và có sự thay đổi giữa các quốc gia.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Result Modal -->
+<div id="bmiModal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="content_pop">
+                    <p class="title">CHỈ SỐ BMI HIỆN TẠI CỦA BẠN LÀ</p>
+                    <p id="bmi" class="stat"></p>
+                    <p id="bmi-title" class="subtitle"></p>
+
+                    <p class="title mt-4">CÂN NẶNG LÝ TƯỞNG CỦA BẠN LÀ</p>
+                    <p id="ideal" class="stat"></p>
+                    <p class="subtitle">kilogram</p>
+
+                    <p class="title mt-4">CÂN NẶNG TỐI ĐA CỦA BẠN LÀ</p>
+                    <p id="max" class="stat"></p>
+                    <p class="subtitle">kilogram</p>
+
+                    <p class="title mt-4">CÂN NẶNG TỐI THIỂU CỦA BẠN LÀ</p>
+                    <p id="min" class="stat"></p>
+                    <p class="subtitle">kilogram</p>
+
+                    <p class="text-[#47654c] mb-2 text-sm font-semibold mt-4">Lời khuyên dành cho bạn:</p>
+                    <p class="advise-content" id="bmi-advise"></p>
+
+                    <p class="text-gray-500 mb-4 text-sm">Để biết lượng calo bạn cần nạp hằng ngày là bao nhiêu bạn hãy <a href="/tdee" class="text-[#47654c] font-semibold hover:underline">TÍNH TDEE CỦA MÌNH</a> nhé</p>
+
+                    <div class="flex flex-col gap-3 mt-4">
+                        <a href="/knowledge" class="bmi-button inline-block text-center">Kiến Thức Về Dinh Dưỡng</a>
+                        <a href="/products" class="text-[#47654c] text-sm font-semibold uppercase text-center hover:underline">Sản phẩm ăn kiêng lành mạnh</a>
+                        <button class="js-reset text-gray-400 text-sm uppercase tracking-wider hover:text-gray-600">Thực hiện lại</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== FOOTER ========== -->
+<div th:replace="~{layout/fragments :: footer}"></div>
+
+<script th:src="@{/js/bmi.js}"></script>
+</body>
+</html>

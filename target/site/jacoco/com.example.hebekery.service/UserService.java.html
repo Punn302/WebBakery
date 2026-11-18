@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.service</a> &gt; <span class="el_source">UserService.java</span></div><h1>UserService.java</h1><pre class="source lang-java linenums">package com.example.hebekery.service;
+
+import com.example.hebekery.model.User;
+import com.example.hebekery.repository.UserRepository;
+import com.example.hebekery.security.CustomUserDetails;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class UserService {
+    public static final String DEFAULT_CUSTOMER_PASSWORD = &quot;123456&quot;;
+    public static final String USER_AUTH = &quot;USER_AUTH&quot;;
+    public static final String ADMIN_AUTH = &quot;ADMIN_AUTH&quot;;
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+<span class="fc" id="L29">    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {</span>
+<span class="fc" id="L30">        this.userRepository = userRepository;</span>
+<span class="fc" id="L31">        this.passwordEncoder = passwordEncoder;</span>
+<span class="fc" id="L32">    }</span>
+
+    public User login(String email, String password) {
+<span class="fc" id="L35">        Optional&lt;User&gt; user = userRepository.findByEmailIgnoreCase(email);</span>
+<span class="pc bpc" id="L36" title="1 of 6 branches missed.">        if (user.isEmpty() || !user.get().isActive() || !passwordMatches(password, user.get().getPassword())) {</span>
+<span class="fc" id="L37">            return null;</span>
+        }
+
+<span class="fc" id="L40">        User authenticatedUser = user.get();</span>
+<span class="fc" id="L41">        authenticatedUser.setLoggedIn(true);</span>
+
+        // Hỗ trợ session cho luồng legacy tương thích ngược (nếu có ServletRequest)
+<span class="fc" id="L44">        HttpSession session = currentSession(false);</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">        if (session != null) {</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">            if (isAdminRole(authenticatedUser)) {</span>
+<span class="nc" id="L47">                session.setAttribute(ADMIN_AUTH, authenticatedUser);</span>
+            } else {
+<span class="nc" id="L49">                session.setAttribute(USER_AUTH, authenticatedUser);</span>
+            }
+        }
+<span class="fc" id="L52">        return authenticatedUser;</span>
+    }
+
+    public void logout() {
+<span class="nc" id="L56">        logoutUser();</span>
+<span class="nc" id="L57">    }</span>
+
+    public void logoutUser() {
+<span class="nc" id="L60">        SecurityContextHolder.clearContext();</span>
+<span class="nc" id="L61">        HttpSession session = currentSession(false);</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (session != null) {</span>
+<span class="nc" id="L63">            session.removeAttribute(USER_AUTH);</span>
+<span class="nc" id="L64">            session.removeAttribute(&quot;user&quot;);</span>
+        }
+<span class="nc" id="L66">    }</span>
+
+    public void logoutAdmin() {
+<span class="nc" id="L69">        SecurityContextHolder.clearContext();</span>
+<span class="nc" id="L70">        HttpSession session = currentSession(false);</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if (session != null) {</span>
+<span class="nc" id="L72">            session.removeAttribute(ADMIN_AUTH);</span>
+        }
+<span class="nc" id="L74">    }</span>
+
+    public User getCurrentUser() {
+<span class="nc" id="L77">        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="nc bnc" id="L78" title="All 6 branches missed.">        if (authentication != null &amp;&amp; authentication.isAuthenticated() &amp;&amp; !(authentication instanceof AnonymousAuthenticationToken)) {</span>
+<span class="nc" id="L79">            Object principal = authentication.getPrincipal();</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">            if (principal instanceof CustomUserDetails customUserDetails) {</span>
+<span class="nc" id="L81">                return customUserDetails.getUser();</span>
+            }
+<span class="nc bnc" id="L83" title="All 2 branches missed.">            if (principal instanceof String email) {</span>
+<span class="nc" id="L84">                return userRepository.findByEmailIgnoreCase(email).orElse(null);</span>
+            }
+        }
+<span class="nc" id="L87">        return getSessionUser(USER_AUTH);</span>
+    }
+
+    public User getCurrentAdmin() {
+<span class="nc" id="L91">        User currentUser = getCurrentUser();</span>
+<span class="nc bnc" id="L92" title="All 4 branches missed.">        if (currentUser != null &amp;&amp; isAdminRole(currentUser)) {</span>
+<span class="nc" id="L93">            return currentUser;</span>
+        }
+<span class="nc" id="L95">        return getSessionUser(ADMIN_AUTH);</span>
+    }
+
+    public boolean isLoggedIn() {
+<span class="nc" id="L99">        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="nc bnc" id="L100" title="All 6 branches missed.">        if (authentication != null &amp;&amp; authentication.isAuthenticated() &amp;&amp; !(authentication instanceof AnonymousAuthenticationToken)) {</span>
+<span class="nc" id="L101">            return true;</span>
+        }
+<span class="nc" id="L103">        User currentUser = getCurrentUser();</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">        return currentUser != null;</span>
+    }
+
+    public boolean isAdmin() {
+<span class="nc" id="L108">        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="nc bnc" id="L109" title="All 6 branches missed.">        if (authentication != null &amp;&amp; authentication.isAuthenticated() &amp;&amp; !(authentication instanceof AnonymousAuthenticationToken)) {</span>
+<span class="nc" id="L110">            return authentication.getAuthorities().stream()</span>
+<span class="nc bnc" id="L111" title="All 4 branches missed.">                    .anyMatch(a -&gt; a.getAuthority().equalsIgnoreCase(&quot;ROLE_ADMIN&quot;) || a.getAuthority().equalsIgnoreCase(&quot;ADMIN&quot;));</span>
+        }
+<span class="nc" id="L113">        User currentAdmin = getCurrentAdmin();</span>
+<span class="nc bnc" id="L114" title="All 4 branches missed.">        return currentAdmin != null &amp;&amp; isAdminRole(currentAdmin);</span>
+    }
+
+    public boolean register(String email, String password, String name, String phone) {
+<span class="fc bfc" id="L118" title="All 2 branches covered.">        if (userRepository.existsByEmailIgnoreCase(email)) {</span>
+<span class="fc" id="L119">            return false;</span>
+        }
+<span class="pc bpc" id="L121" title="1 of 2 branches missed.">        String cleanPhone = phone != null ? phone.replaceAll(&quot;[^0-9]&quot;, &quot;&quot;) : &quot;&quot;;</span>
+<span class="pc bpc" id="L122" title="3 of 4 branches missed.">        if (cleanPhone.startsWith(&quot;84&quot;) &amp;&amp; cleanPhone.length() == 11) {</span>
+<span class="nc" id="L123">            cleanPhone = &quot;0&quot; + cleanPhone.substring(2);</span>
+        }
+<span class="fc" id="L125">        User user = new User(String.valueOf(System.currentTimeMillis()), email.trim().toLowerCase(), passwordEncoder.encode(password), name.trim(), cleanPhone, &quot;ROLE_USER&quot;);</span>
+<span class="fc" id="L126">        userRepository.save(user);</span>
+<span class="fc" id="L127">        return true;</span>
+    }
+
+    public List&lt;User&gt; getAllUsers() {
+<span class="nc" id="L131">        return userRepository.findAll();</span>
+    }
+
+    public Page&lt;User&gt; searchUsers(String keyword, Pageable pageable) {
+<span class="nc bnc" id="L135" title="All 4 branches missed.">        if (keyword == null || keyword.trim().isEmpty()) {</span>
+<span class="nc" id="L136">            return userRepository.findAll(pageable);</span>
+        }
+<span class="nc" id="L138">        String term = keyword.trim();</span>
+<span class="nc" id="L139">        return userRepository.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrPhoneContainingIgnoreCase(term, term, term, pageable);</span>
+    }
+
+    public Optional&lt;User&gt; findById(String id) {
+<span class="fc" id="L143">        return userRepository.findById(id);</span>
+    }
+
+    public User updateUserRole(String id, String role) {
+<span class="pc" id="L147">        User user = findById(id).orElseThrow(() -&gt; new IllegalArgumentException(&quot;KhÃ´ng tÃ¬m tháº¥y user&quot;));</span>
+<span class="fc" id="L148">        user.setRole(role);</span>
+<span class="fc" id="L149">        return userRepository.save(user);</span>
+    }
+
+    public User setUserActive(String id, boolean active) {
+<span class="pc" id="L153">        User user = findById(id).orElseThrow(() -&gt; new IllegalArgumentException(&quot;KhÃ´ng tÃ¬m tháº¥y user&quot;));</span>
+<span class="fc" id="L154">        user.setActive(active);</span>
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">        if (!active) {</span>
+<span class="fc" id="L156">            user.setLoggedIn(false);</span>
+        }
+<span class="fc" id="L158">        return userRepository.save(user);</span>
+    }
+
+    public User resetPassword(String id, String newPassword) {
+<span class="nc" id="L162">        User user = findById(id).orElseThrow(() -&gt; new IllegalArgumentException(&quot;KhÃ´ng tÃ¬m tháº¥y user&quot;));</span>
+<span class="nc" id="L163">        user.setPassword(passwordEncoder.encode(newPassword));</span>
+<span class="nc" id="L164">        return userRepository.save(user);</span>
+    }
+
+    public User resetCustomerPasswordToDefault(String id) {
+<span class="pc" id="L168">        User user = findById(id).orElseThrow(() -&gt; new IllegalArgumentException(&quot;KhÃ´ng tÃ¬m tháº¥y user&quot;));</span>
+<span class="pc bpc" id="L169" title="1 of 4 branches missed.">        if (!&quot;USER&quot;.equalsIgnoreCase(user.getRole()) &amp;&amp; !&quot;ROLE_USER&quot;.equalsIgnoreCase(user.getRole())) {</span>
+<span class="fc" id="L170">            throw new IllegalArgumentException(&quot;Chá»‰ reset máº­t kháº©u máº·c Ä‘á»‹nh cho tÃ i khoáº£n khÃ¡ch&quot;);</span>
+        }
+<span class="fc" id="L172">        user.setPassword(passwordEncoder.encode(DEFAULT_CUSTOMER_PASSWORD));</span>
+<span class="fc" id="L173">        user.setForcePasswordChange(true);</span>
+<span class="fc" id="L174">        return userRepository.save(user);</span>
+    }
+
+    public User updateCurrentUser(String name, String phone) {
+<span class="nc" id="L178">        User currentUser = getCurrentUser();</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">        if (currentUser == null) {</span>
+<span class="nc" id="L180">            throw new IllegalStateException(&quot;Vui lÃ²ng Ä‘Äƒng nháº­p&quot;);</span>
+        }
+
+<span class="nc" id="L183">        currentUser.setName(name);</span>
+<span class="nc" id="L184">        currentUser.setPhone(phone);</span>
+<span class="nc" id="L185">        currentUser = userRepository.save(currentUser);</span>
+
+<span class="nc" id="L187">        HttpSession session = currentSession(false);</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        if (session != null) {</span>
+<span class="nc" id="L189">            session.setAttribute(USER_AUTH, currentUser);</span>
+        }
+<span class="nc" id="L191">        return currentUser;</span>
+    }
+
+    public boolean changePassword(String currentPassword, String newPassword) {
+<span class="nc" id="L195">        User currentUser = getCurrentUser();</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">        if (currentUser == null) {</span>
+<span class="nc" id="L197">            throw new IllegalStateException(&quot;Vui lÃ²ng Ä‘Äƒng nháº­p&quot;);</span>
+        }
+
+<span class="nc bnc" id="L200" title="All 2 branches missed.">        if (!passwordMatches(currentPassword, currentUser.getPassword())) {</span>
+<span class="nc" id="L201">            return false;</span>
+        }
+
+<span class="nc" id="L204">        currentUser.setPassword(passwordEncoder.encode(newPassword));</span>
+<span class="nc" id="L205">        currentUser.setForcePasswordChange(false);</span>
+<span class="nc" id="L206">        currentUser = userRepository.save(currentUser);</span>
+
+<span class="nc" id="L208">        HttpSession session = currentSession(false);</span>
+<span class="nc bnc" id="L209" title="All 2 branches missed.">        if (session != null) {</span>
+<span class="nc" id="L210">            session.setAttribute(USER_AUTH, currentUser);</span>
+        }
+<span class="nc" id="L212">        return true;</span>
+    }
+
+    private User getSessionUser(String key) {
+<span class="nc" id="L216">        HttpSession session = currentSession(false);</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">        if (session == null) {</span>
+<span class="nc" id="L218">            return null;</span>
+        }
+<span class="nc" id="L220">        Object value = session.getAttribute(key);</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">        return value instanceof User user ? user : null;</span>
+    }
+
+    private HttpSession currentSession(boolean create) {
+<span class="fc" id="L225">        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();</span>
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">        if (attributes == null) {</span>
+<span class="fc" id="L227">            return null;</span>
+        }
+<span class="nc" id="L229">        return attributes.getRequest().getSession(create);</span>
+    }
+
+    private boolean isAdminRole(User user) {
+<span class="nc bnc" id="L233" title="All 4 branches missed.">        if (user == null || user.getRole() == null) {</span>
+<span class="nc" id="L234">            return false;</span>
+        }
+<span class="nc" id="L236">        String role = user.getRole().trim().toUpperCase();</span>
+<span class="nc bnc" id="L237" title="All 4 branches missed.">        return &quot;ADMIN&quot;.equals(role) || &quot;ROLE_ADMIN&quot;.equals(role);</span>
+    }
+
+    private boolean passwordMatches(String rawPassword, String storedPassword) {
+<span class="pc bpc" id="L241" title="1 of 2 branches missed.">        if (storedPassword == null) {</span>
+<span class="nc" id="L242">            return false;</span>
+        }
+<span class="fc" id="L244">        return passwordEncoder.matches(rawPassword, storedPassword);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

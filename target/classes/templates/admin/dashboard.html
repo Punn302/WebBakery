@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Admin Dashboard')}"></head>
+<body class="bg-[#fbfaf7] text-gray-800">
+<div class="min-h-screen lg:flex">
+    <aside th:replace="~{admin/fragments :: sidebar('dashboard')}"></aside>
+    <main class="flex-1 px-4 md:px-8 py-8">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-8">
+            <div>
+                <p class="text-sm uppercase tracking-wider text-[#47654c] font-semibold">Admin</p>
+                <h1 class="text-3xl md:text-4xl font-semibold text-[#263d2b]">Tổng quan vận hành</h1>
+            </div>
+            <form method="get" class="flex flex-col sm:flex-row gap-2 bg-white border border-gray-100 rounded-xl p-3 shadow-sm">
+                <input type="date" name="from" th:value="${from}" class="border border-gray-200 rounded-lg px-4 py-3">
+                <input type="date" name="to" th:value="${to}" class="border border-gray-200 rounded-lg px-4 py-3">
+                <button class="bg-[#47654c] text-white rounded-lg px-5 py-3 font-semibold">Lọc</button>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
+            <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-semibold text-gray-500">Doanh thu</p>
+                    <span class="material-symbols-outlined text-[#47654c] bg-[#edf4ee] rounded-lg p-2">payments</span>
+                </div>
+                <p class="text-3xl font-bold text-[#263d2b] mt-5" th:text="${#strings.replace(#numbers.formatDecimal(revenueTotal, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}">0đ</p>
+            </section>
+            <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-semibold text-gray-500">Đơn tính doanh thu</p>
+                    <span class="material-symbols-outlined text-[#47654c] bg-[#edf4ee] rounded-lg p-2">task_alt</span>
+                </div>
+                <p class="text-3xl font-bold text-[#263d2b] mt-5" th:text="${revenueOrderCount}">0</p>
+            </section>
+            <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-semibold text-gray-500">Đơn hủy</p>
+                    <span class="material-symbols-outlined text-red-500 bg-red-50 rounded-lg p-2">cancel</span>
+                </div>
+                <p class="text-3xl font-bold text-[#263d2b] mt-5" th:text="${cancelledOrderCount}">0</p>
+            </section>
+            <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-semibold text-gray-500">Sản phẩm đang bán</p>
+                    <span class="material-symbols-outlined text-[#47654c] bg-[#edf4ee] rounded-lg p-2">bakery_dining</span>
+                </div>
+                <p class="text-3xl font-bold text-[#263d2b] mt-5" th:text="${productCount}">0</p>
+            </section>
+        </div>
+
+        <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+            <div class="flex items-center justify-between gap-4 mb-6">
+                <h2 class="text-lg font-semibold text-[#263d2b]">Doanh thu theo kỳ</h2>
+                <a th:href="@{/admin/reports(from=${from},to=${to})}" class="text-sm font-semibold text-[#47654c]">Báo cáo</a>
+            </div>
+            <div class="grid gap-3 h-72 items-end" th:style="'grid-template-columns: repeat(' + ${#lists.size(weeklyRevenue)} + ', minmax(0, 1fr));'">
+                <div th:each="point : ${weeklyRevenue}" class="h-full flex flex-col justify-end gap-2">
+                    <p class="text-xs text-center text-gray-500" th:text="${#strings.replace(#numbers.formatDecimal(point.revenue, 0, 'COMMA', 0, 'POINT'), ',', '.')}">0</p>
+                    <div class="rounded-t-lg bg-[#47654c]" th:style="'height:' + ${point.percent} + '%'"></div>
+                    <p class="text-xs text-center text-gray-400" th:text="${point.label}">01/01</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mt-6">
+            <div class="flex items-center justify-between gap-4 mb-5">
+                <h2 class="text-lg font-semibold text-[#263d2b]">Cảnh báo tồn kho</h2>
+                <a href="/admin/inventory" class="text-sm font-semibold text-[#47654c]">Xem tồn kho</a>
+            </div>
+            <div th:if="${#lists.isEmpty(lowStockProducts)}" class="text-sm text-gray-400">Không có sản phẩm tồn thấp.</div>
+            <div th:if="${!#lists.isEmpty(lowStockProducts)}" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                <a th:each="product : ${lowStockProducts}" href="/admin/inventory" class="flex items-center justify-between rounded-lg border border-gray-100 px-4 py-3">
+                    <span class="font-semibold text-gray-700" th:text="${product.name}">Sản phẩm</span>
+                    <span th:classappend="${product.outOfStock} ? ' text-red-500' : ' text-amber-600'" class="font-bold" th:text="${product.stockQuantity}">0</span>
+                </a>
+            </div>
+        </section>
+    </main>
+</div>
+<script th:replace="~{admin/fragments :: logoutScript}"></script>
+</body>
+</html>

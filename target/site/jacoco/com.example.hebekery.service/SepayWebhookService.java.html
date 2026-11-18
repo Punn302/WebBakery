@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SepayWebhookService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.service</a> &gt; <span class="el_source">SepayWebhookService.java</span></div><h1>SepayWebhookService.java</h1><pre class="source lang-java linenums">package com.example.hebekery.service;
+
+import com.example.hebekery.config.SepayConfig;
+import com.example.hebekery.dto.request.SepayWebhookPayload;
+import com.example.hebekery.model.CustomerProfile;
+import com.example.hebekery.model.Order;
+import com.example.hebekery.model.OrderStatusHistory;
+import com.example.hebekery.model.PaymentTransaction;
+import com.example.hebekery.repository.CustomerProfileRepository;
+import com.example.hebekery.repository.OrderRepository;
+import com.example.hebekery.repository.OrderStatusHistoryRepository;
+import com.example.hebekery.repository.PaymentTransactionRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+@Service
+public class SepayWebhookService {
+
+<span class="fc" id="L30">    private static final Logger log = LoggerFactory.getLogger(SepayWebhookService.class);</span>
+<span class="fc" id="L31">    private static final Pattern HBK_PATTERN = Pattern.compile(&quot;(?i)(HBK[-_A-Za-z0-9]+)&quot;);</span>
+
+    private final SepayConfig sepayConfig;
+    private final OrderRepository orderRepository;
+    private final OrderStatusHistoryRepository orderStatusHistoryRepository;
+    private final PaymentTransactionRepository paymentTransactionRepository;
+    private final CustomerProfileRepository customerProfileRepository;
+
+    public SepayWebhookService(SepayConfig sepayConfig,
+                               OrderRepository orderRepository,
+                               OrderStatusHistoryRepository orderStatusHistoryRepository,
+                               PaymentTransactionRepository paymentTransactionRepository,
+<span class="fc" id="L43">                               CustomerProfileRepository customerProfileRepository) {</span>
+<span class="fc" id="L44">        this.sepayConfig = sepayConfig;</span>
+<span class="fc" id="L45">        this.orderRepository = orderRepository;</span>
+<span class="fc" id="L46">        this.orderStatusHistoryRepository = orderStatusHistoryRepository;</span>
+<span class="fc" id="L47">        this.paymentTransactionRepository = paymentTransactionRepository;</span>
+<span class="fc" id="L48">        this.customerProfileRepository = customerProfileRepository;</span>
+<span class="fc" id="L49">    }</span>
+
+    /**
+     * Xác thực Header Authorization của SePay Webhook
+     */
+    public boolean verifyApiKey(String authHeader) {
+<span class="fc" id="L55">        String expectedKey = sepayConfig.getWebhookApiKey();</span>
+<span class="fc bfc" id="L56" title="All 4 branches covered.">        if (expectedKey == null || expectedKey.isBlank()) {</span>
+<span class="fc" id="L57">            log.warn(&quot;SePay Webhook: Cấu hình webhook API key chưa được thiết lập.&quot;);</span>
+<span class="fc" id="L58">            return false;</span>
+        }
+<span class="fc bfc" id="L60" title="All 4 branches covered.">        if (authHeader == null || authHeader.isBlank()) {</span>
+<span class="fc" id="L61">            return false;</span>
+        }
+<span class="fc" id="L63">        String cleanHeader = authHeader.trim();</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        if (cleanHeader.toLowerCase().startsWith(&quot;apikey &quot;)) {</span>
+<span class="fc" id="L65">            cleanHeader = cleanHeader.substring(7).trim();</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        } else if (cleanHeader.toLowerCase().startsWith(&quot;bearer &quot;)) {</span>
+<span class="fc" id="L67">            cleanHeader = cleanHeader.substring(7).trim();</span>
+        }
+<span class="fc" id="L69">        byte[] expectedBytes = expectedKey.getBytes(StandardCharsets.UTF_8);</span>
+<span class="fc" id="L70">        byte[] actualBytes = cleanHeader.getBytes(StandardCharsets.UTF_8);</span>
+<span class="fc" id="L71">        return MessageDigest.isEqual(expectedBytes, actualBytes);</span>
+    }
+
+    /**
+     * Xử lý webhook thanh toán từ SePay
+     */
+    @Transactional
+    public boolean processWebhook(SepayWebhookPayload payload) {
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        if (payload == null) {</span>
+<span class="nc" id="L80">            log.warn(&quot;SePay Webhook: Payload rỗng&quot;);</span>
+<span class="nc" id="L81">            return false;</span>
+        }
+
+        // 1. Kiểm tra Idempotency chống xử lý trùng lặp giao dịch
+<span class="fc" id="L85">        String referenceCode = payload.getReferenceCode();</span>
+<span class="pc bpc" id="L86" title="2 of 4 branches missed.">        if (referenceCode != null &amp;&amp; !referenceCode.isBlank()) {</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">            if (paymentTransactionRepository.existsByReferenceCode(referenceCode.trim())) {</span>
+<span class="fc" id="L88">                log.info(&quot;SePay Webhook: Giao dịch {} đã được xử lý.&quot;, referenceCode);</span>
+<span class="fc" id="L89">                return true;</span>
+            }
+        }
+
+        // 2. Kiểm tra loại giao dịch: chỉ chấp nhận tiền vào (&quot;in&quot;)
+<span class="pc bpc" id="L94" title="1 of 4 branches missed.">        if (payload.getTransferType() != null &amp;&amp; !&quot;in&quot;.equalsIgnoreCase(payload.getTransferType().trim())) {</span>
+<span class="fc" id="L95">            log.info(&quot;SePay Webhook: Bỏ qua loại giao dịch: {}&quot;, payload.getTransferType());</span>
+<span class="fc" id="L96">            return false;</span>
+        }
+
+        // 3. Trích xuất mã đơn hàng từ nội dung chuyển khoản
+<span class="fc" id="L100">        String content = payload.getContent();</span>
+<span class="pc bpc" id="L101" title="2 of 4 branches missed.">        if (content == null || content.isBlank()) {</span>
+<span class="nc" id="L102">            log.warn(&quot;SePay Webhook: Nội dung giao dịch rỗng&quot;);</span>
+<span class="nc" id="L103">            return false;</span>
+        }
+
+<span class="fc" id="L106">        Order order = findOrderByContent(content)</span>
+<span class="fc" id="L107">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Không tìm thấy đơn hàng tương ứng với nội dung: &quot; + content));</span>
+
+<span class="fc" id="L109">        Double amount = payload.getTransferAmount();</span>
+
+        // 4. Nếu đơn hàng đã bị HỦY trước đó: không chuyển sang PAID âm thầm, cắm cờ cho nhân viên xử lý
+<span class="fc bfc" id="L112" title="All 2 branches covered.">        if (&quot;CANCELLED&quot;.equalsIgnoreCase(order.getOrderStatus())) {</span>
+<span class="fc" id="L113">            log.warn(&quot;SePay Webhook: Đơn hàng {} đã hủy nhưng nhận thanh toán: {}&quot;, order.getId(), amount);</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">            order.setAdminNote((order.getAdminNote() != null ? order.getAdminNote() + &quot; | &quot; : &quot;&quot;)</span>
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">                    + &quot;CẢNH BÁO: Nhận thanh toán &quot; + (amount != null ? Math.round(amount) : 0) + &quot; VNĐ cho đơn hàng ĐÃ HỦY. Cần nhân viên kiểm tra hoàn tiền.&quot;);</span>
+<span class="fc" id="L116">            orderRepository.save(order);</span>
+
+<span class="fc" id="L118">            orderStatusHistoryRepository.save(new OrderStatusHistory(</span>
+<span class="fc" id="L119">                    order.getId(),</span>
+<span class="fc" id="L120">                    order.getOrderStatus(),</span>
+                    &quot;CANCELLED_PAYMENT_RECEIVED&quot;,
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">                    &quot;Đã nhận chuyển khoản &quot; + (amount != null ? Math.round(amount) : 0) + &quot; VNĐ cho đơn đã hủy. Cần nhân viên đối soát.&quot;,</span>
+                    &quot;SEPAY_WEBHOOK&quot;
+            ));
+
+<span class="fc" id="L126">            PaymentTransaction tx = new PaymentTransaction(</span>
+<span class="fc" id="L127">                    &quot;TX-&quot; + UUID.randomUUID(),</span>
+<span class="fc" id="L128">                    order.getId(),</span>
+<span class="pc bpc" id="L129" title="2 of 4 branches missed.">                    referenceCode != null &amp;&amp; !referenceCode.isBlank() ? referenceCode.trim() : &quot;TX-&quot; + UUID.randomUUID(),</span>
+<span class="fc" id="L130">                    payload.getGateway(),</span>
+<span class="fc" id="L131">                    payload.getAccountNumber(),</span>
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">                    amount != null ? amount : 0.0,</span>
+<span class="fc" id="L133">                    payload.getTransferType(),</span>
+<span class="fc" id="L134">                    payload.getContent(),</span>
+<span class="fc" id="L135">                    parseTransactionDate(payload.getTransactionDate())</span>
+            );
+<span class="fc" id="L137">            paymentTransactionRepository.save(tx);</span>
+<span class="fc" id="L138">            return true;</span>
+        }
+
+        // 5. Kiểm tra số tiền chuyển khoản: xử lý thiếu tiền một cách an toàn không crash
+<span class="pc bpc" id="L142" title="1 of 4 branches missed.">        if (amount == null || amount &lt; (order.getTotal() - 1.0)) {</span>
+<span class="fc" id="L143">            log.warn(&quot;SePay Webhook: Thanh toán không đủ. Nhận: {}, Yêu cầu: {}&quot;, amount, order.getTotal());</span>
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">            order.setAdminNote((order.getAdminNote() != null ? order.getAdminNote() + &quot; | &quot; : &quot;&quot;)</span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">                    + &quot;CẢNH BÁO: Thanh toán thiếu. Nhận &quot; + (amount != null ? Math.round(amount) : 0) + &quot; / &quot; + Math.round(order.getTotal()) + &quot; VNĐ. Mã GD: &quot; + referenceCode);</span>
+<span class="fc" id="L146">            orderRepository.save(order);</span>
+
+<span class="fc" id="L148">            orderStatusHistoryRepository.save(new OrderStatusHistory(</span>
+<span class="fc" id="L149">                    order.getId(),</span>
+<span class="fc" id="L150">                    order.getOrderStatus(),</span>
+                    &quot;PARTIAL_PAYMENT&quot;,
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">                    &quot;Thanh toán thiếu: nhận &quot; + (amount != null ? Math.round(amount) : 0) + &quot; VNĐ / &quot; + Math.round(order.getTotal()) + &quot; VNĐ. Cần kiểm tra.&quot;,</span>
+                    &quot;SEPAY_WEBHOOK&quot;
+            ));
+
+<span class="pc bpc" id="L156" title="2 of 4 branches missed.">            if (referenceCode != null &amp;&amp; !referenceCode.isBlank()) {</span>
+<span class="fc" id="L157">                PaymentTransaction tx = new PaymentTransaction(</span>
+<span class="fc" id="L158">                        &quot;TX-&quot; + UUID.randomUUID(),</span>
+<span class="fc" id="L159">                        order.getId(),</span>
+<span class="fc" id="L160">                        referenceCode.trim(),</span>
+<span class="fc" id="L161">                        payload.getGateway(),</span>
+<span class="fc" id="L162">                        payload.getAccountNumber(),</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">                        amount != null ? amount : 0.0,</span>
+<span class="fc" id="L164">                        payload.getTransferType(),</span>
+<span class="fc" id="L165">                        payload.getContent(),</span>
+<span class="fc" id="L166">                        parseTransactionDate(payload.getTransactionDate())</span>
+                );
+<span class="fc" id="L168">                paymentTransactionRepository.save(tx);</span>
+            }
+<span class="fc" id="L170">            return false;</span>
+        }
+
+        // 6. Cập nhật trạng thái đơn hàng sang PAID và PROCESSING
+<span class="fc" id="L174">        order.setPaymentStatus(&quot;PAID&quot;);</span>
+<span class="pc bpc" id="L175" title="3 of 4 branches missed.">        if (&quot;PENDING&quot;.equals(order.getOrderStatus()) || &quot;AWAITING_PAYMENT&quot;.equals(order.getOrderStatus())) {</span>
+<span class="fc" id="L176">            order.setOrderStatus(&quot;PROCESSING&quot;);</span>
+        }
+<span class="fc" id="L178">        orderRepository.save(order);</span>
+
+        // 7. Ghi log lịch sử trạng thái đơn
+<span class="fc" id="L181">        orderStatusHistoryRepository.save(new OrderStatusHistory(</span>
+<span class="fc" id="L182">                order.getId(),</span>
+<span class="fc" id="L183">                order.getOrderStatus(),</span>
+                &quot;PAID&quot;,
+<span class="fc" id="L185">                &quot;SePay Webhook xác nhận đã nhận chuyển khoản: &quot; + Math.round(amount) + &quot; VNĐ (Mã GD: &quot; + referenceCode + &quot;)&quot;,</span>
+                &quot;SEPAY_WEBHOOK&quot;
+        ));
+
+        // 8. Lưu bản ghi PaymentTransaction
+<span class="fc" id="L190">        PaymentTransaction tx = new PaymentTransaction(</span>
+<span class="fc" id="L191">                &quot;TX-&quot; + UUID.randomUUID(),</span>
+<span class="fc" id="L192">                order.getId(),</span>
+<span class="pc bpc" id="L193" title="2 of 4 branches missed.">                referenceCode != null &amp;&amp; !referenceCode.isBlank() ? referenceCode.trim() : &quot;TX-&quot; + UUID.randomUUID(),</span>
+<span class="fc" id="L194">                payload.getGateway(),</span>
+<span class="fc" id="L195">                payload.getAccountNumber(),</span>
+<span class="fc" id="L196">                amount,</span>
+<span class="fc" id="L197">                payload.getTransferType(),</span>
+<span class="fc" id="L198">                payload.getContent(),</span>
+<span class="fc" id="L199">                parseTransactionDate(payload.getTransactionDate())</span>
+        );
+<span class="fc" id="L201">        paymentTransactionRepository.save(tx);</span>
+
+        // Chú ý: Loyalty points được tích khi đơn hoàn tất/giao hàng (OrderService.markReceived),
+        // không cộng tại webhook thanh toán để tránh cộng điểm 2 lần.
+
+<span class="fc" id="L206">        log.info(&quot;SePay Webhook: Xử lý đơn hàng {} thành công.&quot;, order.getId());</span>
+<span class="fc" id="L207">        return true;</span>
+    }
+
+    /**
+     * Tìm kiếm đơn hàng qua nội dung chuyển khoản (Regex &amp; Direct Query, không scan full table)
+     */
+    public Optional&lt;Order&gt; findOrderByContent(String content) {
+<span class="pc bpc" id="L214" title="2 of 4 branches missed.">        if (content == null || content.isBlank()) {</span>
+<span class="nc" id="L215">            return Optional.empty();</span>
+        }
+
+        // Tìm chuỗi dạng HBK...
+<span class="fc" id="L219">        Matcher matcher = HBK_PATTERN.matcher(content);</span>
+<span class="pc bpc" id="L220" title="1 of 2 branches missed.">        if (matcher.find()) {</span>
+<span class="fc" id="L221">            String token = matcher.group(1).trim();</span>
+            // Thử tìm theo orderCode trước
+<span class="fc" id="L223">            Optional&lt;Order&gt; byCode = orderRepository.findByOrderCode(token);</span>
+<span class="fc bfc" id="L224" title="All 2 branches covered.">            if (byCode.isPresent()) return byCode;</span>
+
+            // Thử tìm theo ID
+<span class="fc" id="L227">            Optional&lt;Order&gt; byId = orderRepository.findById(token);</span>
+<span class="pc bpc" id="L228" title="1 of 2 branches missed.">            if (byId.isPresent()) return byId;</span>
+
+            // Thử bỏ tiền tố &quot;HBK&quot; hoặc &quot;HBK-&quot;
+<span class="fc" id="L231">            String rawCode = token.replaceFirst(&quot;(?i)^HBK[-_]?&quot;, &quot;&quot;);</span>
+<span class="fc" id="L232">            Optional&lt;Order&gt; byRawCode = orderRepository.findByOrderCode(rawCode);</span>
+<span class="pc bpc" id="L233" title="1 of 2 branches missed.">            if (byRawCode.isPresent()) return byRawCode;</span>
+
+<span class="fc" id="L235">            Optional&lt;Order&gt; byRawId = orderRepository.findById(rawCode);</span>
+<span class="pc bpc" id="L236" title="1 of 2 branches missed.">            if (byRawId.isPresent()) return byRawId;</span>
+
+            // Thử thêm &quot;ORD-&quot; nếu token chứa UUID
+<span class="fc" id="L239">            Optional&lt;Order&gt; byOrdId = orderRepository.findById(&quot;ORD-&quot; + rawCode);</span>
+<span class="pc bpc" id="L240" title="1 of 2 branches missed.">            if (byOrdId.isPresent()) return byOrdId;</span>
+        }
+
+        // Trích xuất các chuỗi alphanumeric khác có khả năng là mã đơn hàng để truy vấn trực tiếp
+<span class="fc" id="L244">        Pattern tokenPattern = Pattern.compile(&quot;[A-Za-z0-9_-]{4,}&quot;);</span>
+<span class="fc" id="L245">        Matcher tokenMatcher = tokenPattern.matcher(content);</span>
+<span class="fc bfc" id="L246" title="All 2 branches covered.">        while (tokenMatcher.find()) {</span>
+<span class="fc" id="L247">            String candidate = tokenMatcher.group().trim();</span>
+<span class="fc" id="L248">            Optional&lt;Order&gt; directMatch = orderRepository.findByOrderCode(candidate)</span>
+<span class="fc" id="L249">                    .or(() -&gt; orderRepository.findById(candidate));</span>
+<span class="pc bpc" id="L250" title="1 of 2 branches missed.">            if (directMatch.isPresent()) {</span>
+<span class="nc" id="L251">                return directMatch;</span>
+            }
+<span class="fc" id="L253">        }</span>
+
+<span class="fc" id="L255">        return Optional.empty();</span>
+    }
+
+    private LocalDateTime parseTransactionDate(String dateStr) {
+<span class="pc bpc" id="L259" title="1 of 4 branches missed.">        if (dateStr == null || dateStr.isBlank()) {</span>
+<span class="fc" id="L260">            return LocalDateTime.now();</span>
+        }
+        try {
+<span class="fc" id="L263">            return LocalDateTime.parse(dateStr.trim(), DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm:ss&quot;));</span>
+<span class="nc" id="L264">        } catch (Exception e) {</span>
+            try {
+<span class="nc" id="L266">                return LocalDateTime.parse(dateStr.trim(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);</span>
+<span class="nc" id="L267">            } catch (Exception ex) {</span>
+<span class="nc" id="L268">                return LocalDateTime.now();</span>
+            }
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

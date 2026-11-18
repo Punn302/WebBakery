@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LiquibaseConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.config</a> &gt; <span class="el_source">LiquibaseConfig.java</span></div><h1>LiquibaseConfig.java</h1><pre class="source lang-java linenums">package com.example.hebekery.config;
+
+import jakarta.persistence.EntityManagerFactory;
+import liquibase.integration.spring.SpringLiquibase;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+
+import javax.sql.DataSource;
+
+@Configuration
+<span class="fc" id="L16">public class LiquibaseConfig {</span>
+
+    @Value(&quot;${spring.liquibase.change-log:classpath:db/changelog/db.changelog-master.yaml}&quot;)
+    private String changeLog;
+
+    @Value(&quot;${spring.liquibase.enabled:true}&quot;)
+    private boolean enabled;
+
+    @Bean(name = &quot;liquibase&quot;)
+    @ConditionalOnProperty(name = &quot;spring.liquibase.enabled&quot;, havingValue = &quot;true&quot;, matchIfMissing = true)
+    public SpringLiquibase liquibase(DataSource dataSource) {
+<span class="nc" id="L27">        SpringLiquibase liquibase = new SpringLiquibase();</span>
+<span class="nc" id="L28">        liquibase.setDataSource(dataSource);</span>
+<span class="nc" id="L29">        liquibase.setChangeLog(changeLog);</span>
+<span class="nc" id="L30">        liquibase.setShouldRun(enabled);</span>
+<span class="nc" id="L31">        return liquibase;</span>
+    }
+
+    @Bean
+    public static BeanFactoryPostProcessor entityManagerFactoryDependsOnLiquibase() {
+<span class="fc" id="L36">        return beanFactory -&gt; {</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">            if (!beanFactory.containsBeanDefinition(&quot;liquibase&quot;)) {</span>
+<span class="fc" id="L38">                return;</span>
+            }
+<span class="nc bnc" id="L40" title="All 2 branches missed.">            for (String name : beanFactory.getBeanNamesForType(LocalContainerEntityManagerFactoryBean.class, true, false)) {</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">                String rawName = name.startsWith(&quot;&amp;&quot;) ? name.substring(1) : name;</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">                if (beanFactory.containsBeanDefinition(rawName)) {</span>
+<span class="nc" id="L43">                    addDependsOn(beanFactory.getBeanDefinition(rawName), &quot;liquibase&quot;);</span>
+                }
+            }
+<span class="nc bnc" id="L46" title="All 2 branches missed.">            for (String name : beanFactory.getBeanNamesForType(EntityManagerFactory.class, true, false)) {</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">                String rawName = name.startsWith(&quot;&amp;&quot;) ? name.substring(1) : name;</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">                if (beanFactory.containsBeanDefinition(rawName)) {</span>
+<span class="nc" id="L49">                    addDependsOn(beanFactory.getBeanDefinition(rawName), &quot;liquibase&quot;);</span>
+                }
+            }
+<span class="nc" id="L52">        };</span>
+    }
+
+    private static void addDependsOn(BeanDefinition bd, String beanName) {
+<span class="nc" id="L56">        String[] dependsOn = bd.getDependsOn();</span>
+<span class="nc bnc" id="L57" title="All 4 branches missed.">        if (dependsOn == null || dependsOn.length == 0) {</span>
+<span class="nc" id="L58">            bd.setDependsOn(beanName);</span>
+<span class="nc" id="L59">            return;</span>
+        }
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        for (String dep : dependsOn) {</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">            if (dep.equals(beanName)) {</span>
+<span class="nc" id="L63">                return;</span>
+            }
+        }
+<span class="nc" id="L66">        String[] newDependsOn = new String[dependsOn.length + 1];</span>
+<span class="nc" id="L67">        System.arraycopy(dependsOn, 0, newDependsOn, 0, dependsOn.length);</span>
+<span class="nc" id="L68">        newDependsOn[dependsOn.length] = beanName;</span>
+<span class="nc" id="L69">        bd.setDependsOn(newDependsOn);</span>
+<span class="nc" id="L70">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

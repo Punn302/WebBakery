@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007-add-order-voucher-and-shipping-columns
+      author: hebekery
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - columnExists:
+                tableName: orders
+                columnName: subtotal
+      changes:
+        - addColumn:
+            tableName: orders
+            columns:
+              - column:
+                  name: subtotal
+                  type: double
+                  defaultValueNumeric: 0
+              - column:
+                  name: shipping_fee
+                  type: double
+                  defaultValueNumeric: 0
+              - column:
+                  name: discount_amount
+                  type: double
+                  defaultValueNumeric: 0
+              - column:
+                  name: voucher_code
+                  type: varchar(255)

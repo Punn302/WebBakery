@@ -1,0 +1,85 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-create-loyalty-transactions-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: loyalty_transactions
+            columns:
+              - column:
+                  name: id
+                  type: varchar(64)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_id
+                  type: varchar(64)
+              - column:
+                  name: transaction_type
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: points
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: balance_after
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(255)
+              - column:
+                  name: created_at
+                  type: datetime
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_loyalty_tx_user_id
+            tableName: loyalty_transactions
+            columns:
+              - column:
+                  name: user_id
+        - createIndex:
+            indexName: idx_loyalty_tx_order_id
+            tableName: loyalty_transactions
+            columns:
+              - column:
+                  name: order_id
+
+  - changeSet:
+      id: 010-add-points-columns-to-orders
+      author: hebekery
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - columnExists:
+                tableName: orders
+                columnName: points_used
+      changes:
+        - addColumn:
+            tableName: orders
+            columns:
+              - column:
+                  name: points_used
+                  type: int
+                  defaultValueNumeric: 0
+              - column:
+                  name: points_discount_amount
+                  type: double
+                  defaultValueNumeric: 0
+              - column:
+                  name: points_earned
+                  type: int
+                  defaultValueNumeric: 0
+

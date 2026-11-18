@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminVoucherController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.controller</a> &gt; <span class="el_source">AdminVoucherController.java</span></div><h1>AdminVoucherController.java</h1><pre class="source lang-java linenums">package com.example.hebekery.controller;
+
+import com.example.hebekery.dto.ApiResponse;
+import com.example.hebekery.dto.VoucherResponse;
+import com.example.hebekery.model.Voucher;
+import com.example.hebekery.service.AuditLogService;
+import com.example.hebekery.service.VoucherService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/api/admin/vouchers&quot;)
+@PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+@Tag(name = &quot;Admin Voucher&quot;, description = &quot;Các API quản lý mã giảm giá dành cho Quản trị viên&quot;)
+@SecurityRequirement(name = &quot;BearerAuth&quot;)
+public class AdminVoucherController {
+
+    private final VoucherService voucherService;
+    private final AuditLogService auditLogService;
+
+<span class="fc" id="L27">    public AdminVoucherController(VoucherService voucherService, AuditLogService auditLogService) {</span>
+<span class="fc" id="L28">        this.voucherService = voucherService;</span>
+<span class="fc" id="L29">        this.auditLogService = auditLogService;</span>
+<span class="fc" id="L30">    }</span>
+
+    @Operation(summary = &quot;Lấy toàn bộ danh sách voucher hệ thống&quot;)
+    @GetMapping
+    public ResponseEntity&lt;ApiResponse&lt;List&lt;VoucherResponse&gt;&gt;&gt; getAllVouchers() {
+<span class="nc" id="L35">        return ResponseEntity.ok(ApiResponse.success(voucherService.getAllVouchers()));</span>
+    }
+
+    @Operation(summary = &quot;Tạo mới voucher khuyến mãi&quot;)
+    @PostMapping
+    public ResponseEntity&lt;ApiResponse&lt;VoucherResponse&gt;&gt; createVoucher(@RequestBody Voucher voucher) {
+<span class="nc" id="L41">        Voucher created = voucherService.createVoucher(voucher);</span>
+<span class="nc" id="L42">        auditLogService.log(&quot;CREATE&quot;, &quot;VOUCHER&quot;, created.getId(), &quot;Tạo mới voucher: &quot; + created.getCode());</span>
+<span class="nc" id="L43">        return ResponseEntity.ok(ApiResponse.success(&quot;Tạo mã voucher thành công&quot;, VoucherResponse.from(created)));</span>
+    }
+
+    @Operation(summary = &quot;Cập nhật voucher&quot;)
+    @PutMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;VoucherResponse&gt;&gt; updateVoucher(@PathVariable String id, @RequestBody Voucher voucher) {
+<span class="nc" id="L49">        Voucher updated = voucherService.updateVoucher(id, voucher);</span>
+<span class="nc" id="L50">        auditLogService.log(&quot;UPDATE&quot;, &quot;VOUCHER&quot;, updated.getId(), &quot;Cập nhật voucher: &quot; + updated.getCode());</span>
+<span class="nc" id="L51">        return ResponseEntity.ok(ApiResponse.success(&quot;Cập nhật voucher thành công&quot;, VoucherResponse.from(updated)));</span>
+    }
+
+    @Operation(summary = &quot;Xóa voucher&quot;)
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; deleteVoucher(@PathVariable String id) {
+<span class="nc" id="L57">        voucherService.deleteVoucher(id);</span>
+<span class="nc" id="L58">        auditLogService.log(&quot;DELETE&quot;, &quot;VOUCHER&quot;, id, &quot;Xóa voucher ID: &quot; + id);</span>
+<span class="nc" id="L59">        return ResponseEntity.ok(ApiResponse.success(&quot;Xóa voucher thành công&quot;, null));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

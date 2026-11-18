@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtTokenProvider.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.security</a> &gt; <span class="el_source">JwtTokenProvider.java</span></div><h1>JwtTokenProvider.java</h1><pre class="source lang-java linenums">package com.example.hebekery.security;
+
+import com.example.hebekery.model.User;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecurityException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+
+@Component
+public class JwtTokenProvider {
+<span class="fc" id="L24">    private static final Logger log = LoggerFactory.getLogger(JwtTokenProvider.class);</span>
+
+    @Value(&quot;${jwt.secret:}&quot;)
+    private String jwtSecret;
+
+    @Value(&quot;${jwt.expiration-ms:86400000}&quot;)
+    private long jwtExpirationMs;
+
+    @Value(&quot;${jwt.refresh-expiration-ms:604800000}&quot;)
+    private long jwtRefreshExpirationMs;
+
+<span class="fc" id="L35">    public JwtTokenProvider() {}</span>
+
+<span class="fc" id="L37">    public JwtTokenProvider(String jwtSecret, long jwtExpirationMs, long jwtRefreshExpirationMs) {</span>
+<span class="fc" id="L38">        this.jwtSecret = jwtSecret;</span>
+<span class="fc" id="L39">        this.jwtExpirationMs = jwtExpirationMs;</span>
+<span class="fc" id="L40">        this.jwtRefreshExpirationMs = jwtRefreshExpirationMs;</span>
+<span class="fc" id="L41">    }</span>
+
+    private SecretKey getSigningKey() {
+<span class="pc bpc" id="L44" title="2 of 4 branches missed.">        if (jwtSecret == null || jwtSecret.isBlank()) {</span>
+<span class="nc" id="L45">            throw new IllegalStateException(&quot;JWT secret key must be configured in environment variable JWT_SECRET&quot;);</span>
+        }
+<span class="fc" id="L47">        byte[] keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        if (keyBytes.length &lt; 32) {</span>
+<span class="nc" id="L49">            byte[] padded = new byte[32];</span>
+<span class="nc" id="L50">            System.arraycopy(keyBytes, 0, padded, 0, keyBytes.length);</span>
+<span class="nc" id="L51">            keyBytes = padded;</span>
+        }
+<span class="fc" id="L53">        return Keys.hmacShaKeyFor(keyBytes);</span>
+    }
+
+    public String generateToken(Authentication authentication) {
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if (authentication.getPrincipal() instanceof CustomUserDetails userDetails) {</span>
+<span class="nc" id="L58">            return generateToken(userDetails.getUser());</span>
+        }
+<span class="nc" id="L60">        return generateTokenBySubject(authentication.getName(), null, null, null);</span>
+    }
+
+    public String generateToken(User user) {
+<span class="fc" id="L64">        return generateTokenBySubject(user.getEmail(), user.getId(), user.getRole(), user.getName());</span>
+    }
+
+    public String generateTokenBySubject(String subject, String userId, String role, String name) {
+<span class="fc" id="L68">        Date now = new Date();</span>
+<span class="fc" id="L69">        Date expiryDate = new Date(now.getTime() + jwtExpirationMs);</span>
+
+<span class="fc" id="L71">        var builder = Jwts.builder()</span>
+<span class="fc" id="L72">                .subject(subject)</span>
+<span class="fc" id="L73">                .issuedAt(now)</span>
+<span class="fc" id="L74">                .expiration(expiryDate)</span>
+<span class="fc" id="L75">                .signWith(getSigningKey());</span>
+
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">        if (userId != null) {</span>
+<span class="fc" id="L78">            builder.claim(&quot;userId&quot;, userId);</span>
+        }
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">        if (role != null) {</span>
+<span class="fc" id="L81">            builder.claim(&quot;role&quot;, role);</span>
+        }
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">        if (name != null) {</span>
+<span class="fc" id="L84">            builder.claim(&quot;name&quot;, name);</span>
+        }
+
+<span class="fc" id="L87">        return builder.compact();</span>
+    }
+
+    public String generateRefreshToken(String username) {
+<span class="fc" id="L91">        Date now = new Date();</span>
+<span class="fc" id="L92">        Date expiryDate = new Date(now.getTime() + jwtRefreshExpirationMs);</span>
+
+<span class="fc" id="L94">        return Jwts.builder()</span>
+<span class="fc" id="L95">                .subject(username)</span>
+<span class="fc" id="L96">                .claim(&quot;type&quot;, &quot;REFRESH&quot;)</span>
+<span class="fc" id="L97">                .issuedAt(now)</span>
+<span class="fc" id="L98">                .expiration(expiryDate)</span>
+<span class="fc" id="L99">                .signWith(getSigningKey())</span>
+<span class="fc" id="L100">                .compact();</span>
+    }
+
+    public Claims getClaimsFromToken(String token) {
+<span class="fc" id="L104">        return Jwts.parser()</span>
+<span class="fc" id="L105">                .verifyWith(getSigningKey())</span>
+<span class="fc" id="L106">                .build()</span>
+<span class="fc" id="L107">                .parseSignedClaims(token)</span>
+<span class="fc" id="L108">                .getPayload();</span>
+    }
+
+    public String getUsernameFromToken(String token) {
+<span class="fc" id="L112">        return getClaimsFromToken(token).getSubject();</span>
+    }
+
+    public String getUserIdFromToken(String token) {
+<span class="fc" id="L116">        Claims claims = getClaimsFromToken(token);</span>
+<span class="fc" id="L117">        return claims.get(&quot;userId&quot;, String.class);</span>
+    }
+
+    public String getRoleFromToken(String token) {
+<span class="fc" id="L121">        Claims claims = getClaimsFromToken(token);</span>
+<span class="fc" id="L122">        return claims.get(&quot;role&quot;, String.class);</span>
+    }
+
+    public boolean validateToken(String token) {
+<span class="fc bfc" id="L126" title="All 4 branches covered.">        if (token == null || token.isBlank()) {</span>
+<span class="fc" id="L127">            return false;</span>
+        }
+        try {
+<span class="fc" id="L130">            Jwts.parser()</span>
+<span class="fc" id="L131">                    .verifyWith(getSigningKey())</span>
+<span class="fc" id="L132">                    .build()</span>
+<span class="fc" id="L133">                    .parseSignedClaims(token);</span>
+<span class="fc" id="L134">            return true;</span>
+<span class="fc" id="L135">        } catch (SecurityException | MalformedJwtException e) {</span>
+<span class="fc" id="L136">            log.warn(&quot;Invalid JWT signature / format: {}&quot;, e.getMessage());</span>
+<span class="fc" id="L137">        } catch (ExpiredJwtException e) {</span>
+<span class="fc" id="L138">            log.warn(&quot;Expired JWT token: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L139">        } catch (UnsupportedJwtException e) {</span>
+<span class="nc" id="L140">            log.warn(&quot;Unsupported JWT token: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L141">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L142">            log.warn(&quot;JWT claims string is empty: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L143">        } catch (JwtException e) {</span>
+<span class="nc" id="L144">            log.warn(&quot;JWT validation error: {}&quot;, e.getMessage());</span>
+<span class="pc" id="L145">        }</span>
+<span class="fc" id="L146">        return false;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

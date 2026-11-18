@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomUserDetails.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.security</a> &gt; <span class="el_source">CustomUserDetails.java</span></div><h1>CustomUserDetails.java</h1><pre class="source lang-java linenums">package com.example.hebekery.security;
+
+import com.example.hebekery.model.User;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+public class CustomUserDetails implements UserDetails {
+    private final User user;
+    private final List&lt;GrantedAuthority&gt; authorities;
+
+<span class="fc" id="L16">    public CustomUserDetails(User user) {</span>
+<span class="fc" id="L17">        this.user = user;</span>
+<span class="fc" id="L18">        String role = user.getRole();</span>
+<span class="pc bpc" id="L19" title="2 of 4 branches missed.">        if (role == null || role.isBlank()) {</span>
+<span class="nc" id="L20">            role = &quot;USER&quot;;</span>
+        }
+<span class="pc bpc" id="L22" title="1 of 2 branches missed.">        String authority = role.startsWith(&quot;ROLE_&quot;) ? role.toUpperCase() : &quot;ROLE_&quot; + role.toUpperCase();</span>
+<span class="fc" id="L23">        this.authorities = Collections.singletonList(new SimpleGrantedAuthority(authority));</span>
+<span class="fc" id="L24">    }</span>
+
+    public User getUser() {
+<span class="fc" id="L27">        return user;</span>
+    }
+
+    public String getId() {
+<span class="nc" id="L31">        return user.getId();</span>
+    }
+
+    public String getRole() {
+<span class="nc" id="L35">        return user.getRole();</span>
+    }
+
+    public String getName() {
+<span class="nc" id="L39">        return user.getName();</span>
+    }
+
+    public String getPhone() {
+<span class="nc" id="L43">        return user.getPhone();</span>
+    }
+
+    public boolean isForcePasswordChange() {
+<span class="nc" id="L47">        return user.isForcePasswordChange();</span>
+    }
+
+    @Override
+    public Collection&lt;? extends GrantedAuthority&gt; getAuthorities() {
+<span class="fc" id="L52">        return authorities;</span>
+    }
+
+    @Override
+    public String getPassword() {
+<span class="fc" id="L57">        return user.getPassword();</span>
+    }
+
+    @Override
+    public String getUsername() {
+<span class="fc" id="L62">        return user.getEmail();</span>
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+<span class="nc" id="L67">        return true;</span>
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+<span class="nc" id="L72">        return user.isActive();</span>
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+<span class="nc" id="L77">        return true;</span>
+    }
+
+    @Override
+    public boolean isEnabled() {
+<span class="nc" id="L82">        return user.isActive();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

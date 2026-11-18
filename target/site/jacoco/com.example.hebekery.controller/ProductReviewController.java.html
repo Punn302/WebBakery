@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductReviewController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.controller</a> &gt; <span class="el_source">ProductReviewController.java</span></div><h1>ProductReviewController.java</h1><pre class="source lang-java linenums">package com.example.hebekery.controller;
+
+import com.example.hebekery.dto.ApiResponse;
+import com.example.hebekery.dto.ProductReviewResponse;
+import com.example.hebekery.dto.ProductReviewSummaryResponse;
+import com.example.hebekery.dto.request.ProductReviewRequest;
+import com.example.hebekery.model.ProductReview;
+import com.example.hebekery.service.ProductReviewService;
+import com.example.hebekery.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping
+@Tag(name = &quot;Product Reviews&quot;, description = &quot;Đánh giá, nhận xét sản phẩm và xem tóm tắt xếp hạng sao&quot;)
+public class ProductReviewController {
+
+    private final ProductReviewService productReviewService;
+    private final UserService userService;
+
+<span class="fc" id="L37">    public ProductReviewController(ProductReviewService productReviewService, UserService userService) {</span>
+<span class="fc" id="L38">        this.productReviewService = productReviewService;</span>
+<span class="fc" id="L39">        this.userService = userService;</span>
+<span class="fc" id="L40">    }</span>
+
+    @Operation(summary = &quot;Lấy danh sách đánh giá sản phẩm&quot;, description = &quot;Xem điểm trung bình sao, tổng số đánh giá và các bình luận của sản phẩm&quot;)
+    @GetMapping(&quot;/api/products/{productId}/reviews&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;ProductReviewSummaryResponse&gt;&gt; list(
+            @Parameter(description = &quot;Mã sản phẩm&quot;) @PathVariable String productId) {
+<span class="nc" id="L46">        List&lt;ProductReview&gt; reviews = productReviewService.getReviews(productId);</span>
+<span class="nc" id="L47">        List&lt;ProductReviewResponse&gt; reviewDtos = reviews.stream()</span>
+<span class="nc" id="L48">                .map(ProductReviewResponse::from)</span>
+<span class="nc" id="L49">                .collect(Collectors.toList());</span>
+
+<span class="nc" id="L51">        double avgRating = reviews.stream()</span>
+<span class="nc" id="L52">                .mapToInt(ProductReview::getRating)</span>
+<span class="nc" id="L53">                .average()</span>
+<span class="nc" id="L54">                .orElse(0.0);</span>
+
+<span class="nc" id="L56">        boolean canReview = productReviewService.canReview(productId, userService.getCurrentUser());</span>
+<span class="nc" id="L57">        ProductReviewResponse myReview = null;</span>
+<span class="nc bnc" id="L58" title="All 4 branches missed.">        if (userService.isLoggedIn() &amp;&amp; userService.getCurrentUser() != null) {</span>
+<span class="nc" id="L59">            myReview = productReviewService.getUserReview(productId, userService.getCurrentUser().getId())</span>
+<span class="nc" id="L60">                    .map(ProductReviewResponse::from)</span>
+<span class="nc" id="L61">                    .orElse(null);</span>
+        }
+
+<span class="nc" id="L64">        ProductReviewSummaryResponse summary = new ProductReviewSummaryResponse(</span>
+                reviewDtos,
+                canReview,
+                myReview,
+<span class="nc" id="L68">                Math.round(avgRating * 10.0) / 10.0,</span>
+<span class="nc" id="L69">                reviews.size()</span>
+        );
+
+<span class="nc" id="L72">        return ResponseEntity.ok(ApiResponse.success(&quot;Lấy danh sách đánh giá thành công&quot;, summary));</span>
+    }
+
+    @Operation(summary = &quot;Gửi đánh giá sản phẩm&quot;, description = &quot;Khách hàng đã mua hàng gửi đánh giá từ 1 đến 5 sao và bình luận&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @PostMapping(&quot;/api/products/{productId}/reviews&quot;)
+    @PreAuthorize(&quot;isAuthenticated()&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;ProductReviewResponse&gt;&gt; save(
+            @Parameter(description = &quot;Mã sản phẩm&quot;) @PathVariable String productId,
+            @Valid @RequestBody ProductReviewRequest request) {
+<span class="nc" id="L81">        requireLogin();</span>
+<span class="nc" id="L82">        ProductReview saved = productReviewService.save(productId, userService.getCurrentUser(), request);</span>
+<span class="nc" id="L83">        return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="nc" id="L84">                .body(ApiResponse.success(&quot;Đã lưu đánh giá sản phẩm&quot;, ProductReviewResponse.from(saved)));</span>
+    }
+
+    @Operation(summary = &quot;Xóa đánh giá sản phẩm&quot;, description = &quot;Xóa đánh giá của chính người dùng đối với sản phẩm&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @DeleteMapping(&quot;/api/products/reviews/{reviewId}&quot;)
+    @PreAuthorize(&quot;isAuthenticated()&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; delete(
+            @Parameter(description = &quot;Mã đánh giá cần xóa&quot;) @PathVariable String reviewId) {
+<span class="nc" id="L92">        requireLogin();</span>
+<span class="nc" id="L93">        boolean deleted = productReviewService.delete(reviewId, userService.getCurrentUser());</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        if (!deleted) {</span>
+<span class="nc" id="L95">            return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="nc" id="L96">                    .body(ApiResponse.failure(&quot;Không tìm thấy đánh giá để xóa&quot;));</span>
+        }
+<span class="nc" id="L98">        return ResponseEntity.ok(ApiResponse.success(&quot;Đã xóa đánh giá thành công&quot;, null));</span>
+    }
+
+    private void requireLogin() {
+<span class="nc bnc" id="L102" title="All 4 branches missed.">        if (!userService.isLoggedIn() || userService.getCurrentUser() == null) {</span>
+<span class="nc" id="L103">            throw new IllegalStateException(&quot;Vui lòng đăng nhập để thực hiện thao tác này&quot;);</span>
+        }
+<span class="nc" id="L105">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

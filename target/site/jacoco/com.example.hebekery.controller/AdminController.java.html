@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.controller</a> &gt; <span class="el_source">AdminController.java</span></div><h1>AdminController.java</h1><pre class="source lang-java linenums">package com.example.hebekery.controller;
+
+import com.example.hebekery.model.Product;
+import com.example.hebekery.service.ContactService;
+import com.example.hebekery.service.FileStorageService;
+import com.example.hebekery.service.OrderService;
+import com.example.hebekery.service.ProductService;
+import com.example.hebekery.service.PurchaseReceiptService;
+import com.example.hebekery.service.ReportPdfService;
+import com.example.hebekery.service.ReportService;
+import com.example.hebekery.service.UserService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@Controller
+public class AdminController {
+
+    private final UserService userService;
+    private final OrderService orderService;
+    private final ProductService productService;
+    private final ContactService contactService;
+    private final FileStorageService fileStorageService;
+    private final PurchaseReceiptService purchaseReceiptService;
+    private final ReportService reportService;
+    private final ReportPdfService reportPdfService;
+
+    public AdminController(UserService userService,
+                           OrderService orderService,
+                           ProductService productService,
+                           ContactService contactService,
+                           FileStorageService fileStorageService,
+                           PurchaseReceiptService purchaseReceiptService,
+                           ReportService reportService,
+<span class="fc" id="L51">                           ReportPdfService reportPdfService) {</span>
+<span class="fc" id="L52">        this.userService = userService;</span>
+<span class="fc" id="L53">        this.orderService = orderService;</span>
+<span class="fc" id="L54">        this.productService = productService;</span>
+<span class="fc" id="L55">        this.contactService = contactService;</span>
+<span class="fc" id="L56">        this.fileStorageService = fileStorageService;</span>
+<span class="fc" id="L57">        this.purchaseReceiptService = purchaseReceiptService;</span>
+<span class="fc" id="L58">        this.reportService = reportService;</span>
+<span class="fc" id="L59">        this.reportPdfService = reportPdfService;</span>
+<span class="fc" id="L60">    }</span>
+
+    @GetMapping(&quot;/admin&quot;)
+    public String dashboard(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                            Model model) {
+<span class="nc" id="L66">        requireAdminPage();</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        LocalDate reportFrom = from == null ? LocalDate.now().minusDays(6) : from;</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        LocalDate reportTo = to == null ? LocalDate.now() : to;</span>
+<span class="nc" id="L69">        model.addAttribute(&quot;userCount&quot;, userService.getAllUsers().size());</span>
+<span class="nc" id="L70">        model.addAttribute(&quot;orderCount&quot;, orderService.getAllOrders().size());</span>
+<span class="nc" id="L71">        model.addAttribute(&quot;productCount&quot;, productService.getAllProducts().size());</span>
+<span class="nc" id="L72">        model.addAttribute(&quot;contactCount&quot;, contactService.getAll().size());</span>
+<span class="nc" id="L73">        model.addAttribute(&quot;revenueTotal&quot;, reportService.getRevenueTotal(reportFrom, reportTo));</span>
+<span class="nc" id="L74">        model.addAttribute(&quot;revenueOrderCount&quot;, reportService.getRevenueOrderCount(reportFrom, reportTo));</span>
+<span class="nc" id="L75">        model.addAttribute(&quot;cancelledOrderCount&quot;, reportService.getCancelledOrderCount(reportFrom, reportTo));</span>
+<span class="nc" id="L76">        model.addAttribute(&quot;weeklyRevenue&quot;, reportService.getRevenueTrend(reportFrom, reportTo));</span>
+<span class="nc" id="L77">        model.addAttribute(&quot;from&quot;, reportFrom);</span>
+<span class="nc" id="L78">        model.addAttribute(&quot;to&quot;, reportTo);</span>
+<span class="nc" id="L79">        model.addAttribute(&quot;lowStockProducts&quot;, productService.getLowStockProducts());</span>
+<span class="nc" id="L80">        return &quot;admin/dashboard&quot;;</span>
+    }
+
+    @GetMapping(&quot;/admin/users&quot;)
+    public String usersPage(@RequestParam(defaultValue = &quot;&quot;) String keyword, @RequestParam(defaultValue = &quot;0&quot;) int page, Model model) {
+<span class="nc" id="L85">        requireAdminPage();</span>
+<span class="nc" id="L86">        Pageable pageable = PageRequest.of(Math.max(page, 0), 8, Sort.by(&quot;name&quot;).ascending());</span>
+<span class="nc" id="L87">        model.addAttribute(&quot;page&quot;, userService.searchUsers(keyword, pageable));</span>
+<span class="nc" id="L88">        model.addAttribute(&quot;keyword&quot;, keyword);</span>
+<span class="nc" id="L89">        return &quot;admin/users&quot;;</span>
+    }
+
+    @PostMapping(&quot;/admin/users/{id}/update&quot;)
+    public String updateUserForm(@PathVariable String id, @RequestParam String role,
+                                 @RequestParam(defaultValue = &quot;false&quot;) boolean active,
+                                 @RequestParam(defaultValue = &quot;false&quot;) boolean resetDefaultPassword) {
+<span class="nc" id="L96">        requireAdminPage();</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        if (resetDefaultPassword) {</span>
+<span class="nc" id="L98">            userService.resetCustomerPasswordToDefault(id);</span>
+        }
+<span class="nc" id="L100">        userService.updateUserRole(id, role);</span>
+<span class="nc" id="L101">        userService.setUserActive(id, active);</span>
+<span class="nc" id="L102">        return &quot;redirect:/admin/users&quot;;</span>
+    }
+
+    @GetMapping(&quot;/admin/products&quot;)
+    public String productsPage(@RequestParam(defaultValue = &quot;&quot;) String keyword, @RequestParam(defaultValue = &quot;0&quot;) int page, Model model) {
+<span class="nc" id="L107">        requireAdminPage();</span>
+<span class="nc" id="L108">        Pageable pageable = PageRequest.of(Math.max(page, 0), 8, Sort.by(&quot;id&quot;).ascending());</span>
+<span class="nc" id="L109">        model.addAttribute(&quot;page&quot;, productService.searchProducts(keyword, pageable));</span>
+<span class="nc" id="L110">        model.addAttribute(&quot;keyword&quot;, keyword);</span>
+<span class="nc" id="L111">        model.addAttribute(&quot;product&quot;, new Product());</span>
+<span class="nc" id="L112">        model.addAttribute(&quot;categories&quot;, productService.getAllCategories());</span>
+<span class="nc" id="L113">        return &quot;admin/products&quot;;</span>
+    }
+
+    @GetMapping(&quot;/admin/products/{id}/edit&quot;)
+    public String editProductPage(@PathVariable String id, Model model) {
+<span class="nc" id="L118">        requireAdminPage();</span>
+<span class="nc" id="L119">        Product product = productService.getProductById(id);</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        if (product == null) {</span>
+<span class="nc" id="L121">            return &quot;redirect:/admin/products&quot;;</span>
+        }
+<span class="nc" id="L123">        model.addAttribute(&quot;product&quot;, product);</span>
+<span class="nc" id="L124">        model.addAttribute(&quot;categories&quot;, productService.getAllCategories());</span>
+<span class="nc" id="L125">        return &quot;admin/product-form&quot;;</span>
+    }
+
+    @PostMapping(&quot;/admin/products&quot;)
+    public String saveProductForm(@ModelAttribute Product product, @RequestParam(required = false) MultipartFile imageFile) {
+<span class="nc" id="L130">        requireAdminPage();</span>
+<span class="nc bnc" id="L131" title="All 4 branches missed.">        Product existing = product.getId() == null || product.getId().isBlank() ? null : productService.getProductById(product.getId());</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        String oldImageUrl = existing == null ? null : existing.getImageUrl();</span>
+<span class="nc" id="L133">        String uploadedImage = fileStorageService.saveProductImage(imageFile);</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">        if (uploadedImage != null) {</span>
+<span class="nc" id="L135">            product.setImageUrl(uploadedImage);</span>
+<span class="nc bnc" id="L136" title="All 4 branches missed.">        } else if (product.getId() != null &amp;&amp; !product.getId().isBlank()) {</span>
+<span class="nc bnc" id="L137" title="All 6 branches missed.">            if (existing != null &amp;&amp; (product.getImageUrl() == null || product.getImageUrl().isBlank())) {</span>
+<span class="nc" id="L138">                product.setImageUrl(existing.getImageUrl());</span>
+            }
+        }
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        if (existing != null) {</span>
+<span class="nc" id="L142">            product.setStockQuantity(existing.getStockQuantity());</span>
+<span class="nc" id="L143">            product.setAverageCost(existing.getAverageCost());</span>
+<span class="nc" id="L144">            product.setLowStockThreshold(existing.getLowStockThreshold());</span>
+        }
+<span class="nc" id="L146">        productService.saveProduct(product);</span>
+<span class="nc bnc" id="L147" title="All 6 branches missed.">        if (uploadedImage != null &amp;&amp; oldImageUrl != null &amp;&amp; !oldImageUrl.equals(uploadedImage)) {</span>
+<span class="nc" id="L148">            fileStorageService.deleteProductImage(oldImageUrl);</span>
+        }
+<span class="nc" id="L150">        return &quot;redirect:/admin/products&quot;;</span>
+    }
+
+    @PostMapping(&quot;/admin/products/{id}/delete&quot;)
+    public String deleteProductForm(@PathVariable String id) {
+<span class="nc" id="L155">        requireAdminPage();</span>
+<span class="nc" id="L156">        productService.deleteProduct(id);</span>
+<span class="nc" id="L157">        return &quot;redirect:/admin/products&quot;;</span>
+    }
+
+    @GetMapping(&quot;/admin/products/{id}/preview&quot;)
+    public String productPreviewPage(@PathVariable String id, Model model) {
+<span class="nc" id="L162">        requireAdminPage();</span>
+<span class="nc" id="L163">        Product product = productService.getProductById(id);</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">        if (product == null) {</span>
+<span class="nc" id="L165">            return &quot;redirect:/admin/products&quot;;</span>
+        }
+<span class="nc" id="L167">        model.addAttribute(&quot;product&quot;, product);</span>
+<span class="nc" id="L168">        return &quot;admin/product-preview&quot;;</span>
+    }
+
+    @GetMapping(&quot;/admin/orders&quot;)
+    public String ordersPage(@RequestParam(defaultValue = &quot;&quot;) String keyword,
+                             @RequestParam(defaultValue = &quot;&quot;) String orderStatus,
+                             @RequestParam(defaultValue = &quot;&quot;) String paymentMethod,
+                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                             @RequestParam(defaultValue = &quot;0&quot;) int page,
+                             Model model) {
+<span class="nc" id="L179">        requireAdminPage();</span>
+<span class="nc" id="L180">        Pageable pageable = PageRequest.of(Math.max(page, 0), 8, Sort.by(&quot;createdAt&quot;).descending());</span>
+<span class="nc" id="L181">        model.addAttribute(&quot;page&quot;, orderService.searchOrders(keyword, orderStatus, paymentMethod, from, to, pageable));</span>
+<span class="nc" id="L182">        model.addAttribute(&quot;keyword&quot;, keyword);</span>
+<span class="nc" id="L183">        model.addAttribute(&quot;orderStatus&quot;, orderStatus);</span>
+<span class="nc" id="L184">        model.addAttribute(&quot;paymentMethod&quot;, paymentMethod);</span>
+<span class="nc" id="L185">        model.addAttribute(&quot;from&quot;, from);</span>
+<span class="nc" id="L186">        model.addAttribute(&quot;to&quot;, to);</span>
+<span class="nc" id="L187">        return &quot;admin/orders&quot;;</span>
+    }
+
+    @PostMapping(&quot;/admin/orders/{id}/status&quot;)
+    public String updateOrderStatusForm(@PathVariable String id, @RequestParam String orderStatus, @RequestParam String paymentStatus) {
+<span class="nc" id="L192">        requireAdminPage();</span>
+<span class="nc" id="L193">        orderService.updateStatus(id, orderStatus, paymentStatus);</span>
+<span class="nc" id="L194">        return &quot;redirect:/admin/orders/&quot; + id;</span>
+    }
+
+    @GetMapping(&quot;/admin/orders/{id}&quot;)
+    public String orderDetailPage(@PathVariable String id, Model model) {
+<span class="nc" id="L199">        requireAdminPage();</span>
+<span class="nc" id="L200">        model.addAttribute(&quot;order&quot;, orderService.getOrderById(id));</span>
+<span class="nc" id="L201">        model.addAttribute(&quot;history&quot;, orderService.getHistory(id));</span>
+<span class="nc" id="L202">        model.addAttribute(&quot;returnHistory&quot;, orderService.getReturnHistory(id));</span>
+<span class="nc" id="L203">        return &quot;admin/order-detail&quot;;</span>
+    }
+
+    @PostMapping(&quot;/admin/orders/{id}/note&quot;)
+    public String updateOrderNoteForm(@PathVariable String id, @RequestParam(required = false) String adminNote) {
+<span class="nc" id="L208">        requireAdminPage();</span>
+<span class="nc" id="L209">        orderService.updateAdminNote(id, adminNote);</span>
+<span class="nc" id="L210">        return &quot;redirect:/admin/orders/&quot; + id;</span>
+    }
+
+    @PostMapping(&quot;/admin/orders/{id}/shipping&quot;)
+    public String updateOrderShippingForm(@PathVariable String id,
+                                          @RequestParam(defaultValue = &quot;&quot;) String shippingCarrier,
+                                          @RequestParam(defaultValue = &quot;&quot;) String trackingCode) {
+<span class="nc" id="L217">        requireAdminPage();</span>
+<span class="nc" id="L218">        orderService.updateShippingInfo(id, shippingCarrier, trackingCode);</span>
+<span class="nc" id="L219">        return &quot;redirect:/admin/orders/&quot; + id;</span>
+    }
+
+    @GetMapping(&quot;/admin/orders/{id}/invoice&quot;)
+    public String orderInvoicePage(@PathVariable String id, Model model) {
+<span class="nc" id="L224">        requireAdminPage();</span>
+<span class="nc" id="L225">        model.addAttribute(&quot;order&quot;, orderService.getOrderById(id));</span>
+<span class="nc" id="L226">        return &quot;admin/order-invoice-print&quot;;</span>
+    }
+
+    @PostMapping(&quot;/admin/orders/{id}/return&quot;)
+    public String reviewReturnForm(@PathVariable String id, @RequestParam String decision, @RequestParam(required = false) String adminNote) {
+<span class="nc" id="L231">        requireAdminPage();</span>
+<span class="nc" id="L232">        orderService.reviewReturn(id, decision, adminNote);</span>
+<span class="nc" id="L233">        return &quot;redirect:/admin/orders/&quot; + id;</span>
+    }
+
+    @GetMapping(&quot;/admin/contacts&quot;)
+    public String contactsPage(@RequestParam(defaultValue = &quot;&quot;) String keyword, @RequestParam(defaultValue = &quot;0&quot;) int page, Model model) {
+<span class="nc" id="L238">        requireAdminPage();</span>
+<span class="nc" id="L239">        Pageable pageable = PageRequest.of(Math.max(page, 0), 8, Sort.by(&quot;createdAt&quot;).descending());</span>
+<span class="nc" id="L240">        model.addAttribute(&quot;page&quot;, contactService.search(keyword, pageable));</span>
+<span class="nc" id="L241">        model.addAttribute(&quot;keyword&quot;, keyword);</span>
+<span class="nc" id="L242">        return &quot;admin/contacts&quot;;</span>
+    }
+
+    @PostMapping(&quot;/admin/contacts/{id}/status&quot;)
+    public String updateContactStatusForm(@PathVariable String id, @RequestParam String status) {
+<span class="nc" id="L247">        requireAdminPage();</span>
+<span class="nc" id="L248">        contactService.updateStatus(id, status);</span>
+<span class="nc" id="L249">        return &quot;redirect:/admin/contacts&quot;;</span>
+    }
+
+    @GetMapping(&quot;/admin/reports&quot;)
+    public String reportsPage(@RequestParam(defaultValue = &quot;&quot;) String keyword,
+                              @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                              @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                              @RequestParam(defaultValue = &quot;0&quot;) int page,
+                              Model model) {
+<span class="nc" id="L258">        requireAdminPage();</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">        LocalDate reportFrom = from == null ? LocalDate.now().minusDays(29) : from;</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">        LocalDate reportTo = to == null ? LocalDate.now() : to;</span>
+<span class="nc" id="L261">        Pageable pageable = PageRequest.of(Math.max(page, 0), 8, Sort.by(&quot;importedAt&quot;).descending());</span>
+<span class="nc" id="L262">        model.addAttribute(&quot;page&quot;, purchaseReceiptService.search(keyword, reportFrom, reportTo, pageable));</span>
+<span class="nc" id="L263">        model.addAttribute(&quot;keyword&quot;, keyword);</span>
+<span class="nc" id="L264">        model.addAttribute(&quot;from&quot;, reportFrom);</span>
+<span class="nc" id="L265">        model.addAttribute(&quot;to&quot;, reportTo);</span>
+<span class="nc" id="L266">        model.addAttribute(&quot;products&quot;, productService.getAllProducts());</span>
+<span class="nc" id="L267">        model.addAttribute(&quot;revenueTotal&quot;, reportService.getRevenueTotal(reportFrom, reportTo));</span>
+<span class="nc" id="L268">        model.addAttribute(&quot;revenueOrderCount&quot;, reportService.getRevenueOrderCount(reportFrom, reportTo));</span>
+<span class="nc" id="L269">        model.addAttribute(&quot;cancelledOrderCount&quot;, reportService.getCancelledOrderCount(reportFrom, reportTo));</span>
+<span class="nc" id="L270">        model.addAttribute(&quot;importCostTotal&quot;, reportService.getImportCostTotal(reportFrom, reportTo));</span>
+<span class="nc" id="L271">        model.addAttribute(&quot;importedQuantityTotal&quot;, reportService.getImportedQuantityTotal(reportFrom, reportTo));</span>
+<span class="nc" id="L272">        model.addAttribute(&quot;profitTotal&quot;, reportService.getProfitTotal(reportFrom, reportTo));</span>
+<span class="nc" id="L273">        model.addAttribute(&quot;topSellingProducts&quot;, reportService.getTopSellingProducts(reportFrom, reportTo));</span>
+<span class="nc" id="L274">        model.addAttribute(&quot;weeklyRevenue&quot;, reportService.getRevenueTrend(reportFrom, reportTo));</span>
+<span class="nc" id="L275">        return &quot;admin/reports&quot;;</span>
+    }
+
+    @PostMapping(&quot;/admin/reports/imports&quot;)
+    public String createPurchaseReceipt(@RequestParam(&quot;productId&quot;) List&lt;String&gt; productIds,
+                                        @RequestParam(defaultValue = &quot;&quot;) String supplier,
+                                        @RequestParam(&quot;quantity&quot;) List&lt;Integer&gt; quantities,
+                                        @RequestParam(&quot;unitCost&quot;) List&lt;Double&gt; unitCosts,
+                                        @RequestParam(defaultValue = &quot;&quot;) String note) {
+<span class="nc" id="L284">        requireAdminPage();</span>
+<span class="nc" id="L285">        purchaseReceiptService.createBatch(productIds, quantities, unitCosts, supplier, note);</span>
+<span class="nc" id="L286">        return &quot;redirect:/admin/reports&quot;;</span>
+    }
+
+    @GetMapping(&quot;/admin/reports/imports/{receiptCode}/print&quot;)
+    public String printPurchaseReceipt(@PathVariable String receiptCode, Model model) {
+<span class="nc" id="L291">        requireAdminPage();</span>
+<span class="nc" id="L292">        var receipts = purchaseReceiptService.getByReceiptCode(receiptCode);</span>
+<span class="nc" id="L293">        model.addAttribute(&quot;receiptCode&quot;, receiptCode);</span>
+<span class="nc" id="L294">        model.addAttribute(&quot;receipts&quot;, receipts);</span>
+<span class="nc" id="L295">        model.addAttribute(&quot;totalCost&quot;, receipts.stream().mapToDouble(com.example.hebekery.model.PurchaseReceipt::getTotalCost).sum());</span>
+<span class="nc" id="L296">        model.addAttribute(&quot;totalQuantity&quot;, receipts.stream().mapToInt(com.example.hebekery.model.PurchaseReceipt::getQuantity).sum());</span>
+<span class="nc" id="L297">        return &quot;admin/purchase-receipt-print&quot;;</span>
+    }
+
+    @GetMapping(&quot;/admin/reports/print&quot;)
+    public String printReport(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                              @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                              Model model) {
+<span class="nc" id="L304">        requireAdminPage();</span>
+<span class="nc bnc" id="L305" title="All 2 branches missed.">        LocalDate reportFrom = from == null ? LocalDate.now().minusDays(29) : from;</span>
+<span class="nc bnc" id="L306" title="All 2 branches missed.">        LocalDate reportTo = to == null ? LocalDate.now() : to;</span>
+<span class="nc" id="L307">        model.addAttribute(&quot;from&quot;, reportFrom);</span>
+<span class="nc" id="L308">        model.addAttribute(&quot;to&quot;, reportTo);</span>
+<span class="nc" id="L309">        model.addAttribute(&quot;revenueTotal&quot;, reportService.getRevenueTotal(reportFrom, reportTo));</span>
+<span class="nc" id="L310">        model.addAttribute(&quot;revenueOrderCount&quot;, reportService.getRevenueOrderCount(reportFrom, reportTo));</span>
+<span class="nc" id="L311">        model.addAttribute(&quot;cancelledOrderCount&quot;, reportService.getCancelledOrderCount(reportFrom, reportTo));</span>
+<span class="nc" id="L312">        model.addAttribute(&quot;importCostTotal&quot;, reportService.getImportCostTotal(reportFrom, reportTo));</span>
+<span class="nc" id="L313">        model.addAttribute(&quot;importedQuantityTotal&quot;, reportService.getImportedQuantityTotal(reportFrom, reportTo));</span>
+<span class="nc" id="L314">        model.addAttribute(&quot;profitTotal&quot;, reportService.getProfitTotal(reportFrom, reportTo));</span>
+<span class="nc" id="L315">        model.addAttribute(&quot;weeklyRevenue&quot;, reportService.getRevenueTrend(reportFrom, reportTo));</span>
+<span class="nc" id="L316">        model.addAttribute(&quot;topSellingProducts&quot;, reportService.getTopSellingProducts(reportFrom, reportTo));</span>
+<span class="nc" id="L317">        model.addAttribute(&quot;receipts&quot;, purchaseReceiptService.getAll(reportFrom, reportTo));</span>
+<span class="nc" id="L318">        return &quot;admin/report-print&quot;;</span>
+    }
+
+    @GetMapping(value = &quot;/admin/reports/export.csv&quot;, produces = &quot;text/csv; charset=UTF-8&quot;)
+    @ResponseBody
+    public String exportReportCsv(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+<span class="nc" id="L325">        requireAdminPage();</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">        LocalDate reportFrom = from == null ? LocalDate.now().minusDays(29) : from;</span>
+<span class="nc bnc" id="L327" title="All 2 branches missed.">        LocalDate reportTo = to == null ? LocalDate.now() : to;</span>
+<span class="nc" id="L328">        StringBuilder csv = new StringBuilder();</span>
+<span class="nc" id="L329">        csv.append('\ufeff');</span>
+<span class="nc" id="L330">        csv.append(&quot;Chi tieu,Gia tri\n&quot;);</span>
+<span class="nc" id="L331">        csv.append(&quot;Tu ngay,&quot;).append(reportFrom).append('\n');</span>
+<span class="nc" id="L332">        csv.append(&quot;Den ngay,&quot;).append(reportTo).append('\n');</span>
+<span class="nc" id="L333">        csv.append(&quot;Doanh thu,&quot;).append((long) reportService.getRevenueTotal(reportFrom, reportTo)).append('\n');</span>
+<span class="nc" id="L334">        csv.append(&quot;Loi nhuan uoc tinh,&quot;).append((long) reportService.getProfitTotal(reportFrom, reportTo)).append('\n');</span>
+<span class="nc" id="L335">        csv.append(&quot;Chi phi nhap,&quot;).append((long) reportService.getImportCostTotal(reportFrom, reportTo)).append('\n');</span>
+<span class="nc" id="L336">        csv.append(&quot;\nTop san pham,So luong,Doanh thu\n&quot;);</span>
+<span class="nc" id="L337">        reportService.getTopSellingProducts(reportFrom, reportTo).forEach(item -&gt;</span>
+<span class="nc" id="L338">                csv.append(csvValue(item.getProductName())).append(',')</span>
+<span class="nc" id="L339">                        .append(item.getQuantity()).append(',')</span>
+<span class="nc" id="L340">                        .append((long) item.getRevenue()).append('\n')</span>
+        );
+<span class="nc" id="L342">        csv.append(&quot;\nPhieu nhap,San pham,Nha cung cap,So luong,Tong nhap,Ngay\n&quot;);</span>
+<span class="nc" id="L343">        purchaseReceiptService.getAll(reportFrom, reportTo).forEach(receipt -&gt;</span>
+<span class="nc" id="L344">                csv.append(csvValue(receipt.getReceiptCode())).append(',')</span>
+<span class="nc" id="L345">                        .append(csvValue(receipt.getProductName())).append(',')</span>
+<span class="nc" id="L346">                        .append(csvValue(receipt.getSupplier())).append(',')</span>
+<span class="nc" id="L347">                        .append(receipt.getQuantity()).append(',')</span>
+<span class="nc" id="L348">                        .append((long) receipt.getTotalCost()).append(',')</span>
+<span class="nc" id="L349">                        .append(receipt.getImportedAt()).append('\n')</span>
+        );
+<span class="nc" id="L351">        return csv.toString();</span>
+    }
+
+    @GetMapping(&quot;/admin/reports/export.pdf&quot;)
+    public ResponseEntity&lt;byte[]&gt; exportReportPdf(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+<span class="nc" id="L357">        requireAdminPage();</span>
+<span class="nc bnc" id="L358" title="All 2 branches missed.">        LocalDate reportFrom = from == null ? LocalDate.now().minusDays(29) : from;</span>
+<span class="nc bnc" id="L359" title="All 2 branches missed.">        LocalDate reportTo = to == null ? LocalDate.now() : to;</span>
+<span class="nc" id="L360">        byte[] pdf = reportPdfService.buildReport(reportFrom, reportTo);</span>
+<span class="nc" id="L361">        return ResponseEntity.ok()</span>
+<span class="nc" id="L362">                .header(HttpHeaders.CONTENT_DISPOSITION, &quot;attachment; filename=hebekery-report.pdf&quot;)</span>
+<span class="nc" id="L363">                .contentType(MediaType.APPLICATION_PDF)</span>
+<span class="nc" id="L364">                .body(pdf);</span>
+    }
+
+    @GetMapping(&quot;/admin/inventory&quot;)
+    public String inventoryPage(@RequestParam(defaultValue = &quot;&quot;) String keyword, @RequestParam(defaultValue = &quot;0&quot;) int page, Model model) {
+<span class="nc" id="L369">        requireAdminPage();</span>
+<span class="nc" id="L370">        Pageable pageable = PageRequest.of(Math.max(page, 0), 10, Sort.by(&quot;name&quot;).ascending());</span>
+<span class="nc" id="L371">        model.addAttribute(&quot;page&quot;, productService.searchProducts(keyword, pageable));</span>
+<span class="nc" id="L372">        model.addAttribute(&quot;keyword&quot;, keyword);</span>
+<span class="nc" id="L373">        return &quot;admin/inventory&quot;;</span>
+    }
+
+    @PostMapping(&quot;/admin/inventory/{id}/threshold&quot;)
+    public String updateInventoryThreshold(@PathVariable String id, @RequestParam(defaultValue = &quot;0&quot;) int lowStockThreshold) {
+<span class="nc" id="L378">        requireAdminPage();</span>
+<span class="nc" id="L379">        productService.updateLowStockThreshold(id, lowStockThreshold);</span>
+<span class="nc" id="L380">        return &quot;redirect:/admin/inventory&quot;;</span>
+    }
+
+    private void requireAdminPage() {
+<span class="nc bnc" id="L384" title="All 2 branches missed.">        if (!userService.isAdmin()) {</span>
+<span class="nc" id="L385">            throw new IllegalStateException(&quot;Ban can dang nhap bang tai khoan admin&quot;);</span>
+        }
+<span class="nc" id="L387">    }</span>
+
+    private String csvValue(String value) {
+<span class="nc bnc" id="L390" title="All 2 branches missed.">        String safe = value == null ? &quot;&quot; : value.replace(&quot;\&quot;&quot;, &quot;\&quot;\&quot;&quot;);</span>
+<span class="nc" id="L391">        return &quot;\&quot;&quot; + safe + &quot;\&quot;&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

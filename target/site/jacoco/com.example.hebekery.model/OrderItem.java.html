@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderItem.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.model</a> &gt; <span class="el_source">OrderItem.java</span></div><h1>OrderItem.java</h1><pre class="source lang-java linenums">package com.example.hebekery.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = &quot;order_items&quot;)
+public class OrderItem {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = &quot;order_id&quot;, nullable = false)
+    private Order order;
+
+    private String productId;
+    private String productName;
+    private String imageUrl;
+    private double price;
+    private double costAtSale;
+    private int quantity;
+    private double total;
+
+<span class="fc" id="L32">    public OrderItem() {</span>
+<span class="fc" id="L33">    }</span>
+
+<span class="fc" id="L35">    public OrderItem(String productId, String productName, String imageUrl, double price, int quantity) {</span>
+<span class="fc" id="L36">        this.productId = productId;</span>
+<span class="fc" id="L37">        this.productName = productName;</span>
+<span class="fc" id="L38">        this.imageUrl = imageUrl;</span>
+<span class="fc" id="L39">        this.price = price;</span>
+<span class="fc" id="L40">        this.quantity = quantity;</span>
+<span class="fc" id="L41">        this.total = price * quantity;</span>
+<span class="fc" id="L42">    }</span>
+
+<span class="nc" id="L44">    public Long getId() { return id; }</span>
+<span class="nc" id="L45">    public void setId(Long id) { this.id = id; }</span>
+<span class="nc" id="L46">    public Order getOrder() { return order; }</span>
+<span class="fc" id="L47">    public void setOrder(Order order) { this.order = order; }</span>
+<span class="fc" id="L48">    public String getProductId() { return productId; }</span>
+<span class="nc" id="L49">    public void setProductId(String productId) { this.productId = productId; }</span>
+<span class="fc" id="L50">    public String getProductName() { return productName; }</span>
+<span class="nc" id="L51">    public void setProductName(String productName) { this.productName = productName; }</span>
+<span class="nc" id="L52">    public String getImageUrl() { return imageUrl; }</span>
+<span class="nc" id="L53">    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }</span>
+<span class="nc" id="L54">    public double getPrice() { return price; }</span>
+<span class="nc" id="L55">    public void setPrice(double price) { this.price = price; }</span>
+<span class="nc" id="L56">    public double getCostAtSale() { return costAtSale; }</span>
+<span class="fc" id="L57">    public void setCostAtSale(double costAtSale) { this.costAtSale = costAtSale; }</span>
+<span class="fc" id="L58">    public int getQuantity() { return quantity; }</span>
+    public void setQuantity(int quantity) {
+<span class="nc" id="L60">        this.quantity = quantity;</span>
+<span class="nc" id="L61">        this.total = this.price * quantity;</span>
+<span class="nc" id="L62">    }</span>
+<span class="nc" id="L63">    public double getTotal() { return total; }</span>
+<span class="nc" id="L64">    public void setTotal(double total) { this.total = total; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

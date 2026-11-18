@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegisterRequest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.dto.request</a> &gt; <span class="el_source">RegisterRequest.java</span></div><h1>RegisterRequest.java</h1><pre class="source lang-java linenums">package com.example.hebekery.dto.request;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
+@Schema(description = &quot;Yêu cầu đăng ký tài khoản khách hàng mới&quot;)
+<span class="fc" id="L10">public class RegisterRequest {</span>
+
+    @Schema(description = &quot;Địa chỉ email đăng ký&quot;, example = &quot;khachmoi@gmail.com&quot;)
+    @NotBlank(message = &quot;Email không được để trống&quot;)
+    @Email(message = &quot;Email không hợp lệ&quot;)
+    private String email;
+
+    @Schema(description = &quot;Mật khẩu bảo mật (tối thiểu 6 ký tự)&quot;, example = &quot;matkhau123&quot;)
+    @NotBlank(message = &quot;Mật khẩu không được để trống&quot;)
+    @Size(min = 6, message = &quot;Mật khẩu phải có ít nhất 6 ký tự&quot;)
+    private String password;
+
+    @Schema(description = &quot;Họ và tên khách hàng&quot;, example = &quot;Trần Thị Mai&quot;)
+    @NotBlank(message = &quot;Họ tên không được để trống&quot;)
+    private String name;
+
+    @Schema(description = &quot;Số điện thoại liên lạc&quot;, example = &quot;0912345678&quot;)
+    @Pattern(regexp = &quot;^$|^(\\+84|0)?[0-9]{9,10}$|^[0-9]{10,11}$&quot;, message = &quot;Số điện thoại không hợp lệ&quot;)
+    private String phone;
+
+    public String getEmail() {
+<span class="fc" id="L31">        return email;</span>
+    }
+
+    public void setEmail(String email) {
+<span class="fc" id="L35">        this.email = email;</span>
+<span class="fc" id="L36">    }</span>
+
+    public String getPassword() {
+<span class="fc" id="L39">        return password;</span>
+    }
+
+    public void setPassword(String password) {
+<span class="fc" id="L43">        this.password = password;</span>
+<span class="fc" id="L44">    }</span>
+
+    public String getName() {
+<span class="fc" id="L47">        return name;</span>
+    }
+
+    public void setName(String name) {
+<span class="fc" id="L51">        this.name = name;</span>
+<span class="fc" id="L52">    }</span>
+
+    public String getPhone() {
+<span class="fc" id="L55">        return phone;</span>
+    }
+
+    public void setPhone(String phone) {
+<span class="fc" id="L59">        this.phone = phone;</span>
+<span class="fc" id="L60">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

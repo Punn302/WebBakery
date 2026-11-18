@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductReviewService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.service</a> &gt; <span class="el_source">ProductReviewService.java</span></div><h1>ProductReviewService.java</h1><pre class="source lang-java linenums">package com.example.hebekery.service;
+
+import com.example.hebekery.dto.request.ProductReviewRequest;
+import com.example.hebekery.model.Order;
+import com.example.hebekery.model.ProductReview;
+import com.example.hebekery.model.User;
+import com.example.hebekery.repository.OrderRepository;
+import com.example.hebekery.repository.ProductReviewRepository;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class ProductReviewService {
+    private final ProductReviewRepository productReviewRepository;
+    private final OrderRepository orderRepository;
+
+<span class="fc" id="L20">    public ProductReviewService(ProductReviewRepository productReviewRepository, OrderRepository orderRepository) {</span>
+<span class="fc" id="L21">        this.productReviewRepository = productReviewRepository;</span>
+<span class="fc" id="L22">        this.orderRepository = orderRepository;</span>
+<span class="fc" id="L23">    }</span>
+
+    public List&lt;ProductReview&gt; getReviews(String productId) {
+<span class="nc" id="L26">        return productReviewRepository.findByProductIdOrderByCreatedAtDesc(productId);</span>
+    }
+
+    public List&lt;ProductReview&gt; getAllReviews() {
+<span class="nc" id="L30">        return productReviewRepository.findAll();</span>
+    }
+
+    public Optional&lt;ProductReview&gt; getUserReview(String productId, String userId) {
+<span class="nc" id="L34">        return productReviewRepository.findByProductIdAndUserId(productId, userId);</span>
+    }
+
+    public boolean canReview(String productId, User user) {
+<span class="nc bnc" id="L38" title="All 2 branches missed.">        return user != null;</span>
+    }
+
+    public ProductReview save(String productId, User user, ProductReviewRequest request) {
+<span class="nc" id="L42">        requireCanReview(productId, user);</span>
+<span class="nc" id="L43">        ProductReview review = getUserReview(productId, user.getId()).orElseGet(ProductReview::new);</span>
+<span class="nc" id="L44">        LocalDateTime now = LocalDateTime.now();</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        if (review.getId() == null) {</span>
+<span class="nc" id="L46">            review.setId(&quot;RV-&quot; + System.currentTimeMillis());</span>
+<span class="nc" id="L47">            review.setProductId(productId);</span>
+<span class="nc" id="L48">            review.setUserId(user.getId());</span>
+<span class="nc" id="L49">            review.setUserName(user.getName());</span>
+<span class="nc" id="L50">            review.setCreatedAt(now);</span>
+        }
+<span class="nc" id="L52">        review.setRating(request.getRating());</span>
+<span class="nc" id="L53">        review.setComment(request.getComment().trim());</span>
+<span class="nc" id="L54">        review.setUpdatedAt(now);</span>
+<span class="nc" id="L55">        return productReviewRepository.save(review);</span>
+    }
+
+    public boolean delete(String reviewId, User user) {
+<span class="nc" id="L59">        ProductReview review = productReviewRepository.findById(reviewId)</span>
+<span class="nc" id="L60">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Không tìm thấy đánh giá&quot;));</span>
+<span class="nc bnc" id="L61" title="All 4 branches missed.">        if (user == null || !review.getUserId().equals(user.getId())) {</span>
+<span class="nc" id="L62">            throw new IllegalArgumentException(&quot;Bạn không có quyền xóa đánh giá này&quot;);</span>
+        }
+<span class="nc" id="L64">        productReviewRepository.delete(review);</span>
+<span class="nc" id="L65">        return true;</span>
+    }
+
+    public boolean adminDelete(String reviewId) {
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        if (!productReviewRepository.existsById(reviewId)) {</span>
+<span class="nc" id="L70">            return false;</span>
+        }
+<span class="nc" id="L72">        productReviewRepository.deleteById(reviewId);</span>
+<span class="nc" id="L73">        return true;</span>
+    }
+
+    private void requireCanReview(String productId, User user) {
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        if (!canReview(productId, user)) {</span>
+<span class="nc" id="L78">            throw new IllegalArgumentException(&quot;Vui lòng đăng nhập để gửi đánh giá sản phẩm&quot;);</span>
+        }
+<span class="nc" id="L80">    }</span>
+
+    private boolean containsProduct(Order order, String productId) {
+<span class="nc" id="L83">        return order.getItems().stream().anyMatch(item -&gt; productId.equals(item.getProductId()));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

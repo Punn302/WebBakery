@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.controller</a> &gt; <span class="el_source">ProductController.java</span></div><h1>ProductController.java</h1><pre class="source lang-java linenums">package com.example.hebekery.controller;
+
+import com.example.hebekery.dto.ApiResponse;
+import com.example.hebekery.dto.ProductResponse;
+import com.example.hebekery.model.Product;
+import com.example.hebekery.service.ProductService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping(&quot;/api/products&quot;)
+@Tag(name = &quot;Product Catalog&quot;, description = &quot;Xem, tìm kiếm, lọc và xem chi tiết sản phẩm cho khách&quot;)
+public class ProductController {
+
+    private final ProductService productService;
+
+<span class="fc" id="L32">    public ProductController(ProductService productService) {</span>
+<span class="fc" id="L33">        this.productService = productService;</span>
+<span class="fc" id="L34">    }</span>
+
+    @Operation(summary = &quot;Lấy danh sách sản phẩm phân trang&quot;, description = &quot;Tìm kiếm và lọc sản phẩm theo từ khóa, ID danh mục hoặc tên danh mục&quot;)
+    @GetMapping
+    public ResponseEntity&lt;ApiResponse&lt;Page&lt;ProductResponse&gt;&gt;&gt; getProducts(
+            @Parameter(description = &quot;ID danh mục (ưu tiên cao nhất)&quot;) @RequestParam(required = false) Long categoryId,
+            @Parameter(description = &quot;Từ khóa tìm kiếm theo tên/mô tả&quot;) @RequestParam(required = false) String keyword,
+            @Parameter(description = &quot;Slug/tên danh mục (mặc định 'all')&quot;) @RequestParam(defaultValue = &quot;all&quot;) String category,
+            @Parameter(description = &quot;Số thứ tự trang (bắt đầu từ 0)&quot;) @RequestParam(defaultValue = &quot;0&quot;) int page,
+            @Parameter(description = &quot;Số phần tử trên mỗi trang&quot;) @RequestParam(defaultValue = &quot;12&quot;) int size) {
+<span class="fc" id="L44">        Pageable pageable = PageRequest.of(Math.max(page, 0), size, Sort.by(&quot;id&quot;).ascending());</span>
+        Page&lt;Product&gt; products;
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">        if (categoryId != null) {</span>
+<span class="nc" id="L47">            products = productService.searchProducts(categoryId, keyword, pageable);</span>
+<span class="pc bpc" id="L48" title="3 of 4 branches missed.">        } else if (keyword != null &amp;&amp; !keyword.isBlank()) {</span>
+<span class="nc" id="L49">            products = productService.searchProducts(keyword.trim(), pageable);</span>
+        } else {
+<span class="fc" id="L51">            products = productService.getProductsPage(category, pageable);</span>
+        }
+<span class="fc" id="L53">        Page&lt;ProductResponse&gt; responsePage = products.map(ProductResponse::from);</span>
+<span class="fc" id="L54">        return ResponseEntity.ok(ApiResponse.success(&quot;Lấy danh sách sản phẩm thành công&quot;, responsePage));</span>
+    }
+
+    public ResponseEntity&lt;ApiResponse&lt;Page&lt;ProductResponse&gt;&gt;&gt; getProducts(
+            String keyword,
+            String category,
+            int page,
+            int size) {
+<span class="fc" id="L62">        return getProducts(null, keyword, category, page, size);</span>
+    }
+
+    @Operation(summary = &quot;Xem chi tiết sản phẩm theo mã&quot;, description = &quot;Trả về thông tin chi tiết một sản phẩm đang kinh doanh&quot;)
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;ProductResponse&gt;&gt; getProductById(
+            @Parameter(description = &quot;Mã SKU / ID sản phẩm&quot;) @PathVariable String id) {
+<span class="fc" id="L69">        Product product = productService.getProductById(id);</span>
+<span class="pc bpc" id="L70" title="1 of 4 branches missed.">        if (product == null || !product.isActive()) {</span>
+<span class="fc" id="L71">            return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="fc" id="L72">                    .body(ApiResponse.failure(&quot;Không tìm thấy sản phẩm hoặc sản phẩm đã ngừng kinh doanh&quot;));</span>
+        }
+<span class="fc" id="L74">        return ResponseEntity.ok(ApiResponse.success(&quot;Lấy thông tin sản phẩm thành công&quot;, ProductResponse.from(product)));</span>
+    }
+
+    @Operation(summary = &quot;Lấy danh sách sản phẩm nổi bật&quot;, description = &quot;Lấy danh sách các sản phẩm gắn cờ isFeatured để hiển thị trên trang chủ&quot;)
+    @GetMapping(&quot;/featured&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;List&lt;ProductResponse&gt;&gt;&gt; getFeaturedProducts() {
+<span class="fc" id="L80">        List&lt;ProductResponse&gt; responses = productService.getFeaturedProducts().stream()</span>
+<span class="fc" id="L81">                .map(ProductResponse::from)</span>
+<span class="fc" id="L82">                .collect(Collectors.toList());</span>
+<span class="fc" id="L83">        return ResponseEntity.ok(ApiResponse.success(&quot;Lấy danh sách sản phẩm nổi bật thành công&quot;, responses));</span>
+    }
+
+    @Operation(summary = &quot;Lấy danh sách tên danh mục sản phẩm&quot;, description = &quot;Trả về danh sách tên tất cả danh mục dùng cho bộ lọc thanh điều hướng&quot;)
+    @GetMapping(&quot;/categories&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;List&lt;String&gt;&gt;&gt; getCategories() {
+<span class="fc" id="L89">        return ResponseEntity.ok(ApiResponse.success(&quot;Lấy danh mục sản phẩm thành công&quot;, productService.getAllCategories()));</span>
+    }
+
+    @Operation(summary = &quot;Lấy danh sách sản phẩm liên quan&quot;, description = &quot;Gợi ý tối đa 4 sản phẩm cùng danh mục với sản phẩm hiện tại&quot;)
+    @GetMapping(&quot;/{id}/related&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;List&lt;ProductResponse&gt;&gt;&gt; getRelatedProducts(
+            @Parameter(description = &quot;Mã SKU / ID sản phẩm tham chiếu&quot;) @PathVariable String id) {
+<span class="nc" id="L96">        Product current = productService.getProductById(id);</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        if (current == null) {</span>
+<span class="nc" id="L98">            return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="nc" id="L99">                    .body(ApiResponse.failure(&quot;Không tìm thấy sản phẩm&quot;));</span>
+        }
+<span class="nc" id="L101">        String categoryName = current.getCategoryName();</span>
+<span class="nc" id="L102">        List&lt;ProductResponse&gt; related = productService.getRelatedProducts(id, categoryName).stream()</span>
+<span class="nc" id="L103">                .map(ProductResponse::from)</span>
+<span class="nc" id="L104">                .collect(Collectors.toList());</span>
+<span class="nc" id="L105">        return ResponseEntity.ok(ApiResponse.success(&quot;Lấy danh sách sản phẩm liên quan thành công&quot;, related));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

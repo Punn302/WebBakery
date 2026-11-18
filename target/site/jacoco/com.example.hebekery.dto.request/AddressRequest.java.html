@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AddressRequest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.dto.request</a> &gt; <span class="el_source">AddressRequest.java</span></div><h1>AddressRequest.java</h1><pre class="source lang-java linenums">package com.example.hebekery.dto.request;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+
+<span class="nc" id="L6">public class AddressRequest {</span>
+    @NotBlank(message = &quot;Ten nguoi nhan khong duoc de trong&quot;)
+    private String receiverName;
+
+    @NotBlank(message = &quot;So dien thoai khong duoc de trong&quot;)
+    @Pattern(regexp = &quot;^[0-9]{10,11}$&quot;, message = &quot;So dien thoai khong hop le&quot;)
+    private String phone;
+
+    @NotBlank(message = &quot;Dia chi khong duoc de trong&quot;)
+    private String addressLine;
+
+    private String province;
+    private String district;
+    private String ward;
+    private boolean defaultAddress;
+
+<span class="nc" id="L22">    public String getReceiverName() { return receiverName; }</span>
+<span class="nc" id="L23">    public void setReceiverName(String receiverName) { this.receiverName = receiverName; }</span>
+<span class="nc" id="L24">    public String getPhone() { return phone; }</span>
+<span class="nc" id="L25">    public void setPhone(String phone) { this.phone = phone; }</span>
+<span class="nc" id="L26">    public String getAddressLine() { return addressLine; }</span>
+<span class="nc" id="L27">    public void setAddressLine(String addressLine) { this.addressLine = addressLine; }</span>
+<span class="nc" id="L28">    public String getProvince() { return province; }</span>
+<span class="nc" id="L29">    public void setProvince(String province) { this.province = province; }</span>
+<span class="nc" id="L30">    public String getDistrict() { return district; }</span>
+<span class="nc" id="L31">    public void setDistrict(String district) { this.district = district; }</span>
+<span class="nc" id="L32">    public String getWard() { return ward; }</span>
+<span class="nc" id="L33">    public void setWard(String ward) { this.ward = ward; }</span>
+<span class="nc" id="L34">    public boolean isDefaultAddress() { return defaultAddress; }</span>
+<span class="nc" id="L35">    public void setDefaultAddress(boolean defaultAddress) { this.defaultAddress = defaultAddress; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -566,21 +566,6 @@ export const AdminVoucherPage: React.FC = () => {
               </div>
             </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-[#2A2725] uppercase tracking-wider">
-                  Đơn hàng tối thiểu (VNĐ)
-                </label>
-                <Input
-                  type="number"
-                  value={formData.minOrderAmount}
-                  onChange={(e) => setFormData({ ...formData, minOrderAmount: +e.target.value })}
-                  min={0}
-                  step={1000}
-                  className="rounded-xl border-[#E5E2DF] font-mono text-xs"
-                />
-              </div>
-            </div>
-
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="text-xs font-bold text-[#2A2725] uppercase tracking-wider">

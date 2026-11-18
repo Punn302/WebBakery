@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ContactService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.service</a> &gt; <span class="el_source">ContactService.java</span></div><h1>ContactService.java</h1><pre class="source lang-java linenums">package com.example.hebekery.service;
+
+import com.example.hebekery.dto.request.ContactRequest;
+import com.example.hebekery.model.ContactMessage;
+import com.example.hebekery.repository.ContactMessageRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+public class ContactService {
+    private final ContactMessageRepository contactMessageRepository;
+
+<span class="fc" id="L17">    public ContactService(ContactMessageRepository contactMessageRepository) {</span>
+<span class="fc" id="L18">        this.contactMessageRepository = contactMessageRepository;</span>
+<span class="fc" id="L19">    }</span>
+
+    public ContactMessage save(ContactRequest request) {
+<span class="nc" id="L22">        ContactMessage message = new ContactMessage();</span>
+<span class="nc" id="L23">        message.setId(&quot;MSG-&quot; + System.currentTimeMillis());</span>
+<span class="nc" id="L24">        message.setName(request.getName());</span>
+<span class="nc" id="L25">        message.setEmail(request.getEmail());</span>
+<span class="nc" id="L26">        message.setPhone(request.getPhone());</span>
+<span class="nc" id="L27">        message.setSubject(request.getSubject());</span>
+<span class="nc" id="L28">        message.setMessage(request.getMessage());</span>
+<span class="nc" id="L29">        message.setStatus(&quot;NEW&quot;);</span>
+<span class="nc" id="L30">        message.setCreatedAt(LocalDateTime.now());</span>
+<span class="nc" id="L31">        return contactMessageRepository.save(message);</span>
+    }
+
+    public List&lt;ContactMessage&gt; getAll() {
+<span class="nc" id="L35">        return contactMessageRepository.findAll();</span>
+    }
+
+    public Page&lt;ContactMessage&gt; search(String keyword, Pageable pageable) {
+<span class="nc bnc" id="L39" title="All 4 branches missed.">        if (keyword == null || keyword.trim().isEmpty()) {</span>
+<span class="nc" id="L40">            return contactMessageRepository.findAll(pageable);</span>
+        }
+<span class="nc" id="L42">        String term = keyword.trim();</span>
+<span class="nc" id="L43">        return contactMessageRepository.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrSubjectContainingIgnoreCaseOrStatusContainingIgnoreCase(</span>
+                term,
+                term,
+                term,
+                term,
+                pageable
+        );
+    }
+
+    public ContactMessage updateStatus(String id, String status) {
+<span class="nc" id="L53">        ContactMessage message = contactMessageRepository.findById(id)</span>
+<span class="nc" id="L54">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Khong tim thay lien he&quot;));</span>
+<span class="nc" id="L55">        message.setStatus(status);</span>
+<span class="nc" id="L56">        return contactMessageRepository.save(message);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

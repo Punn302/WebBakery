@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaymentStatusResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.dto</a> &gt; <span class="el_source">PaymentStatusResponse.java</span></div><h1>PaymentStatusResponse.java</h1><pre class="source lang-java linenums">package com.example.hebekery.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = &quot;Thông tin trạng thái thanh toán đơn hàng phục vụ Polling realtime&quot;)
+public class PaymentStatusResponse {
+
+    @Schema(description = &quot;Mã ID kỹ thuật của đơn hàng&quot;, example = &quot;ORD-123456&quot;)
+    private String orderId;
+
+    @Schema(description = &quot;Mã đơn hàng hiển thị&quot;, example = &quot;HBK-20261105-ABC&quot;)
+    private String orderCode;
+
+    @Schema(description = &quot;Trạng thái tiến trình đơn (PENDING, PROCESSING, SHIPPING...)&quot;, example = &quot;PROCESSING&quot;)
+    private String orderStatus;
+
+    @Schema(description = &quot;Trạng thái thanh toán (PENDING, PAID)&quot;, example = &quot;PAID&quot;)
+    private String paymentStatus;
+
+    @Schema(description = &quot;Cờ đánh dấu đã thanh toán thành công hay chưa&quot;, example = &quot;true&quot;)
+    private boolean isPaid;
+
+    @Schema(description = &quot;Tổng tiền của đơn hàng&quot;, example = &quot;280000&quot;)
+    private double total;
+
+<span class="nc" id="L26">    public PaymentStatusResponse() {</span>
+<span class="nc" id="L27">    }</span>
+
+    public PaymentStatusResponse(String orderId, String orderCode, String orderStatus,
+<span class="fc" id="L30">                                 String paymentStatus, boolean isPaid, double total) {</span>
+<span class="fc" id="L31">        this.orderId = orderId;</span>
+<span class="fc" id="L32">        this.orderCode = orderCode;</span>
+<span class="fc" id="L33">        this.orderStatus = orderStatus;</span>
+<span class="fc" id="L34">        this.paymentStatus = paymentStatus;</span>
+<span class="fc" id="L35">        this.isPaid = isPaid;</span>
+<span class="fc" id="L36">        this.total = total;</span>
+<span class="fc" id="L37">    }</span>
+
+    public String getOrderId() {
+<span class="fc" id="L40">        return orderId;</span>
+    }
+
+    public void setOrderId(String orderId) {
+<span class="nc" id="L44">        this.orderId = orderId;</span>
+<span class="nc" id="L45">    }</span>
+
+    public String getOrderCode() {
+<span class="nc" id="L48">        return orderCode;</span>
+    }
+
+    public void setOrderCode(String orderCode) {
+<span class="nc" id="L52">        this.orderCode = orderCode;</span>
+<span class="nc" id="L53">    }</span>
+
+    public String getOrderStatus() {
+<span class="nc" id="L56">        return orderStatus;</span>
+    }
+
+    public void setOrderStatus(String orderStatus) {
+<span class="nc" id="L60">        this.orderStatus = orderStatus;</span>
+<span class="nc" id="L61">    }</span>
+
+    public String getPaymentStatus() {
+<span class="fc" id="L64">        return paymentStatus;</span>
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+<span class="nc" id="L68">        this.paymentStatus = paymentStatus;</span>
+<span class="nc" id="L69">    }</span>
+
+    public boolean isPaid() {
+<span class="fc" id="L72">        return isPaid;</span>
+    }
+
+    public void setPaid(boolean paid) {
+<span class="nc" id="L76">        isPaid = paid;</span>
+<span class="nc" id="L77">    }</span>
+
+    public double getTotal() {
+<span class="nc" id="L80">        return total;</span>
+    }
+
+    public void setTotal(double total) {
+<span class="nc" id="L84">        this.total = total;</span>
+<span class="nc" id="L85">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PurchaseReceiptService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.service</a> &gt; <span class="el_source">PurchaseReceiptService.java</span></div><h1>PurchaseReceiptService.java</h1><pre class="source lang-java linenums">package com.example.hebekery.service;
+
+import com.example.hebekery.model.Product;
+import com.example.hebekery.model.PurchaseReceipt;
+import com.example.hebekery.repository.PurchaseReceiptRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class PurchaseReceiptService {
+    private final PurchaseReceiptRepository purchaseReceiptRepository;
+    private final ProductService productService;
+
+<span class="fc" id="L21">    public PurchaseReceiptService(PurchaseReceiptRepository purchaseReceiptRepository, ProductService productService) {</span>
+<span class="fc" id="L22">        this.purchaseReceiptRepository = purchaseReceiptRepository;</span>
+<span class="fc" id="L23">        this.productService = productService;</span>
+<span class="fc" id="L24">    }</span>
+
+    public PurchaseReceipt create(String productId, String supplier, int quantity, double unitCost, String note) {
+<span class="nc" id="L27">        return createBatch(List.of(productId), List.of(quantity), List.of(unitCost), supplier, note).get(0);</span>
+    }
+
+    @Transactional
+    public List&lt;PurchaseReceipt&gt; createBatch(List&lt;String&gt; productIds, List&lt;Integer&gt; quantities, List&lt;Double&gt; unitCosts, String supplier, String note) {
+<span class="nc bnc" id="L32" title="All 8 branches missed.">        if (productIds == null || quantities == null || unitCosts == null || productIds.isEmpty()) {</span>
+<span class="nc" id="L33">            throw new IllegalArgumentException(&quot;Vui long nhap it nhat mot san pham&quot;);</span>
+        }
+<span class="nc bnc" id="L35" title="All 4 branches missed.">        if (productIds.size() != quantities.size() || productIds.size() != unitCosts.size()) {</span>
+<span class="nc" id="L36">            throw new IllegalArgumentException(&quot;Du lieu phieu nhap khong hop le&quot;);</span>
+        }
+
+<span class="nc" id="L39">        String receiptCode = &quot;PN-&quot; + System.currentTimeMillis();</span>
+<span class="nc" id="L40">        LocalDateTime importedAt = LocalDateTime.now();</span>
+<span class="nc" id="L41">        List&lt;PurchaseReceipt&gt; savedReceipts = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        for (int i = 0; i &lt; productIds.size(); i++) {</span>
+<span class="nc" id="L44">            String productId = productIds.get(i);</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">            int quantity = quantities.get(i) == null ? 0 : quantities.get(i);</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">            double unitCost = unitCosts.get(i) == null ? 0 : unitCosts.get(i);</span>
+<span class="nc" id="L47">            savedReceipts.add(createLine(receiptCode, importedAt, productId, supplier, quantity, unitCost, note, i + 1));</span>
+        }
+
+<span class="nc" id="L50">        return savedReceipts;</span>
+    }
+
+    private PurchaseReceipt createLine(String receiptCode, LocalDateTime importedAt, String productId, String supplier, int quantity, double unitCost, String note, int lineNumber) {
+<span class="nc bnc" id="L54" title="All 4 branches missed.">        if (productId == null || productId.isBlank()) {</span>
+<span class="nc" id="L55">            throw new IllegalArgumentException(&quot;Vui long chon san pham&quot;);</span>
+        }
+<span class="nc" id="L57">        Product product = productService.getProductById(productId);</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        if (product == null) {</span>
+<span class="nc" id="L59">            throw new IllegalArgumentException(&quot;Khong tim thay san pham&quot;);</span>
+        }
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        if (quantity &lt;= 0) {</span>
+<span class="nc" id="L62">            throw new IllegalArgumentException(&quot;So luong nhap phai lon hon 0&quot;);</span>
+        }
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        if (unitCost &lt; 0) {</span>
+<span class="nc" id="L65">            throw new IllegalArgumentException(&quot;Don gia nhap khong hop le&quot;);</span>
+        }
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        if (unitCost &gt; product.getPrice()) {</span>
+<span class="nc" id="L68">            throw new IllegalArgumentException(&quot;Gia nhap cua &quot; + product.getName() + &quot; khong duoc vuot qua gia ban&quot;);</span>
+        }
+
+<span class="nc" id="L71">        PurchaseReceipt receipt = new PurchaseReceipt();</span>
+<span class="nc" id="L72">        receipt.setId(receiptCode + &quot;-&quot; + lineNumber);</span>
+<span class="nc" id="L73">        receipt.setReceiptCode(receiptCode);</span>
+<span class="nc" id="L74">        receipt.setProductId(product.getId());</span>
+<span class="nc" id="L75">        receipt.setProductName(product.getName());</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        receipt.setSupplier(supplier == null ? &quot;&quot; : supplier.trim());</span>
+<span class="nc" id="L77">        receipt.setQuantity(quantity);</span>
+<span class="nc" id="L78">        receipt.setUnitCost(unitCost);</span>
+<span class="nc" id="L79">        receipt.setImportedAt(importedAt);</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        receipt.setNote(note == null ? &quot;&quot; : note.trim());</span>
+<span class="nc" id="L81">        PurchaseReceipt saved = purchaseReceiptRepository.save(receipt);</span>
+<span class="nc" id="L82">        productService.receiveStock(productId, quantity, unitCost, &quot;PURCHASE_RECEIPT&quot;, receiptCode, &quot;Nhap hang tu phieu &quot; + receiptCode);</span>
+<span class="nc" id="L83">        return saved;</span>
+    }
+
+    public Page&lt;PurchaseReceipt&gt; search(String keyword, Pageable pageable) {
+<span class="nc" id="L87">        return search(keyword, null, null, pageable);</span>
+    }
+
+    public Page&lt;PurchaseReceipt&gt; search(String keyword, LocalDate from, LocalDate to, Pageable pageable) {
+<span class="nc" id="L91">        return purchaseReceiptRepository.search(</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">                keyword == null ? &quot;&quot; : keyword.trim(),</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">                from == null ? null : from.atStartOfDay(),</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">                to == null ? null : to.plusDays(1).atStartOfDay(),</span>
+                pageable
+        );
+    }
+
+    public List&lt;PurchaseReceipt&gt; getAll() {
+<span class="nc" id="L100">        return purchaseReceiptRepository.findAll();</span>
+    }
+
+    public List&lt;PurchaseReceipt&gt; getAll(LocalDate from, LocalDate to) {
+<span class="nc bnc" id="L104" title="All 4 branches missed.">        if (from == null || to == null) {</span>
+<span class="nc" id="L105">            return getAll();</span>
+        }
+<span class="nc" id="L107">        return purchaseReceiptRepository.findByImportedAtGreaterThanEqualAndImportedAtLessThan(from.atStartOfDay(), to.plusDays(1).atStartOfDay());</span>
+    }
+
+    public double getTotalImportCost() {
+<span class="nc" id="L111">        return getAll().stream().mapToDouble(PurchaseReceipt::getTotalCost).sum();</span>
+    }
+
+    public double getTotalImportCost(LocalDate from, LocalDate to) {
+<span class="nc" id="L115">        return getAll(from, to).stream().mapToDouble(PurchaseReceipt::getTotalCost).sum();</span>
+    }
+
+    public int getTotalImportedQuantity() {
+<span class="nc" id="L119">        return getAll().stream().mapToInt(PurchaseReceipt::getQuantity).sum();</span>
+    }
+
+    public int getTotalImportedQuantity(LocalDate from, LocalDate to) {
+<span class="nc" id="L123">        return getAll(from, to).stream().mapToInt(PurchaseReceipt::getQuantity).sum();</span>
+    }
+
+    public List&lt;PurchaseReceipt&gt; getByReceiptCode(String receiptCode) {
+<span class="nc" id="L127">        return purchaseReceiptRepository.findByReceiptCodeOrderByImportedAtAsc(receiptCode);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

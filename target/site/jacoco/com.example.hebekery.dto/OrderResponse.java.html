@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.dto</a> &gt; <span class="el_source">OrderResponse.java</span></div><h1>OrderResponse.java</h1><pre class="source lang-java linenums">package com.example.hebekery.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = &quot;Tóm tắt thông tin đơn hàng trong danh sách&quot;)
+public class OrderResponse {
+
+    @Schema(description = &quot;Mã định danh kỹ thuật đơn hàng&quot;, example = &quot;ORD-UUID-1234&quot;)
+    private String id;
+
+    @Schema(description = &quot;Mã đơn hàng hiển thị khách hàng&quot;, example = &quot;HBK-20261105-001&quot;)
+    private String orderCode;
+
+    @Schema(description = &quot;Ngày tạo đơn&quot;, example = &quot;05/11/2026&quot;)
+    private String date;
+
+    @Schema(description = &quot;Class CSS hiển thị màu badge&quot;, example = &quot;bg-green-100 text-green-800&quot;)
+    private String statusClass;
+
+    @Schema(description = &quot;Nhãn trạng thái đơn hiển thị tiếng Việt&quot;, example = &quot;Đã giao thành công&quot;)
+    private String statusText;
+
+    @Schema(description = &quot;Mã trạng thái đơn hàng (PENDING, CONFIRMED, SHIPPING, DELIVERED, CANCELLED)&quot;, example = &quot;DELIVERED&quot;)
+    private String orderStatus;
+
+    @Schema(description = &quot;Mã trạng thái thanh toán (UNPAID, PAID, FAILED)&quot;, example = &quot;PAID&quot;)
+    private String paymentStatus;
+
+    @Schema(description = &quot;Ảnh đại diện sản phẩm đầu tiên trong đơn&quot;, example = &quot;https://res.cloudinary.com/hebekery/image/upload/v1/products/banh-mi.jpg&quot;)
+    private String imageUrl;
+
+    @Schema(description = &quot;Tên sản phẩm đại diện trong đơn&quot;, example = &quot;Bánh Mì Nguyên Cám Hạt Óc Chó&quot;)
+    private String productName;
+
+    @Schema(description = &quot;Tổng số lượng mặt hàng&quot;, example = &quot;2&quot;)
+    private int itemCount;
+
+    @Schema(description = &quot;Tổng tiền thanh toán (VNĐ)&quot;, example = &quot;130000.0&quot;)
+    private double total;
+
+<span class="nc" id="L41">    public OrderResponse() {</span>
+<span class="nc" id="L42">    }</span>
+
+<span class="fc" id="L44">    public OrderResponse(String id, String date, String statusClass, String statusText, int itemCount, double total) {</span>
+<span class="fc" id="L45">        this.id = id;</span>
+<span class="fc" id="L46">        this.orderCode = id;</span>
+<span class="fc" id="L47">        this.date = date;</span>
+<span class="fc" id="L48">        this.statusClass = statusClass;</span>
+<span class="fc" id="L49">        this.statusText = statusText;</span>
+<span class="fc" id="L50">        this.itemCount = itemCount;</span>
+<span class="fc" id="L51">        this.total = total;</span>
+<span class="fc" id="L52">    }</span>
+
+    public OrderResponse(String id, String date, String statusClass, String statusText, String orderStatus,
+<span class="nc" id="L55">                         String paymentStatus, String imageUrl, String productName, int itemCount, double total) {</span>
+<span class="nc" id="L56">        this.id = id;</span>
+<span class="nc" id="L57">        this.orderCode = id;</span>
+<span class="nc" id="L58">        this.date = date;</span>
+<span class="nc" id="L59">        this.statusClass = statusClass;</span>
+<span class="nc" id="L60">        this.statusText = statusText;</span>
+<span class="nc" id="L61">        this.orderStatus = orderStatus;</span>
+<span class="nc" id="L62">        this.paymentStatus = paymentStatus;</span>
+<span class="nc" id="L63">        this.imageUrl = imageUrl;</span>
+<span class="nc" id="L64">        this.productName = productName;</span>
+<span class="nc" id="L65">        this.itemCount = itemCount;</span>
+<span class="nc" id="L66">        this.total = total;</span>
+<span class="nc" id="L67">    }</span>
+
+    public String getId() {
+<span class="nc" id="L70">        return id;</span>
+    }
+
+    public void setId(String id) {
+<span class="nc" id="L74">        this.id = id;</span>
+<span class="nc" id="L75">    }</span>
+
+    public String getOrderCode() {
+<span class="nc" id="L78">        return orderCode;</span>
+    }
+
+    public void setOrderCode(String orderCode) {
+<span class="nc" id="L82">        this.orderCode = orderCode;</span>
+<span class="nc" id="L83">    }</span>
+
+    public String getDate() {
+<span class="nc" id="L86">        return date;</span>
+    }
+
+    public void setDate(String date) {
+<span class="nc" id="L90">        this.date = date;</span>
+<span class="nc" id="L91">    }</span>
+
+    public String getStatusClass() {
+<span class="nc" id="L94">        return statusClass;</span>
+    }
+
+    public void setStatusClass(String statusClass) {
+<span class="nc" id="L98">        this.statusClass = statusClass;</span>
+<span class="nc" id="L99">    }</span>
+
+    public String getStatusText() {
+<span class="nc" id="L102">        return statusText;</span>
+    }
+
+    public void setStatusText(String statusText) {
+<span class="nc" id="L106">        this.statusText = statusText;</span>
+<span class="nc" id="L107">    }</span>
+
+    public String getOrderStatus() {
+<span class="nc" id="L110">        return orderStatus;</span>
+    }
+
+    public void setOrderStatus(String orderStatus) {
+<span class="nc" id="L114">        this.orderStatus = orderStatus;</span>
+<span class="nc" id="L115">    }</span>
+
+    public String getPaymentStatus() {
+<span class="nc" id="L118">        return paymentStatus;</span>
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+<span class="nc" id="L122">        this.paymentStatus = paymentStatus;</span>
+<span class="nc" id="L123">    }</span>
+
+    public String getImageUrl() {
+<span class="nc" id="L126">        return imageUrl;</span>
+    }
+
+    public void setImageUrl(String imageUrl) {
+<span class="nc" id="L130">        this.imageUrl = imageUrl;</span>
+<span class="nc" id="L131">    }</span>
+
+    public String getProductName() {
+<span class="nc" id="L134">        return productName;</span>
+    }
+
+    public void setProductName(String productName) {
+<span class="nc" id="L138">        this.productName = productName;</span>
+<span class="nc" id="L139">    }</span>
+
+    public int getItemCount() {
+<span class="nc" id="L142">        return itemCount;</span>
+    }
+
+    public void setItemCount(int itemCount) {
+<span class="nc" id="L146">        this.itemCount = itemCount;</span>
+<span class="nc" id="L147">    }</span>
+
+    public double getTotal() {
+<span class="nc" id="L150">        return total;</span>
+    }
+
+    public void setTotal(double total) {
+<span class="nc" id="L154">        this.total = total;</span>
+<span class="nc" id="L155">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

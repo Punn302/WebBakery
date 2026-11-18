@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CheckoutRequest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.dto.request</a> &gt; <span class="el_source">CheckoutRequest.java</span></div><h1>CheckoutRequest.java</h1><pre class="source lang-java linenums">package com.example.hebekery.dto.request;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+
+@Schema(description = &quot;Thông tin đặt hàng và thanh toán&quot;)
+<span class="fc" id="L8">public class CheckoutRequest {</span>
+
+    @Schema(description = &quot;Họ tên người nhận hàng&quot;, example = &quot;Nguyễn Văn A&quot;)
+    @NotBlank(message = &quot;Họ tên không được để trống&quot;)
+    private String customerName;
+
+    @Schema(description = &quot;Số điện thoại nhận hàng&quot;, example = &quot;0987654321&quot;)
+    @NotBlank(message = &quot;Số điện thoại không được để trống&quot;)
+    @Pattern(regexp = &quot;^[0-9]{10,11}$&quot;, message = &quot;Số điện thoại không hợp lệ&quot;)
+    private String phone;
+
+    @Schema(description = &quot;Địa chỉ chi tiết nhận hàng&quot;, example = &quot;123 Đường Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh&quot;)
+    @NotBlank(message = &quot;Địa chỉ không được để trống&quot;)
+    private String address;
+
+    @Schema(description = &quot;Ghi chú giao hàng&quot;, example = &quot;Giao vào giờ hành chính&quot;)
+    private String note;
+
+    @Schema(description = &quot;Phương thức thanh toán (COD, SEPAY, VIETQR)&quot;, example = &quot;COD&quot;)
+    @NotBlank(message = &quot;Phương thức thanh toán không được để trống&quot;)
+    @Pattern(regexp = &quot;COD|SEPAY|VIETQR&quot;, message = &quot;Phương thức thanh toán không hợp lệ&quot;)
+    private String paymentMethod;
+
+    @Schema(description = &quot;Mã voucher giảm giá (nếu có)&quot;, example = &quot;HB10&quot;)
+    private String voucherCode;
+
+    @Schema(description = &quot;Số Điểm Lành HeBekery muốn dùng để giảm giá (1 điểm = 1.000đ)&quot;, example = &quot;20&quot;)
+    private Integer pointsUsed;
+
+    public String getCustomerName() {
+<span class="fc" id="L38">        return customerName;</span>
+    }
+
+    public void setCustomerName(String customerName) {
+<span class="fc" id="L42">        this.customerName = customerName;</span>
+<span class="fc" id="L43">    }</span>
+
+    public String getPhone() {
+<span class="fc" id="L46">        return phone;</span>
+    }
+
+    public void setPhone(String phone) {
+<span class="fc" id="L50">        this.phone = phone;</span>
+<span class="fc" id="L51">    }</span>
+
+    public String getAddress() {
+<span class="fc" id="L54">        return address;</span>
+    }
+
+    public void setAddress(String address) {
+<span class="fc" id="L58">        this.address = address;</span>
+<span class="fc" id="L59">    }</span>
+
+    public String getNote() {
+<span class="fc" id="L62">        return note;</span>
+    }
+
+    public void setNote(String note) {
+<span class="fc" id="L66">        this.note = note;</span>
+<span class="fc" id="L67">    }</span>
+
+    public String getPaymentMethod() {
+<span class="fc" id="L70">        return paymentMethod;</span>
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+<span class="fc" id="L74">        this.paymentMethod = paymentMethod;</span>
+<span class="fc" id="L75">    }</span>
+
+    public String getVoucherCode() {
+<span class="fc" id="L78">        return voucherCode;</span>
+    }
+
+    public void setVoucherCode(String voucherCode) {
+<span class="nc" id="L82">        this.voucherCode = voucherCode;</span>
+<span class="nc" id="L83">    }</span>
+
+    public Integer getPointsUsed() {
+<span class="fc" id="L86">        return pointsUsed;</span>
+    }
+
+    public void setPointsUsed(Integer pointsUsed) {
+<span class="nc" id="L90">        this.pointsUsed = pointsUsed;</span>
+<span class="nc" id="L91">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

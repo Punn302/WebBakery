@@ -1,0 +1,70 @@
+﻿<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Phiếu nhập ' + ${receiptCode}">Phiếu nhập</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print { display: none; }
+            body { background: #fff; }
+        }
+    </style>
+</head>
+<body class="bg-[#fbfaf7] text-gray-800">
+<main class="max-w-4xl mx-auto bg-white min-h-screen p-8">
+    <div class="no-print flex justify-end mb-6">
+        <button onclick="window.print()" class="bg-[#47654c] text-white rounded-lg px-5 py-3 font-semibold">In phiếu</button>
+    </div>
+
+    <header class="border-b border-gray-200 pb-5 mb-6">
+        <p class="text-sm uppercase tracking-widest text-[#47654c] font-semibold">Hebekery</p>
+        <h1 class="text-3xl font-bold text-[#263d2b] mt-2">Phiếu nhập hàng</h1>
+        <p class="text-gray-500 mt-2">Mã phiếu: <span class="font-semibold text-gray-800" th:text="${receiptCode}"></span></p>
+        <p class="text-gray-500" th:if="${!#lists.isEmpty(receipts)}">Ngày nhập: <span th:text="${#temporals.format(receipts[0].importedAt, 'dd/MM/yyyy HH:mm')}"></span></p>
+        <p class="text-gray-500" th:if="${!#lists.isEmpty(receipts)}">Nhà cung cấp: <span th:text="${receipts[0].supplier}"></span></p>
+    </header>
+
+    <table class="w-full text-sm">
+        <thead class="bg-[#f7f3ec]">
+        <tr>
+            <th class="text-left px-4 py-3">Sản phẩm</th>
+            <th class="text-right px-4 py-3">SL</th>
+            <th class="text-right px-4 py-3">Giá nhập</th>
+            <th class="text-right px-4 py-3">Thành tiền</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="receipt : ${receipts}" class="border-b border-gray-100">
+            <td class="px-4 py-3">
+                <p class="font-semibold" th:text="${receipt.productName}"></p>
+                <p class="text-xs text-gray-400" th:text="${receipt.productId}"></p>
+            </td>
+            <td class="px-4 py-3 text-right" th:text="${receipt.quantity}"> </td>
+            <td class="px-4 py-3 text-right" th:text="${#strings.replace(#numbers.formatDecimal(receipt.unitCost, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"> </td>
+            <td class="px-4 py-3 text-right font-semibold" th:text="${#strings.replace(#numbers.formatDecimal(receipt.totalCost, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"> </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <section class="mt-6 flex justify-end">
+        <div class="w-72 space-y-2 text-sm">
+            <div class="flex justify-between"><span>Tổng số lượng</span><span class="font-semibold" th:text="${totalQuantity}"></span></div>
+            <div class="flex justify-between text-xl font-bold text-[#47654c]"><span>Tổng tiền</span><span th:text="${#strings.replace(#numbers.formatDecimal(totalCost, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}"></span></div>
+        </div>
+    </section>
+
+    <section class="mt-16 grid grid-cols-2 gap-16 text-center text-sm">
+        <div>
+            <p class="font-semibold">Người lập phiếu</p>
+            <p class="text-gray-400 mt-16">Ký, ghi rõ họ tên</p>
+        </div>
+        <div>
+            <p class="font-semibold">Người nhận hàng</p>
+            <p class="text-gray-400 mt-16">Ký, ghi rõ họ tên</p>
+        </div>
+    </section>
+</main>
+</body>
+</html>

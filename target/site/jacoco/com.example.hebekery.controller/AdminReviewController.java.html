@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminReviewController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.controller</a> &gt; <span class="el_source">AdminReviewController.java</span></div><h1>AdminReviewController.java</h1><pre class="source lang-java linenums">package com.example.hebekery.controller;
+
+import com.example.hebekery.dto.ApiResponse;
+import com.example.hebekery.dto.ProductReviewResponse;
+import com.example.hebekery.model.Product;
+import com.example.hebekery.model.ProductReview;
+import com.example.hebekery.service.ProductReviewService;
+import com.example.hebekery.service.ProductService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping(&quot;/api/admin/reviews&quot;)
+@PreAuthorize(&quot;hasAnyRole('ADMIN', 'STAFF_SALES')&quot;)
+@Tag(name = &quot;Admin Reviews&quot;, description = &quot;Quản lý và kiểm duyệt đánh giá, nhận xét của khách hàng&quot;)
+public class AdminReviewController {
+
+    private final ProductReviewService productReviewService;
+    private final ProductService productService;
+
+<span class="fc" id="L31">    public AdminReviewController(ProductReviewService productReviewService, ProductService productService) {</span>
+<span class="fc" id="L32">        this.productReviewService = productReviewService;</span>
+<span class="fc" id="L33">        this.productService = productService;</span>
+<span class="fc" id="L34">    }</span>
+
+    @Operation(summary = &quot;Xem toàn bộ đánh giá sản phẩm&quot;, description = &quot;Lấy danh sách tất cả đánh giá của khách hàng (yêu cầu ADMIN hoặc STAFF_SALES)&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @GetMapping
+    public ResponseEntity&lt;ApiResponse&lt;List&lt;Map&lt;String, Object&gt;&gt;&gt;&gt; getAllReviews() {
+<span class="fc" id="L39">        List&lt;ProductReview&gt; reviews = productReviewService.getAllReviews();</span>
+<span class="fc" id="L40">        List&lt;Map&lt;String, Object&gt;&gt; result = reviews.stream().map(r -&gt; {</span>
+<span class="fc" id="L41">            Product product = productService.getProductById(r.getProductId());</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">            String productName = product != null ? product.getName() : (&quot;Sản phẩm Hebekery #&quot; + r.getProductId());</span>
+<span class="fc" id="L43">            return Map.&lt;String, Object&gt;of(</span>
+<span class="fc" id="L44">                    &quot;id&quot;, r.getId(),</span>
+<span class="fc" id="L45">                    &quot;productId&quot;, r.getProductId(),</span>
+                    &quot;productName&quot;, productName,
+<span class="fc" id="L47">                    &quot;userId&quot;, r.getUserId(),</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">                    &quot;userName&quot;, r.getUserName() != null ? r.getUserName() : &quot;Khách hàng&quot;,</span>
+<span class="fc" id="L49">                    &quot;rating&quot;, r.getRating(),</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">                    &quot;comment&quot;, r.getComment() != null ? r.getComment() : &quot;&quot;,</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">                    &quot;createdAt&quot;, r.getCreatedAt() != null ? r.getCreatedAt().toString() : &quot;&quot;</span>
+            );
+<span class="fc" id="L53">        }).collect(Collectors.toList());</span>
+
+<span class="fc" id="L55">        return ResponseEntity.ok(ApiResponse.success(&quot;Lấy danh sách đánh giá thành công&quot;, result));</span>
+    }
+
+    @Operation(summary = &quot;Xóa đánh giá vi phạm / spam&quot;, description = &quot;Xóa một đánh giá không phù hợp khỏi hệ thống (yêu cầu ADMIN hoặc STAFF_SALES)&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; deleteReview(
+            @Parameter(description = &quot;Mã đánh giá cần xóa&quot;) @PathVariable String id) {
+<span class="fc" id="L62">        boolean deleted = productReviewService.adminDelete(id);</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        if (!deleted) {</span>
+<span class="fc" id="L64">            return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="fc" id="L65">                    .body(ApiResponse.failure(&quot;Không tìm thấy đánh giá cần xóa&quot;));</span>
+        }
+<span class="fc" id="L67">        return ResponseEntity.ok(ApiResponse.success(&quot;Đã xóa đánh giá thành công&quot;, null));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

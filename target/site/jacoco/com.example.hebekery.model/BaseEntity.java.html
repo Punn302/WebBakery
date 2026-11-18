@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BaseEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.model</a> &gt; <span class="el_source">BaseEntity.java</span></div><h1>BaseEntity.java</h1><pre class="source lang-java linenums">package com.example.hebekery.model;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.MappedSuperclass;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
+
+@MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
+<span class="fc" id="L16">public abstract class BaseEntity {</span>
+
+    @CreatedDate
+    @Column(name = &quot;created_at&quot;, nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(name = &quot;updated_at&quot;)
+    private LocalDateTime updatedAt;
+
+    @CreatedBy
+    @Column(name = &quot;created_by&quot;, updatable = false, length = 100)
+    private String createdBy;
+
+    @LastModifiedBy
+    @Column(name = &quot;updated_by&quot;, length = 100)
+    private String updatedBy;
+
+    public LocalDateTime getCreatedAt() {
+<span class="fc" id="L35">        return createdAt;</span>
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+<span class="fc" id="L39">        this.createdAt = createdAt;</span>
+<span class="fc" id="L40">    }</span>
+
+    public LocalDateTime getUpdatedAt() {
+<span class="fc" id="L43">        return updatedAt;</span>
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+<span class="nc" id="L47">        this.updatedAt = updatedAt;</span>
+<span class="nc" id="L48">    }</span>
+
+    public String getCreatedBy() {
+<span class="fc" id="L51">        return createdBy;</span>
+    }
+
+    public void setCreatedBy(String createdBy) {
+<span class="nc" id="L55">        this.createdBy = createdBy;</span>
+<span class="nc" id="L56">    }</span>
+
+    public String getUpdatedBy() {
+<span class="fc" id="L59">        return updatedBy;</span>
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+<span class="nc" id="L63">        this.updatedBy = updatedBy;</span>
+<span class="nc" id="L64">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

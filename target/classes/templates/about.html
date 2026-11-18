@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hebekery | Về Thương Hiệu</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<!-- ========== HEADER ========== -->
+<div th:replace="~{layout/fragments :: header}"></div>
+
+<main>
+    <!-- Hero Section - giống trang chủ -->
+    <section class="relative h-[50vh] min-h-[400px] w-full flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <img th:src="@{/images/about-hero.png}"
+                 alt="Hebekery về thương hiệu"
+                 class="w-full h-full object-cover">
+            <div class="absolute inset-0 hero-gradient"></div>
+        </div>
+        <div class="relative z-10 text-center px-6 md:px-0 max-w-4xl">
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-4 opacity-0 animate-fadeInUp">
+                HEBEKERY
+            </h1>
+            <p class="text-xl text-white/90 opacity-0 animate-fadeInUp" style="animation-delay: 0.2s">
+                Foods Care of Health and Beauty
+            </p>
+        </div>
+    </section>
+
+    <!-- About Content -->
+    <section class="py-20 max-w-7xl mx-auto px-4 md:px-8">
+        <div class="text-center mb-12">
+            <span class="text-sm text-[#47654c] uppercase tracking-wider font-semibold">Về chúng tôi</span>
+            <h2 class="text-3xl md:text-4xl font-medium text-gray-800 mt-2">Ăn Ngon - Sống Khỏe - Tươi Trẻ cùng HeBekery</h2>
+            <div class="w-16 h-0.5 bg-[#47654c] mx-auto mt-4"></div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <!-- Left Content -->
+            <div class="space-y-6 text-gray-600 leading-relaxed">
+                <p>
+                    Với sự tự hào mang đến những sản phẩm tự nhiên 100% healthy được làm từ các nguyên liệu tươi ngon nhất
+                    và chọn lọc kỹ lưỡng với tiêu chuẩn thuần organic mang trọn tinh tuý từ mẹ thiên nhiên để luôn mang lại
+                    những giá trị tốt nhất cho khách hàng trên hành trình kiểm soát cân nặng, ăn kiêng lành mạnh và cải thiện
+                    vẻ đẹp từ trong ra ngoài.
+                </p>
+                <p>
+                    HeBekery mong muốn mang lại những giá trị cốt lõi nhất và tinh tuý nhất không chỉ về mặt thông tin
+                    mà còn là chế độ dinh dưỡng lành mạnh. Bên cạnh đó, luôn là người bạn đồng hành cùng khách hàng với
+                    thông điệp "ăn ngon sống khoẻ và tươi trẻ" được thông điệp đến với tất cả.
+                </p>
+                <p>
+                    Tự tin với quy trình sản xuất chuyên nghiệp, đặc biệt đáp ứng được những yêu cầu về tiêu chuẩn vệ sinh
+                    an toàn thực phẩm và quy chuẩn sản xuất, HeBekery tự tin mang đến những sản phẩm tốt nhất cho sức khoẻ
+                    đời sống và tinh thần của khách hàng.
+                </p>
+
+                <h3 class="text-xl font-semibold text-gray-800 pt-4">Tiềm lực và khả năng sản xuất</h3>
+                <p>
+                    HeBekery là một xưởng sản xuất có trụ sở được đặt tại Phan Thiết, Việt Nam, chuyên sản xuất các loại
+                    thực phẩm thật sự tốt cho sức khỏe, và khả năng sản xuất với số lượng lớn.
+                </p>
+                <p>
+                    Chúng tôi là một start-up thành lập được 3 năm, và chúng tôi vẫn chọn con đường tự sản xuất các sản phẩm
+                    lành mạnh và tự nhiên thay vì thuê ngoài/OEM để có thể tự chủ động được chất lượng sản phẩm của chính mình
+                    bằng những sản phẩm của Sự Tử Tế Nhất.
+                </p>
+
+                <h3 class="text-xl font-semibold text-gray-800 pt-4">Quá trình hình thành và phát triển</h3>
+
+                <div class="space-y-3">
+                    <h4 class="text-lg font-semibold text-[#47654c]">Cuối năm 2020:</h4>
+                    <p>Bắt đầu từ một chiếc lò nướng bánh nhỏ, chúng tôi bắt đầu thử nghiệm và sản xuất các sản phẩm lành mạnh của mình như Granola, Biscotti. Chúng tôi đã phát triển và ra mắt 8 sản phẩm với 25 SKUS với tên thương hiệu HeBe.</p>
+
+                    <h4 class="text-lg font-semibold text-[#47654c]">Cuối năm 2021:</h4>
+                    <p>Chúng tôi đã thật sự bùng nổ: với 60% sản phẩm luôn nằm trong top 10 sản phẩm bán chạy nhất của danh mục hàng tạp hóa trên Shopee và sàn thương mại điện tử Lazada. Chúng tôi đã ra mắt 50 SKUS vào cuối năm 2021.</p>
+
+                    <h4 class="text-lg font-semibold text-[#47654c]">Năm 2022:</h4>
+                    <p>Chúng tôi đã trưởng thành hơn cả về con người và khả năng sản xuất. Chúng tôi thật sự rất quan tâm đến khách hàng của mình, những người cần sử dụng các sản phẩm thật sự lành mạnh 100% để trở nên khoẻ mạnh, đẹp hơn và hạnh phúc hơn. Chúng tôi đã quyết định thay thế bao bì giấy kraft thủ công cũ bằng túi OPP có chất lượng bảo quản tốt hơn. Chúng tôi quyết định thay đổi thương hiệu từ HeBe thành HeBekery.</p>
+                </div>
+
+                <h3 class="text-xl font-semibold text-gray-800 pt-4">Sứ mệnh của HeBekery</h3>
+                <p>
+                    Sứ mệnh của chúng tôi là mang lại cho người tiêu dùng những sản phẩm thực phẩm chất lượng cao, an toàn và bổ dưỡng,
+                    nâng cao sức khỏe và chất lượng cuộc sống của cộng đồng.
+                </p>
+
+                <h3 class="text-xl font-semibold text-gray-800 pt-4">Tầm nhìn của HeBekery</h3>
+                <ul class="list-disc pl-6 space-y-2">
+                    <li>Trở thành thương hiệu thực phẩm lành mạnh phổ biến tại Việt Nam</li>
+                    <li>Mở rộng các dây chuyền sản xuất, đặc biệt là các sản phẩm đóng gói tiện lợi vào năm 2025</li>
+                    <li>Trở thành biểu tượng tiêu biểu của sự lành mạnh thật sự</li>
+                    <li>Tạo dựng một thương hiệu mạnh mẽ với sự trung thành cao từ khách hàng</li>
+                </ul>
+                <p>
+                    Chúng tôi tự hào là một trong những công ty hàng đầu trong lĩnh vực sản xuất thực phẩm lành mạnh tại Việt Nam.
+                    Chúng tôi đã được cấp chứng nhận ISO 22000:2018 về quản lý chất lượng và vệ sinh an toàn thực phẩm HACCP.
+                </p>
+            </div>
+
+            <!-- Right Content - Products -->
+            <div>
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 uppercase tracking-wider">SẢN PHẨM CỦA HEBEKERY</h2>
+                    <div class="w-16 h-0.5 bg-[#47654c] mx-auto mt-3"></div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-5">
+                    <div class="product-card group cursor-pointer">
+                        <div class="aspect-square rounded-xl overflow-hidden bg-white shadow-md hover-lift">
+                            <img th:src="@{/images/granola.jpg}" alt="GRANOLA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                        </div>
+                        <div class="text-center mt-3">
+                            <span class="text-xs text-[#47654c] uppercase tracking-wider">Ngũ cốc</span>
+                            <h3 class="text-base font-medium text-gray-800">GRANOLA</h3>
+                        </div>
+                    </div>
+                    <div class="product-card group cursor-pointer">
+                        <div class="aspect-square rounded-xl overflow-hidden bg-white shadow-md hover-lift">
+                            <img th:src="@{/images/biscotti.jpg}" alt="BISCOTTI" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                        </div>
+                        <div class="text-center mt-3">
+                            <span class="text-xs text-[#47654c] uppercase tracking-wider">Bánh Ý</span>
+                            <h3 class="text-base font-medium text-gray-800">BISCOTTI</h3>
+                        </div>
+                    </div>
+                    <div class="product-card group cursor-pointer">
+                        <div class="aspect-square rounded-xl overflow-hidden bg-white shadow-md hover-lift">
+                            <img th:src="@{/images/oat-bars.jpg}" alt="TRÁI CÂY SẤY" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                        </div>
+                        <div class="text-center mt-3">
+                            <span class="text-xs text-[#47654c] uppercase tracking-wider">Trái cây</span>
+                            <h3 class="text-base font-medium text-gray-800">TRÁI CÂY SẤY</h3>
+                        </div>
+                    </div>
+                    <div class="product-card group cursor-pointer">
+                        <div class="aspect-square rounded-xl overflow-hidden bg-white shadow-md hover-lift">
+                            <img th:src="@{/images/keto-cookies.jpg}" alt="BÁNH HẠNH NHÂN" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                        </div>
+                        <div class="text-center mt-3">
+                            <span class="text-xs text-[#47654c] uppercase tracking-wider">Bánh Keto</span>
+                            <h3 class="text-base font-medium text-gray-800">BÁNH HẠNH NHÂN</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values Bar - giống trang chủ -->
+    <section class="bg-[#f1ede6] py-10 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 md:px-8 flex flex-wrap justify-center md:justify-between gap-6 md:gap-0">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-[#47654c]">eco</span>
+                <span class="text-sm font-semibold uppercase tracking-wider text-gray-600">100% Hữu Cơ</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-[#47654c]">local_shipping</span>
+                <span class="text-sm font-semibold uppercase tracking-wider text-gray-600">Giao Hàng Trung Hòa Carbon</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-[#47654c]">verified</span>
+                <span class="text-sm font-semibold uppercase tracking-wider text-gray-600">Chứng Nhận Non-GMO</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-[#47654c]">favorite</span>
+                <span class="text-sm font-semibold uppercase tracking-wider text-gray-600">Làm Thủ Công Hàng Tuần</span>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- ========== FOOTER ========== -->
+<div th:replace="~{layout/fragments :: footer}"></div>
+
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AddressResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.dto</a> &gt; <span class="el_source">AddressResponse.java</span></div><h1>AddressResponse.java</h1><pre class="source lang-java linenums">package com.example.hebekery.dto;
+
+import com.example.hebekery.model.Address;
+
+public class AddressResponse {
+    private String id;
+    private String userId;
+    private String receiverName;
+    private String phone;
+    private String addressLine;
+    private String province;
+    private String district;
+    private String ward;
+    private String fullAddress;
+    private boolean defaultAddress;
+
+<span class="nc" id="L17">    public AddressResponse() {</span>
+<span class="nc" id="L18">    }</span>
+
+    public static AddressResponse from(Address address) {
+<span class="nc bnc" id="L21" title="All 2 branches missed.">        if (address == null) {</span>
+<span class="nc" id="L22">            return null;</span>
+        }
+<span class="nc" id="L24">        AddressResponse dto = new AddressResponse();</span>
+<span class="nc" id="L25">        dto.setId(address.getId());</span>
+<span class="nc" id="L26">        dto.setUserId(address.getUserId());</span>
+<span class="nc" id="L27">        dto.setReceiverName(address.getReceiverName());</span>
+<span class="nc" id="L28">        dto.setPhone(address.getPhone());</span>
+<span class="nc" id="L29">        dto.setAddressLine(address.getAddressLine());</span>
+<span class="nc" id="L30">        dto.setProvince(address.getProvince());</span>
+<span class="nc" id="L31">        dto.setDistrict(address.getDistrict());</span>
+<span class="nc" id="L32">        dto.setWard(address.getWard());</span>
+<span class="nc" id="L33">        dto.setDefaultAddress(address.isDefaultAddress());</span>
+
+<span class="nc" id="L35">        StringBuilder full = new StringBuilder();</span>
+<span class="nc bnc" id="L36" title="All 4 branches missed.">        if (address.getAddressLine() != null &amp;&amp; !address.getAddressLine().isBlank()) {</span>
+<span class="nc" id="L37">            full.append(address.getAddressLine());</span>
+        }
+<span class="nc bnc" id="L39" title="All 4 branches missed.">        if (address.getWard() != null &amp;&amp; !address.getWard().isBlank()) {</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">            if (full.length() &gt; 0) full.append(&quot;, &quot;);</span>
+<span class="nc" id="L41">            full.append(address.getWard());</span>
+        }
+<span class="nc bnc" id="L43" title="All 4 branches missed.">        if (address.getDistrict() != null &amp;&amp; !address.getDistrict().isBlank()) {</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">            if (full.length() &gt; 0) full.append(&quot;, &quot;);</span>
+<span class="nc" id="L45">            full.append(address.getDistrict());</span>
+        }
+<span class="nc bnc" id="L47" title="All 4 branches missed.">        if (address.getProvince() != null &amp;&amp; !address.getProvince().isBlank()) {</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">            if (full.length() &gt; 0) full.append(&quot;, &quot;);</span>
+<span class="nc" id="L49">            full.append(address.getProvince());</span>
+        }
+<span class="nc" id="L51">        dto.setFullAddress(full.toString());</span>
+
+<span class="nc" id="L53">        return dto;</span>
+    }
+
+    public String getId() {
+<span class="nc" id="L57">        return id;</span>
+    }
+
+    public void setId(String id) {
+<span class="nc" id="L61">        this.id = id;</span>
+<span class="nc" id="L62">    }</span>
+
+    public String getUserId() {
+<span class="nc" id="L65">        return userId;</span>
+    }
+
+    public void setUserId(String userId) {
+<span class="nc" id="L69">        this.userId = userId;</span>
+<span class="nc" id="L70">    }</span>
+
+    public String getReceiverName() {
+<span class="nc" id="L73">        return receiverName;</span>
+    }
+
+    public void setReceiverName(String receiverName) {
+<span class="nc" id="L77">        this.receiverName = receiverName;</span>
+<span class="nc" id="L78">    }</span>
+
+    public String getPhone() {
+<span class="nc" id="L81">        return phone;</span>
+    }
+
+    public void setPhone(String phone) {
+<span class="nc" id="L85">        this.phone = phone;</span>
+<span class="nc" id="L86">    }</span>
+
+    public String getAddressLine() {
+<span class="nc" id="L89">        return addressLine;</span>
+    }
+
+    public void setAddressLine(String addressLine) {
+<span class="nc" id="L93">        this.addressLine = addressLine;</span>
+<span class="nc" id="L94">    }</span>
+
+    public String getProvince() {
+<span class="nc" id="L97">        return province;</span>
+    }
+
+    public void setProvince(String province) {
+<span class="nc" id="L101">        this.province = province;</span>
+<span class="nc" id="L102">    }</span>
+
+    public String getDistrict() {
+<span class="nc" id="L105">        return district;</span>
+    }
+
+    public void setDistrict(String district) {
+<span class="nc" id="L109">        this.district = district;</span>
+<span class="nc" id="L110">    }</span>
+
+    public String getWard() {
+<span class="nc" id="L113">        return ward;</span>
+    }
+
+    public void setWard(String ward) {
+<span class="nc" id="L117">        this.ward = ward;</span>
+<span class="nc" id="L118">    }</span>
+
+    public String getFullAddress() {
+<span class="nc" id="L121">        return fullAddress;</span>
+    }
+
+    public void setFullAddress(String fullAddress) {
+<span class="nc" id="L125">        this.fullAddress = fullAddress;</span>
+<span class="nc" id="L126">    }</span>
+
+    public boolean isDefaultAddress() {
+<span class="nc" id="L129">        return defaultAddress;</span>
+    }
+
+    public void setDefaultAddress(boolean defaultAddress) {
+<span class="nc" id="L133">        this.defaultAddress = defaultAddress;</span>
+<span class="nc" id="L134">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.dto</a> &gt; <span class="el_source">AuthResponse.java</span></div><h1>AuthResponse.java</h1><pre class="source lang-java linenums">package com.example.hebekery.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = &quot;Phản hồi xác thực người dùng sau khi đăng nhập thành công&quot;)
+public class AuthResponse {
+
+    @Schema(description = &quot;JSON Web Token (JWT) dùng cho các request tiếp theo&quot;, example = &quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...&quot;)
+    private String accessToken;
+
+    @Schema(description = &quot;Refresh token để cấp mới access token khi hết hạn&quot;, example = &quot;d9f8e7d6-c5b4-4a3b-8c2d-1e0f9a8b7c6d&quot;)
+    private String refreshToken;
+
+<span class="pc" id="L14">    @Schema(description = &quot;Loại token xác thực&quot;, example = &quot;Bearer&quot;)</span>
+    private String tokenType = &quot;Bearer&quot;;
+
+    @Schema(description = &quot;Thời gian hết hạn của token (tính bằng giây)&quot;, example = &quot;86400&quot;)
+    private long expiresIn;
+
+    @Schema(description = &quot;Thông tin hồ sơ người dùng đã đăng nhập&quot;)
+    private UserResponse user;
+
+<span class="nc" id="L23">    public AuthResponse() {</span>
+<span class="nc" id="L24">    }</span>
+
+<span class="fc" id="L26">    public AuthResponse(String accessToken, String refreshToken, long expiresIn, UserResponse user) {</span>
+<span class="fc" id="L27">        this.accessToken = accessToken;</span>
+<span class="fc" id="L28">        this.refreshToken = refreshToken;</span>
+<span class="fc" id="L29">        this.expiresIn = expiresIn;</span>
+<span class="fc" id="L30">        this.user = user;</span>
+<span class="fc" id="L31">    }</span>
+
+    public String getAccessToken() {
+<span class="fc" id="L34">        return accessToken;</span>
+    }
+
+    @Schema(description = &quot;Token alias tương thích ngược với frontend&quot;, example = &quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...&quot;)
+    public String getToken() {
+<span class="nc" id="L39">        return accessToken;</span>
+    }
+
+    public void setToken(String token) {
+<span class="nc" id="L43">        this.accessToken = token;</span>
+<span class="nc" id="L44">    }</span>
+
+    public void setAccessToken(String accessToken) {
+<span class="nc" id="L47">        this.accessToken = accessToken;</span>
+<span class="nc" id="L48">    }</span>
+
+    public String getRefreshToken() {
+<span class="fc" id="L51">        return refreshToken;</span>
+    }
+
+    public void setRefreshToken(String refreshToken) {
+<span class="nc" id="L55">        this.refreshToken = refreshToken;</span>
+<span class="nc" id="L56">    }</span>
+
+    public String getTokenType() {
+<span class="nc" id="L59">        return tokenType;</span>
+    }
+
+    public void setTokenType(String tokenType) {
+<span class="nc" id="L63">        this.tokenType = tokenType;</span>
+<span class="nc" id="L64">    }</span>
+
+    public long getExpiresIn() {
+<span class="nc" id="L67">        return expiresIn;</span>
+    }
+
+    public void setExpiresIn(long expiresIn) {
+<span class="nc" id="L71">        this.expiresIn = expiresIn;</span>
+<span class="nc" id="L72">    }</span>
+
+    public UserResponse getUser() {
+<span class="fc" id="L75">        return user;</span>
+    }
+
+    public void setUser(UserResponse user) {
+<span class="nc" id="L79">        this.user = user;</span>
+<span class="nc" id="L80">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

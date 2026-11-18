@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SepayConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.config</a> &gt; <span class="el_source">SepayConfig.java</span></div><h1>SepayConfig.java</h1><pre class="source lang-java linenums">package com.example.hebekery.config;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@ConfigurationProperties(prefix = &quot;sepay&quot;)
+<span class="fc" id="L8">public class SepayConfig {</span>
+
+    private String webhookApiKey;
+    private String accountNumber;
+    private String bankCode;
+    private String accountHolder;
+
+    public String getWebhookApiKey() {
+<span class="nc" id="L16">        return webhookApiKey;</span>
+    }
+
+    public void setWebhookApiKey(String webhookApiKey) {
+<span class="fc" id="L20">        this.webhookApiKey = webhookApiKey;</span>
+<span class="fc" id="L21">    }</span>
+
+    public String getAccountNumber() {
+<span class="nc" id="L24">        return accountNumber;</span>
+    }
+
+    public void setAccountNumber(String accountNumber) {
+<span class="fc" id="L28">        this.accountNumber = accountNumber;</span>
+<span class="fc" id="L29">    }</span>
+
+    public String getBankCode() {
+<span class="nc" id="L32">        return bankCode;</span>
+    }
+
+    public void setBankCode(String bankCode) {
+<span class="fc" id="L36">        this.bankCode = bankCode;</span>
+<span class="fc" id="L37">    }</span>
+
+    public String getAccountHolder() {
+<span class="nc" id="L40">        return accountHolder;</span>
+    }
+
+    public void setAccountHolder(String accountHolder) {
+<span class="fc" id="L44">        this.accountHolder = accountHolder;</span>
+<span class="fc" id="L45">    }</span>
+
+    /**
+     * Sinh URL anh VietQR dong qua cong SePay
+     */
+    public String generateVietQrUrl(String orderId, double amount) {
+<span class="fc" id="L51">        long roundedAmount = Math.round(amount);</span>
+<span class="fc" id="L52">        String memo = &quot;HBK&quot; + orderId.replaceAll(&quot;[^a-zA-Z0-9]&quot;, &quot;&quot;);</span>
+<span class="fc" id="L53">        return String.format(</span>
+                &quot;https://qr.sepay.vn/img?bank=%s&amp;acc=%s&amp;template=compact&amp;amount=%d&amp;des=%s&quot;,
+<span class="pc bpc" id="L55" title="2 of 4 branches missed.">                bankCode != null &amp;&amp; !bankCode.isBlank() ? bankCode : &quot;MBBank&quot;,</span>
+<span class="pc bpc" id="L56" title="2 of 4 branches missed.">                accountNumber != null &amp;&amp; !accountNumber.isBlank() ? accountNumber : &quot;&quot;,</span>
+<span class="fc" id="L57">                roundedAmount,</span>
+                memo
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

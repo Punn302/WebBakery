@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoyaltySummaryResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.dto</a> &gt; <span class="el_source">LoyaltySummaryResponse.java</span></div><h1>LoyaltySummaryResponse.java</h1><pre class="source lang-java linenums">package com.example.hebekery.dto;
+
+import com.example.hebekery.model.CustomerProfile;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = &quot;Tổng quan thông tin điểm thưởng và hạng thành viên VVIP&quot;)
+public class LoyaltySummaryResponse {
+
+    private String userId;
+    private int loyaltyPoints;
+    private String membershipTier;
+    private String tierDisplayName;
+    private double earnRate; // 0.01 = 1%, 0.02 = 2%, etc.
+    private int earnPercent; // 1, 2, 3, 5
+    private double totalSpent;
+    private double nextTierThreshold;
+    private String nextTierName;
+    private double amountToNextTier;
+    private int progressPercent;
+    private int pointValueVnd; // points * 1000
+
+<span class="fc" id="L22">    public LoyaltySummaryResponse() {</span>
+<span class="fc" id="L23">    }</span>
+
+    public static LoyaltySummaryResponse from(CustomerProfile profile) {
+<span class="fc" id="L26">        LoyaltySummaryResponse res = new LoyaltySummaryResponse();</span>
+<span class="fc" id="L27">        res.setUserId(profile.getUserId());</span>
+<span class="fc" id="L28">        res.setLoyaltyPoints(profile.getLoyaltyPoints());</span>
+<span class="fc" id="L29">        res.setMembershipTier(profile.getMembershipTier());</span>
+<span class="fc" id="L30">        res.setTierDisplayName(profile.getTierDisplayName());</span>
+<span class="fc" id="L31">        res.setEarnRate(profile.getEarnRate());</span>
+<span class="fc" id="L32">        res.setEarnPercent((int) (profile.getEarnRate() * 100));</span>
+<span class="fc" id="L33">        res.setTotalSpent(profile.getTotalSpent());</span>
+<span class="fc" id="L34">        res.setPointValueVnd(profile.getLoyaltyPoints() * 1000);</span>
+
+<span class="fc" id="L36">        double threshold = profile.getNextTierThreshold();</span>
+<span class="fc" id="L37">        res.setNextTierThreshold(threshold);</span>
+<span class="fc" id="L38">        res.setNextTierName(profile.getNextTierName());</span>
+
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        if (&quot;DIAMOND&quot;.equalsIgnoreCase(profile.getMembershipTier())) {</span>
+<span class="nc" id="L41">            res.setAmountToNextTier(0.0);</span>
+<span class="nc" id="L42">            res.setProgressPercent(100);</span>
+        } else {
+<span class="fc" id="L44">            double remaining = Math.max(0.0, threshold - profile.getTotalSpent());</span>
+<span class="fc" id="L45">            res.setAmountToNextTier(remaining);</span>
+<span class="fc" id="L46">            int progress = (int) Math.min(100, Math.round((profile.getTotalSpent() / threshold) * 100));</span>
+<span class="fc" id="L47">            res.setProgressPercent(progress);</span>
+        }
+<span class="fc" id="L49">        return res;</span>
+    }
+
+    public String getUserId() {
+<span class="nc" id="L53">        return userId;</span>
+    }
+
+    public void setUserId(String userId) {
+<span class="fc" id="L57">        this.userId = userId;</span>
+<span class="fc" id="L58">    }</span>
+
+    public int getLoyaltyPoints() {
+<span class="fc" id="L61">        return loyaltyPoints;</span>
+    }
+
+    public void setLoyaltyPoints(int loyaltyPoints) {
+<span class="fc" id="L65">        this.loyaltyPoints = loyaltyPoints;</span>
+<span class="fc" id="L66">    }</span>
+
+    public String getMembershipTier() {
+<span class="fc" id="L69">        return membershipTier;</span>
+    }
+
+    public void setMembershipTier(String membershipTier) {
+<span class="fc" id="L73">        this.membershipTier = membershipTier;</span>
+<span class="fc" id="L74">    }</span>
+
+    public String getTierDisplayName() {
+<span class="nc" id="L77">        return tierDisplayName;</span>
+    }
+
+    public void setTierDisplayName(String tierDisplayName) {
+<span class="fc" id="L81">        this.tierDisplayName = tierDisplayName;</span>
+<span class="fc" id="L82">    }</span>
+
+    public double getEarnRate() {
+<span class="nc" id="L85">        return earnRate;</span>
+    }
+
+    public void setEarnRate(double earnRate) {
+<span class="fc" id="L89">        this.earnRate = earnRate;</span>
+<span class="fc" id="L90">    }</span>
+
+    public int getEarnPercent() {
+<span class="nc" id="L93">        return earnPercent;</span>
+    }
+
+    public void setEarnPercent(int earnPercent) {
+<span class="fc" id="L97">        this.earnPercent = earnPercent;</span>
+<span class="fc" id="L98">    }</span>
+
+    public double getTotalSpent() {
+<span class="nc" id="L101">        return totalSpent;</span>
+    }
+
+    public void setTotalSpent(double totalSpent) {
+<span class="fc" id="L105">        this.totalSpent = totalSpent;</span>
+<span class="fc" id="L106">    }</span>
+
+    public double getNextTierThreshold() {
+<span class="fc" id="L109">        return nextTierThreshold;</span>
+    }
+
+    public void setNextTierThreshold(double nextTierThreshold) {
+<span class="fc" id="L113">        this.nextTierThreshold = nextTierThreshold;</span>
+<span class="fc" id="L114">    }</span>
+
+    public String getNextTierName() {
+<span class="fc" id="L117">        return nextTierName;</span>
+    }
+
+    public void setNextTierName(String nextTierName) {
+<span class="fc" id="L121">        this.nextTierName = nextTierName;</span>
+<span class="fc" id="L122">    }</span>
+
+    public double getAmountToNextTier() {
+<span class="fc" id="L125">        return amountToNextTier;</span>
+    }
+
+    public void setAmountToNextTier(double amountToNextTier) {
+<span class="fc" id="L129">        this.amountToNextTier = amountToNextTier;</span>
+<span class="fc" id="L130">    }</span>
+
+    public int getProgressPercent() {
+<span class="fc" id="L133">        return progressPercent;</span>
+    }
+
+    public void setProgressPercent(int progressPercent) {
+<span class="fc" id="L137">        this.progressPercent = progressPercent;</span>
+<span class="fc" id="L138">    }</span>
+
+    public int getPointValueVnd() {
+<span class="fc" id="L141">        return pointValueVnd;</span>
+    }
+
+    public void setPointValueVnd(int pointValueVnd) {
+<span class="fc" id="L145">        this.pointValueVnd = pointValueVnd;</span>
+<span class="fc" id="L146">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

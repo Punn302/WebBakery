@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductReviewSummaryResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.dto</a> &gt; <span class="el_source">ProductReviewSummaryResponse.java</span></div><h1>ProductReviewSummaryResponse.java</h1><pre class="source lang-java linenums">package com.example.hebekery.dto;
+
+import java.util.List;
+
+public class ProductReviewSummaryResponse {
+    private List&lt;ProductReviewResponse&gt; reviews;
+    private boolean canReview;
+    private ProductReviewResponse myReview;
+    private double averageRating;
+    private int reviewCount;
+
+<span class="nc" id="L12">    public ProductReviewSummaryResponse() {</span>
+<span class="nc" id="L13">    }</span>
+
+<span class="nc" id="L15">    public ProductReviewSummaryResponse(List&lt;ProductReviewResponse&gt; reviews, boolean canReview, ProductReviewResponse myReview, double averageRating, int reviewCount) {</span>
+<span class="nc" id="L16">        this.reviews = reviews;</span>
+<span class="nc" id="L17">        this.canReview = canReview;</span>
+<span class="nc" id="L18">        this.myReview = myReview;</span>
+<span class="nc" id="L19">        this.averageRating = averageRating;</span>
+<span class="nc" id="L20">        this.reviewCount = reviewCount;</span>
+<span class="nc" id="L21">    }</span>
+
+    public List&lt;ProductReviewResponse&gt; getReviews() {
+<span class="nc" id="L24">        return reviews;</span>
+    }
+
+    public void setReviews(List&lt;ProductReviewResponse&gt; reviews) {
+<span class="nc" id="L28">        this.reviews = reviews;</span>
+<span class="nc" id="L29">    }</span>
+
+    public boolean isCanReview() {
+<span class="nc" id="L32">        return canReview;</span>
+    }
+
+    public void setCanReview(boolean canReview) {
+<span class="nc" id="L36">        this.canReview = canReview;</span>
+<span class="nc" id="L37">    }</span>
+
+    public ProductReviewResponse getMyReview() {
+<span class="nc" id="L40">        return myReview;</span>
+    }
+
+    public void setMyReview(ProductReviewResponse myReview) {
+<span class="nc" id="L44">        this.myReview = myReview;</span>
+<span class="nc" id="L45">    }</span>
+
+    public double getAverageRating() {
+<span class="nc" id="L48">        return averageRating;</span>
+    }
+
+    public void setAverageRating(double averageRating) {
+<span class="nc" id="L52">        this.averageRating = averageRating;</span>
+<span class="nc" id="L53">    }</span>
+
+    public int getReviewCount() {
+<span class="nc" id="L56">        return reviewCount;</span>
+    }
+
+    public void setReviewCount(int reviewCount) {
+<span class="nc" id="L60">        this.reviewCount = reviewCount;</span>
+<span class="nc" id="L61">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

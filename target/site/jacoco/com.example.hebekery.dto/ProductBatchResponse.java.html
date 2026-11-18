@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductBatchResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.dto</a> &gt; <span class="el_source">ProductBatchResponse.java</span></div><h1>ProductBatchResponse.java</h1><pre class="source lang-java linenums">package com.example.hebekery.dto;
+
+import com.example.hebekery.model.Product;
+import com.example.hebekery.model.ProductBatch;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
+@Schema(description = &quot;Thông tin chi tiết lô bánh và hạn sử dụng&quot;)
+public class ProductBatchResponse {
+
+    private String id;
+    private String productId;
+    private String productName;
+    private String productImageUrl;
+    private double originalPrice;
+    private double discountedPrice;
+    private String batchCode;
+    private LocalDate manufactureDate;
+    private LocalDate expiryDate;
+    private int initialQuantity;
+    private int currentQuantity;
+    private String status; // ACTIVE, NEAR_EXPIRY, EXPIRED, SOLD_OUT
+    private double discountPercent;
+    private String note;
+    private long daysRemaining;
+    private String alertLevel; // SAFE (green), WARNING (yellow), DANGER (red)
+    private LocalDateTime createdAt;
+
+<span class="fc" id="L32">    public ProductBatchResponse() {</span>
+<span class="fc" id="L33">    }</span>
+
+    public static ProductBatchResponse from(ProductBatch batch, Product product) {
+<span class="fc" id="L36">        ProductBatchResponse res = new ProductBatchResponse();</span>
+<span class="fc" id="L37">        res.setId(batch.getId());</span>
+<span class="fc" id="L38">        res.setProductId(batch.getProductId());</span>
+<span class="fc" id="L39">        res.setBatchCode(batch.getBatchCode());</span>
+<span class="fc" id="L40">        res.setManufactureDate(batch.getManufactureDate());</span>
+<span class="fc" id="L41">        res.setExpiryDate(batch.getExpiryDate());</span>
+<span class="fc" id="L42">        res.setInitialQuantity(batch.getInitialQuantity());</span>
+<span class="fc" id="L43">        res.setCurrentQuantity(batch.getCurrentQuantity());</span>
+<span class="fc" id="L44">        res.setStatus(batch.getStatus());</span>
+<span class="fc" id="L45">        res.setDiscountPercent(batch.getDiscountPercent());</span>
+<span class="fc" id="L46">        res.setNote(batch.getNote());</span>
+<span class="fc" id="L47">        res.setCreatedAt(batch.getCreatedAt());</span>
+
+<span class="fc" id="L49">        long days = ChronoUnit.DAYS.between(LocalDate.now(), batch.getExpiryDate());</span>
+<span class="fc" id="L50">        res.setDaysRemaining(days);</span>
+
+<span class="pc bpc" id="L52" title="2 of 4 branches missed.">        if (days &lt; 15 || &quot;EXPIRED&quot;.equalsIgnoreCase(batch.getStatus())) {</span>
+<span class="nc" id="L53">            res.setAlertLevel(&quot;DANGER&quot;);</span>
+<span class="pc bpc" id="L54" title="2 of 4 branches missed.">        } else if (days &lt;= 30 || &quot;NEAR_EXPIRY&quot;.equalsIgnoreCase(batch.getStatus())) {</span>
+<span class="nc" id="L55">            res.setAlertLevel(&quot;WARNING&quot;);</span>
+        } else {
+<span class="fc" id="L57">            res.setAlertLevel(&quot;SAFE&quot;);</span>
+        }
+
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if (product != null) {</span>
+<span class="fc" id="L61">            res.setProductName(product.getName());</span>
+<span class="fc" id="L62">            res.setProductImageUrl(product.getImageUrl());</span>
+<span class="fc" id="L63">            res.setOriginalPrice(product.getPrice());</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">            if (batch.getDiscountPercent() &gt; 0) {</span>
+<span class="nc" id="L65">                double discounted = product.getPrice() * (1.0 - (batch.getDiscountPercent() / 100.0));</span>
+<span class="nc" id="L66">                res.setDiscountedPrice(Math.round(discounted / 1000.0) * 1000.0);</span>
+<span class="nc" id="L67">            } else {</span>
+<span class="fc" id="L68">                res.setDiscountedPrice(product.getPrice());</span>
+            }
+        }
+<span class="fc" id="L71">        return res;</span>
+    }
+
+    public String getId() {
+<span class="nc" id="L75">        return id;</span>
+    }
+
+    public void setId(String id) {
+<span class="fc" id="L79">        this.id = id;</span>
+<span class="fc" id="L80">    }</span>
+
+    public String getProductId() {
+<span class="fc" id="L83">        return productId;</span>
+    }
+
+    public void setProductId(String productId) {
+<span class="fc" id="L87">        this.productId = productId;</span>
+<span class="fc" id="L88">    }</span>
+
+    public String getProductName() {
+<span class="nc" id="L91">        return productName;</span>
+    }
+
+    public void setProductName(String productName) {
+<span class="fc" id="L95">        this.productName = productName;</span>
+<span class="fc" id="L96">    }</span>
+
+    public String getProductImageUrl() {
+<span class="nc" id="L99">        return productImageUrl;</span>
+    }
+
+    public void setProductImageUrl(String productImageUrl) {
+<span class="fc" id="L103">        this.productImageUrl = productImageUrl;</span>
+<span class="fc" id="L104">    }</span>
+
+    public double getOriginalPrice() {
+<span class="nc" id="L107">        return originalPrice;</span>
+    }
+
+    public void setOriginalPrice(double originalPrice) {
+<span class="fc" id="L111">        this.originalPrice = originalPrice;</span>
+<span class="fc" id="L112">    }</span>
+
+    public double getDiscountedPrice() {
+<span class="nc" id="L115">        return discountedPrice;</span>
+    }
+
+    public void setDiscountedPrice(double discountedPrice) {
+<span class="fc" id="L119">        this.discountedPrice = discountedPrice;</span>
+<span class="fc" id="L120">    }</span>
+
+    public String getBatchCode() {
+<span class="fc" id="L123">        return batchCode;</span>
+    }
+
+    public void setBatchCode(String batchCode) {
+<span class="fc" id="L127">        this.batchCode = batchCode;</span>
+<span class="fc" id="L128">    }</span>
+
+    public LocalDate getManufactureDate() {
+<span class="nc" id="L131">        return manufactureDate;</span>
+    }
+
+    public void setManufactureDate(LocalDate manufactureDate) {
+<span class="fc" id="L135">        this.manufactureDate = manufactureDate;</span>
+<span class="fc" id="L136">    }</span>
+
+    public LocalDate getExpiryDate() {
+<span class="nc" id="L139">        return expiryDate;</span>
+    }
+
+    public void setExpiryDate(LocalDate expiryDate) {
+<span class="fc" id="L143">        this.expiryDate = expiryDate;</span>
+<span class="fc" id="L144">    }</span>
+
+    public int getInitialQuantity() {
+<span class="nc" id="L147">        return initialQuantity;</span>
+    }
+
+    public void setInitialQuantity(int initialQuantity) {
+<span class="fc" id="L151">        this.initialQuantity = initialQuantity;</span>
+<span class="fc" id="L152">    }</span>
+
+    public int getCurrentQuantity() {
+<span class="fc" id="L155">        return currentQuantity;</span>
+    }
+
+    public void setCurrentQuantity(int currentQuantity) {
+<span class="fc" id="L159">        this.currentQuantity = currentQuantity;</span>
+<span class="fc" id="L160">    }</span>
+
+    public String getStatus() {
+<span class="fc" id="L163">        return status;</span>
+    }
+
+    public void setStatus(String status) {
+<span class="fc" id="L167">        this.status = status;</span>
+<span class="fc" id="L168">    }</span>
+
+    public double getDiscountPercent() {
+<span class="nc" id="L171">        return discountPercent;</span>
+    }
+
+    public void setDiscountPercent(double discountPercent) {
+<span class="fc" id="L175">        this.discountPercent = discountPercent;</span>
+<span class="fc" id="L176">    }</span>
+
+    public String getNote() {
+<span class="nc" id="L179">        return note;</span>
+    }
+
+    public void setNote(String note) {
+<span class="fc" id="L183">        this.note = note;</span>
+<span class="fc" id="L184">    }</span>
+
+    public long getDaysRemaining() {
+<span class="nc" id="L187">        return daysRemaining;</span>
+    }
+
+    public void setDaysRemaining(long daysRemaining) {
+<span class="fc" id="L191">        this.daysRemaining = daysRemaining;</span>
+<span class="fc" id="L192">    }</span>
+
+    public String getAlertLevel() {
+<span class="fc" id="L195">        return alertLevel;</span>
+    }
+
+    public void setAlertLevel(String alertLevel) {
+<span class="fc" id="L199">        this.alertLevel = alertLevel;</span>
+<span class="fc" id="L200">    }</span>
+
+    public LocalDateTime getCreatedAt() {
+<span class="nc" id="L203">        return createdAt;</span>
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+<span class="fc" id="L207">        this.createdAt = createdAt;</span>
+<span class="fc" id="L208">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,80 @@
+databaseChangeLog:
+  - changeSet:
+      id: 009-seed-vouchers
+      author: hebekery
+      changes:
+        - insert:
+            tableName: vouchers
+            columns:
+              - column: { name: id, value: "VOUCHER-HB10" }
+              - column: { name: code, value: "HB10" }
+              - column: { name: discount_type, value: "PERCENTAGE" }
+              - column: { name: discount_value, valueNumeric: 10 }
+              - column: { name: max_discount, valueNumeric: 50000 }
+              - column: { name: min_order_amount, valueNumeric: 150000 }
+              - column: { name: usage_limit, valueNumeric: 500 }
+              - column: { name: used_count, valueNumeric: 12 }
+              - column: { name: user_limit, valueNumeric: 1 }
+              - column: { name: start_date, valueDate: "2026-01-01T00:00:00" }
+              - column: { name: end_date, valueDate: "2026-12-31T23:59:59" }
+              - column: { name: active, valueBoolean: true }
+        - insert:
+            tableName: vouchers
+            columns:
+              - column: { name: id, value: "VOUCHER-HB20" }
+              - column: { name: code, value: "HB20" }
+              - column: { name: discount_type, value: "PERCENTAGE" }
+              - column: { name: discount_value, valueNumeric: 20 }
+              - column: { name: max_discount, valueNumeric: 80000 }
+              - column: { name: min_order_amount, valueNumeric: 300000 }
+              - column: { name: usage_limit, valueNumeric: 300 }
+              - column: { name: used_count, valueNumeric: 38 }
+              - column: { name: user_limit, valueNumeric: 1 }
+              - column: { name: start_date, valueDate: "2026-01-01T00:00:00" }
+              - column: { name: end_date, valueDate: "2026-12-31T23:59:59" }
+              - column: { name: active, valueBoolean: true }
+        - insert:
+            tableName: vouchers
+            columns:
+              - column: { name: id, value: "VOUCHER-FREESHIP" }
+              - column: { name: code, value: "FREESHIP" }
+              - column: { name: discount_type, value: "FREE_SHIPPING" }
+              - column: { name: discount_value, valueNumeric: 30000 }
+              - column: { name: max_discount, valueNumeric: 30000 }
+              - column: { name: min_order_amount, valueNumeric: 200000 }
+              - column: { name: usage_limit, valueNumeric: 1000 }
+              - column: { name: used_count, valueNumeric: 85 }
+              - column: { name: user_limit, valueNumeric: 2 }
+              - column: { name: start_date, valueDate: "2026-01-01T00:00:00" }
+              - column: { name: end_date, valueDate: "2026-12-31T23:59:59" }
+              - column: { name: active, valueBoolean: true }
+        - insert:
+            tableName: vouchers
+            columns:
+              - column: { name: id, value: "VOUCHER-WELCOME" }
+              - column: { name: code, value: "HEBEWELCOME" }
+              - column: { name: discount_type, value: "FIXED_AMOUNT" }
+              - column: { name: discount_value, valueNumeric: 30000 }
+              - column: { name: max_discount, valueNumeric: 30000 }
+              - column: { name: min_order_amount, valueNumeric: 199000 }
+              - column: { name: usage_limit, valueNumeric: 500 }
+              - column: { name: used_count, valueNumeric: 45 }
+              - column: { name: user_limit, valueNumeric: 1 }
+              - column: { name: start_date, valueDate: "2026-01-01T00:00:00" }
+              - column: { name: end_date, valueDate: "2026-12-31T23:59:59" }
+              - column: { name: active, valueBoolean: true }
+        - insert:
+            tableName: vouchers
+            columns:
+              - column: { name: id, value: "VOUCHER-KETO" }
+              - column: { name: code, value: "HEBEKETO" }
+              - column: { name: discount_type, value: "FIXED_AMOUNT" }
+              - column: { name: discount_value, valueNumeric: 15000 }
+              - column: { name: max_discount, valueNumeric: 15000 }
+              - column: { name: min_order_amount, valueNumeric: 120000 }
+              - column: { name: usage_limit, valueNumeric: 300 }
+              - column: { name: used_count, valueNumeric: 19 }
+              - column: { name: user_limit, valueNumeric: 1 }
+              - column: { name: start_date, valueDate: "2026-01-01T00:00:00" }
+              - column: { name: end_date, valueDate: "2026-12-31T23:59:59" }
+              - column: { name: active, valueBoolean: true }

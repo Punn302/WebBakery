@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RevenueReportResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.dto</a> &gt; <span class="el_source">RevenueReportResponse.java</span></div><h1>RevenueReportResponse.java</h1><pre class="source lang-java linenums">package com.example.hebekery.dto;
+
+import java.util.List;
+
+public class RevenueReportResponse {
+    private double revenueTotal;
+    private long revenueOrderCount;
+    private long cancelledOrderCount;
+    private double importCostTotal;
+    private long importedQuantityTotal;
+    private double profitTotal;
+    private List&lt;WeeklyRevenuePoint&gt; revenueTrend;
+    private List&lt;TopSellingProduct&gt; topSellingProducts;
+
+<span class="nc" id="L15">    public RevenueReportResponse() {</span>
+<span class="nc" id="L16">    }</span>
+
+    public double getRevenueTotal() {
+<span class="nc" id="L19">        return revenueTotal;</span>
+    }
+
+    public void setRevenueTotal(double revenueTotal) {
+<span class="nc" id="L23">        this.revenueTotal = revenueTotal;</span>
+<span class="nc" id="L24">    }</span>
+
+    public long getRevenueOrderCount() {
+<span class="nc" id="L27">        return revenueOrderCount;</span>
+    }
+
+    public void setRevenueOrderCount(long revenueOrderCount) {
+<span class="nc" id="L31">        this.revenueOrderCount = revenueOrderCount;</span>
+<span class="nc" id="L32">    }</span>
+
+    public long getCancelledOrderCount() {
+<span class="nc" id="L35">        return cancelledOrderCount;</span>
+    }
+
+    public void setCancelledOrderCount(long cancelledOrderCount) {
+<span class="nc" id="L39">        this.cancelledOrderCount = cancelledOrderCount;</span>
+<span class="nc" id="L40">    }</span>
+
+    public double getImportCostTotal() {
+<span class="nc" id="L43">        return importCostTotal;</span>
+    }
+
+    public void setImportCostTotal(double importCostTotal) {
+<span class="nc" id="L47">        this.importCostTotal = importCostTotal;</span>
+<span class="nc" id="L48">    }</span>
+
+    public long getImportedQuantityTotal() {
+<span class="nc" id="L51">        return importedQuantityTotal;</span>
+    }
+
+    public void setImportedQuantityTotal(long importedQuantityTotal) {
+<span class="nc" id="L55">        this.importedQuantityTotal = importedQuantityTotal;</span>
+<span class="nc" id="L56">    }</span>
+
+    public double getProfitTotal() {
+<span class="nc" id="L59">        return profitTotal;</span>
+    }
+
+    public void setProfitTotal(double profitTotal) {
+<span class="nc" id="L63">        this.profitTotal = profitTotal;</span>
+<span class="nc" id="L64">    }</span>
+
+    public List&lt;WeeklyRevenuePoint&gt; getRevenueTrend() {
+<span class="nc" id="L67">        return revenueTrend;</span>
+    }
+
+    public void setRevenueTrend(List&lt;WeeklyRevenuePoint&gt; revenueTrend) {
+<span class="nc" id="L71">        this.revenueTrend = revenueTrend;</span>
+<span class="nc" id="L72">    }</span>
+
+    public List&lt;TopSellingProduct&gt; getTopSellingProducts() {
+<span class="nc" id="L75">        return topSellingProducts;</span>
+    }
+
+    public void setTopSellingProducts(List&lt;TopSellingProduct&gt; topSellingProducts) {
+<span class="nc" id="L79">        this.topSellingProducts = topSellingProducts;</span>
+<span class="nc" id="L80">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

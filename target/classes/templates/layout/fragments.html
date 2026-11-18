@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<header th:fragment="header" class="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 transition-all duration-300 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-4">
+        <div class="flex items-center justify-between">
+            <a href="/" class="flex-shrink-0">
+                <img th:src="@{/images/logo.webp}" alt="Hebekery Logo" class="h-10 md:h-12 w-auto object-contain">
+            </a>
+
+            <nav class="hidden lg:flex items-center gap-6">
+                <a href="/about" class="text-sm font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-800 transition-colors">Về thương hiệu</a>
+                <a href="/products" class="text-sm font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-800 transition-colors">Sản phẩm</a>
+                <a href="/bmi" class="text-sm font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-800 transition-colors">Tính BMI</a>
+                <a href="/tdee" class="text-sm font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-800 transition-colors">Tính TDEE</a>
+                <a href="/knowledge" class="text-sm font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-800 transition-colors">Kiến thức</a>
+                <a href="/contact" class="text-sm font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-800 transition-colors">Liên hệ</a>
+                <a href="/order-tracking" class="text-sm font-semibold uppercase tracking-wider text-gray-600 hover:text-gray-900 transition-colors">Kiểm tra đơn</a>
+            </nav>
+
+            <div class="flex items-center gap-5">
+                <div class="relative flex items-center">
+                    <button id="searchToggleBtn" class="text-gray-600 hover:text-gray-900 transition-colors" type="button">
+                        <span class="material-symbols-outlined">search</span>
+                    </button>
+                    <div id="searchExpand" class="absolute right-0 top-1/2 -translate-y-1/2 invisible opacity-0 transition-all duration-300" style="width: 0;">
+                        <form action="/search" method="get" class="flex items-center">
+                            <input type="text" name="keyword" id="searchInput"
+                                   placeholder="Tìm kiếm sản phẩm..."
+                                   class="w-64 py-2 px-4 bg-white border border-gray-300 rounded-l-full focus:outline-none focus:border-[#47654c] text-sm">
+                            <button type="submit" class="px-4 py-2 bg-[#47654c] text-white rounded-r-full hover:bg-[#3a543e] transition">
+                                <span class="material-symbols-outlined text-sm">search</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <a th:if="${session.user == null}" href="/login" class="text-gray-600 hover:text-gray-900 transition-colors">
+                    <span class="material-symbols-outlined">person</span>
+                </a>
+                <a th:if="${session.user != null}" href="/profile" class="text-gray-600 hover:text-gray-900 transition-colors inline-flex">
+                    <span class="material-symbols-outlined">person</span>
+                </a>
+
+                <a href="/cart" class="text-gray-600 hover:text-gray-900 transition-colors relative">
+                    <span class="material-symbols-outlined">shopping_cart</span>
+                    <span class="cart-badge absolute -top-2 -right-2 bg-[#47654c] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full hidden">0</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<footer th:fragment="footer" class="bg-white border-t border-gray-200 mt-20">
+    <div class="flex flex-col md:flex-row justify-between items-start px-4 md:px-8 py-16 max-w-7xl mx-auto gap-10">
+        <div class="max-w-xs">
+            <img th:src="@{/images/logo.webp}" alt="Hebekery Logo" class="h-8 mb-5 object-contain">
+            <p class="text-sm text-gray-500 leading-relaxed">
+                Hebekery mang đến các sản phẩm bakery và snack healthy được chọn lọc cho thói quen ăn uống hằng ngày.
+            </p>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-10 md:gap-20">
+            <div>
+                <h5 class="text-sm font-semibold uppercase tracking-wider mb-5">Mua sắm</h5>
+                <ul class="space-y-3 text-sm text-gray-500">
+                    <li><a href="/products" class="hover:text-gray-800 transition-colors">Sản phẩm</a></li>
+                    <li><a href="/cart" class="hover:text-gray-800 transition-colors">Giỏ hàng</a></li>
+                    <li><a href="/order-tracking" class="hover:text-gray-800 transition-colors">Kiểm tra đơn</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="text-sm font-semibold uppercase tracking-wider mb-5">Nội dung</h5>
+                <ul class="space-y-3 text-sm text-gray-500">
+                    <li><a href="/knowledge" class="hover:text-gray-800 transition-colors">Kiến thức</a></li>
+                    <li><a href="/bmi" class="hover:text-gray-800 transition-colors">Tính BMI</a></li>
+                    <li><a href="/tdee" class="hover:text-gray-800 transition-colors">Tính TDEE</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="text-sm font-semibold uppercase tracking-wider mb-5">Hỗ trợ</h5>
+                <ul class="space-y-3 text-sm text-gray-500">
+                    <li><a href="/contact" class="hover:text-gray-800 transition-colors">Liên hệ</a></li>
+                    <li><a href="/profile" class="hover:text-gray-800 transition-colors">Tài khoản</a></li>
+                    <li><a href="/order-tracking" class="hover:text-gray-800 transition-colors">Theo dõi đơn</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="px-4 md:px-8 py-6 border-t border-gray-100 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+        <span class="text-xs text-gray-400">© 2026 Hebekery.</span>
+        <div class="flex gap-5">
+            <a href="#" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <span class="material-symbols-outlined text-base">photo_camera</span>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <span class="material-symbols-outlined text-base">push_pin</span>
+            </a>
+        </div>
+    </div>
+    <script th:src="@{/js/common.js(v=2)}"></script>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SepayWebhookPayload.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.dto.request</a> &gt; <span class="el_source">SepayWebhookPayload.java</span></div><h1>SepayWebhookPayload.java</h1><pre class="source lang-java linenums">package com.example.hebekery.dto.request;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(description = &quot;Payload nhận từ Webhook đối soát SePay&quot;)
+public class SepayWebhookPayload {
+
+    @Schema(description = &quot;ID giao dịch nội bộ SePay&quot;, example = &quot;1827364&quot;)
+    private Long id;
+
+    @Schema(description = &quot;Mã ngân hàng&quot;, example = &quot;MBBank&quot;)
+    private String gateway;
+
+    @Schema(description = &quot;Thời gian giao dịch&quot;, example = &quot;2026-11-04 22:30:00&quot;)
+    private String transactionDate;
+
+    @Schema(description = &quot;Số tài khoản nhận&quot;, example = &quot;0987654321&quot;)
+    private String accountNumber;
+
+    @Schema(description = &quot;Mã code giao dịch (nếu có)&quot;)
+    private String code;
+
+    @Schema(description = &quot;Nội dung chuyển khoản (chứa mã đơn HBK...)&quot;, example = &quot;HBK10852 thanh toan&quot;)
+    private String content;
+
+    @Schema(description = &quot;Loại giao dịch (in / out)&quot;, example = &quot;in&quot;)
+    private String transferType;
+
+    @Schema(description = &quot;Số tiền chuyển khoản&quot;, example = &quot;280000&quot;)
+    private Double transferAmount;
+
+    @Schema(description = &quot;Số dư lũy kế&quot;)
+    private Double accumulated;
+
+    @Schema(description = &quot;Tài khoản phụ&quot;)
+    private String subAccount;
+
+    @Schema(description = &quot;Mã tham chiếu ngân hàng (FT...)&quot;, example = &quot;FT2630981726&quot;)
+    private String referenceCode;
+
+<span class="fc" id="L44">    public SepayWebhookPayload() {</span>
+<span class="fc" id="L45">    }</span>
+
+    public Long getId() {
+<span class="nc" id="L48">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="nc" id="L52">        this.id = id;</span>
+<span class="nc" id="L53">    }</span>
+
+    public String getGateway() {
+<span class="fc" id="L56">        return gateway;</span>
+    }
+
+    public void setGateway(String gateway) {
+<span class="fc" id="L60">        this.gateway = gateway;</span>
+<span class="fc" id="L61">    }</span>
+
+    public String getTransactionDate() {
+<span class="fc" id="L64">        return transactionDate;</span>
+    }
+
+    public void setTransactionDate(String transactionDate) {
+<span class="fc" id="L68">        this.transactionDate = transactionDate;</span>
+<span class="fc" id="L69">    }</span>
+
+    public String getAccountNumber() {
+<span class="fc" id="L72">        return accountNumber;</span>
+    }
+
+    public void setAccountNumber(String accountNumber) {
+<span class="fc" id="L76">        this.accountNumber = accountNumber;</span>
+<span class="fc" id="L77">    }</span>
+
+    public String getCode() {
+<span class="nc" id="L80">        return code;</span>
+    }
+
+    public void setCode(String code) {
+<span class="nc" id="L84">        this.code = code;</span>
+<span class="nc" id="L85">    }</span>
+
+    public String getContent() {
+<span class="fc" id="L88">        return content;</span>
+    }
+
+    public void setContent(String content) {
+<span class="fc" id="L92">        this.content = content;</span>
+<span class="fc" id="L93">    }</span>
+
+    public String getTransferType() {
+<span class="fc" id="L96">        return transferType;</span>
+    }
+
+    public void setTransferType(String transferType) {
+<span class="fc" id="L100">        this.transferType = transferType;</span>
+<span class="fc" id="L101">    }</span>
+
+    public Double getTransferAmount() {
+<span class="fc" id="L104">        return transferAmount;</span>
+    }
+
+    public void setTransferAmount(Double transferAmount) {
+<span class="fc" id="L108">        this.transferAmount = transferAmount;</span>
+<span class="fc" id="L109">    }</span>
+
+    public Double getAccumulated() {
+<span class="nc" id="L112">        return accumulated;</span>
+    }
+
+    public void setAccumulated(Double accumulated) {
+<span class="nc" id="L116">        this.accumulated = accumulated;</span>
+<span class="nc" id="L117">    }</span>
+
+    public String getSubAccount() {
+<span class="nc" id="L120">        return subAccount;</span>
+    }
+
+    public void setSubAccount(String subAccount) {
+<span class="nc" id="L124">        this.subAccount = subAccount;</span>
+<span class="nc" id="L125">    }</span>
+
+    public String getReferenceCode() {
+<span class="fc" id="L128">        return referenceCode;</span>
+    }
+
+    public void setReferenceCode(String referenceCode) {
+<span class="fc" id="L132">        this.referenceCode = referenceCode;</span>
+<span class="fc" id="L133">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

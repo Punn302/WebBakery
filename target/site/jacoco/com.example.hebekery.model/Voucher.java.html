@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Voucher.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.model</a> &gt; <span class="el_source">Voucher.java</span></div><h1>Voucher.java</h1><pre class="source lang-java linenums">package com.example.hebekery.model;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = &quot;vouchers&quot;)
+public class Voucher extends BaseEntity {
+
+    @Id
+    private String id;
+
+    @Column(nullable = false, unique = true, length = 64)
+    private String code;
+
+    @Column(name = &quot;discount_type&quot;, nullable = false, length = 32)
+    private String discountType; // PERCENTAGE, FIXED_AMOUNT, FREE_SHIPPING
+
+    @Column(name = &quot;discount_value&quot;, nullable = false)
+    private double discountValue;
+
+    @Column(name = &quot;max_discount&quot;)
+    private Double maxDiscount;
+
+<span class="nc" id="L31">    @Column(name = &quot;min_order_amount&quot;)</span>
+    private double minOrderAmount = 0.0;
+
+<span class="nc" id="L34">    @Column(name = &quot;usage_limit&quot;)</span>
+    private int usageLimit = 100;
+
+<span class="nc" id="L37">    @Column(name = &quot;used_count&quot;)</span>
+    private int usedCount = 0;
+
+<span class="nc" id="L40">    @Column(name = &quot;user_limit&quot;)</span>
+    private int userLimit = 1;
+
+    @Column(name = &quot;start_date&quot;)
+    private LocalDateTime startDate;
+
+    @Column(name = &quot;end_date&quot;)
+    private LocalDateTime endDate;
+
+<span class="nc" id="L49">    @Enumerated(EnumType.STRING)</span>
+    @Column(name = &quot;target_segment&quot;, nullable = false)
+    private TargetSegment targetSegment = TargetSegment.ALL;
+
+<span class="nc" id="L53">    @Column(nullable = false)</span>
+    private boolean active = true;
+
+<span class="nc" id="L56">    public Voucher() {</span>
+<span class="nc" id="L57">    }</span>
+
+    public TargetSegment getTargetSegment() {
+<span class="nc" id="L60">        return targetSegment;</span>
+    }
+
+    public void setTargetSegment(TargetSegment targetSegment) {
+<span class="nc" id="L64">        this.targetSegment = targetSegment;</span>
+<span class="nc" id="L65">    }</span>
+
+    public String getId() {
+<span class="nc" id="L68">        return id;</span>
+    }
+
+    public void setId(String id) {
+<span class="nc" id="L72">        this.id = id;</span>
+<span class="nc" id="L73">    }</span>
+
+    public String getCode() {
+<span class="nc" id="L76">        return code;</span>
+    }
+
+    public void setCode(String code) {
+<span class="nc" id="L80">        this.code = code;</span>
+<span class="nc" id="L81">    }</span>
+
+    public String getDiscountType() {
+<span class="nc" id="L84">        return discountType;</span>
+    }
+
+    public void setDiscountType(String discountType) {
+<span class="nc" id="L88">        this.discountType = discountType;</span>
+<span class="nc" id="L89">    }</span>
+
+    public double getDiscountValue() {
+<span class="nc" id="L92">        return discountValue;</span>
+    }
+
+    public void setDiscountValue(double discountValue) {
+<span class="nc" id="L96">        this.discountValue = discountValue;</span>
+<span class="nc" id="L97">    }</span>
+
+    public Double getMaxDiscount() {
+<span class="nc" id="L100">        return maxDiscount;</span>
+    }
+
+    public void setMaxDiscount(Double maxDiscount) {
+<span class="nc" id="L104">        this.maxDiscount = maxDiscount;</span>
+<span class="nc" id="L105">    }</span>
+
+    public double getMinOrderAmount() {
+<span class="nc" id="L108">        return minOrderAmount;</span>
+    }
+
+    public void setMinOrderAmount(double minOrderAmount) {
+<span class="nc" id="L112">        this.minOrderAmount = minOrderAmount;</span>
+<span class="nc" id="L113">    }</span>
+
+    public int getUsageLimit() {
+<span class="nc" id="L116">        return usageLimit;</span>
+    }
+
+    public void setUsageLimit(int usageLimit) {
+<span class="nc" id="L120">        this.usageLimit = usageLimit;</span>
+<span class="nc" id="L121">    }</span>
+
+    public int getUsedCount() {
+<span class="nc" id="L124">        return usedCount;</span>
+    }
+
+    public void setUsedCount(int usedCount) {
+<span class="nc" id="L128">        this.usedCount = usedCount;</span>
+<span class="nc" id="L129">    }</span>
+
+    public int getUserLimit() {
+<span class="nc" id="L132">        return userLimit;</span>
+    }
+
+    public void setUserLimit(int userLimit) {
+<span class="nc" id="L136">        this.userLimit = userLimit;</span>
+<span class="nc" id="L137">    }</span>
+
+    public LocalDateTime getStartDate() {
+<span class="nc" id="L140">        return startDate;</span>
+    }
+
+    public void setStartDate(LocalDateTime startDate) {
+<span class="nc" id="L144">        this.startDate = startDate;</span>
+<span class="nc" id="L145">    }</span>
+
+    public LocalDateTime getEndDate() {
+<span class="nc" id="L148">        return endDate;</span>
+    }
+
+    public void setEndDate(LocalDateTime endDate) {
+<span class="nc" id="L152">        this.endDate = endDate;</span>
+<span class="nc" id="L153">    }</span>
+
+    public boolean isActive() {
+<span class="nc" id="L156">        return active;</span>
+    }
+
+    public void setActive(boolean active) {
+<span class="nc" id="L160">        this.active = active;</span>
+<span class="nc" id="L161">    }</span>
+
+    public boolean isValidForOrder(double orderSubtotal) {
+<span class="nc bnc" id="L164" title="All 2 branches missed.">        if (!active) return false;</span>
+<span class="nc" id="L165">        LocalDateTime now = LocalDateTime.now();</span>
+<span class="nc bnc" id="L166" title="All 4 branches missed.">        if (startDate != null &amp;&amp; now.isBefore(startDate)) return false;</span>
+<span class="nc bnc" id="L167" title="All 4 branches missed.">        if (endDate != null &amp;&amp; now.isAfter(endDate)) return false;</span>
+<span class="nc bnc" id="L168" title="All 4 branches missed.">        if (usageLimit &gt; 0 &amp;&amp; usedCount &gt;= usageLimit) return false;</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        return orderSubtotal &gt;= minOrderAmount;</span>
+    }
+
+    public double calculateDiscount(double orderSubtotal) {
+<span class="nc bnc" id="L173" title="All 2 branches missed.">        if (!isValidForOrder(orderSubtotal)) return 0.0;</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">        if (&quot;PERCENTAGE&quot;.equalsIgnoreCase(discountType)) {</span>
+<span class="nc" id="L175">            double discount = orderSubtotal * (discountValue / 100.0);</span>
+<span class="nc bnc" id="L176" title="All 4 branches missed.">            if (maxDiscount != null &amp;&amp; maxDiscount &gt; 0) {</span>
+<span class="nc" id="L177">                discount = Math.min(discount, maxDiscount);</span>
+            }
+<span class="nc" id="L179">            return discount;</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">        } else if (&quot;FIXED_AMOUNT&quot;.equalsIgnoreCase(discountType)) {</span>
+<span class="nc" id="L181">            return Math.min(discountValue, orderSubtotal);</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">        } else if (&quot;FREE_SHIPPING&quot;.equalsIgnoreCase(discountType)) {</span>
+<span class="nc" id="L183">            return 30000.0; // Phí ship chuẩn 30k</span>
+        }
+<span class="nc" id="L185">        return 0.0;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PurchaseReceiptResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.dto</a> &gt; <span class="el_source">PurchaseReceiptResponse.java</span></div><h1>PurchaseReceiptResponse.java</h1><pre class="source lang-java linenums">package com.example.hebekery.dto;
+
+import com.example.hebekery.model.PurchaseReceipt;
+
+public class PurchaseReceiptResponse {
+    private String id;
+    private String receiptCode;
+    private String productId;
+    private String productName;
+    private String supplier;
+    private int quantity;
+    private double unitCost;
+    private double totalCost;
+    private String importedAt;
+    private String note;
+
+<span class="nc" id="L17">    public PurchaseReceiptResponse() {</span>
+<span class="nc" id="L18">    }</span>
+
+    public static PurchaseReceiptResponse from(PurchaseReceipt pr) {
+<span class="nc bnc" id="L21" title="All 2 branches missed.">        if (pr == null) {</span>
+<span class="nc" id="L22">            return null;</span>
+        }
+<span class="nc" id="L24">        PurchaseReceiptResponse dto = new PurchaseReceiptResponse();</span>
+<span class="nc" id="L25">        dto.setId(pr.getId());</span>
+<span class="nc" id="L26">        dto.setReceiptCode(pr.getReceiptCode());</span>
+<span class="nc" id="L27">        dto.setProductId(pr.getProductId());</span>
+<span class="nc" id="L28">        dto.setProductName(pr.getProductName());</span>
+<span class="nc" id="L29">        dto.setSupplier(pr.getSupplier());</span>
+<span class="nc" id="L30">        dto.setQuantity(pr.getQuantity());</span>
+<span class="nc" id="L31">        dto.setUnitCost(pr.getUnitCost());</span>
+<span class="nc" id="L32">        dto.setTotalCost(pr.getTotalCost());</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">        dto.setImportedAt(pr.getImportedAt() != null ? pr.getImportedAt().toString() : null);</span>
+<span class="nc" id="L34">        dto.setNote(pr.getNote());</span>
+<span class="nc" id="L35">        return dto;</span>
+    }
+
+    public String getId() {
+<span class="nc" id="L39">        return id;</span>
+    }
+
+    public void setId(String id) {
+<span class="nc" id="L43">        this.id = id;</span>
+<span class="nc" id="L44">    }</span>
+
+    public String getReceiptCode() {
+<span class="nc" id="L47">        return receiptCode;</span>
+    }
+
+    public void setReceiptCode(String receiptCode) {
+<span class="nc" id="L51">        this.receiptCode = receiptCode;</span>
+<span class="nc" id="L52">    }</span>
+
+    public String getProductId() {
+<span class="nc" id="L55">        return productId;</span>
+    }
+
+    public void setProductId(String productId) {
+<span class="nc" id="L59">        this.productId = productId;</span>
+<span class="nc" id="L60">    }</span>
+
+    public String getProductName() {
+<span class="nc" id="L63">        return productName;</span>
+    }
+
+    public void setProductName(String productName) {
+<span class="nc" id="L67">        this.productName = productName;</span>
+<span class="nc" id="L68">    }</span>
+
+    public String getSupplier() {
+<span class="nc" id="L71">        return supplier;</span>
+    }
+
+    public void setSupplier(String supplier) {
+<span class="nc" id="L75">        this.supplier = supplier;</span>
+<span class="nc" id="L76">    }</span>
+
+    public int getQuantity() {
+<span class="nc" id="L79">        return quantity;</span>
+    }
+
+    public void setQuantity(int quantity) {
+<span class="nc" id="L83">        this.quantity = quantity;</span>
+<span class="nc" id="L84">    }</span>
+
+    public double getUnitCost() {
+<span class="nc" id="L87">        return unitCost;</span>
+    }
+
+    public void setUnitCost(double unitCost) {
+<span class="nc" id="L91">        this.unitCost = unitCost;</span>
+<span class="nc" id="L92">    }</span>
+
+    public double getTotalCost() {
+<span class="nc" id="L95">        return totalCost;</span>
+    }
+
+    public void setTotalCost(double totalCost) {
+<span class="nc" id="L99">        this.totalCost = totalCost;</span>
+<span class="nc" id="L100">    }</span>
+
+    public String getImportedAt() {
+<span class="nc" id="L103">        return importedAt;</span>
+    }
+
+    public void setImportedAt(String importedAt) {
+<span class="nc" id="L107">        this.importedAt = importedAt;</span>
+<span class="nc" id="L108">    }</span>
+
+    public String getNote() {
+<span class="nc" id="L111">        return note;</span>
+    }
+
+    public void setNote(String note) {
+<span class="nc" id="L115">        this.note = note;</span>
+<span class="nc" id="L116">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

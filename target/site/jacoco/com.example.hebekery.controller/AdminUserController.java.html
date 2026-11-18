@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminUserController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.controller</a> &gt; <span class="el_source">AdminUserController.java</span></div><h1>AdminUserController.java</h1><pre class="source lang-java linenums">package com.example.hebekery.controller;
+
+import com.example.hebekery.dto.ApiResponse;
+import com.example.hebekery.dto.UserResponse;
+import com.example.hebekery.dto.request.AdminUserUpdateRequest;
+import com.example.hebekery.model.User;
+import com.example.hebekery.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping(&quot;/api/admin/users&quot;)
+@PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+@Tag(name = &quot;Admin User Management&quot;, description = &quot;Quản lý danh sách người dùng, vai trò và trạng thái tài khoản&quot;)
+public class AdminUserController {
+
+    private final UserService userService;
+
+<span class="fc" id="L38">    public AdminUserController(UserService userService) {</span>
+<span class="fc" id="L39">        this.userService = userService;</span>
+<span class="fc" id="L40">    }</span>
+
+    @Operation(summary = &quot;Tìm kiếm người dùng quản trị&quot;, description = &quot;Lấy danh sách người dùng phân trang theo từ khóa tên hoặc email (yêu cầu quyền ADMIN)&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @GetMapping
+    public ResponseEntity&lt;ApiResponse&lt;Page&lt;UserResponse&gt;&gt;&gt; searchUsers(
+            @Parameter(description = &quot;Từ khóa tìm kiếm&quot;) @RequestParam(defaultValue = &quot;&quot;) String keyword,
+            @Parameter(description = &quot;Số thứ tự trang&quot;) @RequestParam(defaultValue = &quot;0&quot;) int page,
+            @Parameter(description = &quot;Số người dùng trên mỗi trang&quot;) @RequestParam(defaultValue = &quot;10&quot;) int size) {
+<span class="fc" id="L48">        Pageable pageable = PageRequest.of(Math.max(page, 0), size, Sort.by(&quot;name&quot;).ascending());</span>
+<span class="fc" id="L49">        Page&lt;User&gt; usersPage = userService.searchUsers(keyword, pageable);</span>
+<span class="fc" id="L50">        Page&lt;UserResponse&gt; dtoPage = usersPage.map(UserResponse::from);</span>
+<span class="fc" id="L51">        return ResponseEntity.ok(ApiResponse.success(&quot;Lấy danh sách người dùng thành công&quot;, dtoPage));</span>
+    }
+
+    @Operation(summary = &quot;Xem thông tin người dùng&quot;, description = &quot;Lấy chi tiết hồ sơ tài khoản theo mã ID (yêu cầu quyền ADMIN)&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;UserResponse&gt;&gt; getUserById(
+            @Parameter(description = &quot;Mã định danh người dùng&quot;) @PathVariable String id) {
+<span class="nc" id="L58">        User user = userService.findById(id)</span>
+<span class="nc" id="L59">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Không tìm thấy người dùng với mã: &quot; + id));</span>
+<span class="nc" id="L60">        return ResponseEntity.ok(ApiResponse.success(&quot;Lấy thông tin người dùng thành công&quot;, UserResponse.from(user)));</span>
+    }
+
+    @Operation(summary = &quot;Cập nhật hồ sơ người dùng&quot;, description = &quot;Cập nhật vai trò, trạng thái active hoặc reset mật khẩu mặc định (yêu cầu quyền ADMIN)&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @PutMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;UserResponse&gt;&gt; updateUser(
+            @Parameter(description = &quot;Mã định danh người dùng&quot;) @PathVariable String id,
+            @RequestBody AdminUserUpdateRequest request) {
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        if (Boolean.TRUE.equals(request.getResetDefaultPassword())) {</span>
+<span class="nc" id="L69">            userService.resetCustomerPasswordToDefault(id);</span>
+        }
+<span class="nc bnc" id="L71" title="All 4 branches missed.">        if (request.getRole() != null &amp;&amp; !request.getRole().isBlank()) {</span>
+<span class="nc" id="L72">            userService.updateUserRole(id, request.getRole());</span>
+        }
+<span class="nc bnc" id="L74" title="All 2 branches missed.">        if (request.getActive() != null) {</span>
+<span class="nc" id="L75">            userService.setUserActive(id, request.getActive());</span>
+        }
+<span class="nc" id="L77">        User updated = userService.findById(id).orElseThrow();</span>
+<span class="nc" id="L78">        return ResponseEntity.ok(ApiResponse.success(&quot;Cập nhật thông tin người dùng thành công&quot;, UserResponse.from(updated)));</span>
+    }
+
+    @Operation(summary = &quot;Thay đổi vai trò người dùng&quot;, description = &quot;Đổi vai trò giữa ADMIN, STAFF_WAREHOUSE, STAFF_SALES, USER (yêu cầu quyền ADMIN)&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @PutMapping(&quot;/{id}/role&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;UserResponse&gt;&gt; updateUserRole(
+            @Parameter(description = &quot;Mã định danh người dùng&quot;) @PathVariable String id,
+            @RequestBody Map&lt;String, String&gt; payload) {
+<span class="fc" id="L86">        String role = payload.get(&quot;role&quot;);</span>
+<span class="pc bpc" id="L87" title="2 of 4 branches missed.">        if (role == null || role.isBlank()) {</span>
+<span class="nc" id="L88">            return ResponseEntity.badRequest().body(ApiResponse.failure(&quot;Vai trò không được để trống&quot;));</span>
+        }
+<span class="fc" id="L90">        User updated = userService.updateUserRole(id, role.trim().toUpperCase());</span>
+<span class="fc" id="L91">        return ResponseEntity.ok(ApiResponse.success(&quot;Cập nhật vai trò thành công&quot;, UserResponse.from(updated)));</span>
+    }
+
+    @Operation(summary = &quot;Khóa hoặc kích hoạt tài khoản&quot;, description = &quot;Chuyển đổi trạng thái hoạt động active của người dùng (yêu cầu quyền ADMIN)&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @PatchMapping(&quot;/{id}/status&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;UserResponse&gt;&gt; updateUserStatus(
+            @Parameter(description = &quot;Mã định danh người dùng&quot;) @PathVariable String id,
+            @RequestBody Map&lt;String, Boolean&gt; payload) {
+<span class="fc" id="L99">        Boolean active = payload.get(&quot;active&quot;);</span>
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">        if (active == null) {</span>
+<span class="nc" id="L101">            return ResponseEntity.badRequest().body(ApiResponse.failure(&quot;Trạng thái active không được để trống&quot;));</span>
+        }
+<span class="fc" id="L103">        User updated = userService.setUserActive(id, active);</span>
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">        String msg = active ? &quot;Kích hoạt tài khoản thành công&quot; : &quot;Khóa tài khoản thành công&quot;;</span>
+<span class="fc" id="L105">        return ResponseEntity.ok(ApiResponse.success(msg, UserResponse.from(updated)));</span>
+    }
+
+    @Operation(summary = &quot;Đặt lại mật khẩu cho tài khoản&quot;, description = &quot;Reset mật khẩu người dùng về mật khẩu mới hoặc mặc định 123456 (yêu cầu quyền ADMIN)&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @PostMapping(&quot;/{id}/reset-password&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;UserResponse&gt;&gt; resetPassword(
+            @Parameter(description = &quot;Mã định danh người dùng&quot;) @PathVariable String id,
+            @RequestBody(required = false) Map&lt;String, String&gt; payload) {
+<span class="nc bnc" id="L113" title="All 2 branches missed.">        String newPassword = payload != null ? payload.get(&quot;newPassword&quot;) : null;</span>
+        User updated;
+<span class="nc bnc" id="L115" title="All 4 branches missed.">        if (newPassword != null &amp;&amp; !newPassword.isBlank()) {</span>
+<span class="nc" id="L116">            updated = userService.resetPassword(id, newPassword);</span>
+        } else {
+<span class="nc" id="L118">            updated = userService.resetCustomerPasswordToDefault(id);</span>
+        }
+<span class="nc" id="L120">        return ResponseEntity.ok(ApiResponse.success(&quot;Đặt lại mật khẩu thành công&quot;, UserResponse.from(updated)));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

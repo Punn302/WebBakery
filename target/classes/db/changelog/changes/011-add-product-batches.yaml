@@ -1,0 +1,80 @@
+databaseChangeLog:
+  - changeSet:
+      id: 011-create-product-batches-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: product_batches
+            columns:
+              - column:
+                  name: id
+                  type: varchar(64)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: product_id
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: batch_code
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: manufacture_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: expiry_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: initial_quantity
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: current_quantity
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(32)
+                  defaultValue: "ACTIVE"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: discount_percent
+                  type: double
+                  defaultValueNumeric: 0
+              - column:
+                  name: note
+                  type: varchar(500)
+              - column:
+                  name: created_at
+                  type: datetime
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: datetime
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - createIndex:
+            indexName: idx_batch_product_id
+            tableName: product_batches
+            columns:
+              - column:
+                  name: product_id
+        - createIndex:
+            indexName: idx_batch_expiry_date
+            tableName: product_batches
+            columns:
+              - column:
+                  name: expiry_date
+
+

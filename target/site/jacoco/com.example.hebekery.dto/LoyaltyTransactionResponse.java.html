@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoyaltyTransactionResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.dto</a> &gt; <span class="el_source">LoyaltyTransactionResponse.java</span></div><h1>LoyaltyTransactionResponse.java</h1><pre class="source lang-java linenums">package com.example.hebekery.dto;
+
+import com.example.hebekery.model.LoyaltyTransaction;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.time.LocalDateTime;
+
+@Schema(description = &quot;Lịch sử biến động Điểm Lành HeBekery&quot;)
+public class LoyaltyTransactionResponse {
+
+    private String id;
+    private String userId;
+    private String orderId;
+    private String transactionType;
+    private String transactionTypeName;
+    private int points;
+    private int balanceAfter;
+    private String description;
+    private LocalDateTime createdAt;
+
+<span class="nc" id="L21">    public LoyaltyTransactionResponse() {</span>
+<span class="nc" id="L22">    }</span>
+
+    public static LoyaltyTransactionResponse from(LoyaltyTransaction tx) {
+<span class="nc" id="L25">        LoyaltyTransactionResponse res = new LoyaltyTransactionResponse();</span>
+<span class="nc" id="L26">        res.setId(tx.getId());</span>
+<span class="nc" id="L27">        res.setUserId(tx.getUserId());</span>
+<span class="nc" id="L28">        res.setOrderId(tx.getOrderId());</span>
+<span class="nc" id="L29">        res.setTransactionType(tx.getTransactionType());</span>
+<span class="nc" id="L30">        res.setPoints(tx.getPoints());</span>
+<span class="nc" id="L31">        res.setBalanceAfter(tx.getBalanceAfter());</span>
+<span class="nc" id="L32">        res.setDescription(tx.getDescription());</span>
+<span class="nc" id="L33">        res.setCreatedAt(tx.getCreatedAt());</span>
+
+<span class="nc bnc" id="L35" title="All 6 branches missed.">        String typeName = switch (tx.getTransactionType()) {</span>
+<span class="nc" id="L36">            case &quot;EARN_PURCHASE&quot; -&gt; &quot;Tích điểm đơn hàng&quot;;</span>
+<span class="nc" id="L37">            case &quot;REDEEM_CHECKOUT&quot; -&gt; &quot;Trừ điểm mua hàng&quot;;</span>
+<span class="nc" id="L38">            case &quot;BIRTHDAY_GIFT&quot; -&gt; &quot;Quà tặng sinh nhật&quot;;</span>
+<span class="nc" id="L39">            case &quot;CANCEL_REFUND&quot; -&gt; &quot;Hoàn điểm hủy đơn&quot;;</span>
+<span class="nc" id="L40">            case &quot;ADMIN_ADJUST&quot; -&gt; &quot;Điều chỉnh hệ thống&quot;;</span>
+<span class="nc" id="L41">            default -&gt; tx.getTransactionType();</span>
+        };
+<span class="nc" id="L43">        res.setTransactionTypeName(typeName);</span>
+<span class="nc" id="L44">        return res;</span>
+    }
+
+    public String getId() {
+<span class="nc" id="L48">        return id;</span>
+    }
+
+    public void setId(String id) {
+<span class="nc" id="L52">        this.id = id;</span>
+<span class="nc" id="L53">    }</span>
+
+    public String getUserId() {
+<span class="nc" id="L56">        return userId;</span>
+    }
+
+    public void setUserId(String userId) {
+<span class="nc" id="L60">        this.userId = userId;</span>
+<span class="nc" id="L61">    }</span>
+
+    public String getOrderId() {
+<span class="nc" id="L64">        return orderId;</span>
+    }
+
+    public void setOrderId(String orderId) {
+<span class="nc" id="L68">        this.orderId = orderId;</span>
+<span class="nc" id="L69">    }</span>
+
+    public String getTransactionType() {
+<span class="nc" id="L72">        return transactionType;</span>
+    }
+
+    public void setTransactionType(String transactionType) {
+<span class="nc" id="L76">        this.transactionType = transactionType;</span>
+<span class="nc" id="L77">    }</span>
+
+    public String getTransactionTypeName() {
+<span class="nc" id="L80">        return transactionTypeName;</span>
+    }
+
+    public void setTransactionTypeName(String transactionTypeName) {
+<span class="nc" id="L84">        this.transactionTypeName = transactionTypeName;</span>
+<span class="nc" id="L85">    }</span>
+
+    public int getPoints() {
+<span class="nc" id="L88">        return points;</span>
+    }
+
+    public void setPoints(int points) {
+<span class="nc" id="L92">        this.points = points;</span>
+<span class="nc" id="L93">    }</span>
+
+    public int getBalanceAfter() {
+<span class="nc" id="L96">        return balanceAfter;</span>
+    }
+
+    public void setBalanceAfter(int balanceAfter) {
+<span class="nc" id="L100">        this.balanceAfter = balanceAfter;</span>
+<span class="nc" id="L101">    }</span>
+
+    public String getDescription() {
+<span class="nc" id="L104">        return description;</span>
+    }
+
+    public void setDescription(String description) {
+<span class="nc" id="L108">        this.description = description;</span>
+<span class="nc" id="L109">    }</span>
+
+    public LocalDateTime getCreatedAt() {
+<span class="nc" id="L112">        return createdAt;</span>
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+<span class="nc" id="L116">        this.createdAt = createdAt;</span>
+<span class="nc" id="L117">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

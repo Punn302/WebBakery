@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.service</a> &gt; <span class="el_source">ProductService.java</span></div><h1>ProductService.java</h1><pre class="source lang-java linenums">package com.example.hebekery.service;
+
+import com.example.hebekery.model.Category;
+import com.example.hebekery.model.InventoryTransaction;
+import com.example.hebekery.model.Product;
+import com.example.hebekery.repository.CategoryRepository;
+import com.example.hebekery.repository.InventoryTransactionRepository;
+import com.example.hebekery.repository.ProductRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class ProductService {
+
+    private final ProductRepository productRepository;
+    private final InventoryTransactionRepository inventoryTransactionRepository;
+    private final CategoryRepository categoryRepository;
+
+    public ProductService(ProductRepository productRepository,
+                          InventoryTransactionRepository inventoryTransactionRepository,
+<span class="fc" id="L27">                          CategoryRepository categoryRepository) {</span>
+<span class="fc" id="L28">        this.productRepository = productRepository;</span>
+<span class="fc" id="L29">        this.inventoryTransactionRepository = inventoryTransactionRepository;</span>
+<span class="fc" id="L30">        this.categoryRepository = categoryRepository;</span>
+<span class="fc" id="L31">    }</span>
+
+    public List&lt;Product&gt; getAllProducts() {
+<span class="nc" id="L34">        return productRepository.findByActiveTrue();</span>
+    }
+
+    public List&lt;Product&gt; getAllProductsIncludingHidden() {
+<span class="nc" id="L38">        return productRepository.findAll();</span>
+    }
+
+    public List&lt;Product&gt; getLowStockProducts() {
+<span class="fc" id="L42">        return productRepository.findLowStockProducts();</span>
+    }
+
+    public List&lt;Product&gt; getFeaturedProducts() {
+<span class="fc" id="L46">        return productRepository.findByIsFeaturedTrueAndActiveTrue();</span>
+    }
+
+    public Page&lt;Product&gt; getProductsPage(String category, Pageable pageable) {
+<span class="nc bnc" id="L50" title="All 6 branches missed.">        if (category == null || category.isBlank() || &quot;all&quot;.equalsIgnoreCase(category)) {</span>
+<span class="nc" id="L51">            return productRepository.findByActiveTrue(pageable);</span>
+        }
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (category.trim().matches(&quot;\\d+&quot;)) {</span>
+<span class="nc" id="L54">            return productRepository.findByCategory_IdAndActiveTrue(Long.parseLong(category.trim()), pageable);</span>
+        }
+<span class="nc" id="L56">        return productRepository.findByCategory_NameIgnoreCaseAndActiveTrue(category.trim(), pageable);</span>
+    }
+
+    public Product getProductById(String id) {
+<span class="fc" id="L60">        return productRepository.findById(id).orElse(null);</span>
+    }
+
+    public List&lt;String&gt; getAllCategories() {
+<span class="fc" id="L64">        List&lt;Category&gt; categories = categoryRepository.findByActiveTrueOrderByNameAsc();</span>
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if (categories.isEmpty()) {</span>
+<span class="nc" id="L66">            return List.of(&quot;Ngũ cốc &amp; Granola&quot;, &quot;Bánh ăn kiêng&quot;, &quot;Snack healthy&quot;, &quot;Thực phẩm bổ sung&quot;, &quot;Combo quà tặng&quot;);</span>
+        }
+<span class="fc" id="L68">        return categories.stream().map(Category::getName).toList();</span>
+    }
+
+    public List&lt;Product&gt; getRelatedProducts(String currentId, String category) {
+<span class="nc bnc" id="L72" title="All 4 branches missed.">        if (category == null || category.isBlank()) {</span>
+<span class="nc" id="L73">            return List.of();</span>
+        }
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        if (category.trim().matches(&quot;\\d+&quot;)) {</span>
+<span class="nc" id="L76">            return productRepository.findRelatedProductsByCategoryId(currentId, Long.parseLong(category.trim()), PageRequest.of(0, 4));</span>
+        }
+<span class="nc" id="L78">        return productRepository.findRelatedProductsByCategoryName(currentId, category.trim(), PageRequest.of(0, 4));</span>
+    }
+
+    public List&lt;Product&gt; getRelatedProducts(String currentId, Long categoryId) {
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        if (categoryId == null) {</span>
+<span class="nc" id="L83">            return List.of();</span>
+        }
+<span class="nc" id="L85">        return productRepository.findRelatedProductsByCategoryId(currentId, categoryId, PageRequest.of(0, 4));</span>
+    }
+
+    public List&lt;Product&gt; searchProducts(String keyword) {
+<span class="nc bnc" id="L89" title="All 4 branches missed.">        if (keyword == null || keyword.trim().isEmpty()) {</span>
+<span class="nc" id="L90">            return getAllProducts();</span>
+        }
+<span class="nc" id="L92">        return productRepository.searchActive(keyword.trim(), PageRequest.of(0, 100)).getContent();</span>
+    }
+
+    public Page&lt;Product&gt; searchProducts(String keyword, Pageable pageable) {
+<span class="pc bpc" id="L96" title="2 of 4 branches missed.">        if (keyword == null || keyword.trim().isEmpty()) {</span>
+<span class="nc" id="L97">            return productRepository.findByActiveTrue(pageable);</span>
+        }
+<span class="fc" id="L99">        return productRepository.searchActive(keyword.trim(), pageable);</span>
+    }
+
+    public Page&lt;Product&gt; searchProducts(Long categoryId, String keyword, Pageable pageable) {
+<span class="nc bnc" id="L103" title="All 4 branches missed.">        String term = (keyword != null &amp;&amp; !keyword.isBlank()) ? keyword.trim() : null;</span>
+<span class="nc" id="L104">        return productRepository.searchProducts(categoryId, term, pageable);</span>
+    }
+
+    public Product saveProduct(Product product) {
+<span class="pc bpc" id="L108" title="3 of 4 branches missed.">        if (product.getId() == null || product.getId().isBlank()) {</span>
+<span class="fc" id="L109">            product.setId(&quot;P-&quot; + UUID.randomUUID().toString());</span>
+        }
+<span class="pc bpc" id="L111" title="1 of 2 branches missed.">        if (product.getBadge() == null) {</span>
+<span class="fc" id="L112">            product.setBadge(&quot;&quot;);</span>
+        }
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        if (product.getTag() == null) {</span>
+<span class="fc" id="L115">            product.setTag(&quot;&quot;);</span>
+        }
+<span class="fc" id="L117">        return productRepository.save(product);</span>
+    }
+
+    @Transactional
+    public Product receiveStock(String productId, int quantity, double unitCost) {
+<span class="nc" id="L122">        return receiveStock(productId, quantity, unitCost, &quot;MANUAL&quot;, null, &quot;Nhap kho&quot;);</span>
+    }
+
+    @Transactional
+    public Product receiveStock(String productId, int quantity, double unitCost, String referenceType, String referenceId, String note) {
+<span class="nc" id="L127">        Product product = getProductById(productId);</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        if (product == null) {</span>
+<span class="nc" id="L129">            throw new IllegalArgumentException(&quot;Khong tim thay san pham&quot;);</span>
+        }
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        if (quantity &lt;= 0) {</span>
+<span class="nc" id="L132">            throw new IllegalArgumentException(&quot;So luong nhap phai lon hon 0&quot;);</span>
+        }
+
+<span class="nc" id="L135">        int oldStock = product.getStockQuantity();</span>
+<span class="nc" id="L136">        double oldValue = product.getAverageCost() * oldStock;</span>
+<span class="nc" id="L137">        double addedValue = unitCost * quantity;</span>
+<span class="nc" id="L138">        int newStock = oldStock + quantity;</span>
+
+<span class="nc" id="L140">        product.setStockQuantity(newStock);</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        product.setAverageCost(newStock == 0 ? 0 : (oldValue + addedValue) / newStock);</span>
+<span class="nc" id="L142">        Product saved = productRepository.save(product);</span>
+<span class="nc" id="L143">        recordInventory(saved, &quot;IMPORT&quot;, quantity, unitCost, referenceType, referenceId, note);</span>
+<span class="nc" id="L144">        return saved;</span>
+    }
+
+    @Transactional
+    public Product decreaseStock(String productId, int quantity) {
+<span class="nc" id="L149">        return decreaseStock(productId, quantity, &quot;ORDER&quot;, null, &quot;Xuat kho&quot;);</span>
+    }
+
+    @Transactional
+    public Product decreaseStock(String productId, int quantity, String referenceType, String referenceId, String note) {
+<span class="nc" id="L154">        Product product = getProductById(productId);</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">        if (product == null) {</span>
+<span class="nc" id="L156">            throw new IllegalArgumentException(&quot;Khong tim thay san pham&quot;);</span>
+        }
+<span class="nc bnc" id="L158" title="All 2 branches missed.">        if (quantity &lt;= 0) {</span>
+<span class="nc" id="L159">            throw new IllegalArgumentException(&quot;So luong xuat kho phai lon hon 0&quot;);</span>
+        }
+<span class="nc bnc" id="L161" title="All 2 branches missed.">        if (product.getStockQuantity() &lt; quantity) {</span>
+<span class="nc" id="L162">            throw new IllegalArgumentException(&quot;San pham &quot; + product.getName() + &quot; khong du ton kho&quot;);</span>
+        }
+<span class="nc" id="L164">        product.setStockQuantity(product.getStockQuantity() - quantity);</span>
+<span class="nc" id="L165">        Product saved = productRepository.save(product);</span>
+<span class="nc" id="L166">        recordInventory(saved, &quot;EXPORT&quot;, -quantity, product.getAverageCost(), referenceType, referenceId, note);</span>
+<span class="nc" id="L167">        return saved;</span>
+    }
+
+    @Transactional
+    public Product increaseStock(String productId, int quantity) {
+<span class="nc" id="L172">        return increaseStock(productId, quantity, &quot;RETURN&quot;, null, &quot;Hoan kho&quot;);</span>
+    }
+
+    @Transactional
+    public Product increaseStock(String productId, int quantity, String referenceType, String referenceId, String note) {
+<span class="nc" id="L177">        Product product = getProductById(productId);</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">        if (product == null) {</span>
+<span class="nc" id="L179">            return null;</span>
+        }
+<span class="nc bnc" id="L181" title="All 2 branches missed.">        if (quantity &lt;= 0) {</span>
+<span class="nc" id="L182">            return product;</span>
+        }
+<span class="nc" id="L184">        product.setStockQuantity(product.getStockQuantity() + quantity);</span>
+<span class="nc" id="L185">        Product saved = productRepository.save(product);</span>
+<span class="nc" id="L186">        recordInventory(saved, &quot;RETURN&quot;, quantity, product.getAverageCost(), referenceType, referenceId, note);</span>
+<span class="nc" id="L187">        return saved;</span>
+    }
+
+    public void ensureAvailable(String productId, int quantity) {
+<span class="fc" id="L191">        Product product = getProductById(productId);</span>
+<span class="pc bpc" id="L192" title="1 of 2 branches missed.">        if (product == null) {</span>
+<span class="nc" id="L193">            throw new IllegalArgumentException(&quot;San pham khong ton tai&quot;);</span>
+        }
+<span class="fc bfc" id="L195" title="All 2 branches covered.">        if (product.getStockQuantity() &lt;= 0) {</span>
+<span class="fc" id="L196">            throw new IllegalArgumentException(&quot;San pham da het hang&quot;);</span>
+        }
+<span class="pc bpc" id="L198" title="1 of 2 branches missed.">        if (quantity &gt; product.getStockQuantity()) {</span>
+<span class="fc" id="L199">            throw new IllegalArgumentException(&quot;Chi con &quot; + product.getStockQuantity() + &quot; san pham trong kho&quot;);</span>
+        }
+<span class="nc" id="L201">    }</span>
+
+    public Product updateLowStockThreshold(String productId, int threshold) {
+<span class="fc" id="L204">        Product product = getProductById(productId);</span>
+<span class="pc bpc" id="L205" title="1 of 2 branches missed.">        if (product == null) {</span>
+<span class="nc" id="L206">            throw new IllegalArgumentException(&quot;Khong tim thay san pham&quot;);</span>
+        }
+<span class="fc" id="L208">        product.setLowStockThreshold(Math.max(threshold, 0));</span>
+<span class="fc" id="L209">        return productRepository.save(product);</span>
+    }
+
+    public boolean deleteProduct(String id) {
+<span class="nc" id="L213">        Product product = getProductById(id);</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">        if (product == null) {</span>
+<span class="nc" id="L215">            return false;</span>
+        }
+<span class="nc" id="L217">        product.setActive(false);</span>
+<span class="nc" id="L218">        productRepository.save(product);</span>
+<span class="nc" id="L219">        return true;</span>
+    }
+
+    public boolean hasInventoryTransactions(String productId) {
+<span class="nc" id="L223">        return inventoryTransactionRepository.existsByProductId(productId);</span>
+    }
+
+    private void recordInventory(Product product, String type, int quantity, double unitCost, String referenceType, String referenceId, String note) {
+<span class="nc" id="L227">        inventoryTransactionRepository.save(new InventoryTransaction(</span>
+<span class="nc" id="L228">                product.getId(),</span>
+<span class="nc" id="L229">                product.getName(),</span>
+                type,
+                quantity,
+<span class="nc" id="L232">                product.getStockQuantity(),</span>
+                unitCost,
+                referenceType,
+                referenceId,
+                note
+        ));
+<span class="nc" id="L238">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

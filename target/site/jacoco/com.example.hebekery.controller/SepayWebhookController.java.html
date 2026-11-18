@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SepayWebhookController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.controller</a> &gt; <span class="el_source">SepayWebhookController.java</span></div><h1>SepayWebhookController.java</h1><pre class="source lang-java linenums">package com.example.hebekery.controller;
+
+import com.example.hebekery.dto.ApiResponse;
+import com.example.hebekery.dto.PaymentStatusResponse;
+import com.example.hebekery.dto.request.SepayWebhookPayload;
+import com.example.hebekery.model.Order;
+import com.example.hebekery.service.OrderService;
+import com.example.hebekery.service.SepayWebhookService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping(&quot;/api/payment/sepay&quot;)
+@Tag(name = &quot;SePay Webhook &amp; Payment&quot;, description = &quot;Tiếp nhận webhook thanh toán tự động qua chuyển khoản ngân hàng SePay và kiểm tra trạng thái đơn&quot;)
+public class SepayWebhookController {
+
+    private final SepayWebhookService sepayWebhookService;
+    private final OrderService orderService;
+
+<span class="fc" id="L33">    public SepayWebhookController(SepayWebhookService sepayWebhookService, OrderService orderService) {</span>
+<span class="fc" id="L34">        this.sepayWebhookService = sepayWebhookService;</span>
+<span class="fc" id="L35">        this.orderService = orderService;</span>
+<span class="fc" id="L36">    }</span>
+
+    public ResponseEntity&lt;ApiResponse&lt;Map&lt;String, Object&gt;&gt;&gt; handleWebhook(String authHeader, SepayWebhookPayload payload) {
+<span class="fc" id="L39">        return handleWebhook(authHeader, payload, null);</span>
+    }
+
+    @Operation(summary = &quot;Tiếp nhận thông báo thanh toán SePay&quot;, description = &quot;Xác thực API Key hoặc quyền Admin, đối soát mã đơn hàng và tự động cập nhật trạng thái đơn sang PAID&quot;)
+    @PostMapping(&quot;/webhook&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;Map&lt;String, Object&gt;&gt;&gt; handleWebhook(
+            @RequestHeader(value = &quot;Authorization&quot;, required = false) String authHeader,
+            @RequestBody SepayWebhookPayload payload,
+            Authentication authentication) {
+
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        boolean isAdmin = authentication != null &amp;&amp; authentication.getAuthorities().stream()</span>
+<span class="pc bnc" id="L50" title="All 2 branches missed.">                .anyMatch(a -&gt; &quot;ROLE_ADMIN&quot;.equals(a.getAuthority()));</span>
+
+        // 1. Kiểm tra xác thực (SePay API Key hoặc quyền ADMIN)
+<span class="pc bpc" id="L53" title="1 of 4 branches missed.">        if (!isAdmin &amp;&amp; !sepayWebhookService.verifyApiKey(authHeader)) {</span>
+<span class="fc" id="L54">            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)</span>
+<span class="fc" id="L55">                    .body(ApiResponse.failure(&quot;Unauthorized: Invalid SePay API Key&quot;));</span>
+        }
+
+        // 2. Xử lý nghiệp vụ Webhook
+        try {
+<span class="fc" id="L60">            boolean success = sepayWebhookService.processWebhook(payload);</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">            if (success) {</span>
+<span class="fc" id="L62">                return ResponseEntity.ok(ApiResponse.success(</span>
+                        &quot;Xử lý thanh toán SePay thành công&quot;,
+<span class="fc" id="L64">                        Map.of(</span>
+<span class="fc" id="L65">                                &quot;success&quot;, true,</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">                                &quot;referenceCode&quot;, payload.getReferenceCode() != null ? payload.getReferenceCode() : &quot;&quot;,</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">                                &quot;transferAmount&quot;, payload.getTransferAmount() != null ? payload.getTransferAmount() : 0</span>
+                        )
+                ));
+            } else {
+<span class="nc" id="L71">                return ResponseEntity.ok(ApiResponse.success(</span>
+                        &quot;Giao dịch đã được ghi nhận nhưng bị bỏ qua (không phải tiền vào hoặc không hợp lệ)&quot;,
+<span class="nc" id="L73">                        Map.of(&quot;success&quot;, false)</span>
+                ));
+            }
+<span class="fc" id="L76">        } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L77">            return ResponseEntity.badRequest().body(ApiResponse.failure(e.getMessage()));</span>
+<span class="nc" id="L78">        } catch (Exception e) {</span>
+<span class="nc" id="L79">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="nc" id="L80">                    .body(ApiResponse.failure(&quot;Lỗi xử lý webhook: &quot; + e.getMessage()));</span>
+        }
+    }
+
+    @Operation(summary = &quot;Kiểm tra trạng thái thanh toán đơn hàng công khai (Polling)&quot;, description = &quot;Dành cho giao diện modal VietQR kiểm tra xem đơn hàng đã được xác nhận thanh toán thành công hay chưa&quot;)
+    @GetMapping(&quot;/orders/{orderId}/status&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;PaymentStatusResponse&gt;&gt; checkOrderStatus(
+            @Parameter(description = &quot;Mã ID đơn hàng hoặc mã orderCode&quot;) @PathVariable String orderId) {
+        try {
+<span class="fc" id="L89">            Order order = orderService.getOrderById(orderId);</span>
+<span class="fc" id="L90">            boolean isPaid = &quot;PAID&quot;.equalsIgnoreCase(order.getPaymentStatus());</span>
+<span class="fc" id="L91">            PaymentStatusResponse status = new PaymentStatusResponse(</span>
+<span class="fc" id="L92">                    order.getId(),</span>
+<span class="fc" id="L93">                    order.getOrderCode(),</span>
+<span class="fc" id="L94">                    order.getOrderStatus(),</span>
+<span class="fc" id="L95">                    order.getPaymentStatus(),</span>
+                    isPaid,
+<span class="fc" id="L97">                    order.getTotal()</span>
+            );
+<span class="fc" id="L99">            return ResponseEntity.ok(ApiResponse.success(&quot;Lấy trạng thái thanh toán thành công&quot;, status));</span>
+<span class="fc" id="L100">        } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L101">            return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="fc" id="L102">                    .body(ApiResponse.failure(e.getMessage()));</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuditLog.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.model</a> &gt; <span class="el_source">AuditLog.java</span></div><h1>AuditLog.java</h1><pre class="source lang-java linenums">package com.example.hebekery.model;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = &quot;audit_logs&quot;)
+public class AuditLog extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String action;
+
+    @Column(name = &quot;target_type&quot;, nullable = false)
+    private String targetType;
+
+    @Column(name = &quot;target_id&quot;, nullable = false)
+    private String targetId;
+
+    private String actor;
+
+    @Column(columnDefinition = &quot;TEXT&quot;)
+    private String details;
+
+<span class="fc" id="L27">    public AuditLog() {}</span>
+
+<span class="nc" id="L29">    public AuditLog(String action, String targetType, String targetId, String actor, String details) {</span>
+<span class="nc" id="L30">        this.action = action;</span>
+<span class="nc" id="L31">        this.targetType = targetType;</span>
+<span class="nc" id="L32">        this.targetId = targetId;</span>
+<span class="nc" id="L33">        this.actor = actor;</span>
+<span class="nc" id="L34">        this.details = details;</span>
+<span class="nc" id="L35">    }</span>
+
+<span class="nc" id="L37">    public Long getId() { return id; }</span>
+<span class="nc" id="L38">    public void setId(Long id) { this.id = id; }</span>
+<span class="nc" id="L39">    public String getAction() { return action; }</span>
+<span class="nc" id="L40">    public void setAction(String action) { this.action = action; }</span>
+<span class="nc" id="L41">    public String getTargetType() { return targetType; }</span>
+<span class="nc" id="L42">    public void setTargetType(String targetType) { this.targetType = targetType; }</span>
+<span class="nc" id="L43">    public String getTargetId() { return targetId; }</span>
+<span class="nc" id="L44">    public void setTargetId(String targetId) { this.targetId = targetId; }</span>
+<span class="nc" id="L45">    public String getActor() { return actor; }</span>
+<span class="nc" id="L46">    public void setActor(String actor) { this.actor = actor; }</span>
+<span class="nc" id="L47">    public String getDetails() { return details; }</span>
+<span class="nc" id="L48">    public void setDetails(String details) { this.details = details; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

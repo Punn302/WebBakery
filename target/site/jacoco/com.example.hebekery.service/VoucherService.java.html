@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VoucherService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.service</a> &gt; <span class="el_source">VoucherService.java</span></div><h1>VoucherService.java</h1><pre class="source lang-java linenums">package com.example.hebekery.service;
+
+import com.example.hebekery.dto.VoucherCalculationResponse;
+import com.example.hebekery.dto.VoucherResponse;
+import com.example.hebekery.model.TargetSegment;
+import com.example.hebekery.model.Voucher;
+import com.example.hebekery.model.VoucherUsage;
+import com.example.hebekery.repository.UserRepository;
+import com.example.hebekery.repository.VoucherRepository;
+import com.example.hebekery.repository.VoucherUsageRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+public class VoucherService {
+
+<span class="fc" id="L25">    private static final Logger log = LoggerFactory.getLogger(VoucherService.class);</span>
+
+    private final VoucherRepository voucherRepository;
+    private final VoucherUsageRepository voucherUsageRepository;
+    private final UserRepository userRepository;
+<span class="fc" id="L30">    private final DecimalFormat formatter = new DecimalFormat(&quot;#,###&quot;);</span>
+
+<span class="fc" id="L32">    public VoucherService(VoucherRepository voucherRepository, VoucherUsageRepository voucherUsageRepository, UserRepository userRepository) {</span>
+<span class="fc" id="L33">        this.voucherRepository = voucherRepository;</span>
+<span class="fc" id="L34">        this.voucherUsageRepository = voucherUsageRepository;</span>
+<span class="fc" id="L35">        this.userRepository = userRepository;</span>
+<span class="fc" id="L36">    }</span>
+
+    public List&lt;VoucherResponse&gt; getAvailableVouchers() {
+<span class="nc" id="L39">        LocalDateTime now = LocalDateTime.now();</span>
+<span class="nc" id="L40">        return voucherRepository.findAll().stream()</span>
+<span class="nc" id="L41">                .filter(Voucher::isActive)</span>
+<span class="nc bnc" id="L42" title="All 4 branches missed.">                .filter(v -&gt; v.getStartDate() == null || !now.isBefore(v.getStartDate()))</span>
+<span class="nc bnc" id="L43" title="All 4 branches missed.">                .filter(v -&gt; v.getEndDate() == null || !now.isAfter(v.getEndDate()))</span>
+<span class="nc bnc" id="L44" title="All 4 branches missed.">                .filter(v -&gt; v.getUsageLimit() &lt;= 0 || v.getUsedCount() &lt; v.getUsageLimit())</span>
+<span class="nc" id="L45">                .map(VoucherResponse::from)</span>
+<span class="nc" id="L46">                .collect(Collectors.toList());</span>
+    }
+
+    public List&lt;VoucherResponse&gt; getAllVouchers() {
+<span class="nc" id="L50">        return voucherRepository.findAll().stream()</span>
+<span class="nc" id="L51">                .map(VoucherResponse::from)</span>
+<span class="nc" id="L52">                .collect(Collectors.toList());</span>
+    }
+
+    public VoucherCalculationResponse validateAndCalculate(String code, double orderAmount, String userId) {
+<span class="nc bnc" id="L56" title="All 4 branches missed.">        if (code == null || code.trim().isEmpty()) {</span>
+<span class="nc" id="L57">            return VoucherCalculationResponse.invalid(&quot;Mã giảm giá không được để trống&quot;, orderAmount);</span>
+        }
+
+<span class="nc" id="L60">        String cleanCode = code.trim().toUpperCase();</span>
+<span class="nc" id="L61">        Voucher voucher = voucherRepository.findByCodeIgnoreCaseAndActiveTrue(cleanCode).orElse(null);</span>
+
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        if (voucher == null) {</span>
+<span class="nc" id="L64">            return VoucherCalculationResponse.invalid(&quot;Mã giảm giá '&quot; + cleanCode + &quot;' không tồn tại hoặc đã bị khóa&quot;, orderAmount);</span>
+        }
+
+<span class="nc" id="L67">        LocalDateTime now = LocalDateTime.now();</span>
+<span class="nc bnc" id="L68" title="All 4 branches missed.">        if (voucher.getStartDate() != null &amp;&amp; now.isBefore(voucher.getStartDate())) {</span>
+<span class="nc" id="L69">            return VoucherCalculationResponse.invalid(&quot;Mã giảm giá chưa đến ngày áp dụng&quot;, orderAmount);</span>
+        }
+<span class="nc bnc" id="L71" title="All 4 branches missed.">        if (voucher.getEndDate() != null &amp;&amp; now.isAfter(voucher.getEndDate())) {</span>
+<span class="nc" id="L72">            return VoucherCalculationResponse.invalid(&quot;Mã giảm giá đã hết hạn sử dụng&quot;, orderAmount);</span>
+        }
+
+<span class="nc bnc" id="L75" title="All 4 branches missed.">        if (voucher.getUsageLimit() &gt; 0 &amp;&amp; voucher.getUsedCount() &gt;= voucher.getUsageLimit()) {</span>
+<span class="nc" id="L76">            return VoucherCalculationResponse.invalid(&quot;Mã giảm giá đã hết số lượt sử dụng&quot;, orderAmount);</span>
+        }
+
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        if (orderAmount &lt; voucher.getMinOrderAmount()) {</span>
+<span class="nc" id="L80">            String requiredAmount = formatter.format(voucher.getMinOrderAmount()) + &quot;đ&quot;;</span>
+<span class="nc" id="L81">            return VoucherCalculationResponse.invalid(</span>
+                    &quot;Đơn hàng cần đạt tối thiểu &quot; + requiredAmount + &quot; để áp dụng mã '&quot; + cleanCode + &quot;'&quot;,
+                    orderAmount
+            );
+        }
+
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if (voucher.getTargetSegment() != TargetSegment.ALL) {</span>
+<span class="nc bnc" id="L88" title="All 4 branches missed.">            if (userId == null || userId.isBlank()) {</span>
+<span class="nc" id="L89">                return VoucherCalculationResponse.invalid(&quot;Mã giảm giá này chỉ dành cho thành viên&quot;, orderAmount);</span>
+            }
+            // Logic to check segments (VIP/NEW) would go here
+        }
+
+<span class="nc bnc" id="L94" title="All 6 branches missed.">        if (userId != null &amp;&amp; !userId.isBlank() &amp;&amp; voucher.getUserLimit() &gt; 0) {</span>
+<span class="nc" id="L95">            long userUsedCount = voucherUsageRepository.countByVoucherIdAndUserId(voucher.getId(), userId);</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">            if (userUsedCount &gt;= voucher.getUserLimit()) {</span>
+<span class="nc" id="L97">                return VoucherCalculationResponse.invalid(&quot;Bạn đã đạt giới hạn sử dụng mã này (&quot; + voucher.getUserLimit() + &quot; lần)&quot;, orderAmount);</span>
+            }
+        }
+
+<span class="nc" id="L101">        double discountAmount = 0.0;</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        if (&quot;PERCENTAGE&quot;.equalsIgnoreCase(voucher.getDiscountType())) {</span>
+<span class="nc" id="L103">            discountAmount = (orderAmount * voucher.getDiscountValue()) / 100.0;</span>
+<span class="nc bnc" id="L104" title="All 4 branches missed.">            if (voucher.getMaxDiscount() != null &amp;&amp; voucher.getMaxDiscount() &gt; 0) {</span>
+<span class="nc" id="L105">                discountAmount = Math.min(discountAmount, voucher.getMaxDiscount());</span>
+            }
+<span class="nc bnc" id="L107" title="All 4 branches missed.">        } else if (&quot;FIXED_AMOUNT&quot;.equalsIgnoreCase(voucher.getDiscountType()) || &quot;FREE_SHIPPING&quot;.equalsIgnoreCase(voucher.getDiscountType())) {</span>
+<span class="nc" id="L108">            discountAmount = Math.min(voucher.getDiscountValue(), orderAmount);</span>
+        }
+
+<span class="nc" id="L111">        discountAmount = Math.round(discountAmount);</span>
+<span class="nc" id="L112">        double finalAmount = Math.max(0.0, orderAmount - discountAmount);</span>
+
+<span class="nc" id="L114">        return new VoucherCalculationResponse(</span>
+                true,
+<span class="nc" id="L116">                &quot;Áp dụng mã giảm giá thành công! Giảm &quot; + formatter.format(discountAmount) + &quot;đ&quot;,</span>
+                cleanCode,
+<span class="nc" id="L118">                voucher.getDiscountType(),</span>
+                discountAmount,
+                finalAmount
+        );
+    }
+
+    @Transactional
+    public void recordUsage(String voucherCode, String userId, String orderId) {
+<span class="nc bnc" id="L126" title="All 4 branches missed.">        if (voucherCode == null || voucherCode.isBlank()) return;</span>
+<span class="nc" id="L127">        Voucher voucher = voucherRepository.findByCodeIgnoreCase(voucherCode.trim()).orElse(null);</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        if (voucher != null) {</span>
+<span class="nc" id="L129">            voucher.setUsedCount(voucher.getUsedCount() + 1);</span>
+<span class="nc" id="L130">            voucherRepository.save(voucher);</span>
+
+<span class="nc" id="L132">            VoucherUsage usage = new VoucherUsage(</span>
+<span class="nc" id="L133">                    UUID.randomUUID().toString(),</span>
+<span class="nc" id="L134">                    voucher.getId(),</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">                    userId != null ? userId : &quot;GUEST&quot;,</span>
+                    orderId
+            );
+<span class="nc" id="L138">            voucherUsageRepository.save(usage);</span>
+        }
+<span class="nc" id="L140">    }</span>
+
+    @Transactional
+    public void restoreVoucherUsage(String voucherCode, String orderId) {
+<span class="nc bnc" id="L144" title="All 4 branches missed.">        if (voucherCode == null || voucherCode.isBlank()) return;</span>
+<span class="nc" id="L145">        Voucher voucher = voucherRepository.findByCodeIgnoreCase(voucherCode.trim()).orElse(null);</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        if (voucher != null) {</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">            if (voucher.getUsedCount() &gt; 0) {</span>
+<span class="nc" id="L148">                voucher.setUsedCount(voucher.getUsedCount() - 1);</span>
+<span class="nc" id="L149">                voucherRepository.save(voucher);</span>
+            }
+<span class="nc bnc" id="L151" title="All 4 branches missed.">            if (orderId != null &amp;&amp; !orderId.isBlank()) {</span>
+<span class="nc" id="L152">                voucherUsageRepository.deleteByOrderId(orderId);</span>
+            }
+<span class="nc" id="L154">            log.info(&quot;Đã phục hồi lượt dùng voucher {} cho đơn hàng {}&quot;, voucherCode, orderId);</span>
+        }
+<span class="nc" id="L156">    }</span>
+
+    @Transactional
+    public Voucher createVoucher(Voucher voucher) {
+<span class="nc bnc" id="L160" title="All 4 branches missed.">        if (voucher.getId() == null || voucher.getId().isBlank()) {</span>
+<span class="nc" id="L161">            voucher.setId(UUID.randomUUID().toString());</span>
+        }
+<span class="nc" id="L163">        voucher.setCode(voucher.getCode().trim().toUpperCase());</span>
+<span class="nc" id="L164">        return voucherRepository.save(voucher);</span>
+    }
+
+    @Transactional
+    public Voucher updateVoucher(String id, Voucher req) {
+<span class="nc" id="L169">        Voucher existing = voucherRepository.findById(id)</span>
+<span class="nc" id="L170">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Không tìm thấy voucher ID: &quot; + id));</span>
+
+<span class="nc" id="L172">        existing.setCode(req.getCode().trim().toUpperCase());</span>
+<span class="nc" id="L173">        existing.setDiscountType(req.getDiscountType());</span>
+<span class="nc" id="L174">        existing.setDiscountValue(req.getDiscountValue());</span>
+<span class="nc" id="L175">        existing.setMaxDiscount(req.getMaxDiscount());</span>
+<span class="nc" id="L176">        existing.setMinOrderAmount(req.getMinOrderAmount());</span>
+<span class="nc" id="L177">        existing.setUsageLimit(req.getUsageLimit());</span>
+<span class="nc" id="L178">        existing.setUserLimit(req.getUserLimit());</span>
+<span class="nc" id="L179">        existing.setStartDate(req.getStartDate());</span>
+<span class="nc" id="L180">        existing.setEndDate(req.getEndDate());</span>
+<span class="nc" id="L181">        existing.setActive(req.isActive());</span>
+
+<span class="nc" id="L183">        return voucherRepository.save(existing);</span>
+    }
+
+    @Transactional
+    public void deleteVoucher(String id) {
+<span class="nc" id="L188">        voucherRepository.deleteById(id);</span>
+<span class="nc" id="L189">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

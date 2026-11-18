@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.service</a> &gt; <span class="el_source">OrderService.java</span></div><h1>OrderService.java</h1><pre class="source lang-java linenums">package com.example.hebekery.service;
+
+import com.example.hebekery.config.SepayConfig;
+import com.example.hebekery.dto.CheckoutResponse;
+import com.example.hebekery.dto.OrderResponse;
+import com.example.hebekery.dto.PublicOrderTrackingResponse;
+import com.example.hebekery.dto.request.CheckoutRequest;
+import com.example.hebekery.model.CartItem;
+import com.example.hebekery.model.Order;
+import com.example.hebekery.model.OrderItem;
+import com.example.hebekery.model.OrderStatusHistory;
+import com.example.hebekery.model.ReturnHistory;
+import com.example.hebekery.model.User;
+import com.example.hebekery.model.Product;
+import com.example.hebekery.repository.OrderRepository;
+import com.example.hebekery.repository.OrderStatusHistoryRepository;
+import com.example.hebekery.repository.ReturnHistoryRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class OrderService {
+
+    private final OrderRepository orderRepository;
+    private final OrderStatusHistoryRepository orderStatusHistoryRepository;
+    private final ReturnHistoryRepository returnHistoryRepository;
+    private final ProductService productService;
+    private final SepayConfig sepayConfig;
+    private final VoucherService voucherService;
+    private final LoyaltyService loyaltyService;
+    private final ProductBatchService productBatchService;
+
+    public OrderService(OrderRepository orderRepository,
+                        OrderStatusHistoryRepository orderStatusHistoryRepository,
+                        ReturnHistoryRepository returnHistoryRepository,
+                        ProductService productService,
+                        SepayConfig sepayConfig,
+                        VoucherService voucherService,
+                        LoyaltyService loyaltyService,
+<span class="fc" id="L47">                        ProductBatchService productBatchService) {</span>
+<span class="fc" id="L48">        this.orderRepository = orderRepository;</span>
+<span class="fc" id="L49">        this.orderStatusHistoryRepository = orderStatusHistoryRepository;</span>
+<span class="fc" id="L50">        this.returnHistoryRepository = returnHistoryRepository;</span>
+<span class="fc" id="L51">        this.productService = productService;</span>
+<span class="fc" id="L52">        this.sepayConfig = sepayConfig;</span>
+<span class="fc" id="L53">        this.voucherService = voucherService;</span>
+<span class="fc" id="L54">        this.loyaltyService = loyaltyService;</span>
+<span class="fc" id="L55">        this.productBatchService = productBatchService;</span>
+<span class="fc" id="L56">    }</span>
+
+    @Transactional
+    public CheckoutResponse createOrder(User user, List&lt;CartItem&gt; cartItems, double subtotal, CheckoutRequest request) {
+<span class="fc" id="L60">        validateCheckout(user, cartItems);</span>
+
+<span class="fc" id="L62">        Order order = new Order();</span>
+<span class="fc" id="L63">        String technicalId = &quot;ORD-&quot; + java.util.UUID.randomUUID();</span>
+<span class="fc" id="L64">        String businessCode = &quot;HBK-&quot; + LocalDate.now().toString().replace(&quot;-&quot;, &quot;&quot;) + &quot;-&quot; + java.util.UUID.randomUUID().toString().substring(0, 6).toUpperCase();</span>
+<span class="fc" id="L65">        order.setId(technicalId);</span>
+<span class="fc" id="L66">        order.setOrderCode(businessCode);</span>
+<span class="fc" id="L67">        order.setUserId(user.getId());</span>
+<span class="fc" id="L68">        order.setCustomerName(request.getCustomerName());</span>
+<span class="fc" id="L69">        order.setPhone(request.getPhone());</span>
+<span class="fc" id="L70">        order.setAddress(request.getAddress());</span>
+<span class="fc" id="L71">        order.setNote(request.getNote());</span>
+<span class="fc" id="L72">        order.setPaymentMethod(request.getPaymentMethod());</span>
+<span class="fc" id="L73">        order.setPaymentStatus(&quot;PENDING&quot;);</span>
+<span class="fc" id="L74">        order.setOrderStatus(&quot;PENDING&quot;);</span>
+
+        // Calculate shipping fee: &gt;= 299,000 VND is Free Shipping (0 VND), otherwise 30,000 VND
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">        double shippingFee = subtotal &gt;= 299000.0 ? 0.0 : 30000.0;</span>
+<span class="fc" id="L78">        double discountAmount = 0.0;</span>
+<span class="fc" id="L79">        String appliedVoucherCode = null;</span>
+
+<span class="pc bpc" id="L81" title="3 of 4 branches missed.">        if (request.getVoucherCode() != null &amp;&amp; !request.getVoucherCode().trim().isEmpty()) {</span>
+<span class="nc" id="L82">            com.example.hebekery.dto.VoucherCalculationResponse vCalc = voucherService.validateAndCalculate(</span>
+<span class="nc" id="L83">                request.getVoucherCode(),</span>
+                subtotal,
+<span class="nc" id="L85">                user.getId()</span>
+            );
+<span class="nc bnc" id="L87" title="All 4 branches missed.">            if (vCalc != null &amp;&amp; vCalc.isValid()) {</span>
+<span class="nc" id="L88">                appliedVoucherCode = vCalc.getCode();</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">                if (&quot;FREE_SHIPPING&quot;.equalsIgnoreCase(vCalc.getDiscountType())) {</span>
+<span class="nc" id="L90">                    shippingFee = 0.0;</span>
+                } else {
+<span class="nc" id="L92">                    discountAmount = vCalc.getDiscountAmount();</span>
+                }
+            }
+        }
+
+        // Loyalty points discount calculation (max 30% of subtotal)
+<span class="fc" id="L98">        int pointsUsed = 0;</span>
+<span class="fc" id="L99">        double pointsDiscountAmount = 0.0;</span>
+<span class="pc bpc" id="L100" title="3 of 4 branches missed.">        if (request.getPointsUsed() != null &amp;&amp; request.getPointsUsed() &gt; 0) {</span>
+<span class="nc" id="L101">            int maxAllowedPoints = (int) Math.floor((subtotal * 0.3) / 1000.0);</span>
+<span class="nc" id="L102">            pointsUsed = Math.min(request.getPointsUsed(), maxAllowedPoints);</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">            if (pointsUsed &gt; 0) {</span>
+<span class="nc" id="L104">                pointsDiscountAmount = pointsUsed * 1000.0;</span>
+<span class="nc" id="L105">                loyaltyService.redeemPointsForOrder(user.getId(), technicalId, pointsUsed);</span>
+            }
+        }
+
+<span class="fc" id="L109">        double total = Math.max(0.0, subtotal + shippingFee - discountAmount - pointsDiscountAmount);</span>
+<span class="fc" id="L110">        order.setPointsUsed(pointsUsed);</span>
+<span class="fc" id="L111">        order.setPointsDiscountAmount(pointsDiscountAmount);</span>
+<span class="fc" id="L112">        order.setSubtotal(subtotal);</span>
+<span class="fc" id="L113">        order.setShippingFee(shippingFee);</span>
+<span class="fc" id="L114">        order.setDiscountAmount(discountAmount);</span>
+<span class="fc" id="L115">        order.setVoucherCode(appliedVoucherCode);</span>
+<span class="fc" id="L116">        order.setTotal(total);</span>
+<span class="fc" id="L117">        order.setCreatedAt(LocalDateTime.now());</span>
+<span class="fc" id="L118">        order.setItems(copyItems(order, cartItems));</span>
+<span class="fc" id="L119">        orderRepository.save(order);</span>
+
+        // Record voucher usage if successfully applied
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">        if (appliedVoucherCode != null) {</span>
+<span class="nc" id="L123">            voucherService.recordUsage(appliedVoucherCode, user.getId(), order.getId());</span>
+        }
+
+<span class="fc" id="L126">        addHistory(order, &quot;User tạo đơn hàng&quot;, &quot;USER&quot;);</span>
+
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        if (&quot;VIETQR&quot;.equalsIgnoreCase(request.getPaymentMethod())) {</span>
+<span class="fc" id="L129">            String paymentUrl = sepayConfig.generateVietQrUrl(order.getId(), order.getTotal());</span>
+<span class="fc" id="L130">            return new CheckoutResponse(</span>
+<span class="fc" id="L131">                    order.getId(),</span>
+                    &quot;VIETQR&quot;,
+                    &quot;PENDING&quot;,
+                    paymentUrl,
+                    &quot;Đơn hàng đã tạo. Vui lòng quét mã VietQR để hoàn tất thanh toán.&quot;
+            );
+        }
+
+<span class="fc" id="L139">        return new CheckoutResponse(</span>
+<span class="fc" id="L140">                order.getId(),</span>
+                &quot;COD&quot;,
+                &quot;PENDING&quot;,
+                null,
+                &quot;Đặt hàng COD thành công. Bạn sẽ thanh toán khi nhận hàng.&quot;
+        );
+    }
+
+    public void validateCheckout(User user, List&lt;CartItem&gt; cartItems) {
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">        if (user == null) {</span>
+<span class="nc" id="L150">            throw new IllegalStateException(&quot;Vui lòng đăng nhập&quot;);</span>
+        }
+<span class="pc bpc" id="L152" title="2 of 4 branches missed.">        if (cartItems == null || cartItems.isEmpty()) {</span>
+<span class="nc" id="L153">            throw new IllegalArgumentException(&quot;Giỏ hàng đang trống&quot;);</span>
+        }
+<span class="fc" id="L155">        cartItems.forEach(item -&gt; productService.ensureAvailable(item.getProductId(), item.getQuantity()));</span>
+<span class="fc" id="L156">    }</span>
+
+    @Transactional
+    public CheckoutResponse createPaidOrder(User user, List&lt;CartItem&gt; cartItems, double subtotal, CheckoutRequest request) {
+<span class="nc" id="L160">        validateCheckout(user, cartItems);</span>
+
+<span class="nc" id="L162">        Order order = new Order();</span>
+<span class="nc" id="L163">        String technicalId = &quot;ORD-&quot; + java.util.UUID.randomUUID();</span>
+<span class="nc" id="L164">        String businessCode = &quot;HBK-&quot; + LocalDate.now().toString().replace(&quot;-&quot;, &quot;&quot;) + &quot;-&quot; + java.util.UUID.randomUUID().toString().substring(0, 6).toUpperCase();</span>
+<span class="nc" id="L165">        order.setId(technicalId);</span>
+<span class="nc" id="L166">        order.setOrderCode(businessCode);</span>
+<span class="nc" id="L167">        order.setUserId(user.getId());</span>
+<span class="nc" id="L168">        order.setCustomerName(request.getCustomerName());</span>
+<span class="nc" id="L169">        order.setPhone(request.getPhone());</span>
+<span class="nc" id="L170">        order.setAddress(request.getAddress());</span>
+<span class="nc" id="L171">        order.setNote(request.getNote());</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">        order.setPaymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod() : &quot;VIETQR&quot;);</span>
+<span class="nc" id="L173">        order.setPaymentStatus(&quot;PAID&quot;);</span>
+<span class="nc" id="L174">        order.setOrderStatus(&quot;PENDING&quot;);</span>
+<span class="nc" id="L175">        order.setTotal(subtotal + 30000);</span>
+<span class="nc" id="L176">        order.setCreatedAt(LocalDateTime.now());</span>
+<span class="nc" id="L177">        order.setItems(copyItems(order, cartItems));</span>
+<span class="nc" id="L178">        orderRepository.save(order);</span>
+<span class="nc" id="L179">        addHistory(order, &quot;Đơn hàng đã được thanh toán&quot;, &quot;SYSTEM&quot;);</span>
+
+<span class="nc" id="L181">        return new CheckoutResponse(</span>
+<span class="nc" id="L182">                order.getId(),</span>
+<span class="nc" id="L183">                order.getPaymentMethod(),</span>
+                &quot;PAID&quot;,
+                null,
+                &quot;Thanh toán thành công. Đơn hàng đã được ghi nhận.&quot;
+        );
+    }
+
+    public List&lt;Order&gt; getRawOrdersByUser(String userId) {
+<span class="nc" id="L191">        return orderRepository.findByUserId(userId).stream()</span>
+<span class="nc" id="L192">                .sorted((a, b) -&gt; {</span>
+<span class="nc bnc" id="L193" title="All 4 branches missed.">                    if (a.getCreatedAt() == null || b.getCreatedAt() == null) return 0;</span>
+<span class="nc" id="L194">                    return b.getCreatedAt().compareTo(a.getCreatedAt());</span>
+                })
+<span class="nc" id="L196">                .collect(Collectors.toList());</span>
+    }
+
+    public List&lt;OrderResponse&gt; getOrdersByUser(String userId) {
+<span class="nc" id="L200">        return orderRepository.findByUserId(userId).stream().map(this::toResponse).collect(Collectors.toList());</span>
+    }
+
+    public List&lt;OrderResponse&gt; getAllOrders() {
+<span class="nc" id="L204">        return orderRepository.findAll().stream().map(this::toResponse).collect(Collectors.toList());</span>
+    }
+
+    public Page&lt;OrderResponse&gt; searchOrders(String keyword, Pageable pageable) {
+<span class="nc" id="L208">        return searchOrders(keyword, &quot;&quot;, &quot;&quot;, null, null, pageable);</span>
+    }
+
+    public Page&lt;OrderResponse&gt; searchOrders(String keyword, String orderStatus, String paymentMethod, LocalDate dateFrom, LocalDate dateTo, Pageable pageable) {
+<span class="nc bnc" id="L212" title="All 2 branches missed.">        LocalDateTime from = dateFrom == null ? null : dateFrom.atStartOfDay();</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">        LocalDateTime to = dateTo == null ? null : dateTo.plusDays(1).atStartOfDay();</span>
+<span class="nc" id="L214">        return orderRepository.search(</span>
+<span class="nc" id="L215">                clean(keyword),</span>
+<span class="nc" id="L216">                clean(orderStatus),</span>
+<span class="nc" id="L217">                clean(paymentMethod),</span>
+                from,
+                to,
+                pageable
+<span class="nc" id="L221">        ).map(this::toResponse);</span>
+    }
+
+    public Order getOrderById(String orderId) {
+<span class="pc" id="L225">        return orderRepository.findWithItemsById(orderId).or(() -&gt; orderRepository.findByOrderCode(orderId)).or(() -&gt; orderRepository.findById(orderId)).orElseThrow(() -&gt; new IllegalArgumentException(&quot;Không tìm thấy đơn hàng&quot;));</span>
+    }
+
+    public PublicOrderTrackingResponse trackOrder(String orderCode, String phone) {
+<span class="fc bfc" id="L229" title="All 8 branches covered.">        if (orderCode == null || phone == null || orderCode.isBlank() || phone.isBlank()) {</span>
+<span class="fc" id="L230">            return null;</span>
+        }
+<span class="fc" id="L232">        String trimmedCode = orderCode.trim();</span>
+<span class="fc" id="L233">        String trimmedPhone = phone.trim();</span>
+
+<span class="fc" id="L235">        Order order = orderRepository.findByOrderCode(trimmedCode)</span>
+<span class="pc" id="L236">                .or(() -&gt; orderRepository.findWithItemsById(trimmedCode))</span>
+<span class="pc" id="L237">                .or(() -&gt; orderRepository.findById(trimmedCode))</span>
+<span class="fc" id="L238">                .orElse(null);</span>
+
+<span class="pc bpc" id="L240" title="1 of 2 branches missed.">        if (order == null) {</span>
+<span class="nc" id="L241">            return null;</span>
+        }
+
+<span class="pc bpc" id="L244" title="1 of 4 branches missed.">        if (order.getPhone() == null || !order.getPhone().trim().equals(trimmedPhone)) {</span>
+<span class="fc" id="L245">            return null;</span>
+        }
+
+<span class="fc" id="L248">        return PublicOrderTrackingResponse.from(order);</span>
+    }
+
+    @Transactional
+    public Order updateStatus(String orderId, String orderStatus, String paymentStatus) {
+<span class="fc" id="L253">        Order order = getOrderById(orderId);</span>
+<span class="pc bpc" id="L254" title="1 of 2 branches missed.">        if (&quot;CANCELLED&quot;.equals(order.getOrderStatus())</span>
+<span class="pc bpc" id="L255" title="1 of 2 branches missed.">                || &quot;RECEIVED&quot;.equals(order.getOrderStatus())</span>
+<span class="pc bpc" id="L256" title="1 of 2 branches missed.">                || &quot;RETURN_REQUESTED&quot;.equals(order.getOrderStatus())</span>
+<span class="pc bpc" id="L257" title="1 of 2 branches missed.">                || &quot;RETURNED&quot;.equals(order.getOrderStatus())) {</span>
+<span class="nc" id="L258">            throw new IllegalArgumentException(&quot;Đơn hàng hiện không thể cập nhật giao hàng&quot;);</span>
+        }
+<span class="pc bpc" id="L260" title="1 of 2 branches missed.">        if (&quot;SHIPPING&quot;.equals(orderStatus)) {</span>
+<span class="nc" id="L261">            throw new IllegalArgumentException(&quot;Đơn chờ xử lý chỉ được chuyển sang đang giao bằng thao tác tạo vận đơn&quot;);</span>
+        }
+<span class="pc bpc" id="L263" title="1 of 4 branches missed.">        if (&quot;DELIVERED&quot;.equals(orderStatus) &amp;&amp; !&quot;SHIPPING&quot;.equals(order.getOrderStatus())) {</span>
+<span class="fc" id="L264">            throw new IllegalArgumentException(&quot;Chỉ đơn đang giao mới được chuyển sang đã giao&quot;);</span>
+        }
+<span class="pc bpc" id="L266" title="2 of 4 branches missed.">        if (!&quot;SHIPPING&quot;.equals(orderStatus) &amp;&amp; !&quot;DELIVERED&quot;.equals(orderStatus)) {</span>
+<span class="nc" id="L267">            throw new IllegalArgumentException(&quot;Admin chỉ được chuyển đơn sang Đang giao hoặc Đã giao&quot;);</span>
+        }
+<span class="pc bpc" id="L269" title="2 of 4 branches missed.">        if (orderStatus != null &amp;&amp; !orderStatus.isBlank()) {</span>
+<span class="fc" id="L270">            order.setOrderStatus(orderStatus);</span>
+        }
+<span class="pc bpc" id="L272" title="2 of 4 branches missed.">        if (&quot;DELIVERED&quot;.equals(orderStatus) &amp;&amp; &quot;COD&quot;.equals(order.getPaymentMethod())) {</span>
+<span class="fc" id="L273">            order.setPaymentStatus(&quot;PAID&quot;);</span>
+<span class="nc bnc" id="L274" title="All 4 branches missed.">        } else if (paymentStatus != null &amp;&amp; !paymentStatus.isBlank()) {</span>
+<span class="nc bnc" id="L275" title="All 4 branches missed.">            if (!&quot;PENDING&quot;.equals(paymentStatus) &amp;&amp; !&quot;PAID&quot;.equals(paymentStatus)) {</span>
+<span class="nc" id="L276">                throw new IllegalArgumentException(&quot;Trạng thái thanh toán không hợp lệ&quot;);</span>
+            }
+<span class="nc" id="L278">            order.setPaymentStatus(paymentStatus);</span>
+        }
+<span class="fc" id="L280">        deductInventoryIfNeeded(order);</span>
+<span class="pc bpc" id="L281" title="1 of 2 branches missed.">        if (&quot;DELIVERED&quot;.equals(order.getOrderStatus())) {</span>
+<span class="fc" id="L282">            loyaltyService.awardPointsForDeliveredOrder(order);</span>
+        }
+<span class="fc" id="L284">        Order saved = orderRepository.save(order);</span>
+<span class="fc" id="L285">        addHistory(saved, &quot;Admin cập nhật trạng thái&quot;, &quot;ADMIN&quot;);</span>
+<span class="fc" id="L286">        return saved;</span>
+    }
+
+    public Order updateAdminNote(String orderId, String adminNote) {
+<span class="nc" id="L290">        Order order = getOrderById(orderId);</span>
+<span class="nc" id="L291">        order.setAdminNote(adminNote);</span>
+<span class="nc" id="L292">        Order saved = orderRepository.save(order);</span>
+<span class="nc" id="L293">        addHistory(saved, &quot;Admin ghi chú đơn hàng&quot;, &quot;ADMIN&quot;);</span>
+<span class="nc" id="L294">        return saved;</span>
+    }
+
+    public Order updateShippingInfo(String orderId, String shippingCarrier, String trackingCode) {
+<span class="nc" id="L298">        Order order = getOrderById(orderId);</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">        if (!&quot;PENDING&quot;.equals(order.getOrderStatus())) {</span>
+<span class="nc" id="L300">            throw new IllegalArgumentException(&quot;Chỉ đơn chờ xử lý mới được tạo mã vận đơn&quot;);</span>
+        }
+<span class="nc bnc" id="L302" title="All 4 branches missed.">        if (shippingCarrier == null || shippingCarrier.isBlank()) {</span>
+<span class="nc" id="L303">            throw new IllegalArgumentException(&quot;Vui lòng chọn đơn vị giao hàng&quot;);</span>
+        }
+<span class="nc bnc" id="L305" title="All 4 branches missed.">        if (&quot;CANCELLED&quot;.equals(order.getOrderStatus()) || &quot;RETURNED&quot;.equals(order.getOrderStatus())) {</span>
+<span class="nc" id="L306">            throw new IllegalArgumentException(&quot;Đơn đã hủy hoặc đã đổi trả không thể cập nhật vận chuyển&quot;);</span>
+        }
+<span class="nc" id="L308">        order.setShippingCarrier(clean(shippingCarrier));</span>
+<span class="nc" id="L309">        order.setTrackingCode(generateTrackingCode(order));</span>
+<span class="nc" id="L310">        order.setOrderStatus(&quot;SHIPPING&quot;);</span>
+<span class="nc" id="L311">        Order saved = orderRepository.save(order);</span>
+<span class="nc" id="L312">        addHistory(saved, &quot;Admin cập nhật thông tin vận chuyển&quot;, &quot;ADMIN&quot;);</span>
+<span class="nc" id="L313">        return saved;</span>
+    }
+
+    public Order cancelOrder(String orderId, String userId) {
+<span class="fc" id="L317">        Order order = getOrderById(orderId);</span>
+<span class="fc bfc" id="L318" title="All 2 branches covered.">        if (!order.getUserId().equals(userId)) {</span>
+<span class="fc" id="L319">            throw new IllegalArgumentException(&quot;Bạn không có quyền hủy đơn hàng này&quot;);</span>
+        }
+<span class="pc bpc" id="L321" title="1 of 4 branches missed.">        if (!&quot;PENDING&quot;.equals(order.getOrderStatus()) &amp;&amp; !&quot;PROCESSING&quot;.equals(order.getOrderStatus())) {</span>
+<span class="fc" id="L322">            throw new IllegalArgumentException(&quot;Đơn hàng hiện tại không thể hủy&quot;);</span>
+        }
+<span class="fc" id="L324">        order.setOrderStatus(&quot;CANCELLED&quot;);</span>
+<span class="pc bpc" id="L325" title="1 of 2 branches missed.">        if (order.getPointsUsed() &gt; 0) {</span>
+<span class="nc" id="L326">            loyaltyService.refundPointsForOrder(order.getUserId(), order.getId(), order.getPointsUsed(), &quot;Hủy đơn hàng&quot;);</span>
+        }
+<span class="pc bpc" id="L328" title="3 of 4 branches missed.">        if (order.getVoucherCode() != null &amp;&amp; !order.getVoucherCode().isBlank()) {</span>
+<span class="nc" id="L329">            voucherService.restoreVoucherUsage(order.getVoucherCode(), order.getId());</span>
+        }
+<span class="fc" id="L331">        Order saved = orderRepository.save(order);</span>
+<span class="fc" id="L332">        addHistory(saved, &quot;User hủy đơn hàng&quot;, &quot;USER&quot;);</span>
+<span class="fc" id="L333">        return saved;</span>
+    }
+
+    @Transactional
+    public Order markReceived(String orderId, String userId) {
+<span class="nc" id="L338">        Order order = getOwnedOrder(orderId, userId);</span>
+<span class="nc bnc" id="L339" title="All 4 branches missed.">        if (!&quot;SHIPPING&quot;.equals(order.getOrderStatus()) &amp;&amp; !&quot;DELIVERED&quot;.equals(order.getOrderStatus())) {</span>
+<span class="nc" id="L340">            throw new IllegalArgumentException(&quot;Chỉ có thể xác nhận đã nhận khi đơn đang giao hoặc đã giao&quot;);</span>
+        }
+<span class="nc" id="L342">        order.setOrderStatus(&quot;RECEIVED&quot;);</span>
+<span class="nc bnc" id="L343" title="All 2 branches missed.">        if (&quot;COD&quot;.equals(order.getPaymentMethod())) {</span>
+<span class="nc" id="L344">            order.setPaymentStatus(&quot;PAID&quot;);</span>
+        }
+<span class="nc" id="L346">        deductInventoryIfNeeded(order);</span>
+<span class="nc" id="L347">        loyaltyService.awardPointsForDeliveredOrder(order);</span>
+<span class="nc" id="L348">        Order saved = orderRepository.save(order);</span>
+<span class="nc" id="L349">        addHistory(saved, &quot;User xác nhận đã nhận hàng&quot;, &quot;USER&quot;);</span>
+<span class="nc" id="L350">        return saved;</span>
+    }
+
+    @Transactional
+    public Order requestReturn(String orderId, String userId, String reason) {
+<span class="fc" id="L355">        Order order = getOwnedOrder(orderId, userId);</span>
+<span class="pc bpc" id="L356" title="1 of 2 branches missed.">        if (!&quot;RECEIVED&quot;.equals(order.getOrderStatus())) {</span>
+<span class="nc" id="L357">            throw new IllegalArgumentException(&quot;Chỉ có thể yêu cầu đổi trả sau khi đã nhận hàng&quot;);</span>
+        }
+<span class="pc bpc" id="L359" title="2 of 4 branches missed.">        if (reason == null || reason.isBlank()) {</span>
+<span class="nc" id="L360">            throw new IllegalArgumentException(&quot;Vui lòng nhập lý do đổi trả&quot;);</span>
+        }
+<span class="fc" id="L362">        order.setOrderStatus(&quot;RETURN_REQUESTED&quot;);</span>
+<span class="fc" id="L363">        order.setReturnStatus(&quot;PENDING&quot;);</span>
+<span class="fc" id="L364">        order.setReturnReason(reason.trim());</span>
+<span class="fc" id="L365">        Order saved = orderRepository.save(order);</span>
+<span class="fc" id="L366">        addHistory(saved, &quot;User yêu cầu đổi trả: &quot; + reason.trim(), &quot;USER&quot;);</span>
+<span class="fc" id="L367">        addReturnHistory(saved, &quot;PENDING&quot;, reason.trim(), null, &quot;USER&quot;);</span>
+<span class="fc" id="L368">        return saved;</span>
+    }
+
+    @Transactional
+    public Order reviewReturn(String orderId, String decision, String adminNote) {
+<span class="fc" id="L373">        Order order = getOrderById(orderId);</span>
+<span class="pc bpc" id="L374" title="1 of 2 branches missed.">        if (!&quot;RETURN_REQUESTED&quot;.equals(order.getOrderStatus())) {</span>
+<span class="nc" id="L375">            throw new IllegalArgumentException(&quot;Đơn hàng chưa có yêu cầu đổi trả&quot;);</span>
+        }
+<span class="pc bpc" id="L377" title="1 of 2 branches missed.">        if (&quot;APPROVED&quot;.equals(decision)) {</span>
+<span class="fc" id="L378">            order.setReturnStatus(&quot;APPROVED&quot;);</span>
+<span class="fc" id="L379">            order.setOrderStatus(&quot;RETURNED&quot;);</span>
+<span class="fc" id="L380">            restoreInventoryIfNeeded(order);</span>
+<span class="nc bnc" id="L381" title="All 2 branches missed.">        } else if (&quot;REJECTED&quot;.equals(decision)) {</span>
+<span class="nc" id="L382">            order.setReturnStatus(&quot;REJECTED&quot;);</span>
+<span class="nc" id="L383">            order.setOrderStatus(&quot;RECEIVED&quot;);</span>
+        } else {
+<span class="nc" id="L385">            throw new IllegalArgumentException(&quot;Quyết định đổi trả không hợp lệ&quot;);</span>
+        }
+<span class="fc" id="L387">        order.setAdminNote(adminNote);</span>
+<span class="fc" id="L388">        Order saved = orderRepository.save(order);</span>
+<span class="pc bpc" id="L389" title="1 of 2 branches missed.">        addHistory(saved, &quot;Admin &quot; + (&quot;APPROVED&quot;.equals(decision) ? &quot;duyệt&quot; : &quot;từ chối&quot;) + &quot; đổi trả: &quot; + safe(adminNote), &quot;ADMIN&quot;);</span>
+<span class="fc" id="L390">        addReturnHistory(saved, order.getReturnStatus(), order.getReturnReason(), adminNote, &quot;ADMIN&quot;);</span>
+<span class="fc" id="L391">        return saved;</span>
+    }
+
+    public List&lt;OrderStatusHistory&gt; getHistory(String orderId) {
+<span class="nc" id="L395">        return orderStatusHistoryRepository.findByOrderIdOrderByCreatedAtAsc(orderId);</span>
+    }
+
+    public List&lt;ReturnHistory&gt; getReturnHistory(String orderId) {
+<span class="nc" id="L399">        return returnHistoryRepository.findByOrderIdOrderByCreatedAtAsc(orderId);</span>
+    }
+
+    private Order getOwnedOrder(String orderId, String userId) {
+<span class="fc" id="L403">        Order order = getOrderById(orderId);</span>
+<span class="pc bpc" id="L404" title="1 of 2 branches missed.">        if (!order.getUserId().equals(userId)) {</span>
+<span class="nc" id="L405">            throw new IllegalArgumentException(&quot;Bạn không có quyền thao tác đơn hàng này&quot;);</span>
+        }
+<span class="fc" id="L407">        return order;</span>
+    }
+
+    private List&lt;OrderItem&gt; copyItems(Order order, List&lt;CartItem&gt; cartItems) {
+<span class="fc" id="L411">        return cartItems.stream()</span>
+<span class="fc" id="L412">                .map(item -&gt; {</span>
+<span class="fc" id="L413">                    Product product = productService.getProductById(item.getProductId());</span>
+<span class="fc" id="L414">                    OrderItem orderItem = new OrderItem(</span>
+<span class="fc" id="L415">                            item.getProductId(),</span>
+<span class="fc" id="L416">                            item.getProductName(),</span>
+<span class="fc" id="L417">                            item.getImageUrl(),</span>
+<span class="fc" id="L418">                            item.getPrice(),</span>
+<span class="fc" id="L419">                            item.getQuantity()</span>
+                    );
+<span class="pc bpc" id="L421" title="1 of 2 branches missed.">                    orderItem.setCostAtSale(product == null ? 0 : product.getAverageCost());</span>
+<span class="fc" id="L422">                    orderItem.setOrder(order);</span>
+<span class="fc" id="L423">                    return orderItem;</span>
+<span class="fc" id="L424">                }).collect(Collectors.toList());</span>
+
+    }
+
+    private OrderResponse toResponse(Order order) {
+<span class="nc bnc" id="L429" title="All 4 branches missed.">        OrderItem firstItem = (order.getItems() == null || order.getItems().isEmpty()) ? null : order.getItems().get(0);</span>
+<span class="nc" id="L430">        return new OrderResponse(</span>
+<span class="nc" id="L431">                order.getId(),</span>
+<span class="nc bnc" id="L432" title="All 2 branches missed.">                order.getCreatedAt() != null ? order.getCreatedAt().toString() : &quot;&quot;,</span>
+<span class="nc" id="L433">                statusClass(order),</span>
+<span class="nc" id="L434">                statusText(order),</span>
+<span class="nc" id="L435">                order.getOrderStatus(),</span>
+<span class="nc" id="L436">                order.getPaymentStatus(),</span>
+<span class="nc bnc" id="L437" title="All 2 branches missed.">                firstItem == null ? &quot;&quot; : firstItem.getImageUrl(),</span>
+<span class="nc bnc" id="L438" title="All 2 branches missed.">                firstItem == null ? &quot;&quot; : firstItem.getProductName(),</span>
+<span class="nc bnc" id="L439" title="All 2 branches missed.">                order.getItems() == null ? 0 : order.getItems().stream().mapToInt(OrderItem::getQuantity).sum(),</span>
+<span class="nc" id="L440">                order.getTotal()</span>
+        );
+    }
+
+    private String statusClass(Order order) {
+<span class="nc bnc" id="L445" title="All 4 branches missed.">        if (&quot;RECEIVED&quot;.equals(order.getOrderStatus()) || &quot;DELIVERED&quot;.equals(order.getOrderStatus())) {</span>
+<span class="nc" id="L446">            return &quot;status-success&quot;;</span>
+        }
+<span class="nc bnc" id="L448" title="All 6 branches missed.">        if (&quot;PENDING&quot;.equals(order.getOrderStatus()) || &quot;PROCESSING&quot;.equals(order.getOrderStatus()) || &quot;SHIPPING&quot;.equals(order.getOrderStatus())) {</span>
+<span class="nc" id="L449">            return &quot;status-pending&quot;;</span>
+        }
+<span class="nc bnc" id="L451" title="All 4 branches missed.">        if (&quot;CANCELLED&quot;.equals(order.getOrderStatus()) || &quot;RETURN_REQUESTED&quot;.equals(order.getOrderStatus())) {</span>
+<span class="nc" id="L452">            return &quot;status-cancelled&quot;;</span>
+        }
+<span class="nc" id="L454">        return &quot;status-new&quot;;</span>
+    }
+
+    public String statusText(Order order) {
+<span class="nc bnc" id="L458" title="All 9 branches missed.">        String orderText = switch (order.getOrderStatus()) {</span>
+<span class="nc" id="L459">            case &quot;PENDING&quot; -&gt; &quot;Chờ xử lý&quot;;</span>
+<span class="nc" id="L460">            case &quot;PROCESSING&quot; -&gt; &quot;Đang xử lý&quot;;</span>
+<span class="nc" id="L461">            case &quot;SHIPPING&quot; -&gt; &quot;Đang giao&quot;;</span>
+<span class="nc" id="L462">            case &quot;DELIVERED&quot; -&gt; &quot;Đã giao&quot;;</span>
+<span class="nc" id="L463">            case &quot;RECEIVED&quot; -&gt; &quot;Đã nhận&quot;;</span>
+<span class="nc" id="L464">            case &quot;CANCELLED&quot; -&gt; &quot;Đã hủy&quot;;</span>
+<span class="nc" id="L465">            case &quot;RETURN_REQUESTED&quot; -&gt; &quot;Yêu cầu đổi trả&quot;;</span>
+<span class="nc" id="L466">            case &quot;RETURNED&quot; -&gt; &quot;Đã đổi trả&quot;;</span>
+<span class="nc" id="L467">            default -&gt; order.getOrderStatus();</span>
+        };
+<span class="nc bnc" id="L469" title="All 3 branches missed.">        String paymentText = switch (order.getPaymentStatus()) {</span>
+<span class="nc" id="L470">            case &quot;PAID&quot; -&gt; &quot;Đã thanh toán&quot;;</span>
+<span class="nc" id="L471">            case &quot;PENDING&quot; -&gt; &quot;Chờ thanh toán&quot;;</span>
+<span class="nc" id="L472">            default -&gt; order.getPaymentStatus();</span>
+        };
+<span class="nc" id="L474">        return orderText + &quot; / &quot; + paymentText;</span>
+    }
+
+    public String returnStatusText(Order order) {
+<span class="nc bnc" id="L478" title="All 4 branches missed.">        if (order.getReturnStatus() == null || order.getReturnStatus().isBlank()) {</span>
+<span class="nc" id="L479">            return &quot;Chưa có yêu cầu&quot;;</span>
+        }
+<span class="nc bnc" id="L481" title="All 4 branches missed.">        return switch (order.getReturnStatus()) {</span>
+<span class="nc" id="L482">            case &quot;PENDING&quot; -&gt; &quot;Chờ duyệt&quot;;</span>
+<span class="nc" id="L483">            case &quot;APPROVED&quot; -&gt; &quot;Đã duyệt&quot;;</span>
+<span class="nc" id="L484">            case &quot;REJECTED&quot; -&gt; &quot;Đã từ chối&quot;;</span>
+<span class="nc" id="L485">            default -&gt; order.getReturnStatus();</span>
+        };
+    }
+
+    private void addHistory(Order order, String note, String changedBy) {
+<span class="fc" id="L490">        orderStatusHistoryRepository.save(new OrderStatusHistory(</span>
+<span class="fc" id="L491">                order.getId(),</span>
+<span class="fc" id="L492">                order.getOrderStatus(),</span>
+<span class="fc" id="L493">                order.getPaymentStatus(),</span>
+                note,
+                changedBy
+        ));
+<span class="fc" id="L497">    }</span>
+
+    private void addReturnHistory(Order order, String returnStatus, String reason, String adminNote, String changedBy) {
+<span class="fc" id="L500">        returnHistoryRepository.save(new ReturnHistory(order.getId(), returnStatus, reason, adminNote, changedBy));</span>
+<span class="fc" id="L501">    }</span>
+
+    private void deductInventoryIfNeeded(Order order) {
+<span class="pc bpc" id="L504" title="1 of 2 branches missed.">        if (order.isInventoryDeducted()) {</span>
+<span class="nc" id="L505">            return;</span>
+        }
+<span class="pc bpc" id="L507" title="3 of 4 branches missed.">        if (!&quot;DELIVERED&quot;.equals(order.getOrderStatus()) &amp;&amp; !&quot;RECEIVED&quot;.equals(order.getOrderStatus())) {</span>
+<span class="nc" id="L508">            return;</span>
+        }
+<span class="fc bfc" id="L510" title="All 2 branches covered.">        for (OrderItem item : order.getItems()) {</span>
+<span class="fc" id="L511">            productService.decreaseStock(item.getProductId(), item.getQuantity(), &quot;ORDER&quot;, order.getId(), &quot;Xuất kho theo đơn &quot; + order.getId());</span>
+<span class="fc" id="L512">            productBatchService.deductBatchStockFEFO(item.getProductId(), item.getQuantity());</span>
+<span class="fc" id="L513">        }</span>
+<span class="fc" id="L514">        order.setInventoryDeducted(true);</span>
+<span class="fc" id="L515">    }</span>
+
+    private void restoreInventoryIfNeeded(Order order) {
+<span class="pc bpc" id="L518" title="1 of 2 branches missed.">        if (!order.isInventoryDeducted()) {</span>
+<span class="nc" id="L519">            return;</span>
+        }
+<span class="fc bfc" id="L521" title="All 2 branches covered.">        for (OrderItem item : order.getItems()) {</span>
+<span class="fc" id="L522">            productService.increaseStock(item.getProductId(), item.getQuantity(), &quot;RETURN&quot;, order.getId(), &quot;Hoàn kho đổi trả &quot; + order.getId());</span>
+<span class="fc" id="L523">        }</span>
+<span class="fc" id="L524">        order.setInventoryDeducted(false);</span>
+<span class="fc" id="L525">    }</span>
+
+    private String safe(String value) {
+<span class="pc bpc" id="L528" title="1 of 2 branches missed.">        return value == null ? &quot;&quot; : value.trim();</span>
+    }
+
+    private String clean(String value) {
+<span class="nc bnc" id="L532" title="All 2 branches missed.">        return value == null ? &quot;&quot; : value.trim();</span>
+    }
+
+    private String generateTrackingCode(Order order) {
+<span class="nc bnc" id="L536" title="All 2 branches missed.">        String source = order.getId() == null ? String.valueOf(System.currentTimeMillis()) : order.getId().replaceAll(&quot;[^0-9A-Za-z]&quot;, &quot;&quot;);</span>
+<span class="nc bnc" id="L537" title="All 2 branches missed.">        String suffix = source.length() &gt; 10 ? source.substring(source.length() - 10) : source;</span>
+<span class="nc" id="L538">        return &quot;VD-&quot; + suffix + &quot;-&quot; + (System.currentTimeMillis() % 10000);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

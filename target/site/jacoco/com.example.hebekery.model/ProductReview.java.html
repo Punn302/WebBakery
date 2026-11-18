@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductReview.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.model</a> &gt; <span class="el_source">ProductReview.java</span></div><h1>ProductReview.java</h1><pre class="source lang-java linenums">package com.example.hebekery.model;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = &quot;product_reviews&quot;)
+<span class="fc" id="L10">public class ProductReview extends BaseEntity {</span>
+    @Id
+    private String id;
+    private String productId;
+    private String userId;
+    private String userName;
+    private int rating;
+    @Column(length = 1000)
+    private String comment;
+
+<span class="fc" id="L20">    public String getId() { return id; }</span>
+<span class="fc" id="L21">    public void setId(String id) { this.id = id; }</span>
+<span class="fc" id="L22">    public String getProductId() { return productId; }</span>
+<span class="fc" id="L23">    public void setProductId(String productId) { this.productId = productId; }</span>
+<span class="fc" id="L24">    public String getUserId() { return userId; }</span>
+<span class="fc" id="L25">    public void setUserId(String userId) { this.userId = userId; }</span>
+<span class="fc" id="L26">    public String getUserName() { return userName; }</span>
+<span class="fc" id="L27">    public void setUserName(String userName) { this.userName = userName; }</span>
+<span class="fc" id="L28">    public int getRating() { return rating; }</span>
+<span class="fc" id="L29">    public void setRating(int rating) { this.rating = rating; }</span>
+<span class="fc" id="L30">    public String getComment() { return comment; }</span>
+<span class="fc" id="L31">    public void setComment(String comment) { this.comment = comment; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

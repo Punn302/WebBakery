@@ -1,0 +1,722 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-users-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: varchar(64)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: phone
+                  type: varchar(32)
+              - column:
+                  name: role
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: active
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: force_password_change
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 001-create-products-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: products
+            columns:
+              - column:
+                  name: id
+                  type: varchar(64)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: category
+                  type: varchar(255)
+              - column:
+                  name: description
+                  type: varchar(1000)
+              - column:
+                  name: price
+                  type: double
+                  constraints:
+                    nullable: false
+              - column:
+                  name: image_url
+                  type: varchar(500)
+              - column:
+                  name: badge
+                  type: varchar(100)
+              - column:
+                  name: tag
+                  type: varchar(100)
+              - column:
+                  name: stock_quantity
+                  type: int
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: low_stock_threshold
+                  type: int
+                  defaultValueNumeric: 5
+                  constraints:
+                    nullable: false
+              - column:
+                  name: average_cost
+                  type: double
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: active
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_featured
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_products_active
+            tableName: products
+            columns:
+              - column:
+                  name: active
+              - column:
+                  name: is_featured
+
+  - changeSet:
+      id: 001-create-orders-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: orders
+            columns:
+              - column:
+                  name: id
+                  type: varchar(64)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: order_code
+                  type: varchar(64)
+              - column:
+                  name: user_id
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: customer_name
+                  type: varchar(255)
+              - column:
+                  name: phone
+                  type: varchar(32)
+              - column:
+                  name: address
+                  type: varchar(1000)
+              - column:
+                  name: note
+                  type: varchar(1000)
+              - column:
+                  name: payment_method
+                  type: varchar(32)
+              - column:
+                  name: payment_status
+                  type: varchar(32)
+              - column:
+                  name: order_status
+                  type: varchar(32)
+              - column:
+                  name: shipping_carrier
+                  type: varchar(255)
+              - column:
+                  name: tracking_code
+                  type: varchar(255)
+              - column:
+                  name: return_reason
+                  type: varchar(1000)
+              - column:
+                  name: return_status
+                  type: varchar(32)
+              - column:
+                  name: admin_note
+                  type: varchar(1000)
+              - column:
+                  name: total
+                  type: double
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: datetime
+              - column:
+                  name: inventory_deducted
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: orders
+            baseColumnNames: user_id
+            constraintName: fk_orders_user
+            referencedTableName: users
+            referencedColumnNames: id
+        - createIndex:
+            indexName: idx_orders_user_id
+            tableName: orders
+            columns:
+              - column:
+                  name: user_id
+        - createIndex:
+            indexName: idx_orders_phone
+            tableName: orders
+            columns:
+              - column:
+                  name: phone
+        - createIndex:
+            indexName: idx_orders_status
+            tableName: orders
+            columns:
+              - column:
+                  name: order_status
+        - createIndex:
+            indexName: idx_orders_order_code
+            tableName: orders
+            columns:
+              - column:
+                  name: order_code
+
+  - changeSet:
+      id: 001-create-order-items-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: order_items
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: order_id
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: product_id
+                  type: varchar(64)
+              - column:
+                  name: product_name
+                  type: varchar(255)
+              - column:
+                  name: image_url
+                  type: varchar(500)
+              - column:
+                  name: price
+                  type: double
+                  constraints:
+                    nullable: false
+              - column:
+                  name: quantity
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total
+                  type: double
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cost_at_sale
+                  type: double
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: order_items
+            baseColumnNames: order_id
+            constraintName: fk_order_items_order
+            referencedTableName: orders
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - createIndex:
+            indexName: idx_order_items_order_id
+            tableName: order_items
+            columns:
+              - column:
+                  name: order_id
+
+  - changeSet:
+      id: 001-create-cart-items-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: cart_items
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: varchar(64)
+              - column:
+                  name: product_id
+                  type: varchar(64)
+              - column:
+                  name: product_name
+                  type: varchar(255)
+              - column:
+                  name: image_url
+                  type: varchar(500)
+              - column:
+                  name: price
+                  type: double
+                  constraints:
+                    nullable: false
+              - column:
+                  name: quantity
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total
+                  type: double
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_cart_items_user_id
+            tableName: cart_items
+            columns:
+              - column:
+                  name: user_id
+
+  - changeSet:
+      id: 001-create-addresses-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: addresses
+            columns:
+              - column:
+                  name: id
+                  type: varchar(64)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: receiver_name
+                  type: varchar(255)
+              - column:
+                  name: phone
+                  type: varchar(32)
+              - column:
+                  name: address_line
+                  type: varchar(1000)
+              - column:
+                  name: province
+                  type: varchar(255)
+              - column:
+                  name: district
+                  type: varchar(255)
+              - column:
+                  name: ward
+                  type: varchar(255)
+              - column:
+                  name: default_address
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: addresses
+            baseColumnNames: user_id
+            constraintName: fk_addresses_user
+            referencedTableName: users
+            referencedColumnNames: id
+        - createIndex:
+            indexName: idx_addresses_user_id
+            tableName: addresses
+            columns:
+              - column:
+                  name: user_id
+
+  - changeSet:
+      id: 001-create-contact-messages-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: contact_messages
+            columns:
+              - column:
+                  name: id
+                  type: varchar(64)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+              - column:
+                  name: email
+                  type: varchar(255)
+              - column:
+                  name: phone
+                  type: varchar(32)
+              - column:
+                  name: subject
+                  type: varchar(255)
+              - column:
+                  name: message
+                  type: varchar(2000)
+              - column:
+                  name: status
+                  type: varchar(32)
+              - column:
+                  name: created_at
+                  type: datetime
+
+  - changeSet:
+      id: 001-create-purchase-receipts-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: purchase_receipts
+            columns:
+              - column:
+                  name: id
+                  type: varchar(64)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: receipt_code
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: product_id
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: product_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: supplier
+                  type: varchar(255)
+              - column:
+                  name: quantity
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: unit_cost
+                  type: double
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_cost
+                  type: double
+                  constraints:
+                    nullable: false
+              - column:
+                  name: imported_at
+                  type: datetime
+              - column:
+                  name: note
+                  type: varchar(1000)
+        - createIndex:
+            indexName: idx_purchase_receipts_product_id
+            tableName: purchase_receipts
+            columns:
+              - column:
+                  name: product_id
+        - createIndex:
+            indexName: idx_purchase_receipts_receipt_code
+            tableName: purchase_receipts
+            columns:
+              - column:
+                  name: receipt_code
+        - createIndex:
+            indexName: idx_purchase_receipts_imported_at
+            tableName: purchase_receipts
+            columns:
+              - column:
+                  name: imported_at
+
+  - changeSet:
+      id: 001-create-inventory-transactions-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: inventory_transactions
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: product_id
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: product_name
+                  type: varchar(255)
+              - column:
+                  name: transaction_type
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: quantity
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: stock_after
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: unit_cost
+                  type: double
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: reference_type
+                  type: varchar(64)
+              - column:
+                  name: reference_id
+                  type: varchar(128)
+              - column:
+                  name: note
+                  type: varchar(1000)
+              - column:
+                  name: created_at
+                  type: datetime
+        - createIndex:
+            indexName: idx_inventory_transactions_product_id
+            tableName: inventory_transactions
+            columns:
+              - column:
+                  name: product_id
+        - createIndex:
+            indexName: idx_inventory_transactions_reference
+            tableName: inventory_transactions
+            columns:
+              - column:
+                  name: reference_type
+              - column:
+                  name: reference_id
+        - createIndex:
+            indexName: idx_inventory_transactions_created_at
+            tableName: inventory_transactions
+            columns:
+              - column:
+                  name: created_at
+
+  - changeSet:
+      id: 001-create-product-reviews-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: product_reviews
+            columns:
+              - column:
+                  name: id
+                  type: varchar(255)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: product_id
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_name
+                  type: varchar(255)
+              - column:
+                  name: rating
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: comment
+                  type: varchar(1000)
+              - column:
+                  name: created_at
+                  type: datetime
+              - column:
+                  name: updated_at
+                  type: datetime
+        - createIndex:
+            indexName: idx_product_reviews_product_id
+            tableName: product_reviews
+            columns:
+              - column:
+                  name: product_id
+        - createIndex:
+            indexName: uk_product_reviews_product_user
+            tableName: product_reviews
+            columns:
+              - column:
+                  name: product_id
+              - column:
+                  name: user_id
+            unique: true
+
+  - changeSet:
+      id: 001-create-order-status-history-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: order_status_history
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: order_id
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_status
+                  type: varchar(32)
+              - column:
+                  name: payment_status
+                  type: varchar(32)
+              - column:
+                  name: note
+                  type: varchar(1000)
+              - column:
+                  name: changed_by
+                  type: varchar(64)
+              - column:
+                  name: created_at
+                  type: datetime
+        - addForeignKeyConstraint:
+            baseTableName: order_status_history
+            baseColumnNames: order_id
+            constraintName: fk_order_status_history_order
+            referencedTableName: orders
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - createIndex:
+            indexName: idx_order_status_history_order_id
+            tableName: order_status_history
+            columns:
+              - column:
+                  name: order_id
+
+  - changeSet:
+      id: 001-create-return-history-table
+      author: hebekery
+      changes:
+        - createTable:
+            tableName: return_history
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: order_id
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: return_status
+                  type: varchar(32)
+              - column:
+                  name: reason
+                  type: varchar(1000)
+              - column:
+                  name: admin_note
+                  type: varchar(1000)
+              - column:
+                  name: changed_by
+                  type: varchar(64)
+              - column:
+                  name: created_at
+                  type: datetime
+        - createIndex:
+            indexName: idx_return_history_order_id
+            tableName: return_history
+            columns:
+              - column:
+                  name: order_id

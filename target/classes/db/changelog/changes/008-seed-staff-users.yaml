@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: 008-seed-staff-users
+      author: hebekery
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: id, value: "3" }
+              - column: { name: email, value: "warehouse@hebekery.vn" }
+              - column: { name: password, value: "$2a$10$RlU6BD08cNC2xYeP8tCPcez/.AsMLr8ZEvYG7ElLmgJXf/V0RpF/y" }
+              - column: { name: name, value: "Thủ Kho Hebekery" }
+              - column: { name: phone, value: "0933112233" }
+              - column: { name: role, value: "STAFF_WAREHOUSE" }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: force_password_change, valueBoolean: false }
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: id, value: "4" }
+              - column: { name: email, value: "sales@hebekery.vn" }
+              - column: { name: password, value: "$2a$10$RlU6BD08cNC2xYeP8tCPcez/.AsMLr8ZEvYG7ElLmgJXf/V0RpF/y" }
+              - column: { name: name, value: "Nhân Viên Sales Hebekery" }
+              - column: { name: phone, value: "0944112233" }
+              - column: { name: role, value: "STAFF_SALES" }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: force_password_change, valueBoolean: false }

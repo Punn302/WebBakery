@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductRequest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.dto.request</a> &gt; <span class="el_source">ProductRequest.java</span></div><h1>ProductRequest.java</h1><pre class="source lang-java linenums">package com.example.hebekery.dto.request;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+
+@Schema(description = &quot;Yêu cầu tạo mới hoặc cập nhật sản phẩm&quot;)
+public class ProductRequest {
+
+    @Schema(description = &quot;Mã SKU hoặc định danh sản phẩm (bắt buộc khi tạo mới)&quot;, example = &quot;P018&quot;)
+    private String id;
+
+    @Schema(description = &quot;Tên sản phẩm bánh&quot;, example = &quot;Bánh Mì Lúa Mạch Đen Men Tự Nhiên&quot;)
+    @NotBlank(message = &quot;Tên sản phẩm không được để trống&quot;)
+    private String name;
+
+    @Schema(description = &quot;ID danh mục sản phẩm&quot;, example = &quot;1&quot;)
+    private Long categoryId;
+
+    @Schema(description = &quot;Tên danh mục sản phẩm (tương thích ngược)&quot;, example = &quot;Bánh Mì Healthy&quot;)
+    private String category;
+
+    @Schema(description = &quot;Mô tả sản phẩm, thành phần dinh dưỡng và công dụng&quot;, example = &quot;Bánh mì sourdough lúa mạch đen lên men chậm...&quot;)
+    private String description;
+
+    @Schema(description = &quot;Giá bán niêm yết (VNĐ)&quot;, example = &quot;75000.0&quot;)
+    @Min(value = 0, message = &quot;Giá sản phẩm phải lớn hơn hoặc bằng 0&quot;)
+    private double price;
+
+    @Schema(description = &quot;Đường dẫn ảnh Cloudinary&quot;, example = &quot;https://res.cloudinary.com/hebekery/image/upload/v1/products/sourdough.jpg&quot;)
+    private String imageUrl;
+
+    @Schema(description = &quot;Huy hiệu hiển thị (Mới, Bán chạy, Giảm giá)&quot;, example = &quot;Mới&quot;)
+    private String badge;
+
+    @Schema(description = &quot;Thẻ phân loại phụ&quot;, example = &quot;Sourdough&quot;)
+    private String tag;
+
+    @Schema(description = &quot;Số lượng tồn kho ban đầu&quot;, example = &quot;50&quot;)
+    @Min(value = 0, message = &quot;Số lượng tồn kho không được âm&quot;)
+    private int stockQuantity;
+
+<span class="fc" id="L43">    @Schema(description = &quot;Ngưỡng cảnh báo sắp hết hàng&quot;, example = &quot;5&quot;)</span>
+    @Min(value = 0, message = &quot;Ngưỡng cảnh báo sắp hết hàng không được âm&quot;)
+    private int lowStockThreshold = 5;
+
+    @Schema(description = &quot;Giá vốn bình quân ban đầu (WAC)&quot;, example = &quot;40000.0&quot;)
+    private double averageCost;
+
+<span class="fc" id="L50">    @Schema(description = &quot;Trạng thái kinh doanh&quot;, example = &quot;true&quot;)</span>
+    private boolean active = true;
+
+<span class="fc" id="L53">    @Schema(description = &quot;Hiển thị ở mục nổi bật trang chủ&quot;, example = &quot;false&quot;)</span>
+<span class="fc" id="L54">    private Boolean isFeatured = false;</span>
+
+<span class="fc" id="L56">    public ProductRequest() {</span>
+<span class="fc" id="L57">    }</span>
+
+    public String getId() {
+<span class="nc" id="L60">        return id;</span>
+    }
+
+    public void setId(String id) {
+<span class="nc" id="L64">        this.id = id;</span>
+<span class="nc" id="L65">    }</span>
+
+    public String getName() {
+<span class="fc" id="L68">        return name;</span>
+    }
+
+    public void setName(String name) {
+<span class="fc" id="L72">        this.name = name;</span>
+<span class="fc" id="L73">    }</span>
+
+    public Long getCategoryId() {
+<span class="fc" id="L76">        return categoryId;</span>
+    }
+
+    public void setCategoryId(Long categoryId) {
+<span class="nc" id="L80">        this.categoryId = categoryId;</span>
+<span class="nc" id="L81">    }</span>
+
+    public String getCategory() {
+<span class="fc" id="L84">        return category;</span>
+    }
+
+    public void setCategory(String category) {
+<span class="fc" id="L88">        this.category = category;</span>
+<span class="fc" id="L89">    }</span>
+
+    public String getDescription() {
+<span class="fc" id="L92">        return description;</span>
+    }
+
+    public void setDescription(String description) {
+<span class="nc" id="L96">        this.description = description;</span>
+<span class="nc" id="L97">    }</span>
+
+    public double getPrice() {
+<span class="fc" id="L100">        return price;</span>
+    }
+
+    public void setPrice(double price) {
+<span class="fc" id="L104">        this.price = price;</span>
+<span class="fc" id="L105">    }</span>
+
+    public String getImageUrl() {
+<span class="fc" id="L108">        return imageUrl;</span>
+    }
+
+    public void setImageUrl(String imageUrl) {
+<span class="nc" id="L112">        this.imageUrl = imageUrl;</span>
+<span class="nc" id="L113">    }</span>
+
+    public String getBadge() {
+<span class="fc" id="L116">        return badge;</span>
+    }
+
+    public void setBadge(String badge) {
+<span class="nc" id="L120">        this.badge = badge;</span>
+<span class="nc" id="L121">    }</span>
+
+    public String getTag() {
+<span class="fc" id="L124">        return tag;</span>
+    }
+
+    public void setTag(String tag) {
+<span class="nc" id="L128">        this.tag = tag;</span>
+<span class="nc" id="L129">    }</span>
+
+    public int getStockQuantity() {
+<span class="fc" id="L132">        return stockQuantity;</span>
+    }
+
+    public void setStockQuantity(int stockQuantity) {
+<span class="fc" id="L136">        this.stockQuantity = stockQuantity;</span>
+<span class="fc" id="L137">    }</span>
+
+    public int getLowStockThreshold() {
+<span class="fc" id="L140">        return lowStockThreshold;</span>
+    }
+
+    public void setLowStockThreshold(int lowStockThreshold) {
+<span class="nc" id="L144">        this.lowStockThreshold = lowStockThreshold;</span>
+<span class="nc" id="L145">    }</span>
+
+    public double getAverageCost() {
+<span class="fc" id="L148">        return averageCost;</span>
+    }
+
+    public void setAverageCost(double averageCost) {
+<span class="nc" id="L152">        this.averageCost = averageCost;</span>
+<span class="nc" id="L153">    }</span>
+
+    public boolean isActive() {
+<span class="fc" id="L156">        return active;</span>
+    }
+
+    public void setActive(boolean active) {
+<span class="nc" id="L160">        this.active = active;</span>
+<span class="nc" id="L161">    }</span>
+
+    public Boolean getFeatured() {
+<span class="fc" id="L164">        return isFeatured;</span>
+    }
+
+    public void setFeatured(Boolean featured) {
+<span class="nc" id="L168">        isFeatured = featured;</span>
+<span class="nc" id="L169">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

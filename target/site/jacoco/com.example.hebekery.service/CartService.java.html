@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CartService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.service</a> &gt; <span class="el_source">CartService.java</span></div><h1>CartService.java</h1><pre class="source lang-java linenums">package com.example.hebekery.service;
+
+import com.example.hebekery.dto.request.SyncCartItemDto;
+import com.example.hebekery.model.CartItem;
+import com.example.hebekery.model.Product;
+import com.example.hebekery.model.User;
+import com.example.hebekery.repository.CartItemRepository;
+import com.example.hebekery.repository.ProductRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class CartService {
+
+    private final CartItemRepository cartItemRepository;
+    private final UserService userService;
+    private final ProductRepository productRepository;
+
+    public CartService(CartItemRepository cartItemRepository,
+                       UserService userService,
+<span class="fc" id="L25">                       ProductRepository productRepository) {</span>
+<span class="fc" id="L26">        this.cartItemRepository = cartItemRepository;</span>
+<span class="fc" id="L27">        this.userService = userService;</span>
+<span class="fc" id="L28">        this.productRepository = productRepository;</span>
+<span class="fc" id="L29">    }</span>
+
+    public int getQuantity(String productId) {
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        if (!isLoggedIn()) {</span>
+<span class="nc" id="L33">            return 0;</span>
+        }
+<span class="nc" id="L35">        return getCartItems().stream()</span>
+<span class="nc" id="L36">                .filter(item -&gt; item.getProductId().equals(productId))</span>
+<span class="nc" id="L37">                .mapToInt(CartItem::getQuantity)</span>
+<span class="nc" id="L38">                .findFirst()</span>
+<span class="nc" id="L39">                .orElse(0);</span>
+    }
+
+    @Transactional
+    public void addToCart(Product product, int quantity) {
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if (!isLoggedIn()) {</span>
+<span class="nc" id="L45">            return;</span>
+        }
+<span class="fc" id="L47">        String userId = userService.getCurrentUser().getId();</span>
+<span class="fc" id="L48">        Optional&lt;CartItem&gt; existing = cartItemRepository.findByUserIdAndProductId(userId, product.getId());</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if (existing.isPresent()) {</span>
+<span class="fc" id="L50">            CartItem item = existing.get();</span>
+<span class="fc" id="L51">            item.setQuantity(item.getQuantity() + quantity);</span>
+<span class="fc" id="L52">            cartItemRepository.save(item);</span>
+<span class="fc" id="L53">        } else {</span>
+<span class="fc" id="L54">            CartItem item = new CartItem(</span>
+<span class="fc" id="L55">                    product.getId(),</span>
+<span class="fc" id="L56">                    product.getName(),</span>
+<span class="fc" id="L57">                    product.getImageUrl(),</span>
+<span class="fc" id="L58">                    product.getPrice(),</span>
+                    quantity
+            );
+<span class="fc" id="L61">            item.setUserId(userId);</span>
+<span class="fc" id="L62">            cartItemRepository.save(item);</span>
+        }
+<span class="fc" id="L64">    }</span>
+
+    @Transactional
+    public void updateQuantity(String productId, int quantity) {
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">        if (!isLoggedIn()) {</span>
+<span class="nc" id="L69">            return;</span>
+        }
+<span class="fc" id="L71">        String userId = userService.getCurrentUser().getId();</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        if (quantity &lt;= 0) {</span>
+<span class="nc" id="L73">            removeFromCart(productId);</span>
+<span class="nc" id="L74">            return;</span>
+        }
+<span class="fc" id="L76">        cartItemRepository.findByUserIdAndProductId(userId, productId).ifPresent(item -&gt; {</span>
+<span class="fc" id="L77">            item.setQuantity(quantity);</span>
+<span class="fc" id="L78">            cartItemRepository.save(item);</span>
+<span class="fc" id="L79">        });</span>
+<span class="fc" id="L80">    }</span>
+
+    @Transactional
+    public void removeFromCart(String productId) {
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        if (!isLoggedIn()) {</span>
+<span class="nc" id="L85">            return;</span>
+        }
+<span class="fc" id="L87">        String userId = userService.getCurrentUser().getId();</span>
+<span class="fc" id="L88">        cartItemRepository.deleteByUserIdAndProductId(userId, productId);</span>
+<span class="fc" id="L89">    }</span>
+
+    public List&lt;CartItem&gt; getCartItems() {
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        if (!isLoggedIn()) {</span>
+<span class="fc" id="L93">            return Collections.emptyList();</span>
+        }
+<span class="fc" id="L95">        return cartItemRepository.findByUserId(userService.getCurrentUser().getId());</span>
+    }
+
+    public List&lt;CartItem&gt; getCartItems(String userId) {
+<span class="nc bnc" id="L99" title="All 4 branches missed.">        if (userId == null || userId.isBlank()) {</span>
+<span class="nc" id="L100">            return Collections.emptyList();</span>
+        }
+<span class="nc" id="L102">        return cartItemRepository.findByUserId(userId);</span>
+    }
+
+    public double getTotalPrice() {
+<span class="fc" id="L106">        return getCartItems().stream()</span>
+<span class="fc" id="L107">                .mapToDouble(CartItem::getTotal)</span>
+<span class="fc" id="L108">                .sum();</span>
+    }
+
+    public int getCartCount() {
+<span class="nc" id="L112">        return getCartItems().stream()</span>
+<span class="nc" id="L113">                .mapToInt(CartItem::getQuantity)</span>
+<span class="nc" id="L114">                .sum();</span>
+    }
+
+    @Transactional
+    public void clearCart() {
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">        if (isLoggedIn()) {</span>
+<span class="fc" id="L120">            cartItemRepository.deleteByUserId(userService.getCurrentUser().getId());</span>
+        }
+<span class="fc" id="L122">    }</span>
+
+    @Transactional
+    public void clearCart(String userId) {
+<span class="nc bnc" id="L126" title="All 4 branches missed.">        if (userId != null &amp;&amp; !userId.isBlank()) {</span>
+<span class="nc" id="L127">            cartItemRepository.deleteByUserId(userId);</span>
+        }
+<span class="nc" id="L129">    }</span>
+
+    @Transactional
+    public void syncCart(String userId, List&lt;SyncCartItemDto&gt; items) {
+<span class="pc bpc" id="L133" title="4 of 8 branches missed.">        if (userId == null || userId.isBlank() || items == null || items.isEmpty()) {</span>
+<span class="nc" id="L134">            return;</span>
+        }
+
+<span class="fc bfc" id="L137" title="All 2 branches covered.">        for (SyncCartItemDto dto : items) {</span>
+<span class="pc bpc" id="L138" title="2 of 4 branches missed.">            if (dto.getProductId() == null || dto.getQuantity() &lt;= 0) {</span>
+<span class="nc" id="L139">                continue;</span>
+            }
+
+<span class="fc" id="L142">            Optional&lt;Product&gt; productOpt = productRepository.findById(dto.getProductId());</span>
+<span class="pc bpc" id="L143" title="2 of 4 branches missed.">            if (productOpt.isEmpty() || !productOpt.get().isActive()) {</span>
+<span class="nc" id="L144">                continue;</span>
+            }
+
+<span class="fc" id="L147">            Product product = productOpt.get();</span>
+<span class="fc" id="L148">            int validQuantity = Math.min(dto.getQuantity(), Math.max(product.getStockQuantity(), 1));</span>
+
+<span class="fc" id="L150">            Optional&lt;CartItem&gt; existing = cartItemRepository.findByUserIdAndProductId(userId, product.getId());</span>
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">            if (existing.isPresent()) {</span>
+<span class="nc" id="L152">                CartItem item = existing.get();</span>
+<span class="nc" id="L153">                int newQty = Math.min(item.getQuantity() + validQuantity, Math.max(product.getStockQuantity(), 1));</span>
+<span class="nc" id="L154">                item.setQuantity(newQty);</span>
+<span class="nc" id="L155">                cartItemRepository.save(item);</span>
+<span class="nc" id="L156">            } else {</span>
+<span class="fc" id="L157">                CartItem item = new CartItem(</span>
+<span class="fc" id="L158">                        product.getId(),</span>
+<span class="fc" id="L159">                        product.getName(),</span>
+<span class="fc" id="L160">                        product.getImageUrl(),</span>
+<span class="fc" id="L161">                        product.getPrice(),</span>
+                        validQuantity
+                );
+<span class="fc" id="L164">                item.setUserId(userId);</span>
+<span class="fc" id="L165">                cartItemRepository.save(item);</span>
+            }
+<span class="fc" id="L167">        }</span>
+<span class="fc" id="L168">    }</span>
+
+    @Transactional
+    public void saveCartForUser(User user) {
+        // Stateless: Cart is automatically persisted to database for authenticated users
+<span class="nc" id="L173">    }</span>
+
+    @Transactional
+    public void mergeSessionCartForUser(User user) {
+        // Stateless: Client synchronizes local storage cart via POST /api/cart/sync upon login
+<span class="nc" id="L178">    }</span>
+
+    private boolean isLoggedIn() {
+<span class="pc bpc" id="L181" title="1 of 4 branches missed.">        return userService.isLoggedIn() &amp;&amp; userService.getCurrentUser() != null;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

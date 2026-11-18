@@ -1,0 +1,3 @@
+ALTER TABLE addresses ADD COLUMN province VARCHAR(255);
+ALTER TABLE addresses ADD COLUMN district VARCHAR(255);
+ALTER TABLE addresses ADD COLUMN ward VARCHAR(255);

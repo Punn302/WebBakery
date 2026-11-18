@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VoucherController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.controller</a> &gt; <span class="el_source">VoucherController.java</span></div><h1>VoucherController.java</h1><pre class="source lang-java linenums">package com.example.hebekery.controller;
+
+import com.example.hebekery.dto.ApiResponse;
+import com.example.hebekery.dto.VoucherCalculationResponse;
+import com.example.hebekery.dto.VoucherResponse;
+import com.example.hebekery.dto.request.ApplyVoucherRequest;
+import com.example.hebekery.model.User;
+import com.example.hebekery.service.UserService;
+import com.example.hebekery.service.VoucherService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/api/vouchers&quot;)
+@Tag(name = &quot;Voucher&quot;, description = &quot;Các API kiểm tra và áp dụng mã giảm giá cho khách hàng&quot;)
+public class VoucherController {
+
+    private final VoucherService voucherService;
+    private final UserService userService;
+
+<span class="fc" id="L26">    public VoucherController(VoucherService voucherService, UserService userService) {</span>
+<span class="fc" id="L27">        this.voucherService = voucherService;</span>
+<span class="fc" id="L28">        this.userService = userService;</span>
+<span class="fc" id="L29">    }</span>
+
+    @Operation(summary = &quot;Lấy danh sách mã giảm giá đang khả dụng&quot;, description = &quot;Trả về danh sách các voucher Hebekery đang trong thời hạn và còn lượt dùng&quot;)
+    @GetMapping(&quot;/available&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;List&lt;VoucherResponse&gt;&gt;&gt; getAvailableVouchers() {
+<span class="nc" id="L34">        List&lt;VoucherResponse&gt; vouchers = voucherService.getAvailableVouchers();</span>
+<span class="nc" id="L35">        return ResponseEntity.ok(ApiResponse.success(&quot;Lấy danh sách voucher thành công&quot;, vouchers));</span>
+    }
+
+    @Operation(summary = &quot;Kiểm tra và tính toán giảm giá của voucher&quot;, description = &quot;Kiểm tra mã voucher, số tiền đơn hàng tối thiểu và tính số tiền được giảm&quot;)
+    @PostMapping(&quot;/apply&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;VoucherCalculationResponse&gt;&gt; applyVoucher(@Valid @RequestBody ApplyVoucherRequest request) {
+<span class="nc" id="L41">        User currentUser = userService.getCurrentUser();</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        String userId = currentUser != null ? currentUser.getId() : null;</span>
+
+<span class="nc" id="L44">        VoucherCalculationResponse result = voucherService.validateAndCalculate(</span>
+<span class="nc" id="L45">                request.getCode(),</span>
+<span class="nc" id="L46">                request.getOrderAmount(),</span>
+                userId
+        );
+
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        if (!result.isValid()) {</span>
+<span class="nc" id="L51">            return ResponseEntity.badRequest().body(ApiResponse.failure(result.getMessage()));</span>
+        }
+
+<span class="nc" id="L54">        return ResponseEntity.ok(ApiResponse.success(result.getMessage(), result));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

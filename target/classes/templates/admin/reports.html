@@ -1,0 +1,227 @@
+﻿<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Báo cáo')}"></head>
+<body class="bg-[#fbfaf7] text-gray-800">
+<div class="min-h-screen lg:flex">
+    <aside th:replace="~{admin/fragments :: sidebar('reports')}"></aside>
+    <main class="flex-1 px-4 md:px-8 py-8">
+        <div class="flex flex-col gap-4 mb-6">
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                <div>
+                    <p class="text-sm uppercase tracking-wider text-[#47654c] font-semibold">Admin</p>
+                    <h1 class="text-3xl font-semibold text-[#263d2b]">Báo cáo</h1>
+                </div>
+                <div class="flex gap-2">
+                    <a th:href="@{/admin/reports/export.csv(from=${from},to=${to})}" class="bg-white border border-gray-200 text-[#263d2b] px-5 py-3 rounded-lg font-semibold">Export Excel</a>
+                    <a th:href="@{/admin/reports/export.pdf(from=${from},to=${to})}" class="bg-white border border-gray-200 text-[#263d2b] px-5 py-3 rounded-lg font-semibold">Export PDF</a>
+                    <a th:href="@{/admin/reports/print(from=${from},to=${to})}" target="_blank" class="bg-white border border-gray-200 text-[#263d2b] px-5 py-3 rounded-lg font-semibold">In báo cáo</a>
+                </div>
+            </div>
+            <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-3 bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
+                <input name="keyword" th:value="${keyword}" class="border border-gray-200 rounded-lg px-4 py-3 md:col-span-2" placeholder="Tìm phiếu nhập">
+                <input type="date" name="from" th:value="${from}" class="border border-gray-200 rounded-lg px-4 py-3">
+                <input type="date" name="to" th:value="${to}" class="border border-gray-200 rounded-lg px-4 py-3">
+                <button class="bg-[#47654c] text-white px-5 py-3 rounded-lg font-semibold">Lọc</button>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-5 mb-8">
+            <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <p class="text-sm font-semibold text-gray-500">Doanh thu hợp lệ</p>
+                <p class="text-3xl font-bold text-[#263d2b] mt-4" th:text="${#strings.replace(#numbers.formatDecimal(revenueTotal, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}">0đ</p>
+            </section>
+            <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <p class="text-sm font-semibold text-gray-500">Lợi nhuận ước tính</p>
+                <p class="text-3xl font-bold text-[#263d2b] mt-4" th:text="${#strings.replace(#numbers.formatDecimal(profitTotal, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}">0đ</p>
+            </section>
+            <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <p class="text-sm font-semibold text-gray-500">Đơn doanh thu</p>
+                <p class="text-3xl font-bold text-[#263d2b] mt-4" th:text="${revenueOrderCount}">0</p>
+            </section>
+            <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <p class="text-sm font-semibold text-gray-500">Chi phí nhập</p>
+                <p class="text-3xl font-bold text-[#263d2b] mt-4" th:text="${#strings.replace(#numbers.formatDecimal(importCostTotal, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}">0đ</p>
+            </section>
+            <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <p class="text-sm font-semibold text-gray-500">SL nhập</p>
+                <p class="text-3xl font-bold text-[#263d2b] mt-4" th:text="${importedQuantityTotal}">0</p>
+            </section>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+            <section class="xl:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                <div class="flex items-center justify-between gap-4 mb-6">
+                    <h2 class="text-lg font-semibold text-[#263d2b]">Doanh thu theo kỳ</h2>
+                    <p class="text-sm text-gray-500">Đơn hủy và đơn đã đổi trả không tính doanh thu.</p>
+                </div>
+                <div class="grid gap-3 h-72 items-end" th:style="'grid-template-columns: repeat(' + ${#lists.size(weeklyRevenue)} + ', minmax(0, 1fr));'">
+                    <div th:each="point : ${weeklyRevenue}" class="h-full flex flex-col justify-end gap-2">
+                        <p class="text-xs text-center text-gray-500" th:text="${#strings.replace(#numbers.formatDecimal(point.revenue, 0, 'COMMA', 0, 'POINT'), ',', '.')}">0</p>
+                        <div class="rounded-t-lg bg-[#47654c]" th:style="'height:' + ${point.percent} + '%'"></div>
+                        <p class="text-xs text-center text-gray-400" th:text="${point.label}">01/01</p>
+                    </div>
+                </div>
+            </section>
+            <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                <h2 class="text-lg font-semibold text-[#263d2b] mb-5">Top sản phẩm bán chạy</h2>
+                <div class="space-y-4">
+                    <div th:each="item : ${topSellingProducts}" class="border-b border-gray-100 pb-3">
+                        <p class="font-semibold" th:text="${item.productName}">Sản phẩm</p>
+                        <p class="text-sm text-gray-500"><span th:text="${item.quantity}">0</span> sản phẩm · <span th:text="${#strings.replace(#numbers.formatDecimal(item.revenue, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}">0đ</span></p>
+                    </div>
+                    <p th:if="${#lists.isEmpty(topSellingProducts)}" class="text-sm text-gray-400">Chưa có dữ liệu bán hàng.</p>
+                </div>
+            </section>
+        </div>
+
+        <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-8">
+            <h2 class="text-lg font-semibold text-[#263d2b] mb-5">Tạo phiếu nhập</h2>
+            <form method="post" action="/admin/reports/imports" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <input name="supplier" class="border border-gray-200 rounded-lg px-3 py-3" placeholder="Nhà cung cấp">
+                    <input name="note" class="border border-gray-200 rounded-lg px-3 py-3" placeholder="Ghi chú">
+                </div>
+                <div id="purchaseRows" class="space-y-3">
+                    <div class="purchase-row grid grid-cols-1 md:grid-cols-12 gap-3">
+                        <select name="productId" class="border border-gray-200 rounded-lg px-3 py-3 md:col-span-6" required>
+                            <option value="">Chọn sản phẩm</option>
+                            <option th:each="product : ${products}" th:value="${product.id}" th:attr="data-price=${product.price}" th:text="${product.name}"></option>
+                        </select>
+                        <input name="quantity" type="number" min="1" class="border border-gray-200 rounded-lg px-3 py-3 md:col-span-2" placeholder="SL" required>
+                        <div class="md:col-span-3">
+                            <input type="text" inputmode="numeric" class="unit-cost-display border border-gray-200 rounded-lg px-3 py-3 w-full" placeholder="Giá nhập" required>
+                            <input name="unitCost" type="hidden" class="unit-cost-value">
+                        </div>
+                        <button type="button" class="remove-purchase-row border border-red-200 text-red-500 rounded-lg px-3 py-3 font-semibold md:col-span-1">X</button>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <button id="addPurchaseRow" type="button" class="border border-gray-200 rounded-lg font-semibold px-4 py-3">Thêm dòng</button>
+                    <button class="bg-[#47654c] text-white rounded-lg font-semibold px-4 py-3">Lưu</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <table class="w-full text-sm">
+                <thead class="bg-[#f7f3ec] text-gray-600">
+                <tr><th class="text-left px-6 py-4">Phiếu</th><th class="text-left px-6 py-4">Sản phẩm</th><th class="text-left px-6 py-4">Nhà cung cấp</th><th class="text-left px-6 py-4">Số lượng</th><th class="text-left px-6 py-4">Tổng nhập</th><th class="text-left px-6 py-4">Ngày</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="receipt : ${page.content}" class="border-t border-gray-100">
+                    <td class="px-6 py-4">
+                        <a th:href="@{/admin/reports/imports/{code}/print(code=${receipt.receiptCode})}" target="_blank" class="font-semibold text-[#47654c]" th:text="${receipt.receiptCode}">PN</a>
+                        <p class="text-xs text-gray-400" th:text="${receipt.id}">IMP</p>
+                    </td>
+                    <td class="px-6 py-4" th:text="${receipt.productName}">Sản phẩm</td>
+                    <td class="px-6 py-4" th:text="${receipt.supplier}">NCC</td>
+                    <td class="px-6 py-4" th:text="${receipt.quantity}">0</td>
+                    <td class="px-6 py-4 text-[#47654c] font-semibold" th:text="${#strings.replace(#numbers.formatDecimal(receipt.totalCost, 0, 'COMMA', 0, 'POINT'), ',', '.') + 'đ'}">0đ</td>
+                    <td class="px-6 py-4 text-gray-500" th:text="${#temporals.format(receipt.importedAt, 'dd/MM/yyyy HH:mm')}">01/01</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(page.content)}">
+                    <td colspan="6" class="px-6 py-8 text-center text-gray-400">Không có phiếu nhập phù hợp.</td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+        <div class="flex items-center justify-between mt-6 text-sm">
+            <p class="text-gray-500">Trang <span th:text="${page.number + 1}">1</span>/<span th:text="${page.totalPages == 0 ? 1 : page.totalPages}">1</span></p>
+            <div class="flex gap-2">
+                <a th:if="${page.hasPrevious()}" th:href="@{/admin/reports(page=${page.number - 1},keyword=${keyword},from=${from},to=${to})}" class="px-4 py-2 rounded-lg border border-gray-200 bg-white">Trước</a>
+                <a th:if="${page.hasNext()}" th:href="@{/admin/reports(page=${page.number + 1},keyword=${keyword},from=${from},to=${to})}" class="px-4 py-2 rounded-lg border border-gray-200 bg-white">Sau</a>
+            </div>
+        </div>
+    </main>
+</div>
+<script th:replace="~{admin/fragments :: logoutScript}"></script>
+<script>
+    const rowsContainer = document.getElementById('purchaseRows');
+    const addRowButton = document.getElementById('addPurchaseRow');
+    const purchaseForm = document.querySelector('form[action="/admin/reports/imports"]');
+
+    function syncPurchaseRowLimits(row) {
+        const productSelect = row.querySelector('select[name="productId"]');
+        const unitCostInput = row.querySelector('input[name="unitCost"]');
+        const unitCostDisplay = row.querySelector('.unit-cost-display');
+        const selectedOption = productSelect?.selectedOptions?.[0];
+        const salePrice = Number(selectedOption?.dataset?.price || 0);
+        if (unitCostInput && salePrice > 0) {
+            unitCostDisplay.dataset.max = salePrice;
+            unitCostDisplay.title = `Giá nhập không được vượt quá giá bán ${salePrice.toLocaleString('vi-VN')}đ`;
+        }
+    }
+
+    function formatMoneyInput(input) {
+        const rawValue = input.value.replace(/[^\d]/g, '');
+        const hiddenInput = input.closest('.purchase-row')?.querySelector('input[name="unitCost"]');
+        if (hiddenInput) hiddenInput.value = rawValue;
+        input.value = rawValue ? Number(rawValue).toLocaleString('vi-VN') : '';
+    }
+
+    function bindMoneyInputs() {
+        document.querySelectorAll('.unit-cost-display').forEach((input) => {
+            input.oninput = () => formatMoneyInput(input);
+            input.onblur = () => formatMoneyInput(input);
+            formatMoneyInput(input);
+        });
+    }
+
+    function bindProductSelects() {
+        document.querySelectorAll('.purchase-row').forEach((row) => {
+            syncPurchaseRowLimits(row);
+            const productSelect = row.querySelector('select[name="productId"]');
+            productSelect.onchange = () => syncPurchaseRowLimits(row);
+        });
+    }
+
+    function validatePurchaseForm(event) {
+        for (const row of document.querySelectorAll('.purchase-row')) {
+            const quantity = Number(row.querySelector('input[name="quantity"]')?.value || 0);
+            const unitCostDisplay = row.querySelector('.unit-cost-display');
+            const unitCost = Number(row.querySelector('input[name="unitCost"]')?.value || 0);
+            const selectedOption = row.querySelector('select[name="productId"]')?.selectedOptions?.[0];
+            const salePrice = Number(selectedOption?.dataset?.price || 0);
+            if (quantity <= 0) {
+                event.preventDefault();
+                alert('Số lượng nhập phải lớn hơn 0.');
+                return;
+            }
+            if (salePrice > 0 && unitCost > salePrice) {
+                event.preventDefault();
+                alert('Giá nhập không được vượt quá giá bán.');
+                unitCostDisplay?.focus();
+                return;
+            }
+        }
+    }
+
+    function bindRemoveButtons() {
+        document.querySelectorAll('.remove-purchase-row').forEach((button) => {
+            button.onclick = () => {
+                if (document.querySelectorAll('.purchase-row').length > 1) {
+                    button.closest('.purchase-row').remove();
+                }
+            };
+        });
+    }
+
+    addRowButton?.addEventListener('click', () => {
+        const firstRow = document.querySelector('.purchase-row');
+        if (!firstRow || !rowsContainer) return;
+        const newRow = firstRow.cloneNode(true);
+        newRow.querySelectorAll('input').forEach((input) => input.value = '');
+        newRow.querySelector('select').selectedIndex = 0;
+        rowsContainer.appendChild(newRow);
+        bindMoneyInputs();
+        bindProductSelects();
+        bindRemoveButtons();
+    });
+
+    purchaseForm?.addEventListener('submit', validatePurchaseForm);
+    bindMoneyInputs();
+    bindProductSelects();
+    bindRemoveButtons();
+</script>
+</body>
+</html>

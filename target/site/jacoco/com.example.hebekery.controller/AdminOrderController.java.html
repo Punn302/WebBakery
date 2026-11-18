@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminOrderController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.controller</a> &gt; <span class="el_source">AdminOrderController.java</span></div><h1>AdminOrderController.java</h1><pre class="source lang-java linenums">package com.example.hebekery.controller;
+
+import com.example.hebekery.dto.ApiResponse;
+import com.example.hebekery.dto.OrderDetailResponse;
+import com.example.hebekery.dto.OrderResponse;
+import com.example.hebekery.dto.request.AdminOrderUpdateRequest;
+import com.example.hebekery.model.Order;
+import com.example.hebekery.service.AuditLogService;
+import com.example.hebekery.service.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDate;
+import java.util.Map;
+
+@RestController
+@RequestMapping(&quot;/api/admin/orders&quot;)
+@PreAuthorize(&quot;hasAnyRole('ADMIN', 'STAFF_SALES')&quot;)
+@Tag(name = &quot;Admin Order Management&quot;, description = &quot;Quản lý xử lý đơn hàng, đổi trạng thái và xác nhận giao hàng&quot;)
+public class AdminOrderController {
+
+    private final OrderService orderService;
+    private final AuditLogService auditLogService;
+
+<span class="fc" id="L43">    public AdminOrderController(OrderService orderService, AuditLogService auditLogService) {</span>
+<span class="fc" id="L44">        this.orderService = orderService;</span>
+<span class="fc" id="L45">        this.auditLogService = auditLogService;</span>
+<span class="fc" id="L46">    }</span>
+
+    @Operation(summary = &quot;Tìm kiếm và lọc danh sách đơn hàng quản trị&quot;, description = &quot;Lọc đơn hàng theo từ khóa, trạng thái, phương thức thanh toán và khoảng thời gian (yêu cầu ADMIN hoặc STAFF_SALES)&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @GetMapping
+    public ResponseEntity&lt;ApiResponse&lt;Page&lt;OrderResponse&gt;&gt;&gt; searchOrders(
+            @Parameter(description = &quot;Từ khóa tìm kiếm theo mã đơn hoặc người nhận&quot;) @RequestParam(defaultValue = &quot;&quot;) String keyword,
+            @Parameter(description = &quot;Trạng thái đơn hàng (PENDING, CONFIRMED, SHIPPING, DELIVERED, CANCELLED)&quot;) @RequestParam(defaultValue = &quot;&quot;) String orderStatus,
+            @Parameter(description = &quot;Phương thức thanh toán (COD, SEPAY)&quot;) @RequestParam(defaultValue = &quot;&quot;) String paymentMethod,
+            @Parameter(description = &quot;Từ ngày (YYYY-MM-DD)&quot;) @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = &quot;Đến ngày (YYYY-MM-DD)&quot;) @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @Parameter(description = &quot;Số thứ tự trang&quot;) @RequestParam(defaultValue = &quot;0&quot;) int page,
+            @Parameter(description = &quot;Số đơn hàng trên mỗi trang&quot;) @RequestParam(defaultValue = &quot;10&quot;) int size) {
+<span class="fc" id="L58">        Pageable pageable = PageRequest.of(Math.max(page, 0), size, Sort.by(&quot;createdAt&quot;).descending());</span>
+<span class="fc" id="L59">        Page&lt;OrderResponse&gt; responsePage = orderService.searchOrders(keyword, orderStatus, paymentMethod, from, to, pageable);</span>
+<span class="fc" id="L60">        return ResponseEntity.ok(ApiResponse.success(&quot;Lấy danh sách đơn hàng thành công&quot;, responsePage));</span>
+    }
+
+    @Operation(summary = &quot;Xem chi tiết đơn hàng quản trị&quot;, description = &quot;Lấy đầy đủ thông tin mặt hàng, lịch sử trạng thái và đổi trả&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;OrderDetailResponse&gt;&gt; getOrderById(
+            @Parameter(description = &quot;Mã định danh đơn hàng&quot;) @PathVariable String id) {
+<span class="fc" id="L67">        Order order = orderService.getOrderById(id);</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">        if (order == null) {</span>
+<span class="nc" id="L69">            return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="nc" id="L70">                    .body(ApiResponse.failure(&quot;Không tìm thấy đơn hàng với mã: &quot; + id));</span>
+        }
+<span class="fc" id="L72">        return ResponseEntity.ok(ApiResponse.success(&quot;Lấy chi tiết đơn hàng thành công&quot;, OrderDetailResponse.from(order)));</span>
+    }
+
+    @Operation(summary = &quot;Cập nhật trạng thái đơn hàng và thanh toán&quot;, description = &quot;Chuyển trạng thái đơn hàng (ví dụ: CONFIRMED -&gt; SHIPPING -&gt; DELIVERED)&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @PutMapping(&quot;/{id}/status&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;OrderDetailResponse&gt;&gt; updateOrderStatus(
+            @Parameter(description = &quot;Mã định danh đơn hàng&quot;) @PathVariable String id,
+            @RequestBody AdminOrderUpdateRequest request) {
+<span class="fc" id="L80">        Order updated = orderService.updateStatus(id, request.getOrderStatus(), request.getPaymentStatus());</span>
+<span class="fc" id="L81">        return ResponseEntity.ok(ApiResponse.success(&quot;Cập nhật trạng thái đơn hàng thành công&quot;, OrderDetailResponse.from(updated)));</span>
+    }
+
+    @Operation(summary = &quot;Xử lý duyệt hoặc từ chối yêu cầu đổi trả&quot;, description = &quot;Admin đưa ra quyết định (APPROVE / REJECT) và ghi chú nội bộ cho đơn đổi trả&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @PostMapping(&quot;/{id}/return&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;OrderDetailResponse&gt;&gt; reviewReturn(
+            @Parameter(description = &quot;Mã định danh đơn hàng&quot;) @PathVariable String id,
+            @RequestBody Map&lt;String, String&gt; payload) {
+<span class="fc" id="L89">        String decision = payload.get(&quot;decision&quot;);</span>
+<span class="fc" id="L90">        String adminNote = payload.get(&quot;adminNote&quot;);</span>
+<span class="pc bpc" id="L91" title="2 of 4 branches missed.">        if (decision == null || decision.isBlank()) {</span>
+<span class="nc" id="L92">            return ResponseEntity.badRequest().body(ApiResponse.failure(&quot;Quyết định xử lý trả hàng không được để trống&quot;));</span>
+        }
+<span class="fc" id="L94">        Order updated = orderService.reviewReturn(id, decision, adminNote);</span>
+<span class="fc" id="L95">        return ResponseEntity.ok(ApiResponse.success(&quot;Xử lý yêu cầu hoàn trả thành công&quot;, OrderDetailResponse.from(updated)));</span>
+    }
+
+    @Operation(summary = &quot;Cập nhật đơn vị vận chuyển và mã vận đơn&quot;, description = &quot;Lưu mã tracking và hãng chuyển phát cho đơn hàng&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @PutMapping(&quot;/{id}/shipping&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;OrderDetailResponse&gt;&gt; updateShipping(
+            @Parameter(description = &quot;Mã định danh đơn hàng&quot;) @PathVariable String id,
+            @RequestBody Map&lt;String, String&gt; payload) {
+<span class="nc" id="L103">        String shippingCarrier = payload.getOrDefault(&quot;shippingCarrier&quot;, &quot;&quot;);</span>
+<span class="nc" id="L104">        String trackingCode = payload.getOrDefault(&quot;trackingCode&quot;, &quot;&quot;);</span>
+<span class="nc" id="L105">        Order updated = orderService.updateShippingInfo(id, shippingCarrier, trackingCode);</span>
+<span class="nc" id="L106">        return ResponseEntity.ok(ApiResponse.success(&quot;Cập nhật vận chuyển thành công&quot;, OrderDetailResponse.from(updated)));</span>
+    }
+
+    @Operation(summary = &quot;Cập nhật ghi chú nội bộ quản trị&quot;, description = &quot;Lưu ghi chú xử lý đơn cho nhân viên bán hàng/chăm sóc khách hàng&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @PutMapping(&quot;/{id}/note&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;OrderDetailResponse&gt;&gt; updateAdminNote(
+            @Parameter(description = &quot;Mã định danh đơn hàng&quot;) @PathVariable String id,
+            @RequestBody Map&lt;String, String&gt; payload) {
+<span class="nc" id="L114">        String adminNote = payload.get(&quot;adminNote&quot;);</span>
+<span class="nc" id="L115">        Order updated = orderService.updateAdminNote(id, adminNote);</span>
+<span class="nc" id="L116">        return ResponseEntity.ok(ApiResponse.success(&quot;Cập nhật ghi chú quản trị thành công&quot;, OrderDetailResponse.from(updated)));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

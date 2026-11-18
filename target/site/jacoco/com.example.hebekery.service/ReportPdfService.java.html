@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReportPdfService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.service</a> &gt; <span class="el_source">ReportPdfService.java</span></div><h1>ReportPdfService.java</h1><pre class="source lang-java linenums">package com.example.hebekery.service;
+
+import com.example.hebekery.dto.TopSellingProduct;
+import com.example.hebekery.model.PurchaseReceipt;
+import com.lowagie.text.Document;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.pdf.BaseFont;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
+import org.springframework.stereotype.Service;
+
+import java.io.ByteArrayOutputStream;
+import java.time.LocalDate;
+import java.util.List;
+
+@Service
+public class ReportPdfService {
+    private final ReportService reportService;
+    private final PurchaseReceiptService purchaseReceiptService;
+    private final Font regularFont;
+    private final Font titleFont;
+    private final Font boldFont;
+
+<span class="fc" id="L30">    public ReportPdfService(ReportService reportService, PurchaseReceiptService purchaseReceiptService) {</span>
+<span class="fc" id="L31">        this.reportService = reportService;</span>
+<span class="fc" id="L32">        this.purchaseReceiptService = purchaseReceiptService;</span>
+<span class="fc" id="L33">        BaseFont baseFont = createBaseFont();</span>
+<span class="fc" id="L34">        this.regularFont = new Font(baseFont, 10);</span>
+<span class="fc" id="L35">        this.titleFont = new Font(baseFont, 18, Font.BOLD);</span>
+<span class="fc" id="L36">        this.boldFont = new Font(baseFont, 10, Font.BOLD);</span>
+<span class="fc" id="L37">    }</span>
+
+    public byte[] buildReport(LocalDate from, LocalDate to) {
+        try {
+<span class="nc" id="L41">            ByteArrayOutputStream output = new ByteArrayOutputStream();</span>
+<span class="nc" id="L42">            Document document = new Document(PageSize.A4, 36, 36, 36, 36);</span>
+<span class="nc" id="L43">            PdfWriter.getInstance(document, output);</span>
+<span class="nc" id="L44">            document.open();</span>
+
+<span class="nc" id="L46">            addTitle(document, &quot;Báo cáo Hebekery&quot;, &quot;Từ &quot; + from + &quot; đến &quot; + to);</span>
+<span class="nc" id="L47">            addSummary(document, from, to);</span>
+<span class="nc" id="L48">            addTopProducts(document, reportService.getTopSellingProducts(from, to));</span>
+<span class="nc" id="L49">            addReceipts(document, purchaseReceiptService.getAll(from, to));</span>
+
+<span class="nc" id="L51">            document.close();</span>
+<span class="nc" id="L52">            return output.toByteArray();</span>
+<span class="nc" id="L53">        } catch (Exception ex) {</span>
+<span class="nc" id="L54">            throw new IllegalStateException(&quot;Không thể tạo PDF báo cáo&quot;, ex);</span>
+        }
+    }
+
+    private void addTitle(Document document, String title, String subtitle) {
+<span class="nc" id="L59">        Paragraph heading = new Paragraph(title, titleFont);</span>
+<span class="nc" id="L60">        heading.setAlignment(Element.ALIGN_CENTER);</span>
+<span class="nc" id="L61">        document.add(heading);</span>
+<span class="nc" id="L62">        Paragraph sub = new Paragraph(subtitle, regularFont);</span>
+<span class="nc" id="L63">        sub.setAlignment(Element.ALIGN_CENTER);</span>
+<span class="nc" id="L64">        sub.setSpacingAfter(16);</span>
+<span class="nc" id="L65">        document.add(sub);</span>
+<span class="nc" id="L66">    }</span>
+
+    private void addSummary(Document document, LocalDate from, LocalDate to) {
+<span class="nc" id="L69">        PdfPTable table = new PdfPTable(2);</span>
+<span class="nc" id="L70">        table.setWidthPercentage(100);</span>
+<span class="nc" id="L71">        addRow(table, &quot;Doanh thu&quot;, money(reportService.getRevenueTotal(from, to)));</span>
+<span class="nc" id="L72">        addRow(table, &quot;Lợi nhuận&quot;, money(reportService.getProfitTotal(from, to)));</span>
+<span class="nc" id="L73">        addRow(table, &quot;Đơn doanh thu&quot;, String.valueOf(reportService.getRevenueOrderCount(from, to)));</span>
+<span class="nc" id="L74">        addRow(table, &quot;Chi phí nhập&quot;, money(reportService.getImportCostTotal(from, to)));</span>
+<span class="nc" id="L75">        addRow(table, &quot;Số lượng nhập&quot;, String.valueOf(reportService.getImportedQuantityTotal(from, to)));</span>
+<span class="nc" id="L76">        document.add(section(&quot;Tổng quan&quot;));</span>
+<span class="nc" id="L77">        document.add(table);</span>
+<span class="nc" id="L78">    }</span>
+
+    private void addTopProducts(Document document, List&lt;TopSellingProduct&gt; products) {
+<span class="nc" id="L81">        document.add(section(&quot;Top sản phẩm bán chạy&quot;));</span>
+<span class="nc" id="L82">        PdfPTable table = new PdfPTable(new float[]{4, 1, 2});</span>
+<span class="nc" id="L83">        table.setWidthPercentage(100);</span>
+<span class="nc" id="L84">        addHeader(table, &quot;Sản phẩm&quot;, &quot;SL&quot;, &quot;Doanh thu&quot;);</span>
+<span class="nc" id="L85">        products.forEach(item -&gt; addRow(table, item.getProductName(), String.valueOf(item.getQuantity()), money(item.getRevenue())));</span>
+<span class="nc" id="L86">        document.add(table);</span>
+<span class="nc" id="L87">    }</span>
+
+    private void addReceipts(Document document, List&lt;PurchaseReceipt&gt; receipts) {
+<span class="nc" id="L90">        document.add(section(&quot;Phiếu nhập hàng&quot;));</span>
+<span class="nc" id="L91">        PdfPTable table = new PdfPTable(new float[]{2, 4, 1, 2});</span>
+<span class="nc" id="L92">        table.setWidthPercentage(100);</span>
+<span class="nc" id="L93">        addHeader(table, &quot;Phiếu&quot;, &quot;Sản phẩm&quot;, &quot;SL&quot;, &quot;Tổng nhập&quot;);</span>
+<span class="nc" id="L94">        receipts.forEach(item -&gt; addRow(table, item.getReceiptCode(), item.getProductName(), String.valueOf(item.getQuantity()), money(item.getTotalCost())));</span>
+<span class="nc" id="L95">        document.add(table);</span>
+<span class="nc" id="L96">    }</span>
+
+    private Paragraph section(String value) {
+<span class="nc" id="L99">        Paragraph paragraph = new Paragraph(value, boldFont);</span>
+<span class="nc" id="L100">        paragraph.setSpacingBefore(14);</span>
+<span class="nc" id="L101">        paragraph.setSpacingAfter(8);</span>
+<span class="nc" id="L102">        return paragraph;</span>
+    }
+
+    private void addHeader(PdfPTable table, String... values) {
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        for (String value : values) {</span>
+<span class="nc" id="L107">            PdfPCell cell = new PdfPCell(new Phrase(value, boldFont));</span>
+<span class="nc" id="L108">            cell.setPadding(6);</span>
+<span class="nc" id="L109">            table.addCell(cell);</span>
+        }
+<span class="nc" id="L111">    }</span>
+
+    private void addRow(PdfPTable table, String... values) {
+<span class="nc bnc" id="L114" title="All 2 branches missed.">        for (String value : values) {</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">            PdfPCell cell = new PdfPCell(new Phrase(value == null ? &quot;&quot; : value, regularFont));</span>
+<span class="nc" id="L116">            cell.setPadding(6);</span>
+<span class="nc" id="L117">            table.addCell(cell);</span>
+        }
+<span class="nc" id="L119">    }</span>
+
+    private String money(double value) {
+<span class="nc" id="L122">        return String.format(&quot;%,.0fđ&quot;, value).replace(&quot;,&quot;, &quot;.&quot;);</span>
+    }
+
+    private BaseFont createBaseFont() {
+        try {
+<span class="fc" id="L127">            return BaseFont.createFont(&quot;C:/Windows/Fonts/arial.ttf&quot;, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);</span>
+<span class="nc" id="L128">        } catch (Exception ex) {</span>
+            try {
+<span class="nc" id="L130">                return BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, BaseFont.NOT_EMBEDDED);</span>
+<span class="nc" id="L131">            } catch (Exception ignored) {</span>
+<span class="nc" id="L132">                throw new IllegalStateException(&quot;Không thể tải font PDF&quot;, ignored);</span>
+            }
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

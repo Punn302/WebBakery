@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminProductController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.controller</a> &gt; <span class="el_source">AdminProductController.java</span></div><h1>AdminProductController.java</h1><pre class="source lang-java linenums">package com.example.hebekery.controller;
+
+import com.example.hebekery.dto.ApiResponse;
+import com.example.hebekery.dto.ProductResponse;
+import com.example.hebekery.dto.request.ProductRequest;
+import com.example.hebekery.model.Category;
+import com.example.hebekery.model.Product;
+import com.example.hebekery.service.AuditLogService;
+import com.example.hebekery.service.CategoryService;
+import com.example.hebekery.service.ProductService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping(&quot;/api/admin/products&quot;)
+@PreAuthorize(&quot;hasAnyRole('ADMIN', 'STAFF_WAREHOUSE')&quot;)
+@Tag(name = &quot;Admin Product Management&quot;, description = &quot;Quản lý sản phẩm dành cho quản trị viên và thủ kho&quot;)
+public class AdminProductController {
+
+    private final ProductService productService;
+    private final CategoryService categoryService;
+    private final AuditLogService auditLogService;
+
+<span class="fc" id="L46">    public AdminProductController(ProductService productService, CategoryService categoryService, AuditLogService auditLogService) {</span>
+<span class="fc" id="L47">        this.productService = productService;</span>
+<span class="fc" id="L48">        this.categoryService = categoryService;</span>
+<span class="fc" id="L49">        this.auditLogService = auditLogService;</span>
+<span class="fc" id="L50">    }</span>
+
+    @Operation(summary = &quot;Tìm kiếm sản phẩm quản trị&quot;, description = &quot;Lấy danh sách sản phẩm phân trang cho trang quản trị (yêu cầu ADMIN hoặc STAFF_WAREHOUSE)&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @GetMapping
+    public ResponseEntity&lt;ApiResponse&lt;Page&lt;ProductResponse&gt;&gt;&gt; searchProducts(
+            @Parameter(description = &quot;Từ khóa tìm kiếm theo tên/SKU&quot;) @RequestParam(defaultValue = &quot;&quot;) String keyword,
+            @Parameter(description = &quot;Số thứ tự trang&quot;) @RequestParam(defaultValue = &quot;0&quot;) int page,
+            @Parameter(description = &quot;Số lượng trên mỗi trang&quot;) @RequestParam(defaultValue = &quot;10&quot;) int size) {
+<span class="nc" id="L58">        Pageable pageable = PageRequest.of(Math.max(page, 0), size, Sort.by(&quot;id&quot;).descending());</span>
+<span class="nc" id="L59">        Page&lt;Product&gt; products = productService.searchProducts(keyword, pageable);</span>
+<span class="nc" id="L60">        Page&lt;ProductResponse&gt; responsePage = products.map(ProductResponse::from);</span>
+<span class="nc" id="L61">        return ResponseEntity.ok(ApiResponse.success(&quot;Lấy danh sách sản phẩm thành công&quot;, responsePage));</span>
+    }
+
+    @Operation(summary = &quot;Lấy thông tin sản phẩm theo mã&quot;, description = &quot;Xem chi tiết một sản phẩm quản trị theo ID&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;ProductResponse&gt;&gt; getProductById(
+            @Parameter(description = &quot;Mã SKU / ID sản phẩm&quot;) @PathVariable String id) {
+<span class="nc" id="L68">        Product product = productService.getProductById(id);</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        if (product == null) {</span>
+<span class="nc" id="L70">            return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="nc" id="L71">                    .body(ApiResponse.failure(&quot;Không tìm thấy sản phẩm với mã: &quot; + id));</span>
+        }
+<span class="nc" id="L73">        return ResponseEntity.ok(ApiResponse.success(&quot;Lấy thông tin sản phẩm thành công&quot;, ProductResponse.from(product)));</span>
+    }
+
+    @Operation(summary = &quot;Tạo mới sản phẩm&quot;, description = &quot;Thêm sản phẩm mới vào danh mục hàng hóa&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @PostMapping
+    public ResponseEntity&lt;ApiResponse&lt;ProductResponse&gt;&gt; createProduct(@Valid @RequestBody ProductRequest request) {
+<span class="fc" id="L79">        Product product = new Product();</span>
+<span class="fc" id="L80">        product.setName(request.getName());</span>
+
+<span class="fc" id="L82">        Category category = resolveCategory(request);</span>
+<span class="fc" id="L83">        product.setCategory(category);</span>
+
+<span class="fc" id="L85">        product.setDescription(request.getDescription());</span>
+<span class="fc" id="L86">        product.setPrice(request.getPrice());</span>
+<span class="fc" id="L87">        product.setImageUrl(request.getImageUrl());</span>
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">        product.setBadge(request.getBadge() != null ? request.getBadge() : &quot;&quot;);</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">        product.setTag(request.getTag() != null ? request.getTag() : &quot;&quot;);</span>
+<span class="fc" id="L90">        product.setStockQuantity(request.getStockQuantity());</span>
+<span class="fc" id="L91">        product.setLowStockThreshold(request.getLowStockThreshold());</span>
+<span class="fc" id="L92">        product.setAverageCost(request.getAverageCost());</span>
+<span class="fc" id="L93">        product.setActive(request.isActive());</span>
+<span class="pc bpc" id="L94" title="2 of 4 branches missed.">        product.setFeatured(request.getFeatured() != null &amp;&amp; request.getFeatured());</span>
+
+<span class="fc" id="L96">        Product saved = productService.saveProduct(product);</span>
+<span class="fc" id="L97">        auditLogService.log(&quot;CREATE&quot;, &quot;PRODUCT&quot;, saved.getId(), &quot;Tạo sản phẩm: &quot; + saved.getName());</span>
+<span class="fc" id="L98">        return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="fc" id="L99">                .body(ApiResponse.success(&quot;Tạo sản phẩm mới thành công&quot;, ProductResponse.from(saved)));</span>
+    }
+
+    @Operation(summary = &quot;Cập nhật sản phẩm&quot;, description = &quot;Chỉnh sửa thông tin chi tiết một sản phẩm đã có&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @PutMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;ProductResponse&gt;&gt; updateProduct(
+            @Parameter(description = &quot;Mã SKU / ID sản phẩm&quot;) @PathVariable String id,
+            @Valid @RequestBody ProductRequest request) {
+<span class="nc" id="L107">        Product existing = productService.getProductById(id);</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">        if (existing == null) {</span>
+<span class="nc" id="L109">            return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="nc" id="L110">                    .body(ApiResponse.failure(&quot;Không tìm thấy sản phẩm để cập nhật&quot;));</span>
+        }
+
+<span class="nc" id="L113">        existing.setName(request.getName());</span>
+
+<span class="nc" id="L115">        Category category = resolveCategory(request);</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        if (category != null) {</span>
+<span class="nc" id="L117">            existing.setCategory(category);</span>
+        }
+
+<span class="nc" id="L120">        existing.setDescription(request.getDescription());</span>
+<span class="nc" id="L121">        existing.setPrice(request.getPrice());</span>
+<span class="nc bnc" id="L122" title="All 4 branches missed.">        if (request.getImageUrl() != null &amp;&amp; !request.getImageUrl().isBlank()) {</span>
+<span class="nc" id="L123">            existing.setImageUrl(request.getImageUrl());</span>
+        }
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        if (request.getBadge() != null) {</span>
+<span class="nc" id="L126">            existing.setBadge(request.getBadge());</span>
+        }
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        if (request.getTag() != null) {</span>
+<span class="nc" id="L129">            existing.setTag(request.getTag());</span>
+        }
+<span class="nc" id="L131">        existing.setLowStockThreshold(request.getLowStockThreshold());</span>
+<span class="nc" id="L132">        existing.setActive(request.isActive());</span>
+<span class="nc bnc" id="L133" title="All 4 branches missed.">        existing.setFeatured(request.getFeatured() != null &amp;&amp; request.getFeatured());</span>
+
+<span class="nc" id="L135">        Product updated = productService.saveProduct(existing);</span>
+<span class="nc" id="L136">        auditLogService.log(&quot;UPDATE&quot;, &quot;PRODUCT&quot;, updated.getId(), &quot;Cập nhật sản phẩm: &quot; + updated.getName());</span>
+<span class="nc" id="L137">        return ResponseEntity.ok(ApiResponse.success(&quot;Cập nhật thông tin sản phẩm thành công&quot;, ProductResponse.from(updated)));</span>
+    }
+
+    @Operation(summary = &quot;Xóa sản phẩm&quot;, description = &quot;Xóa sản phẩm khỏi hệ thống nếu chưa có ràng buộc đơn hàng&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; deleteProduct(
+            @Parameter(description = &quot;Mã SKU / ID sản phẩm&quot;) @PathVariable String id) {
+<span class="fc" id="L144">        boolean deleted = productService.deleteProduct(id);</span>
+<span class="fc bfc" id="L145" title="All 2 branches covered.">        if (!deleted) {</span>
+<span class="fc" id="L146">            return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="fc" id="L147">                    .body(ApiResponse.failure(&quot;Không tìm thấy sản phẩm để xóa&quot;));</span>
+        }
+<span class="fc" id="L149">        auditLogService.log(&quot;DELETE&quot;, &quot;PRODUCT&quot;, id, &quot;Xóa sản phẩm: &quot; + id);</span>
+<span class="fc" id="L150">        return ResponseEntity.ok(ApiResponse.success(&quot;Xóa sản phẩm thành công&quot;, null));</span>
+    }
+
+    @Operation(summary = &quot;Cập nhật ngưỡng cảnh báo sắp hết hàng&quot;, description = &quot;Cập nhật giá trị lowStockThreshold cho sản phẩm&quot;, security = @SecurityRequirement(name = &quot;BearerAuth&quot;))
+    @PatchMapping(&quot;/{id}/threshold&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;ProductResponse&gt;&gt; updateThreshold(
+            @Parameter(description = &quot;Mã SKU / ID sản phẩm&quot;) @PathVariable String id,
+            @RequestBody Map&lt;String, Integer&gt; payload) {
+<span class="nc" id="L158">        Integer threshold = payload.get(&quot;threshold&quot;);</span>
+<span class="nc bnc" id="L159" title="All 4 branches missed.">        if (threshold == null || threshold &lt; 0) {</span>
+<span class="nc" id="L160">            return ResponseEntity.badRequest()</span>
+<span class="nc" id="L161">                    .body(ApiResponse.failure(&quot;Ngưỡng cảnh báo phải là số nguyên &gt;= 0&quot;));</span>
+        }
+        try {
+<span class="nc" id="L164">            Product updated = productService.updateLowStockThreshold(id, threshold);</span>
+<span class="nc" id="L165">            return ResponseEntity.ok(ApiResponse.success(&quot;Cập nhật ngưỡng cảnh báo thành công&quot;, ProductResponse.from(updated)));</span>
+<span class="nc" id="L166">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L167">            return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="nc" id="L168">                    .body(ApiResponse.failure(e.getMessage()));</span>
+        }
+    }
+
+    private Category resolveCategory(ProductRequest request) {
+<span class="pc bpc" id="L173" title="1 of 2 branches missed.">        if (categoryService == null) {</span>
+<span class="nc" id="L174">            return null;</span>
+        }
+<span class="pc bpc" id="L176" title="1 of 2 branches missed.">        if (request.getCategoryId() != null) {</span>
+<span class="nc" id="L177">            Category cat = categoryService.getCategoryEntityById(request.getCategoryId());</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">            if (cat != null) {</span>
+<span class="nc" id="L179">                return cat;</span>
+            }
+        }
+<span class="pc bpc" id="L182" title="2 of 4 branches missed.">        if (request.getCategory() != null &amp;&amp; !request.getCategory().isBlank()) {</span>
+<span class="fc" id="L183">            return categoryService.getOrCreateCategoryByName(request.getCategory().trim());</span>
+        }
+<span class="nc" id="L185">        return null;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ContactRequest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Hebekery</a> &gt; <a href="index.source.html" class="el_package">com.example.hebekery.dto.request</a> &gt; <span class="el_source">ContactRequest.java</span></div><h1>ContactRequest.java</h1><pre class="source lang-java linenums">package com.example.hebekery.dto.request;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+
+<span class="nc" id="L7">public class ContactRequest {</span>
+    @NotBlank(message = &quot;Ho ten khong duoc de trong&quot;)
+    private String name;
+
+    @NotBlank(message = &quot;Email khong duoc de trong&quot;)
+    @Email(message = &quot;Email khong hop le&quot;)
+    private String email;
+
+    @NotBlank(message = &quot;So dien thoai khong duoc de trong&quot;)
+    @Pattern(regexp = &quot;^[0-9]{10,11}$&quot;, message = &quot;So dien thoai khong hop le&quot;)
+    private String phone;
+
+    @NotBlank(message = &quot;Chu de khong duoc de trong&quot;)
+    private String subject;
+
+    @NotBlank(message = &quot;Noi dung khong duoc de trong&quot;)
+    private String message;
+
+    public String getName() {
+<span class="nc" id="L26">        return name;</span>
+    }
+
+    public void setName(String name) {
+<span class="nc" id="L30">        this.name = name;</span>
+<span class="nc" id="L31">    }</span>
+
+    public String getEmail() {
+<span class="nc" id="L34">        return email;</span>
+    }
+
+    public void setEmail(String email) {
+<span class="nc" id="L38">        this.email = email;</span>
+<span class="nc" id="L39">    }</span>
+
+    public String getPhone() {
+<span class="nc" id="L42">        return phone;</span>
+    }
+
+    public void setPhone(String phone) {
+<span class="nc" id="L46">        this.phone = phone;</span>
+<span class="nc" id="L47">    }</span>
+
+    public String getSubject() {
+<span class="nc" id="L50">        return subject;</span>
+    }
+
+    public void setSubject(String subject) {
+<span class="nc" id="L54">        this.subject = subject;</span>
+<span class="nc" id="L55">    }</span>
+
+    public String getMessage() {
+<span class="nc" id="L58">        return message;</span>
+    }
+
+    public void setMessage(String message) {
+<span class="nc" id="L62">        this.message = message;</span>
+<span class="nc" id="L63">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
