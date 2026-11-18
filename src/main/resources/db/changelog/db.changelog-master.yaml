@@ -21,3 +21,5 @@ databaseChangeLog:
       file: db/changelog/changes/010-add-loyalty-transactions-and-order-points.yaml
   - include:
       file: db/changelog/changes/011-add-product-batches.yaml
+  - include:
+      file: db/changelog/changes/012-seed-admin-user.yaml
