@@ -41,38 +41,38 @@ Hệ thống thương mại điện tử chuyên cung cấp các dòng bánh, h�
 ## 📸 Hình ảnh giao diện thực tế (Screenshots)
 
 ### 1. Trang chủ HeBekery (Chuẩn nhận diện thương hiệu Warm Organic & Hero Slider)
-![Trang chủ Hebekery](docs/screenshots/home.png)
+![Trang chủ Hebekery](public/screenshots/home.png)
 
 ### 2. Thực đơn bánh dinh dưỡng & Huy hiệu Flash Sale Cận Date
-![Thực đơn Bánh Dinh Dưỡng](docs/screenshots/products.png)
+![Thực đơn Bánh Dinh Dưỡng](public/screenshots/products.png)
 
 ### 3. Trang chi tiết sản phẩm & Ưu đãi Flash Sale Cận Date
-![Trang chi tiết sản phẩm](docs/screenshots/pdp_flash_sale.png)
+![Trang chi tiết sản phẩm](public/screenshots/pdp_flash_sale.png)
 
 ### 4. Thẻ Hội Viên Điện Tử VVIP & Hệ thống Điểm Lành HeBekery (Tab 5 Profile)
-![Thẻ Hội Viên VVIP Hebekery](docs/screenshots/profile_vvip_card.png)
+![Thẻ Hội Viên VVIP Hebekery](public/screenshots/profile_vvip_card.png)
 
 ### 5. Tiêu Điểm Lành HeBekery tại Checkout & Thanh toán VietQR Napas 247
-![Tiêu Điểm Lành tại Checkout](docs/screenshots/checkout_loyalty_points.png)
+![Tiêu Điểm Lành tại Checkout](public/screenshots/checkout_loyalty_points.png)
 
 ### 6. Quản Lý Lô Bánh & Hạn Sử Dụng FEFO (Admin Inventory)
-![Quản Lý Lô Bánh FEFO](docs/screenshots/admin_inventory_fefo.png)
+![Quản Lý Lô Bánh FEFO](public/screenshots/admin_inventory_fefo.png)
 
 ### 7. Công cụ Giả lập Webhook SePay cho Quản trị viên
-![SePay Webhook Simulator](docs/screenshots/admin_sepay_simulator.png)
+![SePay Webhook Simulator](public/screenshots/admin_sepay_simulator.png)
 
 ### 8. Quản trị đơn hàng & In Phiếu Giao Hàng A5 / K80
-![In Phiếu Giao Hàng](docs/screenshots/admin_orders_invoice.png)
+![In Phiếu Giao Hàng](public/screenshots/admin_orders_invoice.png)
 
 ### 9. Tự làm Hộp Bánh Mix Vị HeBekery (Custom Box Builder)
-![Tự làm Hộp Bánh](docs/screenshots/box_builder.png)
+![Tự làm Hộp Bánh](public/screenshots/box_builder.png)
 
 ### 10. Công cụ tính BMI, TDEE & Gợi ý thực đơn Eat Clean
-![Công cụ BMI & TDEE](docs/screenshots/bmi.png)
+![Công cụ BMI & TDEE](public/screenshots/bmi.png)
 
 ### 11. Tra cứu đơn hàng công khai & Tài liệu Swagger OpenAPI
-![Tra cứu đơn hàng](docs/screenshots/order-lookup.png)
-![Swagger UI](docs/screenshots/swagger.png)
+![Tra cứu đơn hàng](public/screenshots/order-lookup.png)
+![Swagger UI](public/screenshots/swagger.png)
 
 ---
 
