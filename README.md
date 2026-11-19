@@ -40,17 +40,9 @@ Hệ thống thương mại điện tử chuyên cung cấp các dòng bánh, h�
 
 ## 📸 Hình ảnh giao diện thực tế (Screenshots)
 
-### 1. Giao diện Cửa hàng & Trang chủ HeBekery (Warm Organic & Hero Slider)
-Trải nghiệm mua sắm bánh dinh dưỡng nguyên cám, phân loại danh mục granola/biscotti và cam kết tiêu chuẩn chất lượng ISO 22000 & HACCP.
+Trải nghiệm mua sắm bánh dinh dưỡng nguyên cám, phân loại danh mục Granola, Biscotti, Bánh ngói Keto và cam kết tiêu chuẩn chất lượng ISO 22000 & HACCP.
+
 ![Trang chủ Hebekery](public/screenshots/home.png)
-
-### 2. Quản Trị Kho Lô Bánh & Hạn Sử Dụng FEFO (Admin Inventory)
-Quản lý lô nướng bánh theo hạn sử dụng, cơ chế xuất kho thông minh FEFO (First-Expired, First-Out) và kích hoạt Flash Sale giải cứu bánh cận date.
-![Quản Lý Lô Bánh FEFO](public/screenshots/admin_inventory_fefo.png)
-
-### 3. Quản Lý Đơn Hàng & In Hóa Đơn Vận Chuyển A5 / K80 (Admin Orders & Invoicing)
-Theo dõi tiến độ đơn hàng, dòng tiền thanh toán VietQR SePay tự động và modal in phiếu giao hàng / hóa đơn chuyên nghiệp.
-![In Phiếu Giao Hàng & Hóa Đơn](public/screenshots/admin_orders_invoice.png)
 
 ---
 
@@ -107,7 +99,7 @@ npm run dev
 
 ## 🧪 Kiểm thử tự động (Automated Tests)
 
-- **Backend**: **119/119** JUnit 5 & MockMvc tests Passed (100% `BUILD SUCCESS`).
+- **Backend**: **133/133** JUnit 5 & MockMvc tests Passed (100% `BUILD SUCCESS`).
 - **Frontend**: **29/29** Vitest tests across 9 test suites Passed (100%).
 - **TypeScript**: `npx tsc -b` kiểm tra biên dịch 0 lỗi.
 - **CI/CD**: Tự động kiểm thử qua GitHub Actions trên mỗi lần đẩy mã nguồn.
