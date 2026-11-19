@@ -431,7 +431,7 @@ public class OrderService {
 
     private OrderResponse toResponse(Order order) {
         OrderItem firstItem = (order.getItems() == null || order.getItems().isEmpty()) ? null : order.getItems().get(0);
-        return new OrderResponse(
+        OrderResponse resp = new OrderResponse(
                 order.getId(),
                 order.getCreatedAt() != null ? order.getCreatedAt().toString() : "",
                 statusClass(order),
@@ -443,6 +443,15 @@ public class OrderService {
                 order.getItems() == null ? 0 : order.getItems().stream().mapToInt(OrderItem::getQuantity).sum(),
                 order.getTotal()
         );
+        resp.setOrderCode(order.getOrderCode() != null && !order.getOrderCode().isBlank() ? order.getOrderCode() : order.getId());
+        resp.setCustomerName(order.getCustomerName() != null ? order.getCustomerName() : "");
+        resp.setPhone(order.getPhone() != null ? order.getPhone() : "");
+        resp.setAddress(order.getAddress() != null ? order.getAddress() : "");
+        resp.setPaymentMethod(order.getPaymentMethod() != null ? order.getPaymentMethod() : "COD");
+        resp.setCreatedAt(order.getCreatedAt() != null ? order.getCreatedAt().toString() : "");
+        resp.setShippingCarrier(order.getShippingCarrier() != null ? order.getShippingCarrier() : "");
+        resp.setTrackingCode(order.getTrackingCode() != null ? order.getTrackingCode() : "");
+        return resp;
     }
 
     private String statusClass(Order order) {

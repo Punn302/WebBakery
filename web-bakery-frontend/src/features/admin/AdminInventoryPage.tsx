@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/dialog'
 import { formatCurrency, formatDate } from '@/utils/format'
 import { toast } from 'sonner'
+import { cn } from '@/utils/cn'
 
 interface DynamicReceiptItem {
   productId: string
@@ -273,21 +274,25 @@ export const AdminInventoryPage: React.FC = () => {
   const safeStockCount = products.filter((p) => (p.stockQuantity ?? p.stock ?? 0) > (p.lowStockThreshold || 5)).length
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-text">
       {/* Header */}
-      <div className="border-b border-[#e7e5e4] pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold uppercase tracking-tight text-[#1c1917]">
-            Quản Trị Kho Hàng & Nhập Kho
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#006561]/10 text-[#006561] text-xs font-semibold tracking-wider uppercase mb-1.5">
+            <Warehouse className="w-3.5 h-3.5 text-[#C9785C]" />
+            <span>Kho bánh &amp; Chuỗi cung ứng</span>
+          </div>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#2A2725]">
+            Quản Trị Kho Bánh &amp; Nhập Kho
           </h1>
-          <p className="text-xs text-[#78716c] mt-0.5">
-            Theo dõi số lượng tồn khả dụng, tạo phiếu nhập theo mẻ và tính giá vốn bình quân (WAC)
+          <p className="text-xs text-[#6B6661] mt-0.5">
+            Theo dõi số lượng tồn khả dụng, tạo phiếu nhập theo mẻ và quản lý hạn dùng FEFO
           </p>
         </div>
 
         <Button
           onClick={() => setCreateModalOpen(true)}
-          className="flex items-center gap-1.5 self-start sm:self-auto"
+          className="bg-[#006561] hover:bg-[#004e4a] text-white rounded-xl px-5 py-2.5 text-xs font-bold uppercase tracking-wider cursor-pointer shadow-xs flex items-center gap-1.5 shrink-0 whitespace-nowrap self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Tạo Phiếu Nhập Kho</span>
@@ -295,39 +300,47 @@ export const AdminInventoryPage: React.FC = () => {
       </div>
 
       {/* KPI Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="border border-[#e7e5e4] bg-white p-4 space-y-1">
-          <span className="text-[10px] font-bold text-[#78716c] uppercase tracking-wider block">
-            Mặt Hàng Lưu Kho
-          </span>
-          <div className="text-2xl font-black text-[#1c1917]">{totalStockCount}</div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="bg-white p-4.5 rounded-2xl border border-[#E5E2DF] shadow-2xs space-y-1">
+          <div className="flex items-center justify-between text-[#6B6661]">
+            <span className="text-[11px] font-semibold uppercase tracking-wider">Mặt Hàng Lưu Kho</span>
+            <Package className="w-4 h-4 text-[#006561]" />
+          </div>
+          <div className="font-mono text-2xl sm:text-3xl font-bold text-[#2A2725]">{totalStockCount}</div>
+          <p className="text-[11px] text-[#6B6661]">Mặt hàng đang kinh doanh</p>
         </div>
 
-        <div className="border border-[#e7e5e4] bg-white p-4 space-y-1">
-          <span className="text-[10px] font-bold text-[#15803d] uppercase tracking-wider block">
-            Tồn Kho An Toàn
-          </span>
-          <div className="text-2xl font-black text-[#15803d]">{safeStockCount}</div>
+        <div className="bg-white p-4.5 rounded-2xl border border-[#E5E2DF] shadow-2xs space-y-1">
+          <div className="flex items-center justify-between text-[#6B6661]">
+            <span className="text-[11px] font-semibold uppercase tracking-wider">Tồn Kho An Toàn</span>
+            <CheckCircle className="w-4 h-4 text-[#16a34a]" />
+          </div>
+          <div className="font-mono text-2xl sm:text-3xl font-bold text-[#16a34a]">{safeStockCount}</div>
+          <p className="text-[11px] text-[#16a34a] font-medium">Đủ đáp ứng đơn hàng</p>
         </div>
 
-        <div className="border border-[#e7e5e4] bg-white p-4 space-y-1">
-          <span className="text-[10px] font-bold text-[#d97724] uppercase tracking-wider block">
-            Cận Ngưỡng Tối Thiểu
-          </span>
-          <div className="text-2xl font-black text-[#d97724]">{lowStockCount}</div>
+        <div className="bg-white p-4.5 rounded-2xl border border-[#E5E2DF] shadow-2xs space-y-1">
+          <div className="flex items-center justify-between text-[#6B6661]">
+            <span className="text-[11px] font-semibold uppercase tracking-wider">Cận Ngưỡng Báo</span>
+            <AlertTriangle className="w-4 h-4 text-amber-600" />
+          </div>
+          <div className="font-mono text-2xl sm:text-3xl font-bold text-amber-600">{lowStockCount}</div>
+          <p className="text-[11px] text-amber-700 font-medium">Cần lên mẻ bánh mới</p>
         </div>
 
-        <div className="border border-[#e7e5e4] bg-white p-4 space-y-1">
-          <span className="text-[10px] font-bold text-[#dc2626] uppercase tracking-wider block">
-            Đã Hết Hàng
-          </span>
-          <div className="text-2xl font-black text-[#dc2626]">{outOfStockCount}</div>
+        <div className="bg-white p-4.5 rounded-2xl border border-[#E5E2DF] shadow-2xs space-y-1">
+          <div className="flex items-center justify-between text-[#6B6661]">
+            <span className="text-[11px] font-semibold uppercase tracking-wider">Đã Hết Hàng</span>
+            <TrendingDown className="w-4 h-4 text-[#B23A2A]" />
+          </div>
+          <div className="font-mono text-2xl sm:text-3xl font-bold text-[#B23A2A]">{outOfStockCount}</div>
+          <p className="text-[11px] text-[#B23A2A] font-medium">Tạm ngưng nhận đơn</p>
         </div>
       </div>
 
       {/* Navigation Tabs & Search */}
-      <div className="border border-[#e7e5e4] bg-white p-4 flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="bg-white p-3.5 rounded-2xl border border-[#E5E2DF] shadow-2xs flex flex-col sm:flex-row gap-3 items-center justify-between">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             variant={activeTab === 'STOCK' ? 'default' : 'outline'}
             size="sm"
@@ -335,9 +348,15 @@ export const AdminInventoryPage: React.FC = () => {
               setActiveTab('STOCK')
               setPage(0)
             }}
-            className="text-xs"
+            className={cn(
+              'text-xs rounded-xl flex items-center gap-1.5 cursor-pointer',
+              activeTab === 'STOCK'
+                ? 'bg-[#006561] text-white hover:bg-[#004e4a]'
+                : 'border-[#E5E2DF] text-[#6B6661] hover:text-[#006561]'
+            )}
           >
-            Tồn Kho Hiện Tại
+            <Package className="w-3.5 h-3.5" />
+            <span>Tồn Kho Hiện Tại</span>
           </Button>
           <Button
             variant={activeTab === 'RECEIPTS' ? 'default' : 'outline'}
@@ -346,9 +365,15 @@ export const AdminInventoryPage: React.FC = () => {
               setActiveTab('RECEIPTS')
               setPage(0)
             }}
-            className="text-xs"
+            className={cn(
+              'text-xs rounded-xl flex items-center gap-1.5 cursor-pointer',
+              activeTab === 'RECEIPTS'
+                ? 'bg-[#006561] text-white hover:bg-[#004e4a]'
+                : 'border-[#E5E2DF] text-[#6B6661] hover:text-[#006561]'
+            )}
           >
-            Lịch Sử Phiếu Nhập
+            <FileText className="w-3.5 h-3.5" />
+            <span>Lịch Sử Phiếu Nhập</span>
           </Button>
           <Button
             variant={activeTab === 'BATCHES' ? 'default' : 'outline'}
@@ -357,16 +382,21 @@ export const AdminInventoryPage: React.FC = () => {
               setActiveTab('BATCHES')
               setBatchPage(0)
             }}
-            className="text-xs flex items-center gap-1.5"
+            className={cn(
+              'text-xs rounded-xl flex items-center gap-1.5 cursor-pointer',
+              activeTab === 'BATCHES'
+                ? 'bg-[#006561] text-white hover:bg-[#004e4a]'
+                : 'border-[#E5E2DF] text-[#6B6661] hover:text-[#006561]'
+            )}
           >
-            <Layers className="w-3.5 h-3.5 text-[#006561]" />
-            <span>Quản Lý Lô Bánh & HSD (FEFO)</span>
+            <Flame className="w-3.5 h-3.5 text-[#C9785C]" />
+            <span>Quản Lý Lô Bánh &amp; HSD (FEFO)</span>
           </Button>
         </div>
 
         {activeTab === 'STOCK' && (
           <div className="relative w-full sm:w-72">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#a8a29e]" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6661]" />
             <Input
               value={keyword}
               onChange={(e) => {
@@ -374,7 +404,7 @@ export const AdminInventoryPage: React.FC = () => {
                 setPage(0)
               }}
               placeholder="Tìm theo tên bánh hoặc SKU..."
-              className="pl-9 text-xs h-9"
+              className="pl-9 text-xs h-9 rounded-xl border-[#E5E2DF]"
             />
           </div>
         )}

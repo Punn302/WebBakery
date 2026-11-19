@@ -33,77 +33,91 @@ export const AdminLayout: React.FC = () => {
     setIsMobileOpen(false)
   }, [location.pathname])
 
-  const allNavItems = [
+  const navGroups = [
     {
-      label: 'Tổng quan bếp & kinh doanh',
-      path: '/admin/dashboard',
-      icon: LayoutDashboard,
-      roles: ['ADMIN'],
+      groupTitle: 'Vận Hành & Đơn Hàng',
+      items: [
+        {
+          label: 'Tổng quan điều hành',
+          path: '/admin/dashboard',
+          icon: LayoutDashboard,
+          roles: ['ADMIN'],
+        },
+        {
+          label: 'Đơn hàng khách đặt',
+          path: '/admin/orders',
+          icon: ShoppingBag,
+          roles: ['ADMIN', 'STAFF_SALES'],
+        },
+        {
+          label: 'Mã giảm giá & Voucher',
+          path: '/admin/vouchers',
+          icon: Ticket,
+          roles: ['ADMIN'],
+        },
+        {
+          label: 'Đánh giá & Nhận xét',
+          path: '/admin/reviews',
+          icon: Star,
+          roles: ['ADMIN', 'STAFF_SALES'],
+        },
+        {
+          label: 'Hộp thư CSKH & Tư vấn',
+          path: '/admin/contacts',
+          icon: Mail,
+          roles: ['ADMIN', 'STAFF_SALES'],
+        },
+      ],
     },
     {
-      label: 'Sản phẩm & Thực đơn',
-      path: '/admin/products',
-      icon: Package,
-      roles: ['ADMIN'],
+      groupTitle: 'Bếp Bánh & Tồn Kho',
+      items: [
+        {
+          label: 'Sản phẩm & Thực đơn',
+          path: '/admin/products',
+          icon: Package,
+          roles: ['ADMIN'],
+        },
+        {
+          label: 'Danh mục sản phẩm',
+          path: '/admin/categories',
+          icon: FolderTree,
+          roles: ['ADMIN'],
+        },
+        {
+          label: 'Kho bánh & Nhập lô FEFO',
+          path: '/admin/inventory',
+          icon: Warehouse,
+          roles: ['ADMIN', 'STAFF_WAREHOUSE'],
+        },
+      ],
     },
     {
-      label: 'Danh mục sản phẩm',
-      path: '/admin/categories',
-      icon: FolderTree,
-      roles: ['ADMIN'],
-    },
-    {
-      label: 'Đơn hàng khách đặt',
-      path: '/admin/orders',
-      icon: ShoppingBag,
-      roles: ['ADMIN', 'STAFF_SALES'],
-    },
-    {
-      label: 'Kho nguyên liệu & Nhập kho',
-      path: '/admin/inventory',
-      icon: Warehouse,
-      roles: ['ADMIN', 'STAFF_WAREHOUSE'],
-    },
-    {
-      label: 'Quản lý tài khoản',
-      path: '/admin/users',
-      icon: Users,
-      roles: ['ADMIN'],
-    },
-    {
-      label: 'Mã giảm giá & Voucher',
-      path: '/admin/vouchers',
-      icon: Ticket,
-      roles: ['ADMIN'],
-    },
-    {
-      label: 'Báo cáo doanh thu',
-      path: '/admin/reports',
-      icon: FileBarChart,
-      roles: ['ADMIN'],
-    },
-    {
-      label: 'Hộp thư tư vấn & liên hệ',
-      path: '/admin/contacts',
-      icon: Mail,
-      roles: ['ADMIN', 'STAFF_SALES'],
-    },
-    {
-      label: 'Đánh giá & Nhận xét',
-      path: '/admin/reviews',
-      icon: Star,
-      roles: ['ADMIN', 'STAFF_SALES'],
-    },
-    {
-      label: 'Kiểm thử thanh toán',
-      path: '/admin/sepay-simulator',
-      icon: Zap,
-      roles: ['ADMIN'],
+      groupTitle: 'Hệ Thống & Báo Cáo',
+      items: [
+        {
+          label: 'Báo cáo doanh thu P&L',
+          path: '/admin/reports',
+          icon: FileBarChart,
+          roles: ['ADMIN'],
+        },
+        {
+          label: 'Quản lý tài khoản',
+          path: '/admin/users',
+          icon: Users,
+          roles: ['ADMIN'],
+        },
+        {
+          label: 'Kiểm thử thanh toán SePay',
+          path: '/admin/sepay-simulator',
+          icon: Zap,
+          roles: ['ADMIN'],
+        },
+      ],
     },
   ]
 
   const userRole = user?.role || 'ADMIN'
-  const visibleNavItems = allNavItems.filter((item) => item.roles.includes(userRole))
 
   const getRoleLabel = () => {
     switch (userRole) {
@@ -161,25 +175,39 @@ export const AdminLayout: React.FC = () => {
       </div>
 
       {/* Navigation List */}
-      <nav className="flex-1 p-3 space-y-1.5 overflow-y-auto">
-        {visibleNavItems.map((item) => {
-          const Icon = item.icon
-          const isActive = location.pathname.startsWith(item.path)
+      <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
+        {navGroups.map((group) => {
+          const visibleItems = group.items.filter((item) => item.roles.includes(userRole))
+          if (visibleItems.length === 0) return null
+
           return (
-            <Link
-              key={item.path}
-              to={item.path}
-              onClick={() => setIsMobileOpen(false)}
-              className={cn(
-                'flex items-center gap-3 px-3.5 py-2.5 text-xs rounded-xl transition-all select-none min-h-[44px]',
-                isActive
-                  ? 'bg-[#006561] text-white shadow-xs font-semibold'
-                  : 'text-[#6B6661] hover:bg-[#FAF7F2] hover:text-[#006561] font-medium'
-              )}
-            >
-              <Icon className={cn('w-4 h-4 shrink-0', isActive ? 'text-white' : 'text-[#6B6661]')} />
-              <span className="truncate">{item.label}</span>
-            </Link>
+            <div key={group.groupTitle} className="space-y-1">
+              <span className="px-3 text-[10px] font-bold text-[#6B6661] uppercase tracking-wider block">
+                {group.groupTitle}
+              </span>
+              <div className="space-y-1">
+                {visibleItems.map((item) => {
+                  const Icon = item.icon
+                  const isActive = location.pathname.startsWith(item.path)
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => setIsMobileOpen(false)}
+                      className={cn(
+                        'flex items-center gap-3 px-3.5 py-2 text-xs rounded-xl transition-all select-none min-h-[40px]',
+                        isActive
+                          ? 'bg-[#006561] text-white shadow-xs font-semibold'
+                          : 'text-[#6B6661] hover:bg-[#FAF7F2] hover:text-[#006561] font-medium'
+                      )}
+                    >
+                      <Icon className={cn('w-4 h-4 shrink-0', isActive ? 'text-white' : 'text-[#6B6661]')} />
+                      <span className="truncate">{item.label}</span>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
           )
         })}
       </nav>
@@ -201,7 +229,7 @@ export const AdminLayout: React.FC = () => {
   return (
     <div className="min-h-screen flex bg-[#FAF7F2] text-[#2A2725] font-text">
       {/* Desktop Sidebar (hidden lg:flex) */}
-      <aside className="hidden lg:flex w-64 bg-white border-r border-[#E5E2DF] flex-col shrink-0">
+      <aside className="hidden lg:flex w-72 bg-white border-r border-[#E5E2DF] flex-col shrink-0">
         {renderSidebarContent(false)}
       </aside>
 

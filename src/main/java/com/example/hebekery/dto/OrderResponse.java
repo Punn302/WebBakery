@@ -38,6 +38,27 @@ public class OrderResponse {
     @Schema(description = "Tổng tiền thanh toán (VNĐ)", example = "130000.0")
     private double total;
 
+    @Schema(description = "Họ và tên khách hàng đặt bánh", example = "Nguyễn Văn A")
+    private String customerName;
+
+    @Schema(description = "Số điện thoại nhận hàng", example = "0987654321")
+    private String phone;
+
+    @Schema(description = "Địa chỉ giao hàng", example = "123 Đường Bánh Mì, Q. Tân Bình, TP. HCM")
+    private String address;
+
+    @Schema(description = "Phương thức thanh toán (COD, VIETQR)", example = "VIETQR")
+    private String paymentMethod;
+
+    @Schema(description = "Thời gian tạo đơn định dạng ISO", example = "2026-11-19T10:00:00")
+    private String createdAt;
+
+    @Schema(description = "Đơn vị vận chuyển (GHN, GHTK, ViettelPost)", example = "GiaoHangNhanh")
+    private String shippingCarrier;
+
+    @Schema(description = "Mã vận đơn giao hàng", example = "GHN-882910")
+    private String trackingCode;
+
     public OrderResponse() {
     }
 
@@ -152,5 +173,61 @@ public class OrderResponse {
 
     public void setTotal(double total) {
         this.total = total;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getCreatedAt() {
+        return createdAt != null ? createdAt : date;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getShippingCarrier() {
+        return shippingCarrier;
+    }
+
+    public void setShippingCarrier(String shippingCarrier) {
+        this.shippingCarrier = shippingCarrier;
+    }
+
+    public String getTrackingCode() {
+        return trackingCode;
+    }
+
+    public void setTrackingCode(String trackingCode) {
+        this.trackingCode = trackingCode;
     }
 }

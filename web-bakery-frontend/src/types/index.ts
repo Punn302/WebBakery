@@ -55,6 +55,8 @@ export interface Product {
   category?: Category | string | { id?: number; name?: string; slug?: string }
   categoryId?: number
   averageCost?: number
+  badge?: string
+  tag?: string
   calories?: number
   protein?: number
   fat?: number

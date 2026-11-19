@@ -219,6 +219,10 @@ export const orderApi = {
     const res = await axiosClient.get<PageResponse<Order>>('/admin/orders', { params })
     return unwrap(res)
   },
+  adminGetOrderById: async (id: string): Promise<Order> => {
+    const res = await axiosClient.get<Order>(`/admin/orders/${id}`)
+    return unwrap(res)
+  },
   adminUpdateStatus: async (
     id: string,
     status: string,
