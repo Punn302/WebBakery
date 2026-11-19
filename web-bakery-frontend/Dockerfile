@@ -14,8 +14,9 @@ RUN npm run build
 # Stage 2: Hardened Production Server with Non-Root Nginx
 FROM nginxinc/nginx-unprivileged:alpine
 
-# Remove default nginx html
+USER root
 RUN rm -rf /usr/share/nginx/html/*
+USER nginx
 
 # Copy build artifacts from builder stage with unprivileged ownership
 COPY --from=builder --chown=nginx:nginx /app/dist /usr/share/nginx/html

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -286,6 +287,7 @@ public class OrderService {
         return saved;
     }
 
+    @Transactional
     public Order updateAdminNote(String orderId, String adminNote) {
         Order order = getOrderById(orderId);
         order.setAdminNote(adminNote);
@@ -294,6 +296,7 @@ public class OrderService {
         return saved;
     }
 
+    @Transactional
     public Order updateShippingInfo(String orderId, String shippingCarrier, String trackingCode) {
         Order order = getOrderById(orderId);
         if (!"PENDING".equals(order.getOrderStatus())) {
@@ -313,6 +316,7 @@ public class OrderService {
         return saved;
     }
 
+    @Transactional
     public Order cancelOrder(String orderId, String userId) {
         Order order = getOrderById(orderId);
         if (!order.getUserId().equals(userId)) {

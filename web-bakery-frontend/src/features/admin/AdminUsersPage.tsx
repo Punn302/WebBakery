@@ -114,14 +114,14 @@ export const AdminUsersPage: React.FC = () => {
   const getRoleBadge = (role: UserRole) => {
     switch (role) {
       case 'ADMIN':
-        return <Badge className="bg-[#47654c] text-white">Chủ tiệm (ADMIN)</Badge>
+        return <Badge className="bg-[#006561] text-white rounded-lg">Chủ tiệm (ADMIN)</Badge>
       case 'STAFF_WAREHOUSE':
-        return <Badge className="bg-[#d97724] text-white">Thủ kho (WAREHOUSE)</Badge>
+        return <Badge className="bg-[#C9785C] text-white rounded-lg">Thủ kho (WAREHOUSE)</Badge>
       case 'STAFF_SALES':
-        return <Badge className="bg-[#0284c7] text-white">Bán hàng (SALES)</Badge>
+        return <Badge className="bg-[#0284c7] text-white rounded-lg">Bán hàng (SALES)</Badge>
       case 'USER':
       default:
-        return <Badge variant="secondary">Khách hàng (USER)</Badge>
+        return <Badge variant="secondary" className="rounded-lg">Khách hàng (USER)</Badge>
     }
   }
 
@@ -133,55 +133,55 @@ export const AdminUsersPage: React.FC = () => {
   const userCount = users.filter((u) => u.role === 'USER').length
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-text">
       {/* Page Header */}
-      <div className="border-b border-[#e7e5e4] pb-5">
-        <h1 className="text-2xl font-extrabold uppercase tracking-tight text-[#1c1917]">
-          Quản Lý Tài Khoản & Phân Quyền
+      <div className="border-b border-[#E5E2DF] pb-5">
+        <h1 className="font-display text-2xl font-bold text-[#2A2725]">
+          Quản Lý Tài Khoản &amp; Phân Quyền
         </h1>
-        <p className="text-xs text-[#78716c] mt-0.5">
+        <p className="text-xs text-[#6B6661] mt-1">
           Danh sách người dùng, thiết lập quyền hạn 4 vai trò và kiểm soát trạng thái đăng nhập
         </p>
       </div>
 
       {/* Stats Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        <div className="border border-[#e7e5e4] bg-white p-4 space-y-1">
-          <span className="text-[10px] font-bold text-[#78716c] uppercase tracking-wider block">
+        <div className="rounded-2xl border border-[#E5E2DF] bg-white p-4 space-y-1 shadow-xs">
+          <span className="text-[10px] font-bold text-[#6B6661] uppercase tracking-wider block">
             Tổng Thành Viên
           </span>
-          <div className="text-2xl font-black text-[#1c1917]">{totalCount}</div>
+          <div className="font-display text-2xl font-bold text-[#2A2725]">{totalCount}</div>
         </div>
-        <div className="border border-[#e7e5e4] bg-white p-4 space-y-1">
-          <span className="text-[10px] font-bold text-[#47654c] uppercase tracking-wider block">
+        <div className="rounded-2xl border border-[#E5E2DF] bg-white p-4 space-y-1 shadow-xs">
+          <span className="text-[10px] font-bold text-[#006561] uppercase tracking-wider block">
             Quản Trị Viên
           </span>
-          <div className="text-2xl font-black text-[#47654c]">{adminCount}</div>
+          <div className="font-display text-2xl font-bold text-[#006561]">{adminCount}</div>
         </div>
-        <div className="border border-[#e7e5e4] bg-white p-4 space-y-1">
-          <span className="text-[10px] font-bold text-[#d97724] uppercase tracking-wider block">
-            Thủ Kho & Bếp
+        <div className="rounded-2xl border border-[#E5E2DF] bg-white p-4 space-y-1 shadow-xs">
+          <span className="text-[10px] font-bold text-[#C9785C] uppercase tracking-wider block">
+            Thủ Kho &amp; Bếp
           </span>
-          <div className="text-2xl font-black text-[#d97724]">{warehouseCount}</div>
+          <div className="font-display text-2xl font-bold text-[#C9785C]">{warehouseCount}</div>
         </div>
-        <div className="border border-[#e7e5e4] bg-white p-4 space-y-1">
+        <div className="rounded-2xl border border-[#E5E2DF] bg-white p-4 space-y-1 shadow-xs">
           <span className="text-[10px] font-bold text-[#0284c7] uppercase tracking-wider block">
-            Sales & CSKH
+            Sales &amp; CSKH
           </span>
-          <div className="text-2xl font-black text-[#0284c7]">{salesCount}</div>
+          <div className="font-display text-2xl font-bold text-[#0284c7]">{salesCount}</div>
         </div>
-        <div className="border border-[#e7e5e4] bg-white p-4 space-y-1">
-          <span className="text-[10px] font-bold text-[#57534e] uppercase tracking-wider block">
+        <div className="rounded-2xl border border-[#E5E2DF] bg-white p-4 space-y-1 shadow-xs">
+          <span className="text-[10px] font-bold text-[#6B6661] uppercase tracking-wider block">
             Khách Mua Hàng
           </span>
-          <div className="text-2xl font-black text-[#57534e]">{userCount}</div>
+          <div className="font-display text-2xl font-bold text-[#2A2725]">{userCount}</div>
         </div>
       </div>
 
       {/* Filter Toolbar */}
-      <div className="border border-[#e7e5e4] bg-white p-4 flex flex-col sm:flex-row gap-3 items-center justify-between">
+      <div className="rounded-2xl border border-[#E5E2DF] bg-white p-4 flex flex-col sm:flex-row gap-3 items-center justify-between shadow-xs">
         <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#a8a29e]" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6661]" />
           <Input
             value={keyword}
             onChange={(e) => {
@@ -189,16 +189,16 @@ export const AdminUsersPage: React.FC = () => {
               setPage(0)
             }}
             placeholder="Tìm theo họ tên hoặc email..."
-            className="pl-9 text-xs h-9"
+            className="pl-9 text-xs rounded-xl border-[#E5E2DF] h-9.5"
           />
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <span className="text-xs text-[#78716c] whitespace-nowrap">Lọc vai trò:</span>
+          <span className="text-xs text-[#6B6661] whitespace-nowrap">Lọc vai trò:</span>
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="h-9 border border-[#d6d3d1] bg-white px-3 text-xs text-[#1c1917] focus:outline-none focus:border-[#47654c]"
+            className="h-9.5 rounded-xl border border-[#E5E2DF] bg-white px-3 text-xs text-[#2A2725] focus:outline-none focus:border-[#006561]"
           >
             <option value="ALL">Tất cả vai trò</option>
             <option value="ADMIN">ADMIN (Chủ tiệm)</option>
@@ -210,10 +210,10 @@ export const AdminUsersPage: React.FC = () => {
       </div>
 
       {/* Users Table */}
-      <div className="border border-[#e7e5e4] bg-white overflow-x-auto">
+      <div className="rounded-2xl border border-[#E5E2DF] bg-white overflow-x-auto shadow-xs">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="border-b border-[#e7e5e4] bg-[#faf8f5] text-[#57534e] font-bold uppercase tracking-wider text-[11px]">
+            <tr className="border-b border-[#E5E2DF] bg-[#FAF7F2] text-[#6B6661] font-semibold uppercase tracking-wider text-[11px]">
               <th className="py-3 px-4">Thành viên</th>
               <th className="py-3 px-4">Số điện thoại</th>
               <th className="py-3 px-4">Vai trò</th>
@@ -221,34 +221,34 @@ export const AdminUsersPage: React.FC = () => {
               <th className="py-3 px-4 text-right">Thao tác</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#f5f5f4]">
+          <tbody className="divide-y divide-[#E5E2DF]/50">
             {isLoading ? (
               <tr>
-                <td colSpan={5} className="py-12 text-center text-[#78716c]">
+                <td colSpan={5} className="py-12 text-center text-[#6B6661]">
                   Đang nạp dữ liệu danh sách người dùng...
                 </td>
               </tr>
             ) : filteredUsers.length === 0 ? (
               <tr>
-                <td colSpan={5} className="py-12 text-center text-[#78716c]">
+                <td colSpan={5} className="py-12 text-center text-[#6B6661]">
                   Không tìm thấy tài khoản người dùng nào.
                 </td>
               </tr>
             ) : (
               filteredUsers.map((u) => (
-                <tr key={u.id} className="hover:bg-[#faf8f5] transition-colors">
+                <tr key={u.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 bg-[#47654c]/10 text-[#47654c] font-bold flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-[#006561]/10 text-[#006561] font-bold flex items-center justify-center shrink-0">
                         {u.name?.charAt(0).toUpperCase() || 'U'}
                       </div>
                       <div>
-                        <div className="font-bold text-[#1c1917]">{u.name}</div>
-                        <div className="text-[11px] text-[#78716c]">{u.email}</div>
+                        <div className="font-bold text-[#2A2725]">{u.name}</div>
+                        <div className="text-[11px] text-[#6B6661]">{u.email}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-[#57534e]">
+                  <td className="py-3 px-4 text-[#6B6661]">
                     {u.phone || 'Chưa cập nhật'}
                   </td>
                   <td className="py-3 px-4">{getRoleBadge(u.role)}</td>
@@ -269,7 +269,7 @@ export const AdminUsersPage: React.FC = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-7 text-[11px] px-2.5"
+                        className="h-7 text-[11px] px-2.5 rounded-lg border-[#E5E2DF] text-[#2A2725] hover:bg-[#FAF7F2] cursor-pointer"
                         onClick={() => {
                           setSelectedUser(u)
                           setNewRole(u.role)
@@ -283,7 +283,7 @@ export const AdminUsersPage: React.FC = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 text-[11px] px-2 text-[#78716c] hover:text-[#1c1917]"
+                        className="h-7 text-[11px] px-2 text-[#6B6661] hover:text-[#2A2725] rounded-lg cursor-pointer"
                         title="Đặt lại mật khẩu"
                         onClick={() => {
                           setSelectedUser(u)
@@ -298,7 +298,7 @@ export const AdminUsersPage: React.FC = () => {
                       <Button
                         variant={u.active ? 'ghost' : 'outline'}
                         size="sm"
-                        className={`h-7 text-[11px] px-2 ${
+                        className={`h-7 text-[11px] px-2 rounded-lg cursor-pointer ${
                           u.active
                             ? 'text-[#dc2626] hover:bg-[#dc2626]/10'
                             : 'text-[#15803d] hover:bg-[#15803d]/10'
@@ -324,7 +324,7 @@ export const AdminUsersPage: React.FC = () => {
 
         {/* Pagination Bar */}
         {totalPages > 1 && (
-          <div className="p-3 border-t border-[#e7e5e4] flex items-center justify-between text-xs text-[#78716c]">
+          <div className="p-3 border-t border-[#E5E2DF] flex items-center justify-between text-xs text-[#6B6661]">
             <div>
               Trang {page + 1} / {totalPages}
             </div>
@@ -334,6 +334,7 @@ export const AdminUsersPage: React.FC = () => {
                 size="sm"
                 disabled={page === 0}
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
+                className="rounded-lg border-[#E5E2DF]"
               >
                 Trước
               </Button>
@@ -342,6 +343,7 @@ export const AdminUsersPage: React.FC = () => {
                 size="sm"
                 disabled={page >= totalPages - 1}
                 onClick={() => setPage((p) => p + 1)}
+                className="rounded-lg border-[#E5E2DF]"
               >
                 Tiếp theo
               </Button>
@@ -352,81 +354,82 @@ export const AdminUsersPage: React.FC = () => {
 
       {/* Role Change Modal */}
       <Dialog open={roleModalOpen} onOpenChange={setRoleModalOpen}>
-        <DialogContent onClose={() => setRoleModalOpen(false)} className="max-w-md p-6 space-y-4">
+        <DialogContent onClose={() => setRoleModalOpen(false)} className="max-w-md p-6 space-y-4 rounded-3xl border border-[#E5E2DF]">
           <DialogHeader>
-            <DialogTitle>Thay Đổi Vai Trò Người Dùng</DialogTitle>
-            <DialogDescription className="text-xs text-[#78716c]">
-              Thiết lập quyền truy cập cho tài khoản: <strong>{selectedUser?.name}</strong> ({selectedUser?.email})
+            <DialogTitle className="font-display text-xl text-[#2A2725]">Thay Đổi Vai Trò Người Dùng</DialogTitle>
+            <DialogDescription className="text-xs text-[#6B6661]">
+              Thiết lập quyền truy cập cho tài khoản: <strong className="text-[#2A2725]">{selectedUser?.name}</strong> ({selectedUser?.email})
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 py-2 text-xs">
-            <label className="block font-semibold text-[#1c1917]">
+            <label className="block font-semibold text-[#2A2725]">
               Chọn vai trò phân quyền mới:
             </label>
             <div className="space-y-2">
               <label
                 onClick={() => setNewRole('ADMIN')}
-                className={`flex items-start gap-3 p-3 border cursor-pointer transition-colors ${
-                  newRole === 'ADMIN' ? 'border-[#47654c] bg-[#47654c]/5' : 'border-[#e7e5e4]'
+                className={`flex items-start gap-3 p-3.5 rounded-2xl border cursor-pointer transition-colors ${
+                  newRole === 'ADMIN' ? 'border-[#006561] bg-[#006561]/5' : 'border-[#E5E2DF]'
                 }`}
               >
-                <Shield className="w-4 h-4 text-[#47654c] shrink-0 mt-0.5" />
+                <Shield className="w-4 h-4 text-[#006561] shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-bold text-[#1c1917]">ADMIN (Chủ tiệm / Quản trị viên)</div>
-                  <div className="text-[11px] text-[#78716c]">Toàn quyền truy cập tất cả phân hệ tài chính, nhân sự, kho và sản phẩm.</div>
+                  <div className="font-bold text-[#2A2725]">ADMIN (Chủ tiệm / Quản trị viên)</div>
+                  <div className="text-[11px] text-[#6B6661]">Toàn quyền truy cập tất cả phân hệ tài chính, nhân sự, kho và sản phẩm.</div>
                 </div>
               </label>
 
               <label
                 onClick={() => setNewRole('STAFF_WAREHOUSE')}
-                className={`flex items-start gap-3 p-3 border cursor-pointer transition-colors ${
-                  newRole === 'STAFF_WAREHOUSE' ? 'border-[#d97724] bg-[#d97724]/5' : 'border-[#e7e5e4]'
+                className={`flex items-start gap-3 p-3.5 rounded-2xl border cursor-pointer transition-colors ${
+                  newRole === 'STAFF_WAREHOUSE' ? 'border-[#C9785C] bg-[#C9785C]/5' : 'border-[#E5E2DF]'
                 }`}
               >
-                <Truck className="w-4 h-4 text-[#d97724] shrink-0 mt-0.5" />
+                <Truck className="w-4 h-4 text-[#C9785C] shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-bold text-[#1c1917]">STAFF_WAREHOUSE (Thủ kho / Bếp bánh)</div>
-                  <div className="text-[11px] text-[#78716c]">Quản lý tồn kho, tạo phiếu nhập hàng, quản lý số lô và hạn sử dụng bánh.</div>
+                  <div className="font-bold text-[#2A2725]">STAFF_WAREHOUSE (Thủ kho / Bếp bánh)</div>
+                  <div className="text-[11px] text-[#6B6661]">Quản lý tồn kho, tạo phiếu nhập hàng, quản lý số lô và hạn sử dụng bánh.</div>
                 </div>
               </label>
 
               <label
                 onClick={() => setNewRole('STAFF_SALES')}
-                className={`flex items-start gap-3 p-3 border cursor-pointer transition-colors ${
-                  newRole === 'STAFF_SALES' ? 'border-[#0284c7] bg-[#0284c7]/5' : 'border-[#e7e5e4]'
+                className={`flex items-start gap-3 p-3.5 rounded-2xl border cursor-pointer transition-colors ${
+                  newRole === 'STAFF_SALES' ? 'border-[#0284c7] bg-[#0284c7]/5' : 'border-[#E5E2DF]'
                 }`}
               >
                 <UserCheck className="w-4 h-4 text-[#0284c7] shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-bold text-[#1c1917]">STAFF_SALES (Bán hàng & CSKH)</div>
-                  <div className="text-[11px] text-[#78716c]">Xác nhận đơn hàng, gán mã vận đơn, tiếp nhận yêu cầu đổi trả và tin nhắn liên hệ.</div>
+                  <div className="font-bold text-[#2A2725]">STAFF_SALES (Bán hàng &amp; CSKH)</div>
+                  <div className="text-[11px] text-[#6B6661]">Xác nhận đơn hàng, gán mã vận đơn, tiếp nhận yêu cầu đổi trả và tin nhắn liên hệ.</div>
                 </div>
               </label>
 
               <label
                 onClick={() => setNewRole('USER')}
-                className={`flex items-start gap-3 p-3 border cursor-pointer transition-colors ${
-                  newRole === 'USER' ? 'border-[#57534e] bg-[#57534e]/5' : 'border-[#e7e5e4]'
+                className={`flex items-start gap-3 p-3.5 rounded-2xl border cursor-pointer transition-colors ${
+                  newRole === 'USER' ? 'border-[#6B6661] bg-[#6B6661]/5' : 'border-[#E5E2DF]'
                 }`}
               >
-                <Users className="w-4 h-4 text-[#57534e] shrink-0 mt-0.5" />
+                <Users className="w-4 h-4 text-[#6B6661] shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-bold text-[#1c1917]">USER (Khách hàng thành viên)</div>
-                  <div className="text-[11px] text-[#78716c]">Mua hàng, thanh toán VietQR, tích điểm thưởng và theo dõi đơn hàng cá nhân.</div>
+                  <div className="font-bold text-[#2A2725]">USER (Khách hàng thành viên)</div>
+                  <div className="text-[11px] text-[#6B6661]">Mua hàng, thanh toán VietQR, tích điểm thưởng và theo dõi đơn hàng cá nhân.</div>
                 </div>
               </label>
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="ghost" size="sm" onClick={() => setRoleModalOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0 pt-2">
+            <Button variant="ghost" size="sm" onClick={() => setRoleModalOpen(false)} className="rounded-xl text-xs cursor-pointer">
               Hủy
             </Button>
             <Button
               variant="default"
               size="sm"
               disabled={updateRoleMutation.isPending || newRole === selectedUser?.role}
+              className="bg-[#006561] hover:bg-[#004e4a] text-white rounded-xl text-xs font-semibold px-4 cursor-pointer"
               onClick={() => {
                 if (selectedUser) {
                   updateRoleMutation.mutate({ id: selectedUser.id, role: newRole })
@@ -441,20 +444,20 @@ export const AdminUsersPage: React.FC = () => {
 
       {/* Password Reset Modal */}
       <Dialog open={passwordModalOpen} onOpenChange={setPasswordModalOpen}>
-        <DialogContent onClose={() => setPasswordModalOpen(false)} className="max-w-md p-6 space-y-4">
+        <DialogContent onClose={() => setPasswordModalOpen(false)} className="max-w-md p-6 space-y-4 rounded-3xl border border-[#E5E2DF]">
           <DialogHeader>
-            <DialogTitle>Đặt Lại Mật Khẩu</DialogTitle>
-            <DialogDescription className="text-xs text-[#78716c]">
-              Khôi phục quyền truy cập cho tài khoản <strong>{selectedUser?.email}</strong>
+            <DialogTitle className="font-display text-xl text-[#2A2725]">Đặt Lại Mật Khẩu</DialogTitle>
+            <DialogDescription className="text-xs text-[#6B6661]">
+              Khôi phục quyền truy cập cho tài khoản <strong className="text-[#2A2725]">{selectedUser?.email}</strong>
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 py-2 text-xs">
-            <p className="text-[#57534e]">
-              Nếu để trống, mật khẩu sẽ tự động được reset về mặc định: <strong>123456</strong>
+            <p className="text-[#6B6661]">
+              Nếu để trống, mật khẩu sẽ tự động được reset về mặc định: <strong className="text-[#006561]">123456</strong>
             </p>
             <div>
-              <label className="block font-semibold text-[#1c1917] mb-1">
+              <label className="block font-semibold text-[#2A2725] mb-1">
                 Mật khẩu mới (tùy chọn)
               </label>
               <Input
@@ -462,18 +465,20 @@ export const AdminUsersPage: React.FC = () => {
                 value={customPassword}
                 onChange={(e) => setCustomPassword(e.target.value)}
                 placeholder="Nhập mật khẩu mới hoặc để trống để dùng 123456"
+                className="rounded-xl border-[#E5E2DF] text-xs h-9.5"
               />
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="ghost" size="sm" onClick={() => setPasswordModalOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0 pt-2">
+            <Button variant="ghost" size="sm" onClick={() => setPasswordModalOpen(false)} className="rounded-xl text-xs cursor-pointer">
               Hủy
             </Button>
             <Button
               variant="default"
               size="sm"
               disabled={resetPasswordMutation.isPending}
+              className="bg-[#006561] hover:bg-[#004e4a] text-white rounded-xl text-xs font-semibold px-4 cursor-pointer"
               onClick={() => {
                 if (selectedUser) {
                   resetPasswordMutation.mutate({

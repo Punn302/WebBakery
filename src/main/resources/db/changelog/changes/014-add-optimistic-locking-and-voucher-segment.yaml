@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: 014-add-product-version
+      author: hebekery
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - columnExists:
+                tableName: products
+                columnName: version
+      changes:
+        - addColumn:
+            tableName: products
+            columns:
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: 014-add-voucher-target-segment
+      author: hebekery
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - columnExists:
+                tableName: vouchers
+                columnName: target_segment
+      changes:
+        - addColumn:
+            tableName: vouchers
+            columns:
+              - column:
+                  name: target_segment
+                  type: VARCHAR(32)
+                  defaultValue: "ALL"
+                  constraints:
+                    nullable: false

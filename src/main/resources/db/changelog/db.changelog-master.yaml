@@ -25,3 +25,5 @@ databaseChangeLog:
       file: db/changelog/changes/012-seed-admin-user.yaml
   - include:
       file: db/changelog/changes/013-add-audit-logs-table.yaml
+  - include:
+      file: db/changelog/changes/014-add-optimistic-locking-and-voucher-segment.yaml

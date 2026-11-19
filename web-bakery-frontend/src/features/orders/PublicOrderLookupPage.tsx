@@ -74,39 +74,39 @@ export const PublicOrderLookupPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-10 py-6 pb-16">
+    <div className="max-w-4xl mx-auto space-y-10 py-6 pb-16 font-text">
       {/* ================= Hero Search Banner ================= */}
-      <div className="bg-white rounded-3xl border border-[#eadbce] p-8 sm:p-10 tactile-card text-center space-y-4">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#47654c]/10 text-[#47654c] text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5 text-[#d97724]" />
+      <div className="bg-white rounded-3xl border border-[#E5E2DF] p-8 sm:p-10 shadow-xs text-center space-y-4">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#006561]/10 text-[#006561] text-xs font-semibold">
+          <Sparkles className="w-3.5 h-3.5 text-[#C9785C]" />
           <span>Theo Dõi Hành Trình Mẻ Bánh Tươi</span>
         </div>
-        <h1 className="font-headline text-3xl sm:text-4xl font-bold text-[#4a3728]">
+        <h1 className="font-display text-3xl sm:text-4xl font-bold text-[#2A2725]">
           Tra Cứu Đơn Hàng Công Khai
         </h1>
-        <p className="text-xs sm:text-sm text-[#78716c] max-w-xl mx-auto leading-relaxed">
-          Theo dõi tiến độ nướng bánh và giao nhận theo thời gian thực.
+        <p className="text-xs sm:text-sm text-[#6B6661] max-w-xl mx-auto leading-relaxed">
+          Theo dõi tiến độ nướng bánh và giao nhận theo thời gian thực tại Hebekery.
         </p>
 
         {/* Quick Search Form */}
         <div className="max-w-lg mx-auto pt-2">
           <form onSubmit={handleSearch} className="flex gap-2.5">
             <div className="relative flex-1">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#78716c]" />
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6B6661]" />
               <Input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Nhập mã đơn hàng hoặc SĐT đặt hàng..."
-                className="pl-10 h-11 bg-[#faf8f5] border-[#eadbce] rounded-full text-xs placeholder:text-[#a8a29e] focus-visible:ring-[#4a3728]"
+                className="pl-10 h-11 bg-[#FAF7F2] border-[#E5E2DF] rounded-2xl text-xs placeholder:text-[#6B6661]/60 focus-visible:ring-[#006561]"
               />
             </div>
             <Button
               type="submit"
               size="default"
               disabled={isSearching}
-              className="h-11 px-6 bg-[#4a3728] hover:bg-[#2e1e12] text-[#faf8f5] font-semibold text-xs rounded-full shrink-0 flex items-center gap-1.5 cursor-pointer shadow-sm btn-tactile"
+              className="h-11 px-6 bg-[#006561] hover:bg-[#004e4a] text-white font-semibold text-xs rounded-2xl shrink-0 flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
-              <Search className="w-4 h-4 text-[#d97724]" />
+              <Search className="w-4 h-4 text-[#C9785C]" />
               <span>{isSearching ? 'Đang tìm...' : 'Tra cứu'}</span>
             </Button>
           </form>
@@ -117,12 +117,12 @@ export const PublicOrderLookupPage: React.FC = () => {
       {searchedOrders !== null && (
         <div className="space-y-8">
           {searchedOrders.length === 0 ? (
-            <div className="text-center py-12 rounded-3xl border border-dashed border-[#eadbce] bg-white p-8 space-y-2">
-              <Package className="w-10 h-10 text-[#a8a29e] mx-auto" />
-              <p className="font-headline text-base font-bold text-[#4a3728]">
+            <div className="text-center py-12 rounded-3xl border border-dashed border-[#E5E2DF] bg-white p-8 space-y-2">
+              <Package className="w-10 h-10 text-[#C9785C] mx-auto" />
+              <p className="font-display text-base font-bold text-[#2A2725]">
                 Không tìm thấy đơn hàng nào với thông tin &ldquo;{searchTerm}&rdquo;
               </p>
-              <p className="text-xs text-[#78716c]">
+              <p className="text-xs text-[#6B6661]">
                 Vui lòng kiểm tra lại mã đơn hàng hoặc số điện thoại đã sử dụng khi đặt bánh.
               </p>
             </div>
@@ -141,20 +141,20 @@ export const PublicOrderLookupPage: React.FC = () => {
               return (
                 <div
                   key={order.id}
-                  className="bg-white rounded-3xl border border-[#eadbce] p-6 sm:p-8 space-y-6 tactile-card"
+                  className="bg-white rounded-3xl border border-[#E5E2DF] p-6 sm:p-8 space-y-6 shadow-xs"
                 >
                   {/* Order Top Bar */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#eadbce] pb-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E5E2DF] pb-4">
                     <div>
                       <div className="flex items-center gap-2">
-                        <h2 className="font-headline text-xl font-bold text-[#4a3728]">
+                        <h2 className="font-display text-xl font-bold text-[#2A2725]">
                           #{order.orderCode}
                         </h2>
                         <span
                           className={`text-xs font-semibold px-3 py-0.5 rounded-full ${
                             order.paymentStatus === 'PAID'
-                              ? 'bg-[#47654c]/10 text-[#47654c]'
-                              : 'bg-[#d97724]/10 text-[#d97724]'
+                              ? 'bg-[#006561]/10 text-[#006561]'
+                              : 'bg-[#C9785C]/15 text-[#C9785C]'
                           }`}
                         >
                           {order.paymentStatus === 'PAID'
@@ -162,15 +162,15 @@ export const PublicOrderLookupPage: React.FC = () => {
                             : 'Thanh toán COD khi nhận bánh'}
                         </span>
                       </div>
-                      <p className="text-xs text-[#78716c] mt-1">
+                      <p className="text-xs text-[#6B6661] mt-1">
                         Ngày đặt bánh: {formatDate(order.createdAt)} • Người nhận:{' '}
-                        <strong>{order.customerName}</strong>
+                        <strong className="text-[#2A2725]">{order.customerName}</strong>
                       </p>
                     </div>
 
                     <div className="text-right">
-                      <span className="text-xs text-[#78716c]">Tổng thanh toán:</span>
-                      <p className="font-headline text-2xl font-bold text-[#4a3728]">
+                      <span className="text-xs text-[#6B6661]">Tổng thanh toán:</span>
+                      <p className="font-display text-2xl font-bold text-[#006561]">
                         {formatCurrency(order.total)}
                       </p>
                     </div>
@@ -181,9 +181,9 @@ export const PublicOrderLookupPage: React.FC = () => {
                     <div className="py-4">
                       <div className="relative flex items-center justify-between">
                         {/* Connecting Line */}
-                        <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-1 bg-[#eadbce] -z-0" />
+                        <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-1 bg-[#E5E2DF] -z-0" />
                         <div
-                          className="absolute left-6 top-1/2 -translate-y-1/2 h-1 bg-[#47654c] -z-0 transition-all duration-500"
+                          className="absolute left-6 top-1/2 -translate-y-1/2 h-1 bg-[#006561] -z-0 transition-all duration-500"
                           style={{
                             width: `${((Math.max(currentStep, 1) - 1) / (steps.length - 1)) * 90}%`,
                           }}
@@ -203,10 +203,10 @@ export const PublicOrderLookupPage: React.FC = () => {
                               <div
                                 className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 ${
                                   isCurrent
-                                    ? 'bg-[#4a3728] text-white ring-4 ring-[#eadbce] scale-110 shadow-sm'
+                                    ? 'bg-[#006561] text-white ring-4 ring-[#006561]/20 scale-110 shadow-sm'
                                     : isDone
-                                    ? 'bg-[#47654c] text-white'
-                                    : 'bg-[#faf8f5] text-[#a8a29e] border border-[#eadbce]'
+                                    ? 'bg-[#006561] text-white'
+                                    : 'bg-[#FAF7F2] text-[#6B6661] border border-[#E5E2DF]'
                                 }`}
                               >
                                 <IconComp className="w-5 h-5" />
@@ -214,10 +214,10 @@ export const PublicOrderLookupPage: React.FC = () => {
                               <span
                                 className={`text-xs font-medium text-center whitespace-nowrap ${
                                   isCurrent
-                                    ? 'text-[#4a3728] font-bold'
+                                    ? 'text-[#006561] font-bold'
                                     : isDone
-                                    ? 'text-[#47654c]'
-                                    : 'text-[#a8a29e]'
+                                    ? 'text-[#006561]'
+                                    : 'text-[#6B6661]'
                                 }`}
                               >
                                 {st.label}
@@ -233,7 +233,7 @@ export const PublicOrderLookupPage: React.FC = () => {
                       <div>
                         <p className="font-bold">Đơn hàng này đã bị hủy</p>
                         <p className="text-[11px] text-[#991b1b]">
-                          Nếu quý khách có bất kỳ thắc mắc nào, vui lòng liên hệ hotline 1900 6828 để
+                          Nếu quý khách có bất kỳ thắc mắc nào, vui lòng liên hệ hotline 097 97 64 185 để
                           được hỗ trợ hoàn tiền hoặc đặt lại bánh mới.
                         </p>
                       </div>
@@ -241,36 +241,36 @@ export const PublicOrderLookupPage: React.FC = () => {
                   )}
 
                   {/* 2-Column Details Breakdown */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-[#eadbce]">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-[#E5E2DF]">
                     {/* Items List */}
                     <div className="space-y-3">
-                      <h3 className="font-headline text-sm font-bold text-[#4a3728]">
+                      <h3 className="font-display text-sm font-bold text-[#2A2725]">
                         Chi Tiết Món Bánh Trong Kiện
                       </h3>
                       <div className="space-y-2">
                         {order.items?.map((item, idx) => (
                           <div
                             key={idx}
-                            className="flex items-center justify-between p-3 rounded-xl bg-[#faf8f5] border border-[#eadbce] text-xs"
+                            className="flex items-center justify-between p-3 rounded-2xl bg-[#FAF7F2] border border-[#E5E2DF] text-xs"
                           >
                             <div className="flex items-center gap-2.5">
                               {item.imageUrl && (
                                 <img
                                   src={optimizeCloudinaryUrl(item.imageUrl, 100)}
                                   alt={item.productName}
-                                  className="w-10 h-10 object-cover rounded-lg border border-[#eadbce]"
+                                  className="w-10 h-10 object-cover rounded-xl border border-[#E5E2DF]"
                                 />
                               )}
                               <div>
-                                <span className="font-semibold text-[#4a3728] block">
+                                <span className="font-semibold text-[#2A2725] block">
                                   {item.productName}
                                 </span>
-                                <span className="text-[11px] text-[#78716c]">
+                                <span className="text-[11px] text-[#6B6661]">
                                   Số lượng: x{item.quantity}
                                 </span>
                               </div>
                             </div>
-                            <span className="font-bold text-[#4a3728]">
+                            <span className="font-bold text-[#2A2725]">
                               {formatCurrency(item.price * item.quantity)}
                             </span>
                           </div>
@@ -280,27 +280,27 @@ export const PublicOrderLookupPage: React.FC = () => {
 
                     {/* Delivery & Reassurance */}
                     <div className="space-y-3">
-                      <h3 className="font-headline text-sm font-bold text-[#4a3728]">
+                      <h3 className="font-display text-sm font-bold text-[#2A2725]">
                         Thông Tin Giao Nhận &amp; Bếp Nướng
                       </h3>
-                      <div className="p-4 rounded-2xl bg-[#faf8f5] border border-[#eadbce] space-y-2.5 text-xs text-[#78716c]">
+                      <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#E5E2DF] space-y-2.5 text-xs text-[#6B6661]">
                         <div className="flex items-start gap-2">
-                          <MapPin className="w-4 h-4 text-[#4a3728] shrink-0 mt-0.5" />
+                          <MapPin className="w-4 h-4 text-[#006561] shrink-0 mt-0.5" />
                           <span>
-                            Địa chỉ: <strong>{order.address}</strong>
+                            Địa chỉ: <strong className="text-[#2A2725]">{order.address}</strong>
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Phone className="w-4 h-4 text-[#4a3728] shrink-0" />
+                          <Phone className="w-4 h-4 text-[#006561] shrink-0" />
                           <span>
-                            Số điện thoại: <strong>{order.phone}</strong>
+                            Số điện thoại: <strong className="text-[#2A2725]">{order.phone}</strong>
                           </span>
                         </div>
-                        <div className="pt-2 border-t border-[#eadbce] flex items-center justify-between">
-                          <span className="text-[#47654c] font-semibold flex items-center gap-1">
+                        <div className="pt-2 border-t border-[#E5E2DF] flex items-center justify-between">
+                          <span className="text-[#006561] font-semibold flex items-center gap-1">
                             <ShieldCheck className="w-4 h-4" /> Đổi trả 1-1 trong 24h
                           </span>
-                          <span className="text-[11px] text-[#78716c]">Hotline: 1900 6828</span>
+                          <span className="text-[11px] text-[#6B6661]">Hotline: 097 97 64 185</span>
                         </div>
                       </div>
                     </div>

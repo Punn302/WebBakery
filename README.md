@@ -40,39 +40,17 @@ Hệ thống thương mại điện tử chuyên cung cấp các dòng bánh, h�
 
 ## 📸 Hình ảnh giao diện thực tế (Screenshots)
 
-### 1. Trang chủ HeBekery (Chuẩn nhận diện thương hiệu Warm Organic & Hero Slider)
+### 1. Giao diện Cửa hàng & Trang chủ HeBekery (Warm Organic & Hero Slider)
+Trải nghiệm mua sắm bánh dinh dưỡng nguyên cám, phân loại danh mục granola/biscotti và cam kết tiêu chuẩn chất lượng ISO 22000 & HACCP.
 ![Trang chủ Hebekery](public/screenshots/home.png)
 
-### 2. Thực đơn bánh dinh dưỡng & Huy hiệu Flash Sale Cận Date
-![Thực đơn Bánh Dinh Dưỡng](public/screenshots/products.png)
-
-### 3. Trang chi tiết sản phẩm & Ưu đãi Flash Sale Cận Date
-![Trang chi tiết sản phẩm](public/screenshots/pdp_flash_sale.png)
-
-### 4. Thẻ Hội Viên Điện Tử VVIP & Hệ thống Điểm Lành HeBekery (Tab 5 Profile)
-![Thẻ Hội Viên VVIP Hebekery](public/screenshots/profile_vvip_card.png)
-
-### 5. Tiêu Điểm Lành HeBekery tại Checkout & Thanh toán VietQR Napas 247
-![Tiêu Điểm Lành tại Checkout](public/screenshots/checkout_loyalty_points.png)
-
-### 6. Quản Lý Lô Bánh & Hạn Sử Dụng FEFO (Admin Inventory)
+### 2. Quản Trị Kho Lô Bánh & Hạn Sử Dụng FEFO (Admin Inventory)
+Quản lý lô nướng bánh theo hạn sử dụng, cơ chế xuất kho thông minh FEFO (First-Expired, First-Out) và kích hoạt Flash Sale giải cứu bánh cận date.
 ![Quản Lý Lô Bánh FEFO](public/screenshots/admin_inventory_fefo.png)
 
-### 7. Công cụ Giả lập Webhook SePay cho Quản trị viên
-![SePay Webhook Simulator](public/screenshots/admin_sepay_simulator.png)
-
-### 8. Quản trị đơn hàng & In Phiếu Giao Hàng A5 / K80
-![In Phiếu Giao Hàng](public/screenshots/admin_orders_invoice.png)
-
-### 9. Tự làm Hộp Bánh Mix Vị HeBekery (Custom Box Builder)
-![Tự làm Hộp Bánh](public/screenshots/box_builder.png)
-
-### 10. Công cụ tính BMI, TDEE & Gợi ý thực đơn Eat Clean
-![Công cụ BMI & TDEE](public/screenshots/bmi.png)
-
-### 11. Tra cứu đơn hàng công khai & Tài liệu Swagger OpenAPI
-![Tra cứu đơn hàng](public/screenshots/order-lookup.png)
-![Swagger UI](public/screenshots/swagger.png)
+### 3. Quản Lý Đơn Hàng & In Hóa Đơn Vận Chuyển A5 / K80 (Admin Orders & Invoicing)
+Theo dõi tiến độ đơn hàng, dòng tiền thanh toán VietQR SePay tự động và modal in phiếu giao hàng / hóa đơn chuyên nghiệp.
+![In Phiếu Giao Hàng & Hóa Đơn](public/screenshots/admin_orders_invoice.png)
 
 ---
 

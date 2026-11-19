@@ -177,28 +177,28 @@ export const OrderTrackingPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-12">
+    <div className="max-w-4xl mx-auto space-y-8 pb-12 font-text">
       {/* Header */}
-      <div className="border-b border-[#eadbce] pb-6">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#47654c]/10 text-[#47654c] text-[11px] font-semibold tracking-wide uppercase mb-2">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Lịch sử đặt bánh</span>
+      <div className="border-b border-[#E5E2DF] pb-6">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#006561]/10 text-[#006561] text-[11px] font-semibold tracking-wide uppercase mb-2">
+          <Sparkles className="w-3.5 h-3.5 text-[#C9785C]" />
+          <span>Lịch sử đặt bánh Hebekery</span>
         </div>
-        <h1 className="font-headline text-3xl sm:text-4xl font-bold text-[#2e1e12] tracking-tight">
+        <h1 className="font-display text-3xl sm:text-4xl font-bold text-[#2A2725] tracking-tight">
           Đơn Hàng Của Bạn
         </h1>
-        <p className="text-xs sm:text-sm text-[#7c6856] mt-1.5">
+        <p className="text-xs sm:text-sm text-[#6B6661] mt-1.5">
           Theo dõi tiến độ nướng bánh, vận chuyển, xác nhận nhận hàng và đánh giá chất lượng
         </p>
       </div>
 
       {isLoading ? (
-        <div className="py-20 text-center text-xs text-[#7c6856]">Đang nạp danh sách đơn bánh...</div>
+        <div className="py-20 text-center text-xs text-[#6B6661]">Đang nạp danh sách đơn bánh...</div>
       ) : orders.length === 0 ? (
-        <div className="py-16 text-center border border-[#eadbce] bg-white rounded-2xl p-8 space-y-3">
-          <Package className="w-10 h-10 text-[#eadbce] mx-auto" />
-          <p className="font-headline text-base font-bold text-[#2e1e12]">Bạn chưa có đơn bánh nào</p>
-          <p className="text-xs text-[#7c6856]">
+        <div className="py-16 text-center border border-[#E5E2DF] bg-white rounded-3xl p-8 space-y-3 shadow-xs">
+          <Package className="w-10 h-10 text-[#C9785C] mx-auto" />
+          <p className="font-display text-base font-bold text-[#2A2725]">Bạn chưa có đơn bánh nào</p>
+          <p className="text-xs text-[#6B6661]">
             Hãy đặt thử một chiếc bánh nguyên cám thanh ngọt từ Hebekery nhé!
           </p>
         </div>
@@ -212,20 +212,20 @@ export const OrderTrackingPage: React.FC = () => {
             return (
               <div
                 key={order.id}
-                className="tactile-card rounded-2xl border border-[#eadbce] bg-white p-5 sm:p-6 space-y-4"
+                className="rounded-3xl border border-[#E5E2DF] bg-white p-5 sm:p-6 space-y-4 shadow-xs"
               >
                 {/* Order Header */}
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#f5f0e9] pb-3.5 text-xs">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E5E2DF]/60 pb-3.5 text-xs">
                   <div className="flex items-center gap-3">
-                    <span className="font-headline font-bold text-[#2e1e12] text-sm">#{order.orderCode}</span>
-                    <span className="text-[#7c6856] text-[11px]">{formatDate(order.createdAt)}</span>
+                    <span className="font-display font-bold text-[#2A2725] text-sm">#{order.orderCode}</span>
+                    <span className="text-[#6B6661] text-[11px]">{formatDate(order.createdAt)}</span>
                   </div>
                   <div className="flex items-center gap-2.5">
-                    <span className="text-[11px] text-[#7c6856]">
+                    <span className="text-[11px] text-[#6B6661]">
                       {order.paymentMethod === 'VIETQR' ? 'VietQR SePay' : 'COD'} •{' '}
                       <strong
                         className={
-                          order.paymentStatus === 'PAID' ? 'text-[#15803d]' : 'text-[#d97724]'
+                          order.paymentStatus === 'PAID' ? 'text-[#15803d]' : 'text-[#C9785C]'
                         }
                       >
                         {order.paymentStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}
@@ -236,30 +236,30 @@ export const OrderTrackingPage: React.FC = () => {
                 </div>
 
                 {/* Items List */}
-                <div className="divide-y divide-[#f5f0e9]">
+                <div className="divide-y divide-[#E5E2DF]/50">
                   {order.items?.map((item) => (
                     <div
                       key={item.id || item.productId}
-                      className="py-3 flex items-center justify-between gap-3 text-xs"
+                      className="py-3.5 flex items-center justify-between gap-3 text-xs"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <img
                           src={optimizeCloudinaryUrl(item.imageUrl, 100)}
                           alt={item.productName}
-                          className="w-12 h-12 rounded-xl object-cover border border-[#eadbce] shrink-0"
+                          className="w-13 h-13 rounded-2xl object-cover border border-[#E5E2DF] shrink-0"
                         />
                         <div className="truncate">
-                          <p className="font-semibold text-[#2e1e12] truncate">
+                          <p className="font-semibold text-[#2A2725] truncate">
                             {item.productName}
                           </p>
-                          <p className="text-[#7c6856] text-[11px]">
+                          <p className="text-[#6B6661] text-[11px] mt-0.5">
                             {formatCurrency(item.price)} x {item.quantity}
                           </p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3 shrink-0">
-                        <span className="font-bold text-[#2e1e12]">
+                        <span className="font-bold text-[#2A2725]">
                           {formatCurrency(item.total)}
                         </span>
 
@@ -269,9 +269,9 @@ export const OrderTrackingPage: React.FC = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => handleOpenReviewModal(item)}
-                            className="h-7 px-2.5 text-[11px] flex items-center gap-1 border-[#d97724] text-[#d97724] hover:bg-[#d97724]/10 rounded-full"
+                            className="h-7.5 px-3 text-[11px] flex items-center gap-1 border-[#C9785C] text-[#C9785C] hover:bg-[#C9785C]/10 rounded-full cursor-pointer font-medium"
                           >
-                            <Star className="w-3 h-3 fill-[#d97724]" />
+                            <Star className="w-3 h-3 fill-[#C9785C]" />
                             <span>Đánh giá bánh</span>
                           </Button>
                         )}
@@ -281,10 +281,10 @@ export const OrderTrackingPage: React.FC = () => {
                 </div>
 
                 {/* Order Footer & Actions */}
-                <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#f5f0e9] text-xs">
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#E5E2DF]/60 text-xs">
                   <div>
-                    <span className="text-[#7c6856]">Tổng giá trị đơn bánh: </span>
-                    <strong className="font-headline text-base font-bold text-[#4a3728]">
+                    <span className="text-[#6B6661]">Tổng giá trị đơn bánh: </span>
+                    <strong className="font-display text-base font-bold text-[#2A2725]">
                       {formatCurrency(order.total)}
                     </strong>
                   </div>
@@ -304,7 +304,7 @@ export const OrderTrackingPage: React.FC = () => {
                             confirmReceivedMutation.mutate(order.id)
                           }
                         }}
-                        className="btn-tactile bg-[#15803d] hover:bg-[#166534] text-white rounded-full px-4 text-xs font-semibold flex items-center gap-1.5"
+                        className="bg-[#006561] hover:bg-[#004e4a] text-white rounded-xl px-4 text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         <span>Đã nhận bánh</span>
@@ -319,7 +319,7 @@ export const OrderTrackingPage: React.FC = () => {
                           setSelectedOrder(order)
                           setActionType('CANCEL')
                         }}
-                        className="rounded-full border-[#dc2626] text-[#dc2626] hover:bg-[#dc2626]/10 text-xs px-3.5"
+                        className="rounded-xl border-[#dc2626] text-[#dc2626] hover:bg-[#dc2626]/10 text-xs px-3.5 cursor-pointer"
                       >
                         Hủy đơn bánh
                       </Button>
@@ -333,7 +333,7 @@ export const OrderTrackingPage: React.FC = () => {
                           setSelectedOrder(order)
                           setActionType('RETURN')
                         }}
-                        className="rounded-full text-xs px-3.5"
+                        className="rounded-xl text-xs px-3.5 cursor-pointer"
                       >
                         Yêu cầu đổi trả
                       </Button>
@@ -348,37 +348,37 @@ export const OrderTrackingPage: React.FC = () => {
 
       {/* Cancel / Return Dialog */}
       <Dialog open={!!actionType} onOpenChange={() => setActionType(null)}>
-        <DialogContent onClose={() => setActionType(null)} className="rounded-2xl border border-[#eadbce] p-6 space-y-4">
+        <DialogContent onClose={() => setActionType(null)} className="rounded-3xl border border-[#E5E2DF] p-6 space-y-4">
           <DialogHeader>
-            <DialogTitle className="font-headline text-xl text-[#2e1e12]">
+            <DialogTitle className="font-display text-xl text-[#2A2725]">
               {actionType === 'CANCEL' ? 'Xác Nhận Hủy Đơn Hàng' : 'Gửi Yêu Cầu Đổi Trả'}
             </DialogTitle>
-            <DialogDescription className="text-xs text-[#7c6856]">
+            <DialogDescription className="text-xs text-[#6B6661]">
               Đơn hàng #{selectedOrder?.orderCode}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 py-2">
-            <label className="block text-xs font-medium text-[#2e1e12]">
-              Lý do {actionType === 'CANCEL' ? 'hủy đơn' : 'đổi trả'} <span className="text-[#d97724]">*</span>
+            <label className="block text-xs font-medium text-[#2A2725]">
+              Lý do {actionType === 'CANCEL' ? 'hủy đơn' : 'đổi trả'} <span className="text-[#C9785C]">*</span>
             </label>
             <Input
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Nhập lý do chi tiết..."
-              className="rounded-xl border-[#eadbce] text-xs h-9"
+              className="rounded-xl border-[#E5E2DF] text-xs h-9.5"
             />
           </div>
 
           <DialogFooter className="gap-2 sm:gap-0 pt-2">
-            <Button variant="ghost" size="sm" onClick={() => setActionType(null)} className="rounded-full text-xs">
+            <Button variant="ghost" size="sm" onClick={() => setActionType(null)} className="rounded-xl text-xs cursor-pointer">
               Đóng
             </Button>
             <Button
               variant={actionType === 'CANCEL' ? 'destructive' : 'default'}
               size="sm"
               disabled={!reason.trim()}
-              className="rounded-full text-xs"
+              className="rounded-xl text-xs cursor-pointer"
               onClick={() => {
                 if (!selectedOrder) return
                 if (actionType === 'CANCEL') {
@@ -396,32 +396,32 @@ export const OrderTrackingPage: React.FC = () => {
 
       {/* Product Review Modal */}
       <Dialog open={!!reviewingItem} onOpenChange={() => setReviewingItem(null)}>
-        <DialogContent onClose={() => setReviewingItem(null)} className="max-w-md rounded-2xl border border-[#eadbce] p-6 space-y-4">
+        <DialogContent onClose={() => setReviewingItem(null)} className="max-w-md rounded-3xl border border-[#E5E2DF] p-6 space-y-4">
           {reviewingItem && (
             <form onSubmit={handleReviewSubmit}>
               <DialogHeader>
-                <DialogTitle className="font-headline text-xl text-[#2e1e12] flex items-center gap-2">
-                  <Star className="w-5 h-5 text-[#d97724] fill-[#d97724]" />
+                <DialogTitle className="font-display text-xl text-[#2A2725] flex items-center gap-2">
+                  <Star className="w-5 h-5 text-[#C9785C] fill-[#C9785C]" />
                   <span>Đánh Giá Bánh Dinh Dưỡng</span>
                 </DialogTitle>
-                <DialogDescription className="text-xs text-[#7c6856]">
+                <DialogDescription className="text-xs text-[#6B6661]">
                   Chia sẻ cảm nhận chân thực để giúp cộng đồng ăn sạch chọn bánh ngon hơn
                 </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-4 py-3">
                 {/* Product Summary */}
-                <div className="flex items-center gap-3 p-3 bg-[#faf8f5] border border-[#eadbce] rounded-xl">
+                <div className="flex items-center gap-3 p-3 bg-[#FAF7F2] border border-[#E5E2DF] rounded-2xl">
                   <img
                     src={optimizeCloudinaryUrl(reviewingItem.imageUrl, 100)}
                     alt={reviewingItem.productName}
-                    className="w-12 h-12 rounded-lg object-cover border border-[#eadbce]"
+                    className="w-12 h-12 rounded-xl object-cover border border-[#E5E2DF]"
                   />
                   <div>
-                    <h4 className="font-headline font-bold text-xs text-[#2e1e12]">
+                    <h4 className="font-display font-bold text-xs text-[#2A2725]">
                       {reviewingItem.productName}
                     </h4>
-                    <p className="text-[11px] text-[#7c6856]">
+                    <p className="text-[11px] text-[#6B6661] mt-0.5">
                       Đã mua với giá: {formatCurrency(reviewingItem.price)}
                     </p>
                   </div>
@@ -429,7 +429,7 @@ export const OrderTrackingPage: React.FC = () => {
 
                 {/* Star Rating Selector */}
                 <div className="space-y-1.5 text-center">
-                  <label className="block text-xs font-medium text-[#2e1e12]">
+                  <label className="block text-xs font-medium text-[#2A2725]">
                     Mức độ hài lòng của bạn:
                   </label>
                   <div className="flex items-center justify-center gap-2">
@@ -448,15 +448,15 @@ export const OrderTrackingPage: React.FC = () => {
                             className={cn(
                               'w-7 h-7 transition-colors',
                               isFilled
-                                ? 'text-[#d97724] fill-[#d97724]'
-                                : 'text-[#eadbce] fill-none'
+                                ? 'text-[#C9785C] fill-[#C9785C]'
+                                : 'text-[#E5E2DF] fill-none'
                             )}
                           />
                         </button>
                       )
                     })}
                   </div>
-                  <span className="text-xs font-semibold text-[#d97724]">
+                  <span className="text-xs font-semibold text-[#C9785C]">
                     {rating === 5 && '⭐ Tuyệt vời! Rất hợp khẩu vị'}
                     {rating === 4 && '⭐ Bánh ngon, vừa miệng'}
                     {rating === 3 && '⭐ Bình thường, tạm ổn'}
@@ -467,18 +467,18 @@ export const OrderTrackingPage: React.FC = () => {
 
                 {/* Comment Textarea */}
                 <div className="space-y-1">
-                  <label className="block text-xs font-medium text-[#2e1e12]">
-                    Nhận xét chi tiết <span className="text-[#d97724]">*</span>
+                  <label className="block text-xs font-medium text-[#2A2725]">
+                    Nhận xét chi tiết <span className="text-[#C9785C]">*</span>
                   </label>
                   <textarea
                     rows={4}
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     placeholder="Ví dụ: Bánh thơm ngậy mùi hạnh nhân, độ ngọt thanh tự nhiên từ mật ong, rất thích hợp ăn sáng trước khi tập gym..."
-                    className="w-full rounded-xl border border-[#eadbce] bg-white p-3 text-xs text-[#2e1e12] placeholder:text-[#a8a29e] focus:outline-none focus:border-[#47654c]"
+                    className="w-full rounded-2xl border border-[#E5E2DF] bg-white p-3 text-xs text-[#2A2725] placeholder:text-[#6B6661]/60 focus:outline-none focus:border-[#006561]"
                     required
                   />
-                  <span className="text-[10px] text-[#7c6856] block text-right">
+                  <span className="text-[10px] text-[#6B6661] block text-right">
                     {comment.length} ký tự
                   </span>
                 </div>
@@ -490,7 +490,7 @@ export const OrderTrackingPage: React.FC = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => setReviewingItem(null)}
-                  className="rounded-full text-xs"
+                  className="rounded-xl text-xs cursor-pointer"
                 >
                   Hủy bỏ
                 </Button>
@@ -498,7 +498,7 @@ export const OrderTrackingPage: React.FC = () => {
                   type="submit"
                   size="sm"
                   disabled={reviewMutation.isPending || !comment.trim()}
-                  className="btn-tactile bg-[#4a3728] hover:bg-[#2e1e12] text-white rounded-full text-xs font-semibold"
+                  className="bg-[#006561] hover:bg-[#004e4a] text-white rounded-xl text-xs font-semibold px-5 cursor-pointer shadow-xs"
                 >
                   {reviewMutation.isPending ? 'Đang gửi...' : 'Gửi Đánh Giá'}
                 </Button>

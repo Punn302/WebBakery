@@ -16,10 +16,13 @@ import java.util.Optional;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, String> {
 
+    @EntityGraph(attributePaths = {"items"})
     List<Order> findByUserId(String userId);
 
+    @EntityGraph(attributePaths = {"items"})
     List<Order> findByPhone(String phone);
 
+    @EntityGraph(attributePaths = {"items"})
     Optional<Order> findByOrderCode(String orderCode);
 
     @EntityGraph(attributePaths = {"items"})

@@ -2,6 +2,10 @@ databaseChangeLog:
   - changeSet:
       id: 004-seed-users
       author: hebekery
+      validCheckSum:
+        - "9:33bbc8ba06bdb9f88ee1a5a9772309fe"
+        - "9:d41d8cd98f00b204e9800998ecf8427e"
+        - ANY
       changes:
 
   - changeSet:
